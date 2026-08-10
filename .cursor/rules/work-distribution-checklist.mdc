@@ -1,0 +1,20 @@
+---
+description: Check WORK_DISTRIBUTION.md member checklists after each implementation
+alwaysApply: true
+---
+
+# Work Distribution Checklists
+
+Canonical task ownership and checklists live in `WORK_DISTRIBUTION.md`.
+
+## Before coding
+
+- Identify which member lane the task belongs to (1 foundation, 2 buyer, 3 seller, 4 admin/payments).
+- Respect Member 1 blockers: do not build portal features against missing schema/auth/guards.
+
+## After implementing
+
+1. Open `WORK_DISTRIBUTION.md` and tick every **relevant** checklist item for that change (security, role, payments, graphify, MCP, etc.).
+2. If an item cannot be checked, fix the gap or document why it does not apply — do not silently skip.
+3. Do not expand scope into another member’s lane without updating `WORK_DISTRIBUTION.md`.
+4. Prefer approved MCPs (Appwrite, PayHere, Context7, next-devtools, shadcn, Playwright) per `mcp-acceleration.mdc` — never GitHub MCP.

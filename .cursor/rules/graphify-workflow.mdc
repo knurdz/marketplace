@@ -1,0 +1,20 @@
+---
+description: Use graphify before coding; update graphify after each implementation
+alwaysApply: true
+---
+
+# Graphify Workflow
+
+Use the project knowledge graph so agents reuse structure instead of re-exploring blindly.
+
+## Before implementing
+
+1. If `graphify-out/graph.json` exists, run `/graphify query` (or `graphify query "..."`) for the area you will touch (auth, orders, seller, payments, etc.).
+2. If the graph is missing or clearly stale vs the codebase, run `/graphify .` (or `/graphify . --update`) **before** large features.
+3. Prefer graph answers for “where does X live?” and “what depends on Y?” over broad repo scans when the graph is current.
+
+## After implementing
+
+1. Run `/graphify . --update` (or a full `/graphify .` if the update is insufficient) so new files/edges are indexed.
+2. Do not skip this step when you added modules, routes, Functions, or schema-related code.
+3. If graphify fails, note it and retry once; do not leave the graph knowingly outdated after a major change.
