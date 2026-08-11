@@ -1,7 +1,14 @@
 "use server";
 
 import { cookies } from "next/headers";
-import { Account, Client, Storage, TablesDB, Users } from "node-appwrite";
+import {
+  Account,
+  Client,
+  Functions,
+  Storage,
+  TablesDB,
+  Users,
+} from "node-appwrite";
 import {
   getAppwriteEndpoint,
   getAppwriteProjectId,
@@ -55,6 +62,9 @@ export async function createSessionClient() {
     get storage() {
       return new Storage(client);
     },
+    get functions() {
+      return new Functions(client);
+    },
   };
 }
 
@@ -87,6 +97,9 @@ export async function createAdminClient() {
     },
     get users() {
       return new Users(client);
+    },
+    get functions() {
+      return new Functions(client);
     },
   };
 }

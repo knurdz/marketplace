@@ -4,16 +4,17 @@
 - cluster-only mode — file stats not available
 
 ## Summary
-- 510 nodes · 803 edges · 40 communities (28 shown, 12 thin omitted)
+- 529 nodes · 845 edges · 40 communities (28 shown, 12 thin omitted)
 - Extraction: 100% EXTRACTED · 0% INFERRED · 0% AMBIGUOUS · INFERRED: 1 edges (avg confidence: 0.8)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `edb00a67`
+- Built from commit: `19e79bda`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
 ## Community Hubs (Navigation)
+- config.ts
 - setup-mvp-schema.mjs
 - rate-limit.ts
 - devDependencies
@@ -23,9 +24,8 @@
 - profiles.ts
 - components.json
 - cn
-- index.ts
 - seed-demo.mjs
-- config.ts
+- models.ts
 - portal-shell.tsx
 - products.ts
 - storage.ts
@@ -60,7 +60,7 @@
 7. `main()` - 15 edges
 8. `assertRateLimit()` - 11 edges
 9. `setupProducts()` - 10 edges
-10. `asNotification()` - 9 edges
+10. `isOneOf()` - 8 edges
 
 ## Surprising Connections (you probably didn't know these)
 - `ResendVerificationForm()` --indirect_call--> `requestEmailVerification()`  [INFERRED]
@@ -79,53 +79,53 @@
 
 ## Communities (40 total, 12 thin omitted)
 
-### Community 0 - "setup-mvp-schema.mjs"
+### Community 0 - "config.ts"
+Cohesion: 0.11
+Nodes (33): getBrowserAccount(), getBrowserClient(), ALL_BUCKET_IDS, ALL_TABLE_IDS, BANK_SLIP_EXTENSIONS, BANK_SLIP_MIME_TYPES, getAppUrl(), getAppwriteEndpoint() (+25 more)
+
+### Community 1 - "setup-mvp-schema.mjs"
 Cohesion: 0.19
 Nodes (37): apiKey, client, db, endpoint, ensureBool(), ensureEnum(), ensureFloat(), ensureIndex() (+29 more)
 
-### Community 1 - "rate-limit.ts"
+### Community 2 - "rate-limit.ts"
 Cohesion: 0.13
 Nodes (30): initialState, ResendVerificationForm(), AuthActionState, mapAuthError(), readString(), rollbackSignup(), safeNextPath(), setSessionCookie() (+22 more)
 
-### Community 2 - "devDependencies"
+### Community 3 - "devDependencies"
 Cohesion: 0.06
 Nodes (32): eslint, eslint-config-next, eslint-config-prettier, devDependencies, eslint, eslint-config-next, eslint-config-prettier, prettier (+24 more)
 
-### Community 3 - "compilerOptions"
+### Community 4 - "compilerOptions"
 Cohesion: 0.06
 Nodes (30): ./*, dom, dom.iterable, esnext, **/*.mts, .next/dev/types/**/*.ts, next-env.d.ts, .next/types/**/*.ts (+22 more)
 
-### Community 4 - "dependencies"
+### Community 5 - "dependencies"
 Cohesion: 0.07
 Nodes (29): appwrite, class-variance-authority, clsx, lucide-react, next, node-appwrite, devDependencies, shadcn (+21 more)
 
-### Community 5 - "status.ts"
+### Community 6 - "status.ts"
 Cohesion: 0.10
 Nodes (23): BANK_SLIP_STATUSES, BankSlipStatus, isBankSlipStatus(), isOneOf(), isOrderStatus(), isPaymentMethod(), isPaymentStatus(), isProductStatus() (+15 more)
 
-### Community 6 - "profiles.ts"
+### Community 7 - "profiles.ts"
 Cohesion: 0.14
 Nodes (18): AccountPage(), avatarInitial, initialState, ProfileForm(), useActionToasts(), asProfile(), createProfileForUser(), defaultDisplayName() (+10 more)
 
-### Community 7 - "components.json"
+### Community 8 - "components.json"
 Cohesion: 0.09
 Nodes (21): aliases, components, hooks, lib, ui, utils, iconLibrary, menuAccent (+13 more)
 
-### Community 8 - "cn"
+### Community 9 - "cn"
 Cohesion: 0.17
 Nodes (12): Button(), buttonVariants, Input(), Label(), Separator(), SheetContent(), SheetDescription(), SheetFooter() (+4 more)
-
-### Community 9 - "index.ts"
-Cohesion: 0.20
-Nodes (18): asNullableString(), asPlatformSetting(), getPlatformSetting(), getPlatformSettings(), normalizePlatformSettingKey(), parsePlatformSettingJson(), withSessionTables(), BankSlip (+10 more)
 
 ### Community 10 - "seed-demo.mjs"
 Cohesion: 0.18
 Nodes (20): apiKey, CATEGORIES, client, db, DEMO_USERS, endpoint, ensureBuyerWelcomeNotification(), ensureCategory() (+12 more)
 
-### Community 11 - "config.ts"
-Cohesion: 0.15
-Nodes (13): getBrowserAccount(), getBrowserClient(), ALL_BUCKET_IDS, ALL_TABLE_IDS, BANK_SLIP_EXTENSIONS, BANK_SLIP_MIME_TYPES, getAppwriteEndpoint(), getAppwriteProjectId() (+5 more)
+### Community 11 - "models.ts"
+Cohesion: 0.14
+Nodes (17): asNullableString(), asPlatformSetting(), getPlatformSetting(), getPlatformSettings(), normalizePlatformSettingKey(), withSessionTables(), BankSlip, Category (+9 more)
 
 ### Community 12 - "portal-shell.tsx"
 Cohesion: 0.13
@@ -140,7 +140,7 @@ Cohesion: 0.23
 Nodes (14): bankSlipPermissions(), deleteFile(), deleteFileAsAdmin(), extensionOf(), publicImagePermissions(), toInputFile(), uploadAvatar(), uploadBankSlip() (+6 more)
 
 ### Community 15 - "notifications.ts"
-Cohesion: 0.45
+Cohesion: 0.41
 Nodes (11): asNotification(), asNullableString(), countOwnUnread(), createNotificationForUser(), getOwnNotificationFeed(), listOwnNotifications(), markAllOwnNotificationsRead(), markOwnNotificationRead() (+3 more)
 
 ### Community 18 - "legal-page.tsx"
@@ -172,7 +172,7 @@ Cohesion: 0.50
 Nodes (3): ALL_PLATFORM_SETTING_KEYS, PLATFORM_SETTING_KEYS, PlatformSettingKey
 
 ## Knowledge Gaps
-- **164 isolated node(s):** `npx`, `eslintConfig`, `nextConfig`, `config`, `target` (+159 more)
+- **171 isolated node(s):** `npx`, `eslintConfig`, `nextConfig`, `config`, `target` (+166 more)
   These have ≤1 connection - possible missing edges or undocumented components.
 - **12 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
@@ -181,15 +181,15 @@ _Questions this graph is uniquely positioned to answer:_
 
 - **Why does `dependencies` connect `dependencies` to `devDependencies`?**
   _High betweenness centrality (0.010) - this node is a cross-community bridge._
+- **Why does `Notification` connect `models.ts` to `notifications.ts`?**
+  _High betweenness centrality (0.003) - this node is a cross-community bridge._
 - **What connects `npx`, `eslintConfig`, `nextConfig` to the rest of the system?**
-  _164 weakly-connected nodes found - possible documentation gaps or missing edges._
+  _171 weakly-connected nodes found - possible documentation gaps or missing edges._
+- **Should `config.ts` be split into smaller, more focused modules?**
+  _Cohesion score 0.11382113821138211 - nodes in this community are weakly interconnected._
 - **Should `rate-limit.ts` be split into smaller, more focused modules?**
   _Cohesion score 0.12857142857142856 - nodes in this community are weakly interconnected._
 - **Should `devDependencies` be split into smaller, more focused modules?**
   _Cohesion score 0.06060606060606061 - nodes in this community are weakly interconnected._
 - **Should `compilerOptions` be split into smaller, more focused modules?**
   _Cohesion score 0.06451612903225806 - nodes in this community are weakly interconnected._
-- **Should `dependencies` be split into smaller, more focused modules?**
-  _Cohesion score 0.06666666666666667 - nodes in this community are weakly interconnected._
-- **Should `status.ts` be split into smaller, more focused modules?**
-  _Cohesion score 0.10333333333333333 - nodes in this community are weakly interconnected._

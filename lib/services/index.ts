@@ -23,6 +23,10 @@ export {
   normalizePlatformSettingKey,
   parsePlatformSettingJson,
 } from "./platform-settings";
+export {
+  normalizePayHereOrderId,
+  requestPayHereCheckout,
+} from "./payhere";
 export { getSessionUser } from "./session";
 export {
   deleteFile,
