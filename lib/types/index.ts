@@ -15,6 +15,10 @@ export type {
   ProductImage,
   Report,
   SellerProfile,
+  WishlistItem,
+  WishlistLine,
+  WishlistLineIssue,
+  WishlistView,
 } from "./models";
 export {
   FUNCTION_PAYHERE_CHECKOUT_HASH,
