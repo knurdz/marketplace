@@ -11,6 +11,7 @@ import {
   ORDER_ERROR_CODES,
   type ConfirmFreeOrderActionState,
   type CreateOrderActionState,
+  type PollPayHerePaymentStatusActionState,
   type SubmitBankSlipActionState,
 } from "./order-errors";
 import {
@@ -27,6 +28,8 @@ function revalidateCheckoutPaths() {
   revalidatePath("/checkout/free");
   revalidatePath("/checkout/bank");
   revalidatePath("/checkout/payhere");
+  revalidatePath("/checkout/payhere/return");
+  revalidatePath("/checkout/payhere/cancel");
 }
 
 export async function createOrder(
@@ -183,10 +186,45 @@ export async function submitBankSlipAction(
   };
 }
 
+/** Poll own order + payment for PayHere return/cancel pages (DB only — never trust redirect params). */
+export async function pollPayHerePaymentStatusAction(
+  orderId: string,
+): Promise<PollPayHerePaymentStatusActionState> {
+  const trimmed = orderId?.trim();
+  if (!trimmed) {
+    return { ok: false, error: "Invalid order id." };
+  }
+
+  const order = await getOwnOrder(trimmed);
+  if (!order || order.paymentMethod !== "payhere") {
+    return {
+      ok: false,
+      error: "Order not found.",
+      code: ORDER_ERROR_CODES.NOT_FOUND,
+    };
+  }
+
+  const payment = await getOwnPaymentForOrder(trimmed);
+  if (!payment || payment.method !== "payhere") {
+    return {
+      ok: false,
+      error: "Payment not found.",
+      code: ORDER_ERROR_CODES.NOT_FOUND,
+    };
+  }
+
+  return {
+    ok: true,
+    orderStatus: order.status,
+    paymentStatus: payment.status,
+  };
+}
+
 export { checkoutContinuationPath };
 
 export type {
   ConfirmFreeOrderActionState,
   CreateOrderActionState,
+  PollPayHerePaymentStatusActionState,
   SubmitBankSlipActionState,
 } from "./order-errors";

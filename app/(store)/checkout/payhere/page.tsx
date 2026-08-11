@@ -1,8 +1,7 @@
-import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
-import { Button } from "@/components/ui/button";
+import { PayHereCheckoutForm } from "@/components/store/payhere-checkout-form";
 import { getLoggedInUser } from "@/lib/appwrite/session";
-import { getOwnOrder } from "@/lib/services/orders";
+import { getOwnOrder, getOwnPaymentForOrder } from "@/lib/services/orders";
 
 type CheckoutContinuationPageProps = {
   searchParams: Promise<{ orderId?: string }>;
@@ -22,6 +21,9 @@ export default async function CheckoutPayHerePage({
   const order = await getOwnOrder(orderId);
   if (!order || order.paymentMethod !== "payhere") notFound();
 
+  const payment = await getOwnPaymentForOrder(orderId);
+  if (!payment || payment.method !== "payhere") notFound();
+
   return (
     <main className="relative mx-auto w-full max-w-3xl px-6 py-16 sm:px-10">
       <p className="font-mono text-sm text-accent">$ ./checkout --payhere</p>
@@ -29,22 +31,15 @@ export default async function CheckoutPayHerePage({
         Pay with PayHere
       </h1>
       <p className="mt-4 text-muted-foreground">
-        Order <span className="font-mono text-foreground">{order.$id}</span> was
-        created. PayHere checkout redirect and return/cancel polling land in
-        step 2.9 via <code className="font-mono text-sm">requestPayHereCheckout</code>.
+        Order <span className="font-mono text-foreground">{order.$id}</span> ·
+        Amount due: {order.currency} {order.totalAmount.toFixed(2)}
       </p>
       <p className="mt-2 text-sm text-muted-foreground">
-        Status: {order.status} · Total: {order.currency}{" "}
-        {order.totalAmount.toFixed(2)}
+        You will be redirected to PayHere to complete card payment. Checkout
+        fields and hash are signed server-side — never in the browser.
       </p>
-      <div className="mt-8 flex flex-wrap gap-3">
-        <Button type="button" disabled>
-          Continue to PayHere (step 2.9)
-        </Button>
-        <Button variant="outline" size="sm" asChild>
-          <Link href="/">Back to listings</Link>
-        </Button>
-      </div>
+
+      <PayHereCheckoutForm order={order} payment={payment} />
     </main>
   );
 }

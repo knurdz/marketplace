@@ -15,12 +15,12 @@
   "13": "components.json",
   "14": "seed-demo.mjs",
   "15": "error-fallback.tsx",
-  "16": "cart.ts",
+  "16": "services/index.ts",
   "17": "page-loader.tsx",
   "18": "legal-page.tsx",
   "19": "setup-storage-buckets.mjs",
   "20": "scripts",
-  "21": "keys.ts",
+  "21": "getLoggedInUser",
   "22": "shadcn",
   "23": "AGENTS.md",
   "24": "admin/page.tsx",
@@ -33,5 +33,8 @@
   "31": "clsx",
   "32": "react-dom",
   "33": "sonner",
-  "34": "tailwind-merge"
+  "34": "tailwind-merge",
+  "35": "[id]/page.tsx",
+  "36": "roles.ts",
+  "37": "categories.ts"
 }
