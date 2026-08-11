@@ -1,8 +1,8 @@
 # PayHere contract (Knurdz Marketplace)
 
 > Drafted in **Member 1 step 1.20** (names/payloads/security).  
-> Function **bodies** + merchant secret: **Member 4** (steps 4.8–4.9).  
-> Checkout UX / return-cancel polling: **Member 2** (steps 2.7–2.9).
+> Function **bodies**, merchant secret, free confirm, notify logging, sandbox notes: **Member 1** (steps **1.22–1.28**).  
+> Checkout UX / return-cancel polling: **Member 2** (steps 2.7–2.9) — calls Member 1 APIs only.
 
 Shared TypeScript: [`lib/types/payhere.ts`](../../lib/types/payhere.ts) · client helper: [`lib/services/payhere.ts`](../../lib/services/payhere.ts).
 
@@ -12,10 +12,10 @@ Shared TypeScript: [`lib/types/payhere.ts`](../../lib/types/payhere.ts) · clien
 
 | Piece | Owner |
 |-------|--------|
-| Contract freeze (this doc + TS types + `requestPayHereCheckout`) | Member 1 |
+| Contract freeze (this doc + TS types + `requestPayHereCheckout` stub) | Member 1 (1.20) |
+| `payhere-checkout-hash` + `payhere-notify` Functions, merchant secret, idempotent `paid`, free confirm | **Member 1** (1.22–1.28) |
 | Checkout UI, POST form to PayHere, return/cancel pages that **poll DB** | Member 2 |
-| `payhere-checkout-hash` + `payhere-notify` Functions, merchant secret, idempotent `paid` | Member 4 |
-| Bank slip approve/reject | Member 4 (default policy) |
+| Bank slip approve/reject (admin UI) | Member 4 (default policy) |
 
 ---
 
@@ -114,7 +114,7 @@ if (!result.ok) { /* toast result.error */ }
 // POST result.payload.fields to result.payload.actionUrl
 ```
 
-Until Member 4 deploys the Function, the helper returns a typed `{ ok: false, error: "PayHere checkout is not configured yet." }`.
+Until Member 1 deploys the Function (step 1.22+), the helper returns a typed `{ ok: false, error: "PayHere checkout is not configured yet." }`.
 
 ---
 

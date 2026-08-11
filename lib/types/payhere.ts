@@ -4,7 +4,7 @@
  * Merchant secret never appears in these types or client responses.
  */
 
-/** Appwrite Function IDs — must match console when Member 4 deploys. */
+/** Appwrite Function IDs — must match console when Member 1 deploys (steps 1.22–1.23). */
 export const FUNCTION_PAYHERE_CHECKOUT_HASH = "payhere-checkout-hash";
 export const FUNCTION_PAYHERE_NOTIFY = "payhere-notify";
 

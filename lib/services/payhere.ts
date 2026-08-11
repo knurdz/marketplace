@@ -2,8 +2,8 @@
 
 /**
  * PayHere checkout hash client (step 1.20).
- * Calls Appwrite Function `payhere-checkout-hash` — Member 4 owns the Function body + merchant secret.
- * See docs/agent/PAYHERE.md for full contract (notify + free confirm are not implemented here).
+ * Calls Appwrite Function `payhere-checkout-hash` — Member 1 owns the Function body + merchant secret (steps 1.22–1.28).
+ * See docs/agent/PAYHERE.md for full contract (notify + free confirm implemented by Member 1 payment setup).
  */
 
 import { ExecutionMethod } from "node-appwrite";
