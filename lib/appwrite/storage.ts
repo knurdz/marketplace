@@ -1,6 +1,11 @@
 import { AppwriteException, ID, Permission, Role } from "node-appwrite";
 import { InputFile } from "node-appwrite/file";
 import {
+  assertRateLimit,
+  RATE_LIMIT_MESSAGE,
+  RATE_LIMITS,
+} from "@/lib/security/rate-limit";
+import {
   AVATAR_MAX_BYTES,
   BANK_SLIP_EXTENSIONS,
   BANK_SLIP_MAX_BYTES,
@@ -88,6 +93,15 @@ export async function uploadFile(params: {
   const user = await getLoggedInUser();
   if (!user) {
     throw new Error("You must be signed in to upload.");
+  }
+
+  const uploadLimit = assertRateLimit({
+    bucket: "upload.any",
+    key: `user:${user.$id}`,
+    ...RATE_LIMITS.upload,
+  });
+  if (!uploadLimit.ok) {
+    throw new Error(RATE_LIMIT_MESSAGE);
   }
 
   const { storage } = await createSessionClient();

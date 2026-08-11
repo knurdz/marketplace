@@ -3,6 +3,14 @@
 import { cookies } from "next/headers";
 import { redirect, unstable_rethrow } from "next/navigation";
 import { AppwriteException, ID } from "node-appwrite";
+import {
+  assertRateLimit,
+  assertRateLimits,
+  getClientIp,
+  normalizeEmailKey,
+  RATE_LIMIT_MESSAGE,
+  RATE_LIMITS,
+} from "@/lib/security/rate-limit";
 import { DATABASE_ID, SESSION_COOKIE, TABLE_PROFILES } from "./config";
 import { createProfileForUser } from "./profiles";
 import { ROLE_LABELS } from "./roles";
@@ -104,6 +112,16 @@ export async function signUpWithEmail(
     return { error: "Password must be at least 8 characters." };
   }
 
+  const ip = await getClientIp();
+  const registerLimit = assertRateLimit({
+    bucket: "auth.register",
+    key: `ip:${ip}`,
+    ...RATE_LIMITS.register,
+  });
+  if (!registerLimit.ok) {
+    return { error: RATE_LIMIT_MESSAGE };
+  }
+
   let createdUserId: string | null = null;
 
   try {
@@ -160,6 +178,24 @@ export async function signInWithEmail(
 
   if (!email || !password) {
     return { error: "Email and password are required." };
+  }
+
+  const ip = await getClientIp();
+  const emailKey = normalizeEmailKey(email);
+  const loginLimit = assertRateLimits([
+    {
+      bucket: "auth.login",
+      key: `email:${emailKey}`,
+      ...RATE_LIMITS.login,
+    },
+    {
+      bucket: "auth.login",
+      key: `ip:${ip}`,
+      ...RATE_LIMITS.login,
+    },
+  ]);
+  if (!loginLimit.ok) {
+    return { error: RATE_LIMIT_MESSAGE };
   }
 
   try {

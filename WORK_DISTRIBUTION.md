@@ -91,9 +91,13 @@ Use after every change that touches code or schema:
 
 ### Phase 1 — ongoing
 
+| Step         | Goal                          | Do                                                                   | Verify                                            |
+| ------------ | ----------------------------- | -------------------------------------------------------------------- | ------------------------------------------------- |
+| [x] **1.14** | Auth/upload rate limits       | In-process sliding window on auth + upload server actions            | Burst login/recovery blocked; recovery non-enumerating |
+
 - [ ] In-app notifications collection + badge hook/UI (polling OK for MVP; realtime later)
 - [ ] Global product search helper
-- [ ] Basic rate limiting / abuse guards on sensitive auth & upload endpoints (or Function-level)
+- [x] Basic rate limiting / abuse guards on sensitive auth & upload endpoints (or Function-level)
 - [ ] Legal / FAQ static pages
 - [ ] Toasts + error boundary + loading-state patterns
 - [ ] Platform settings read helper

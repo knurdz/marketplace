@@ -28,6 +28,10 @@ Permission helper: `Role.label('admin')`, etc. Server helpers: [`lib/appwrite/ro
 
 Route guards: [`proxy.ts`](../../proxy.ts) (cookie) + `app/seller/layout.tsx` / `app/admin/layout.tsx` (`requireLabel`).
 
+### Abuse guards (step 1.14)
+
+Server-action rate limits live in [`lib/security/rate-limit.ts`](../../lib/security/rate-limit.ts) (in-process sliding window). Wired on login, register, password recovery, email verify, and uploads via [`lib/appwrite/storage.ts`](../../lib/appwrite/storage.ts) `uploadFile`. **Single-instance only** — multi-instance hosts need a shared store later.
+
 ## Status / method enums (canonical)
 
 | Domain | Values |
@@ -337,7 +341,8 @@ Route guards: [`proxy.ts`](../../proxy.ts) (cookie) + `app/seller/layout.tsx` / 
 
 Buckets created in console; re-apply with `node --env-file=.env.local scripts/setup-storage-buckets.mjs`.  
 Code constants: `BUCKET_*` in [`lib/appwrite/config.ts`](../../lib/appwrite/config.ts).  
-Upload helpers: [`lib/appwrite/storage.ts`](../../lib/appwrite/storage.ts).
+Upload helpers: [`lib/appwrite/storage.ts`](../../lib/appwrite/storage.ts).  
+Uploads are rate-limited in `uploadFile` (see Abuse guards above).
 
 **Permission model:** file security **on** for all buckets. Bucket-level grant is `create(users)` only. Per-file ACLs are set at upload:
 
@@ -368,3 +373,4 @@ Upload helpers: [`lib/appwrite/storage.ts`](../../lib/appwrite/storage.ts).
 | 2026-08-11 | Storage buckets + helpers (step 1.8) |
 | 2026-08-11 | TS status/types at `lib/types/` (step 1.10) |
 | 2026-08-11 | Phase 0 complete — demo seed + done gate (steps 1.12–1.13) |
+| 2026-08-11 | Auth/upload rate limits (step 1.14) |
