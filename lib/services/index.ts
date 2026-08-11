@@ -3,6 +3,17 @@ export {
   getProduct,
   listActiveProducts,
 } from "./products";
+export {
+  asNotification,
+  countOwnUnread,
+  createNotificationForUser,
+  getOwnNotificationFeed,
+  listOwnNotifications,
+  markAllOwnNotificationsRead,
+  markOwnNotificationRead,
+  safeNotificationLink,
+} from "./notifications";
+export type { NotificationActionState } from "./notifications";
 export { getSessionUser } from "./session";
 export {
   deleteFile,

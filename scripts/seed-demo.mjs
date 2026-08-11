@@ -4,7 +4,7 @@
  *      → node --env-file=.env.local scripts/seed-demo.mjs
  *
  * Creates: admin / seller / buyer users + profiles, approved seller shop,
- * two categories, one active sample product.
+ * two categories, one active sample product, one buyer welcome notification.
  */
 import {
   Client,
@@ -60,6 +60,7 @@ const CATEGORIES = [
 
 const PRODUCT_ID = "seed_demo_product";
 const SELLER_PROFILE_ID = "seed_seller_profile";
+const BUYER_WELCOME_NOTIFICATION_ID = "seed_buyer_welcome_notification";
 
 const endpoint = process.env.NEXT_PUBLIC_APPWRITE_ENDPOINT?.trim();
 const projectId = process.env.NEXT_PUBLIC_APPWRITE_PROJECT_ID?.trim();
@@ -288,6 +289,59 @@ async function ensureProduct(sellerUserId, categoryId) {
   }
 }
 
+async function ensureBuyerWelcomeNotification(buyerUserId) {
+  const data = {
+    userId: buyerUserId,
+    type: "system.welcome",
+    title: "Welcome to Knurdz",
+    body: "Your demo buyer account is ready. Explore the storefront and update your profile anytime.",
+    read: false,
+    link: "/account",
+    meta: null,
+  };
+  const permissions = [
+    Permission.read(Role.user(buyerUserId)),
+    Permission.update(Role.user(buyerUserId)),
+    Permission.delete(Role.user(buyerUserId)),
+    Permission.read(Role.label("admin")),
+    Permission.update(Role.label("admin")),
+    Permission.delete(Role.label("admin")),
+  ];
+
+  try {
+    await db.getRow({
+      databaseId: DATABASE_ID,
+      tableId: "notifications",
+      rowId: BUYER_WELCOME_NOTIFICATION_ID,
+    });
+    await db.updateRow({
+      databaseId: DATABASE_ID,
+      tableId: "notifications",
+      rowId: BUYER_WELCOME_NOTIFICATION_ID,
+      data,
+      permissions,
+    });
+    console.log(`= notification: ${BUYER_WELCOME_NOTIFICATION_ID}`);
+  } catch (error) {
+    if (!isNotFound(error)) throw error;
+    try {
+      await db.createRow({
+        databaseId: DATABASE_ID,
+        tableId: "notifications",
+        rowId: BUYER_WELCOME_NOTIFICATION_ID,
+        data,
+        permissions,
+      });
+      console.log(`+ notification: ${BUYER_WELCOME_NOTIFICATION_ID}`);
+    } catch (createErr) {
+      if (!isConflict(createErr)) throw createErr;
+      console.log(
+        `= notification (conflict ok): ${BUYER_WELCOME_NOTIFICATION_ID}`,
+      );
+    }
+  }
+}
+
 async function main() {
   console.log("Seeding demo data…");
 
@@ -305,6 +359,7 @@ async function main() {
   }
 
   await ensureProduct(created.seller.$id, CATEGORIES[0].rowId);
+  await ensureBuyerWelcomeNotification(created.buyer.$id);
 
   console.log("\nDemo seed ready.");
   console.log(`  password (all): ${DEMO_PASSWORD}`);
@@ -314,6 +369,7 @@ async function main() {
     );
   }
   console.log(`  product ${PRODUCT_ID} (status=active)`);
+  console.log(`  notification ${BUYER_WELCOME_NOTIFICATION_ID} (buyer)`);
 }
 
 main().catch((err) => {

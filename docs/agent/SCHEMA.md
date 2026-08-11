@@ -304,6 +304,8 @@ Server-action rate limits live in [`lib/security/rate-limit.ts`](../../lib/secur
 
 **Indexes:** `userId_idx`, `user_read_idx`
 
+**App create path (step 1.15):** use [`createNotificationForUser`](../../lib/appwrite/notifications.ts) (admin SDK) with row ACL `read/update/delete(user)` + admin. Do not expose a buyer “create notification” form. Own-only list/unread/mark-read via session client; badge polls ~45s ([`notification-bell.tsx`](../../components/notifications/notification-bell.tsx)). `link` must be a same-origin relative path.
+
 ---
 
 ### `platform_settings`
@@ -374,3 +376,4 @@ Uploads are rate-limited in `uploadFile` (see Abuse guards above).
 | 2026-08-11 | TS status/types at `lib/types/` (step 1.10) |
 | 2026-08-11 | Phase 0 complete — demo seed + done gate (steps 1.12–1.13) |
 | 2026-08-11 | Auth/upload rate limits (step 1.14) |
+| 2026-08-11 | Notifications service + badge (step 1.15) |

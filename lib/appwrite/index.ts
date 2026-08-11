@@ -39,6 +39,17 @@ export {
 } from "./profiles";
 export type { Profile, ProfileActionState } from "./profiles";
 export {
+  asNotification,
+  countOwnUnread,
+  createNotificationForUser,
+  getOwnNotificationFeed,
+  listOwnNotifications,
+  markAllOwnNotificationsRead,
+  markOwnNotificationRead,
+  safeNotificationLink,
+} from "./notifications";
+export type { NotificationActionState } from "./notifications";
+export {
   ROLE_LABELS,
   requireLabel,
   requireUser,
