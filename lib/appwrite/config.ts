@@ -60,6 +60,13 @@ export const ALL_BUCKET_IDS = [
   BUCKET_BANK_SLIPS,
 ] as const;
 
+/** Re-export PayHere Function IDs (canonical values in lib/types/payhere.ts). */
+export {
+  FUNCTION_PAYHERE_CHECKOUT_HASH,
+  FUNCTION_PAYHERE_NOTIFY,
+  PAYHERE_FUNCTION_IDS as ALL_PAYHERE_FUNCTION_IDS,
+} from "@/lib/types/payhere";
+
 /** Max upload sizes (bytes) — mirror bucket settings. */
 export const AVATAR_MAX_BYTES = 2 * 1024 * 1024; // 2MB
 export const PRODUCT_IMAGE_MAX_BYTES = 5 * 1024 * 1024; // 5MB

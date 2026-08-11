@@ -381,3 +381,4 @@ Uploads are rate-limited in `uploadFile` (see Abuse guards above).
 | 2026-08-11 | Notifications service + badge (step 1.15) |
 | 2026-08-11 | Product title fulltext + searchActiveProducts (step 1.16) |
 | 2026-08-11 | Platform settings read helpers + seed keys (step 1.19) |
+| 2026-08-11 | PayHere Function interface freeze — see PAYHERE.md (step 1.20) |

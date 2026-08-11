@@ -10,7 +10,7 @@ All documents coding agents should read for Knurdz Marketplace live here (except
 4. **Cursor rules** — [`.cursor/rules/`](../../.cursor/rules/) (quality, security, graphify, MCP, human-git, stack conventions)
 5. **README** — [`../../README.md`](../../README.md)
 6. **Schema** — [`SCHEMA.md`](./SCHEMA.md) _(created by Member 1 in step 1.7)_
-7. **PayHere contract** — [`PAYHERE.md`](./PAYHERE.md) _(created by Member 4 with Member 2)_
+7. **PayHere contract** — [`PAYHERE.md`](./PAYHERE.md) _(interface freeze Member 1 step **1.20**; Function bodies Member 4; checkout UX Member 2)_
 
 ## By member
 
