@@ -3,7 +3,10 @@ import { redirect } from "next/navigation";
 import { ProfileForm } from "@/components/auth/profile-form";
 import { ResendVerificationForm } from "@/components/auth/resend-verification-form";
 import { signOut } from "@/lib/appwrite/auth";
-import { getOwnProfile } from "@/lib/appwrite/profiles";
+import {
+  getOwnProfile,
+} from "@/lib/appwrite/profiles";
+import { getAvatarPreviewUrl } from "@/lib/appwrite/storage-urls";
 import { getLoggedInUser } from "@/lib/appwrite/session";
 
 export default async function AccountPage() {
@@ -13,6 +16,9 @@ export default async function AccountPage() {
   }
 
   const profile = await getOwnProfile();
+  const avatarPreviewUrl = profile
+    ? getAvatarPreviewUrl(profile.avatarFileId)
+    : null;
   const labels =
     Array.isArray(user.labels) && user.labels.length > 0
       ? user.labels.join(", ")
@@ -22,23 +28,23 @@ export default async function AccountPage() {
     <div>
       <p className="font-mono text-sm text-accent">$ ./auth --session</p>
       <h1 className="mt-4 text-3xl font-bold tracking-tight">Account</h1>
-      <p className="mt-2 text-sm text-muted">Signed-in session details.</p>
+      <p className="mt-2 text-sm text-muted-foreground">Signed-in session details.</p>
 
       <ul className="mt-8 space-y-3 rounded-md border border-border bg-card p-5 font-mono text-sm">
         <li>
-          <span className="text-muted">email:</span> {user.email}
+          <span className="text-muted-foreground">email:</span> {user.email}
         </li>
         <li>
-          <span className="text-muted">name:</span> {user.name || "—"}
+          <span className="text-muted-foreground">name:</span> {user.name || "—"}
         </li>
         <li>
-          <span className="text-muted">id:</span> {user.$id}
+          <span className="text-muted-foreground">id:</span> {user.$id}
         </li>
         <li>
-          <span className="text-muted">labels:</span> {labels}
+          <span className="text-muted-foreground">labels:</span> {labels}
         </li>
         <li>
-          <span className="text-muted">emailVerified:</span>{" "}
+          <span className="text-muted-foreground">emailVerified:</span>{" "}
           {user.emailVerification ? (
             <span className="text-accent">true</span>
           ) : (
@@ -46,7 +52,7 @@ export default async function AccountPage() {
           )}
         </li>
         <li>
-          <span className="text-muted">profile:</span>{" "}
+          <span className="text-muted-foreground">profile:</span>{" "}
           {profile ? (
             <span className="text-accent">linked ({profile.displayName})</span>
           ) : (
@@ -57,14 +63,16 @@ export default async function AccountPage() {
 
       {!user.emailVerification ? (
         <div className="mt-6 space-y-2">
-          <p className="text-sm text-muted">
+          <p className="text-sm text-muted-foreground">
             Your email is not verified yet. Resend a verification link:
           </p>
           <ResendVerificationForm />
         </div>
       ) : null}
 
-      {profile ? <ProfileForm profile={profile} /> : null}
+      {profile ? (
+        <ProfileForm profile={profile} avatarPreviewUrl={avatarPreviewUrl} />
+      ) : null}
 
       <div className="mt-8 flex flex-wrap gap-4">
         <Link

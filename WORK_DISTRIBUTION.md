@@ -65,8 +65,8 @@ Use after every change that touches code or schema:
 - [ ] Optional phone field on profile / registration (not required for MVP login)
 - [x] Role model (labels/teams) + middleware guards for `/seller`, `/admin`
 - [x] Database collections + indexes + permissions documented (`docs/agent/SCHEMA.md` when created) — include at least: profiles/users, products, orders, order_items, payments, reviews (+ seller_profiles, categories, notifications, audit as needed)
-- [ ] Storage buckets + shared upload helper
-- [ ] UI kit / layout shells (store, seller, admin empty shells) + navbar/routing
+- [x] Storage buckets + shared upload helper
+- [x] UI kit / layout shells (store, seller, admin empty shells) + navbar/routing
 - [ ] Shared order/payment status enums & types + thin service layer / API contracts for other members
 - [ ] Seed: demo admin, seller, buyer, categories
 - [x] README setup so teammates can clone and run
@@ -82,8 +82,8 @@ Use after every change that touches code or schema:
 | [x] **1.5**  | Profiles                      | `profiles` linked to `userId`; create on register                    | Profile after signup; own-only update             |
 | [x] **1.6**  | Roles & guards                | Labels/teams; middleware for `/seller`, `/admin`                     | Buyer blocked from admin                          |
 | [x] **1.7**  | Schema + collections          | All MVP collections + indexes + permissions → `docs/agent/SCHEMA.md` | Doc matches console                               |
-| [ ] **1.8**  | Storage                       | Buckets + upload helper (private bank slips)                         | Avatar upload works                               |
-| [ ] **1.9**  | UI kit + shells               | Store/seller/admin layouts + navbar                                  | Empty dashboards render                           |
+| [x] **1.8**  | Storage                       | Buckets + upload helper (private bank slips)                         | Avatar upload works                               |
+| [x] **1.9**  | UI kit + shells               | Store/seller/admin layouts + navbar                                  | Empty dashboards render                           |
 | [ ] **1.10** | Shared types/enums            | Product/order/payment statuses exported                              | Single source of truth                            |
 | [ ] **1.11** | Thin services                 | Session/product/upload helpers                                       | Others can import contracts                       |
 | [ ] **1.12** | Seed                          | Admin, seller, buyer, categories, sample product                     | One-command seed                                  |

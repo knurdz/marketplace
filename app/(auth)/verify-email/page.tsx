@@ -49,7 +49,7 @@ export default async function VerifyEmailPage({
           <Link href="/account" className="text-accent hover:underline">
             Account
           </Link>
-          <Link href="/login" className="text-muted hover:text-foreground">
+          <Link href="/login" className="text-muted-foreground hover:text-foreground">
             Sign in
           </Link>
         </div>

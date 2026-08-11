@@ -36,7 +36,7 @@ export function ResetPasswordForm({
       ) : null}
 
       <div className="space-y-2">
-        <label htmlFor="password" className="block text-sm text-muted">
+        <label htmlFor="password" className="block text-sm text-muted-foreground">
           New password
         </label>
         <input
@@ -51,7 +51,7 @@ export function ResetPasswordForm({
       </div>
 
       <div className="space-y-2">
-        <label htmlFor="confirm" className="block text-sm text-muted">
+        <label htmlFor="confirm" className="block text-sm text-muted-foreground">
           Confirm password
         </label>
         <input
@@ -73,7 +73,7 @@ export function ResetPasswordForm({
         {pending ? "Updating…" : "Update password"}
       </button>
 
-      <p className="font-mono text-sm text-muted">
+      <p className="font-mono text-sm text-muted-foreground">
         <Link href="/forgot-password" className="text-accent hover:underline">
           Request a new link
         </Link>

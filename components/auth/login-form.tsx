@@ -26,7 +26,7 @@ export function LoginForm({ nextPath }: { nextPath?: string }) {
       ) : null}
 
       <div className="space-y-2">
-        <label htmlFor="email" className="block text-sm text-muted">
+        <label htmlFor="email" className="block text-sm text-muted-foreground">
           Email
         </label>
         <input
@@ -40,7 +40,7 @@ export function LoginForm({ nextPath }: { nextPath?: string }) {
       </div>
 
       <div className="space-y-2">
-        <label htmlFor="password" className="block text-sm text-muted">
+        <label htmlFor="password" className="block text-sm text-muted-foreground">
           Password
         </label>
         <input
@@ -62,13 +62,13 @@ export function LoginForm({ nextPath }: { nextPath?: string }) {
         {pending ? "Signing in…" : "Sign in"}
       </button>
 
-      <p className="font-mono text-sm text-muted">
+      <p className="font-mono text-sm text-muted-foreground">
         <Link href="/forgot-password" className="text-accent hover:underline">
           Forgot password?
         </Link>
       </p>
 
-      <p className="font-mono text-sm text-muted">
+      <p className="font-mono text-sm text-muted-foreground">
         No account?{" "}
         <Link href="/register" className="text-accent hover:underline">
           Register

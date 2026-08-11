@@ -332,9 +332,21 @@ Route guards: [`proxy.ts`](../../proxy.ts) (cookie) + `app/seller/layout.tsx` / 
 
 **Indexes:** `actorId_idx`, `resource_idx`
 
-## Storage (step 1.8 — not created yet)
+## Storage (step 1.8)
 
-Planned buckets: `avatars`, `product-images`, `bank-slips` (private). Documented here so schema consumers know `*FileId` columns point at Storage.
+Buckets created in console; re-apply with `node --env-file=.env.local scripts/setup-storage-buckets.mjs`.  
+Code constants: `BUCKET_*` in [`lib/appwrite/config.ts`](../../lib/appwrite/config.ts).  
+Upload helpers: [`lib/appwrite/storage.ts`](../../lib/appwrite/storage.ts).
+
+**Permission model:** file security **on** for all buckets. Bucket-level grant is `create(users)` only. Per-file ACLs are set at upload:
+
+| Bucket ID | Max size | Extensions | Encryption | File permissions at upload |
+|-----------|----------|------------|------------|----------------------------|
+| `avatars` | 2MB | jpg, jpeg, png, webp | off | `read(any)` + `update/delete(user)` |
+| `product-images` | 5MB | jpg, jpeg, png, webp | off | `read(any)` + `update/delete(user)` |
+| `bank-slips` | 5MB | jpg, jpeg, png, webp, pdf | on | **private** — `read/update/delete(user)` + `read/update/delete(label:admin)`; never `read(any)` |
+
+`*FileId` columns (`profiles.avatarFileId`, `seller_profiles.bannerFileId`, `product_images.fileId`, `bank_slips.fileId`, etc.) store Storage file IDs in the matching bucket.
 
 ## Console match checklist
 
@@ -344,9 +356,12 @@ Planned buckets: `avatars`, `product-images`, `bank-slips` (private). Documented
 - [x] Enum values match this document
 - [x] Code constants in `lib/appwrite/config.ts` match table ids
 - [x] Setup script: `scripts/setup-mvp-schema.mjs` (idempotent)
+- [x] Buckets `avatars`, `product-images`, `bank-slips` exist with file security
+- [x] Setup script: `scripts/setup-storage-buckets.mjs` (idempotent)
 
 ## Changelog
 
 | Date | Change |
 |------|--------|
 | 2026-08-11 | Initial freeze (step 1.7) |
+| 2026-08-11 | Storage buckets + helpers (step 1.8) |

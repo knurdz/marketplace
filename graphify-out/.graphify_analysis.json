@@ -1,6 +1,54 @@
 {
   "communities": {
     "0": [
+      "app_admin_layout",
+      "app_admin_layout_admin_nav",
+      "app_admin_layout_adminlayout",
+      "app_layout",
+      "app_layout_jetbrainsmono",
+      "app_layout_metadata",
+      "app_layout_rootlayout",
+      "app_layout_spacegrotesk",
+      "app_seller_layout",
+      "app_seller_layout_seller_nav",
+      "app_seller_layout_sellerlayout",
+      "app_store_layout",
+      "app_store_layout_storelayout",
+      "app_store_page",
+      "app_store_page_home",
+      "components_layout_portal_shell",
+      "components_layout_portal_shell_portalnavitem",
+      "components_layout_portal_shell_portalshell",
+      "components_layout_portal_shell_portalshellprops",
+      "components_layout_portal_shell_sidenav",
+      "components_layout_store_navbar",
+      "components_layout_store_navbar_navlinks",
+      "components_layout_store_navbar_storenavbar",
+      "components_layout_store_navbar_storenavbarprops",
+      "components_ui_button",
+      "components_ui_button_button",
+      "components_ui_button_buttonvariants",
+      "components_ui_input",
+      "components_ui_input_input",
+      "components_ui_label",
+      "components_ui_label_label",
+      "components_ui_separator",
+      "components_ui_separator_separator",
+      "components_ui_sheet",
+      "components_ui_sheet_sheet",
+      "components_ui_sheet_sheetclose",
+      "components_ui_sheet_sheetcontent",
+      "components_ui_sheet_sheetdescription",
+      "components_ui_sheet_sheetfooter",
+      "components_ui_sheet_sheetheader",
+      "components_ui_sheet_sheetoverlay",
+      "components_ui_sheet_sheetportal",
+      "components_ui_sheet_sheettitle",
+      "components_ui_sheet_sheettrigger",
+      "lib_utils",
+      "lib_utils_cn"
+    ],
+    "1": [
       "scripts_setup_mvp_schema",
       "scripts_setup_mvp_schema_apikey",
       "scripts_setup_mvp_schema_client",
@@ -39,7 +87,77 @@
       "scripts_setup_mvp_schema_slip_status",
       "scripts_setup_mvp_schema_waitcolumnsavailable"
     ],
-    "1": [
+    "2": [
+      "lib_appwrite_browser",
+      "lib_appwrite_browser_getbrowseraccount",
+      "lib_appwrite_browser_getbrowserclient",
+      "lib_appwrite_config",
+      "lib_appwrite_config_all_bucket_ids",
+      "lib_appwrite_config_all_table_ids",
+      "lib_appwrite_config_bank_slip_extensions",
+      "lib_appwrite_config_bank_slip_mime_types",
+      "lib_appwrite_config_getappwriteendpoint",
+      "lib_appwrite_config_getappwriteprojectid",
+      "lib_appwrite_config_hasappwritepublicconfig",
+      "lib_appwrite_config_image_extensions",
+      "lib_appwrite_config_image_mime_types",
+      "lib_appwrite_server",
+      "lib_appwrite_server_createadminclient",
+      "lib_appwrite_server_createsessionclient",
+      "lib_appwrite_session",
+      "lib_appwrite_session_getloggedinuser",
+      "lib_appwrite_storage",
+      "lib_appwrite_storage_bankslippermissions",
+      "lib_appwrite_storage_deletefile",
+      "lib_appwrite_storage_deletefileasadmin",
+      "lib_appwrite_storage_extensionof",
+      "lib_appwrite_storage_isappwritestorageerror",
+      "lib_appwrite_storage_publicimagepermissions",
+      "lib_appwrite_storage_toinputfile",
+      "lib_appwrite_storage_uploadavatar",
+      "lib_appwrite_storage_uploadbankslip",
+      "lib_appwrite_storage_uploadfile",
+      "lib_appwrite_storage_uploadproductimage",
+      "lib_appwrite_storage_uploadvalidationerror",
+      "lib_appwrite_storage_uploadvalidationok",
+      "lib_appwrite_storage_uploadvalidationresult",
+      "lib_appwrite_storage_validateupload"
+    ],
+    "3": [
+      "eslint",
+      "eslint_config_next",
+      "eslint_config_prettier",
+      "package",
+      "package_devdependencies",
+      "package_devdependencies_eslint",
+      "package_devdependencies_eslint_config_next",
+      "package_devdependencies_eslint_config_prettier",
+      "package_devdependencies_prettier",
+      "package_devdependencies_tailwindcss",
+      "package_devdependencies_tailwindcss_postcss",
+      "package_devdependencies_types_node",
+      "package_devdependencies_types_react",
+      "package_devdependencies_types_react_dom",
+      "package_devdependencies_typescript",
+      "package_name",
+      "package_private",
+      "package_scripts",
+      "package_scripts_build",
+      "package_scripts_dev",
+      "package_scripts_format",
+      "package_scripts_format_check",
+      "package_scripts_lint",
+      "package_scripts_start",
+      "package_version",
+      "prettier",
+      "tailwindcss",
+      "tailwindcss_postcss",
+      "types_node",
+      "types_react",
+      "types_react_dom",
+      "typescript"
+    ],
+    "4": [
       "ref",
       "ref_dom",
       "ref_dom_iterable",
@@ -72,24 +190,103 @@
       "tsconfig_include",
       "tsconfig_paths"
     ],
-    "2": [
-      "app_auth_forgot_password_page",
-      "app_auth_forgot_password_page_forgotpasswordpage",
-      "app_auth_reset_password_page",
-      "app_auth_reset_password_page_resetpasswordpage",
-      "app_auth_reset_password_page_searchparams",
-      "app_auth_verify_email_page",
-      "app_auth_verify_email_page_searchparams",
-      "app_auth_verify_email_page_verifyemailpage",
-      "components_auth_forgot_password_form",
-      "components_auth_forgot_password_form_forgotpasswordform",
-      "components_auth_forgot_password_form_initialstate",
+    "5": [
+      "appwrite",
+      "class_variance_authority",
+      "clsx",
+      "lucide_react",
+      "next",
+      "node_appwrite",
+      "package_dependencies",
+      "package_dependencies_appwrite",
+      "package_dependencies_class_variance_authority",
+      "package_dependencies_clsx",
+      "package_dependencies_lucide_react",
+      "package_dependencies_next",
+      "package_dependencies_node_appwrite",
+      "package_dependencies_radix_ui",
+      "package_dependencies_react",
+      "package_dependencies_react_dom",
+      "package_dependencies_shadcn",
+      "package_dependencies_tailwind_merge",
+      "package_dependencies_tw_animate_css",
+      "radix_ui",
+      "react",
+      "react_dom",
+      "shadcn",
+      "tailwind_merge",
+      "tw_animate_css"
+    ],
+    "6": [
+      "app_auth_account_page",
+      "app_auth_account_page_accountpage",
+      "components_auth_profile_form",
+      "components_auth_profile_form_avatarinitial",
+      "components_auth_profile_form_initialstate",
+      "components_auth_profile_form_profileform",
+      "lib_appwrite_index",
+      "lib_appwrite_profiles",
+      "lib_appwrite_profiles_asprofile",
+      "lib_appwrite_profiles_createprofileforuser",
+      "lib_appwrite_profiles_defaultdisplayname",
+      "lib_appwrite_profiles_getownprofile",
+      "lib_appwrite_profiles_profile",
+      "lib_appwrite_profiles_profileactionstate",
+      "lib_appwrite_profiles_readstring",
+      "lib_appwrite_profiles_updateownavatar",
+      "lib_appwrite_profiles_updateownprofile",
+      "lib_appwrite_storage_urls",
+      "lib_appwrite_storage_urls_getavatarpreviewurl",
+      "lib_appwrite_storage_urls_getavatarviewurl",
+      "lib_appwrite_storage_urls_getfilepreviewurl",
+      "lib_appwrite_storage_urls_getfileviewurl"
+    ],
+    "7": [
+      "components",
+      "components_aliases",
+      "components_aliases_components",
+      "components_aliases_hooks",
+      "components_aliases_lib",
+      "components_aliases_ui",
+      "components_aliases_utils",
+      "components_iconlibrary",
+      "components_menuaccent",
+      "components_menucolor",
+      "components_registries",
+      "components_rsc",
+      "components_rtl",
+      "components_schema",
+      "components_style",
+      "components_tailwind",
+      "components_tailwind_basecolor",
+      "components_tailwind_config",
+      "components_tailwind_css",
+      "components_tailwind_cssvariables",
+      "components_tailwind_prefix",
+      "components_tsx"
+    ],
+    "8": [
+      "lib_appwrite_auth",
+      "lib_appwrite_auth_authactionstate",
+      "lib_appwrite_auth_mapautherror",
+      "lib_appwrite_auth_readstring",
+      "lib_appwrite_auth_rollbacksignup",
+      "lib_appwrite_auth_safenextpath",
+      "lib_appwrite_auth_setsessioncookie",
+      "lib_appwrite_auth_signinwithemail",
+      "lib_appwrite_auth_signout",
+      "lib_appwrite_auth_signupwithemail",
+      "lib_appwrite_roles",
+      "lib_appwrite_roles_requirelabel",
+      "lib_appwrite_roles_requireuser",
+      "lib_appwrite_roles_role_labels",
+      "lib_appwrite_roles_rolelabel",
+      "lib_appwrite_roles_userhaslabel"
+    ],
+    "9": [
       "components_auth_resend_verification_form",
       "components_auth_resend_verification_form_initialstate",
       "components_auth_resend_verification_form_resendverificationform",
-      "components_auth_reset_password_form",
-      "components_auth_reset_password_form_initialstate",
-      "components_auth_reset_password_form_resetpasswordform",
       "lib_appwrite_config_getappurl",
       "lib_appwrite_recovery",
       "lib_appwrite_recovery_completeemailverification",
@@ -101,182 +298,120 @@
       "lib_appwrite_recovery_requestpasswordrecovery",
       "lib_appwrite_server_createpublicclient"
     ],
-    "3": [
-      "components_auth_profile_form",
-      "components_auth_profile_form_initialstate",
-      "components_auth_profile_form_profileform",
-      "lib_appwrite_browser",
-      "lib_appwrite_browser_getbrowseraccount",
-      "lib_appwrite_browser_getbrowserclient",
-      "lib_appwrite_config",
-      "lib_appwrite_config_all_table_ids",
-      "lib_appwrite_config_getappwriteendpoint",
-      "lib_appwrite_config_getappwriteprojectid",
-      "lib_appwrite_config_hasappwritepublicconfig",
-      "lib_appwrite_index",
-      "lib_appwrite_profiles",
-      "lib_appwrite_profiles_asprofile",
-      "lib_appwrite_profiles_createprofileforuser",
-      "lib_appwrite_profiles_defaultdisplayname",
-      "lib_appwrite_profiles_getownprofile",
-      "lib_appwrite_profiles_profile",
-      "lib_appwrite_profiles_profileactionstate",
-      "lib_appwrite_profiles_readstring",
-      "lib_appwrite_profiles_updateownprofile",
-      "lib_appwrite_server",
-      "lib_appwrite_server_createadminclient",
-      "lib_appwrite_server_createsessionclient",
-      "lib_appwrite_session",
-      "lib_appwrite_session_getloggedinuser"
+    "10": [
+      "scripts_setup_storage_buckets",
+      "scripts_setup_storage_buckets_apikey",
+      "scripts_setup_storage_buckets_bucketcreateperms",
+      "scripts_setup_storage_buckets_buckets",
+      "scripts_setup_storage_buckets_client",
+      "scripts_setup_storage_buckets_endpoint",
+      "scripts_setup_storage_buckets_ensurebucket",
+      "scripts_setup_storage_buckets_main",
+      "scripts_setup_storage_buckets_projectid",
+      "scripts_setup_storage_buckets_storage"
     ],
-    "4": [
-      "app_auth_account_page",
-      "app_auth_account_page_accountpage",
+    "11": [
       "app_auth_login_page",
       "app_auth_login_page_loginpage",
       "app_auth_login_page_safenextpath",
-      "app_auth_register_page",
-      "app_auth_register_page_registerpage",
-      "app_page",
-      "app_page_home",
       "components_auth_login_form",
       "components_auth_login_form_initialstate",
-      "components_auth_login_form_loginform",
+      "components_auth_login_form_loginform"
+    ],
+    "12": [
+      "app_auth_reset_password_page",
+      "app_auth_reset_password_page_resetpasswordpage",
+      "app_auth_reset_password_page_searchparams",
+      "components_auth_reset_password_form",
+      "components_auth_reset_password_form_initialstate",
+      "components_auth_reset_password_form_resetpasswordform"
+    ],
+    "13": [
+      "app_auth_forgot_password_page",
+      "app_auth_forgot_password_page_forgotpasswordpage",
+      "components_auth_forgot_password_form",
+      "components_auth_forgot_password_form_forgotpasswordform",
+      "components_auth_forgot_password_form_initialstate"
+    ],
+    "14": [
+      "app_auth_register_page",
+      "app_auth_register_page_registerpage",
       "components_auth_register_form",
       "components_auth_register_form_initialstate",
-      "components_auth_register_form_registerform",
-      "lib_appwrite_auth",
-      "lib_appwrite_auth_authactionstate",
-      "lib_appwrite_auth_mapautherror",
-      "lib_appwrite_auth_readstring",
-      "lib_appwrite_auth_rollbacksignup",
-      "lib_appwrite_auth_safenextpath",
-      "lib_appwrite_auth_setsessioncookie",
-      "lib_appwrite_auth_signinwithemail",
-      "lib_appwrite_auth_signout",
-      "lib_appwrite_auth_signupwithemail"
+      "components_auth_register_form_registerform"
     ],
-    "5": [
-      "appwrite",
-      "next",
-      "node_appwrite",
-      "package",
-      "package_dependencies",
-      "package_dependencies_appwrite",
-      "package_dependencies_next",
-      "package_dependencies_node_appwrite",
-      "package_dependencies_react",
-      "package_dependencies_react_dom",
-      "package_name",
-      "package_private",
-      "package_scripts",
-      "package_scripts_build",
-      "package_scripts_dev",
-      "package_scripts_format",
-      "package_scripts_format_check",
-      "package_scripts_lint",
-      "package_scripts_start",
-      "package_version",
-      "react",
-      "react_dom"
+    "15": [
+      "app_auth_verify_email_page",
+      "app_auth_verify_email_page_searchparams",
+      "app_auth_verify_email_page_verifyemailpage"
     ],
-    "6": [
-      "eslint",
-      "eslint_config_next",
-      "eslint_config_prettier",
-      "package_devdependencies",
-      "package_devdependencies_eslint",
-      "package_devdependencies_eslint_config_next",
-      "package_devdependencies_eslint_config_prettier",
-      "package_devdependencies_prettier",
-      "package_devdependencies_tailwindcss",
-      "package_devdependencies_tailwindcss_postcss",
-      "package_devdependencies_types_node",
-      "package_devdependencies_types_react",
-      "package_devdependencies_types_react_dom",
-      "package_devdependencies_typescript",
-      "prettier",
-      "tailwindcss",
-      "tailwindcss_postcss",
-      "types_node",
-      "types_react",
-      "types_react_dom",
-      "typescript"
-    ],
-    "7": [
-      "app_admin_layout",
-      "app_admin_layout_adminlayout",
-      "app_seller_layout",
-      "app_seller_layout_sellerlayout",
-      "lib_appwrite_roles",
-      "lib_appwrite_roles_requirelabel",
-      "lib_appwrite_roles_requireuser",
-      "lib_appwrite_roles_role_labels",
-      "lib_appwrite_roles_rolelabel",
-      "lib_appwrite_roles_userhaslabel"
-    ],
-    "8": [
-      "app_layout",
-      "app_layout_jetbrainsmono",
-      "app_layout_metadata",
-      "app_layout_rootlayout",
-      "app_layout_spacegrotesk"
-    ],
-    "9": [
+    "16": [
       "cursor_mcp",
       "cursor_mcp_mcp_server_shadcn",
       "mcp_command_npx"
     ],
-    "10": [
+    "17": [
       "proxy",
       "proxy_config",
       "proxy_proxy"
     ],
-    "11": [
+    "18": [
       "app_admin_page",
       "app_admin_page_adminpage"
     ],
-    "12": [
+    "19": [
       "app_auth_layout",
       "app_auth_layout_authlayout"
     ],
-    "13": [
+    "20": [
       "app_seller_page",
       "app_seller_page_sellerpage"
     ],
-    "14": [
+    "21": [
       "eslint_config",
       "eslint_config_eslintconfig"
     ],
-    "15": [
+    "22": [
       "next_config",
       "next_config_nextconfig"
     ],
-    "16": [
+    "23": [
       "postcss_config",
       "postcss_config_config"
     ]
   },
   "cohesion": {
-    "0": 0.18768768768768768,
-    "1": 0.06451612903225806,
-    "2": 0.14245014245014245,
-    "3": 0.18461538461538463,
-    "4": 0.14333333333333334,
-    "5": 0.09090909090909091,
-    "6": 0.09523809523809523,
-    "7": 0.3333333333333333,
-    "8": 0.4,
-    "9": 0.6666666666666666,
-    "10": 0.6666666666666666,
-    "11": 1.0,
-    "12": 1.0,
-    "13": 1.0,
-    "14": 1.0,
-    "15": 1.0,
-    "16": 1.0
+    "0": 0.08695652173913043,
+    "1": 0.18768768768768768,
+    "2": 0.1265597147950089,
+    "3": 0.0625,
+    "4": 0.06451612903225806,
+    "5": 0.08,
+    "6": 0.22510822510822512,
+    "7": 0.09090909090909091,
+    "8": 0.21666666666666667,
+    "9": 0.3333333333333333,
+    "10": 0.24444444444444444,
+    "11": 0.4666666666666667,
+    "12": 0.4,
+    "13": 0.5,
+    "14": 0.5,
+    "15": 0.6666666666666666,
+    "16": 0.6666666666666666,
+    "17": 0.6666666666666666,
+    "18": 1.0,
+    "19": 1.0,
+    "20": 1.0,
+    "21": 1.0,
+    "22": 1.0,
+    "23": 1.0
   },
   "gods": [
+    {
+      "id": "lib_utils_cn",
+      "label": "cn()",
+      "degree": 20
+    },
     {
       "id": "tsconfig_compileroptions",
       "label": "compilerOptions",
@@ -308,23 +443,18 @@
       "degree": 15
     },
     {
-      "id": "lib_appwrite_server_createsessionclient",
-      "label": "createSessionClient()",
-      "degree": 10
-    },
-    {
       "id": "scripts_setup_mvp_schema_setupproducts",
       "label": "setupProducts()",
       "degree": 10
     },
     {
-      "id": "scripts_setup_mvp_schema_setupcartitems",
-      "label": "setupCartItems()",
-      "degree": 8
+      "id": "lib_appwrite_server_createsessionclient",
+      "label": "createSessionClient()",
+      "degree": 10
     },
     {
-      "id": "scripts_setup_mvp_schema_setuporders",
-      "label": "setupOrders()",
+      "id": "scripts_setup_mvp_schema_setupcartitems",
+      "label": "setupCartItems()",
       "degree": 8
     }
   ],
@@ -341,6 +471,28 @@
       "why": "inferred connection - not explicitly stated in source; connects across different repos/directories; peripheral node `ResendVerificationForm()` unexpectedly reaches hub `requestEmailVerification()`"
     },
     {
+      "source": "RootLayout()",
+      "target": "cn()",
+      "source_files": [
+        "app/layout.tsx",
+        "lib/utils.ts"
+      ],
+      "confidence": "EXTRACTED",
+      "relation": "calls",
+      "why": "connects across different repos/directories; peripheral node `RootLayout()` unexpectedly reaches hub `cn()`"
+    },
+    {
+      "source": "ProfileForm()",
+      "target": "updateOwnAvatar()",
+      "source_files": [
+        "components/auth/profile-form.tsx",
+        "lib/appwrite/profiles.ts"
+      ],
+      "confidence": "INFERRED",
+      "relation": "indirect_call",
+      "why": "inferred connection - not explicitly stated in source; connects across different repos/directories"
+    },
+    {
       "source": "ProfileForm()",
       "target": "updateOwnProfile()",
       "source_files": [
@@ -349,40 +501,18 @@
       ],
       "confidence": "INFERRED",
       "relation": "indirect_call",
-      "why": "inferred connection - not explicitly stated in source; connects across different repos/directories; peripheral node `ProfileForm()` unexpectedly reaches hub `updateOwnProfile()`"
-    },
-    {
-      "source": "RegisterForm()",
-      "target": "signUpWithEmail()",
-      "source_files": [
-        "components/auth/register-form.tsx",
-        "lib/appwrite/auth.ts"
-      ],
-      "confidence": "INFERRED",
-      "relation": "indirect_call",
       "why": "inferred connection - not explicitly stated in source; connects across different repos/directories"
     },
     {
-      "source": "VerifyEmailPage()",
-      "target": "completeEmailVerification()",
+      "source": "SideNav()",
+      "target": "cn()",
       "source_files": [
-        "app/(auth)/verify-email/page.tsx",
-        "lib/appwrite/recovery.ts"
+        "components/layout/portal-shell.tsx",
+        "lib/utils.ts"
       ],
       "confidence": "EXTRACTED",
       "relation": "calls",
-      "why": "connects across different repos/directories; peripheral node `VerifyEmailPage()` unexpectedly reaches hub `completeEmailVerification()`"
-    },
-    {
-      "source": "ForgotPasswordForm()",
-      "target": "requestPasswordRecovery()",
-      "source_files": [
-        "components/auth/forgot-password-form.tsx",
-        "lib/appwrite/recovery.ts"
-      ],
-      "confidence": "INFERRED",
-      "relation": "indirect_call",
-      "why": "inferred connection - not explicitly stated in source; connects across different repos/directories"
+      "why": "connects across different repos/directories; peripheral node `SideNav()` unexpectedly reaches hub `cn()`"
     }
   ],
   "tokens": {

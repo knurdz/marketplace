@@ -16,7 +16,7 @@ export default async function ResetPasswordPage({
     <div>
       <p className="font-mono text-sm text-accent">$ ./auth --reset</p>
       <h1 className="mt-4 text-3xl font-bold tracking-tight">Reset password</h1>
-      <p className="mt-2 text-sm text-muted">
+      <p className="mt-2 text-sm text-muted-foreground">
         Choose a new password for your account.
       </p>
       <div className="mt-8">
