@@ -6,10 +6,19 @@
 
 import { revalidatePath } from "next/cache";
 import { isPaymentMethod } from "@/lib/types";
-import type { CreateOrderActionState } from "./order-errors";
+import { confirmFreeOrder } from "./free-order";
+import {
+  ORDER_ERROR_CODES,
+  type ConfirmFreeOrderActionState,
+  type CreateOrderActionState,
+  type SubmitBankSlipActionState,
+} from "./order-errors";
 import {
   checkoutContinuationPath,
   createOrder as createOrderImpl,
+  getOwnOrder,
+  getOwnPaymentForOrder,
+  submitBankSlip as submitBankSlipImpl,
 } from "./orders";
 
 function revalidateCheckoutPaths() {
@@ -66,6 +75,118 @@ export async function createOrder(
   };
 }
 
+export async function confirmFreeOrderAction(
+  _prev: ConfirmFreeOrderActionState,
+  formData: FormData,
+): Promise<ConfirmFreeOrderActionState> {
+  const orderId = String(formData.get("orderId") ?? "").trim();
+  if (!orderId) {
+    return { ok: false, error: "Invalid order id." };
+  }
+
+  const order = await getOwnOrder(orderId);
+  if (!order || order.paymentMethod !== "free") {
+    return {
+      ok: false,
+      error: "Order not found.",
+      code: ORDER_ERROR_CODES.NOT_FOUND,
+    };
+  }
+
+  const payment = await getOwnPaymentForOrder(orderId);
+  if (!payment || payment.method !== "free") {
+    return {
+      ok: false,
+      error: "Payment not found.",
+      code: ORDER_ERROR_CODES.NOT_FOUND,
+    };
+  }
+
+  if (payment.status === "paid") {
+    revalidateCheckoutPaths();
+    return {
+      ok: true,
+      orderStatus: order.status,
+      paymentStatus: payment.status,
+    };
+  }
+
+  const confirm = await confirmFreeOrder({ orderId });
+  if (!confirm.ok) {
+    const isNotConfigured = confirm.error.includes("not configured");
+    return {
+      ok: false,
+      error: confirm.error,
+      code: isNotConfigured
+        ? ORDER_ERROR_CODES.CONFIRM_NOT_CONFIGURED
+        : undefined,
+    };
+  }
+
+  const refreshedOrder = await getOwnOrder(orderId);
+  const refreshedPayment = await getOwnPaymentForOrder(orderId);
+
+  if (
+    refreshedPayment?.status === "paid" &&
+    refreshedOrder
+  ) {
+    revalidateCheckoutPaths();
+    return {
+      ok: true,
+      orderStatus: refreshedOrder.status,
+      paymentStatus: refreshedPayment.status,
+    };
+  }
+
+  return {
+    ok: false,
+    pendingConfirmation: true,
+    error:
+      "Confirmation is processing. Refresh in a moment to see your order status.",
+    orderStatus: refreshedOrder?.status ?? order.status,
+    paymentStatus: refreshedPayment?.status ?? payment.status,
+  };
+}
+
+export async function submitBankSlipAction(
+  _prev: SubmitBankSlipActionState,
+  formData: FormData,
+): Promise<SubmitBankSlipActionState> {
+  const orderId = String(formData.get("orderId") ?? "").trim();
+  if (!orderId) {
+    return { ok: false, error: "Invalid order id." };
+  }
+
+  const fileRaw = formData.get("slip");
+  if (!(fileRaw instanceof File) || fileRaw.size === 0) {
+    return {
+      ok: false,
+      error: "Choose a bank slip file to upload.",
+    };
+  }
+
+  const result = await submitBankSlipImpl({ orderId, file: fileRaw });
+
+  if (result.ok) {
+    revalidateCheckoutPaths();
+    return {
+      ok: true,
+      orderStatus: result.orderStatus,
+      paymentStatus: result.paymentStatus,
+    };
+  }
+
+  return {
+    ok: false,
+    error: result.error,
+    code: result.code,
+  };
+}
+
 export { checkoutContinuationPath };
 
-export type { CreateOrderActionState } from "./order-errors";
+export type {
+  ConfirmFreeOrderActionState,
+  CreateOrderActionState,
+  SubmitBankSlipActionState,
+} from "./order-errors";

@@ -59,3 +59,48 @@ export async function getPublicSellerByUserId(
     return null;
   }
 }
+
+/** Bank details for an owned bank-transfer checkout — server-only, never on public seller cards. */
+export type CheckoutSellerBankDetails = {
+  bankAccountName: string | null;
+  bankAccountNumber: string | null;
+  bankName: string | null;
+};
+
+/**
+ * Seller bank account fields for buyer bank-transfer instructions.
+ * Admin client only; call only after verifying the buyer owns a bank_transfer order
+ * for this seller. Returns null when missing, non-approved, or on error.
+ */
+export async function getSellerBankDetailsForCheckout(
+  sellerUserId: string,
+): Promise<CheckoutSellerBankDetails | null> {
+  const trimmed = sellerUserId?.trim();
+  if (!trimmed) return null;
+
+  try {
+    const { tables } = await createAdminClient();
+    const result = await tables.listRows({
+      databaseId: DATABASE_ID,
+      tableId: TABLE_SELLER_PROFILES,
+      queries: [Query.equal("userId", trimmed), Query.limit(1)],
+    });
+
+    const row = result.rows[0];
+    if (!row) return null;
+
+    const record = row as unknown as Record<string, unknown>;
+    const statusRaw = record.status;
+    if (!isSellerStatus(statusRaw) || statusRaw !== "approved") {
+      return null;
+    }
+
+    return {
+      bankAccountName: asNullableString(record.bankAccountName),
+      bankAccountNumber: asNullableString(record.bankAccountNumber),
+      bankName: asNullableString(record.bankName),
+    };
+  } catch {
+    return null;
+  }
+}
