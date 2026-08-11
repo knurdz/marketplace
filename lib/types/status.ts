@@ -102,3 +102,50 @@ export function isReportStatus(value: unknown): value is ReportStatus {
 export function isOrderCancelable(status: OrderStatus): boolean {
   return (ORDER_CANCELABLE_STATUSES as readonly OrderStatus[]).includes(status);
 }
+
+/** Fulfillment track excluding terminal cancel/refund branches. */
+export const ORDER_HAPPY_PATH_STATUSES = [
+  "pending_payment",
+  "payment_review",
+  "paid",
+  "processing",
+  "shipped",
+  "ready_pickup",
+  "completed",
+] as const satisfies readonly OrderStatus[];
+
+export type OrderTimelineStepState = "done" | "current" | "upcoming";
+
+export type OrderTimelineStep = {
+  status: OrderStatus;
+  state: OrderTimelineStepState;
+};
+
+export type OrderTimelineView = {
+  steps: OrderTimelineStep[];
+  terminalOutcome: "cancelled" | "refunded" | null;
+};
+
+const HAPPY_PATH = ORDER_HAPPY_PATH_STATUSES as readonly OrderStatus[];
+
+/** Derive buyer-facing timeline steps from the current order status. */
+export function deriveOrderTimeline(currentStatus: OrderStatus): OrderTimelineView {
+  if (currentStatus === "cancelled" || currentStatus === "refunded") {
+    return {
+      steps: HAPPY_PATH.map((status) => ({ status, state: "upcoming" })),
+      terminalOutcome: currentStatus,
+    };
+  }
+
+  const currentIndex = HAPPY_PATH.indexOf(currentStatus);
+  const idx = currentIndex >= 0 ? currentIndex : 0;
+
+  return {
+    steps: HAPPY_PATH.map((status, index) => ({
+      status,
+      state:
+        index < idx ? "done" : index === idx ? "current" : "upcoming",
+    })),
+    terminalOutcome: null,
+  };
+}

@@ -10,16 +10,16 @@ All documents coding agents should read for Knurdz Marketplace live here (except
 4. **Cursor rules** — [`.cursor/rules/`](../../.cursor/rules/) (quality, security, graphify, MCP, human-git, stack conventions)
 5. **README** — [`../../README.md`](../../README.md)
 6. **Schema** — [`SCHEMA.md`](./SCHEMA.md) _(created by Member 1 in step 1.7)_
-7. **PayHere contract** — [`PAYHERE.md`](./PAYHERE.md) _(interface freeze Member 1 step **1.20**; Function bodies Member 4; checkout UX Member 2)_
+7. **PayHere contract** — [`PAYHERE.md`](./PAYHERE.md) _(interface freeze **1.20**; Function bodies + free confirm + sandbox notes = **Member 1** steps **1.22–1.28**; checkout UX = Member 2)_
 
 ## By member
 
-| Member | Focus           | Guide section                 | Distribution section |
-| ------ | --------------- | ----------------------------- | -------------------- |
-| 1      | Foundation      | Guide §5 · Steps **1.1–1.13** | Member 1             |
-| 2      | Buyer           | Guide §6 · Steps **2.1–2.16** | Member 2             |
-| 3      | Seller          | Guide §7 · Steps **3.1–3.15** | Member 3             |
-| 4      | Admin / PayHere | Guide §8 · Steps **4.1–4.18** | Member 4             |
+| Member | Focus                    | Guide section                 | Distribution section |
+| ------ | ------------------------ | ----------------------------- | -------------------- |
+| 1      | Foundation + **payments** | Guide §5 · Steps **1.1–1.28** | Member 1             |
+| 2      | Buyer (checkout UX)      | Guide §6 · Steps **2.1–2.16** | Member 2             |
+| 3      | Seller                   | Guide §7 · Steps **3.1–3.15** | Member 3             |
+| 4      | Admin / moderation       | Guide §8 · Steps **4.1–4.14** | Member 4             |
 
 ## Non-negotiables
 
