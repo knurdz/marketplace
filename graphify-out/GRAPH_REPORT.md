@@ -1,28 +1,28 @@
 # Graph Report - knurdz-marketplace  (2026-08-11)
 
 ## Corpus Check
-- 146 files · ~56,116 words
+- 153 files · ~59,113 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 1008 nodes · 2562 edges · 46 communities (35 shown, 11 thin omitted)
-- Extraction: 99% EXTRACTED · 1% INFERRED · 0% AMBIGUOUS · INFERRED: 13 edges (avg confidence: 0.8)
+- 1057 nodes · 2750 edges · 55 communities (43 shown, 12 thin omitted)
+- Extraction: 100% EXTRACTED · 0% INFERRED · 0% AMBIGUOUS · INFERRED: 13 edges (avg confidence: 0.8)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `f6b73a38`
+- Built from commit: `50e157f8`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
 ## Community Hubs (Navigation)
-- services/index.ts
+- appwrite/index.ts
 - setup-mvp-schema.mjs
 - auth.ts
 - devDependencies
 - compilerOptions
 - dependencies
 - button.tsx
-- types/payhere.ts
+- reviews.ts
 - Tables (17)
 - components.json
 - Knurdz Marketplace — Member Implementation Guide (Agent Reference)
@@ -38,9 +38,9 @@
 - devDependencies
 - AGENTS.md
 - cart.ts
-- orders.ts
+- order-actions.ts
 - Knurdz Marketplace — Appwrite SCHEMA (frozen)
-- isPaymentMethod
+- orders/page.tsx
 - types/index.ts
 - Notify Function
 - Hash Function
@@ -51,55 +51,64 @@
 - eslint.config.mjs
 - next.config.ts
 - postcss.config.mjs
-- order-display.ts
-- clsx
+- getLoggedInUser
+- services/index.ts
 - scripts
-- free-order.ts
+- orders.ts
+- profiles.ts
+- server.ts
+- appwrite/notifications.ts
 - package.json
+- categories.ts
 - react-dom
 - sonner
 - tailwind-merge
+- platform-settings.ts
+- bank/page.tsx
+- getCart
+- login/page.tsx
+- lucide-react
 
 ## God Nodes (most connected - your core abstractions)
-1. `getLoggedInUser()` - 73 edges
-2. `createSessionClient()` - 50 edges
-3. `hasAppwritePublicConfig()` - 35 edges
-4. `Button()` - 30 edges
+1. `getLoggedInUser()` - 78 edges
+2. `createSessionClient()` - 54 edges
+3. `hasAppwritePublicConfig()` - 42 edges
+4. `Button()` - 32 edges
 5. `cn()` - 29 edges
 6. `createAdminClient()` - 27 edges
 7. `getOwnOrder()` - 24 edges
-8. `getOwnPaymentForOrder()` - 21 edges
-9. `Tables (17)` - 18 edges
-10. `assertRateLimit()` - 17 edges
+8. `assertRateLimit()` - 21 edges
+9. `getOwnPaymentForOrder()` - 21 edges
+10. `getProduct()` - 21 edges
 
 ## Surprising Connections (you probably didn't know these)
 - `RegisterPage()` --calls--> `getLoggedInUser()`  [EXTRACTED]
   app/(auth)/register/page.tsx → lib/appwrite/session.ts
+- `BankSlipUploadForm()` --indirect_call--> `submitBankSlipAction()`  [INFERRED]
+  components/store/bank-slip-upload-form.tsx → lib/services/order-actions.ts
 - `AccountPage()` --calls--> `getLoggedInUser()`  [EXTRACTED]
   app/(auth)/account/page.tsx → lib/appwrite/session.ts
+- `LoginPage()` --calls--> `getLoggedInUser()`  [EXTRACTED]
+  app/(auth)/login/page.tsx → lib/appwrite/session.ts
 - `VerifyEmailPage()` --calls--> `completeEmailVerification()`  [EXTRACTED]
   app/(auth)/verify-email/page.tsx → lib/appwrite/recovery.ts
-- `CategoryPage()` --calls--> `getCategoryBySlug()`  [EXTRACTED]
-  app/(store)/categories/[slug]/page.tsx → lib/services/categories.ts
-- `CategoriesPage()` --calls--> `listCategories()`  [EXTRACTED]
-  app/(store)/categories/page.tsx → lib/services/categories.ts
 
 ## Import Cycles
 - None detected.
 
-## Communities (46 total, 11 thin omitted)
+## Communities (55 total, 12 thin omitted)
 
-### Community 0 - "services/index.ts"
-Cohesion: 0.05
-Nodes (88): AccountPage(), CategoriesPage(), avatarInitial, initialState, ProfileForm(), useActionToasts(), ProductImageGallery(), ProductImageGalleryProps (+80 more)
+### Community 0 - "appwrite/index.ts"
+Cohesion: 0.16
+Nodes (19): ALL_BUCKET_IDS, ALL_TABLE_IDS, AVATAR_MAX_BYTES, BANK_SLIP_MAX_BYTES, BUCKET_AVATARS, BUCKET_BANK_SLIPS, BUCKET_PRODUCT_IMAGES, DATABASE_ID (+11 more)
 
 ### Community 1 - "setup-mvp-schema.mjs"
 Cohesion: 0.18
 Nodes (38): apiKey, client, db, endpoint, ensureBool(), ensureEnum(), ensureFloat(), ensureIndex() (+30 more)
 
 ### Community 2 - "auth.ts"
-Cohesion: 0.07
-Nodes (46): RegisterPage(), SearchParams, SearchParams, VerifyEmailPage(), ForgotPasswordForm(), initialState, initialState, LoginForm() (+38 more)
+Cohesion: 0.06
+Nodes (59): RegisterPage(), SearchParams, SearchParams, VerifyEmailPage(), ForgotPasswordForm(), initialState, initialState, LoginForm() (+51 more)
 
 ### Community 3 - "devDependencies"
 Cohesion: 0.10
@@ -111,15 +120,15 @@ Nodes (28): dom, dom.iterable, esnext, **/*.mts, .next/dev/types/**/*.ts, next-e
 
 ### Community 5 - "dependencies"
 Cohesion: 0.11
-Nodes (19): appwrite, class-variance-authority, lucide-react, next, node-appwrite, dependencies, appwrite, class-variance-authority (+11 more)
+Nodes (19): appwrite, class-variance-authority, clsx, next, node-appwrite, dependencies, appwrite, class-variance-authority (+11 more)
 
 ### Community 6 - "button.tsx"
-Cohesion: 0.05
-Nodes (58): ADMIN_NAV, AdminLayout(), jetbrainsMono, metadata, RootLayout(), spaceGrotesk, SELLER_NAV, SellerLayout() (+50 more)
+Cohesion: 0.07
+Nodes (48): jetbrainsMono, metadata, RootLayout(), spaceGrotesk, StoreLayout(), PortalNavItem, PortalShellProps, SideNav() (+40 more)
 
-### Community 7 - "types/payhere.ts"
-Cohesion: 0.11
-Nodes (24): PayHereCheckoutForm(), PayHereCheckoutFormProps, submitPayHereCheckoutForm(), mapExecutionError(), normalizePayHereOrderId(), requestPayHereCheckout(), Order, FIELD_KEYS (+16 more)
+### Community 7 - "reviews.ts"
+Cohesion: 0.09
+Nodes (32): ProductPage(), ProductPageProps, ProductReviewsPlaceholder(), ProductReviewsPlaceholderProps, SellerInfoCard(), SellerInfoCardProps, TABLE_REVIEWS, createProductReview() (+24 more)
 
 ### Community 8 - "Tables (17)"
 Cohesion: 0.11
@@ -142,8 +151,8 @@ Cohesion: 0.07
 Nodes (27): Change log, Creative & advanced backlog (do not duplicate into MVP lanes), Development phases (team sync), Member 1 — done when, Member 1 — Foundation (must-dos first), Member 2 — Buyer / storefront, Member 2 — verification extras, Member 3 — Seller portal (+19 more)
 
 ### Community 13 - "wishlist.ts"
-Cohesion: 0.10
-Nodes (37): ProductPage(), ProductPageProps, WishlistPage(), ProductReviewsPlaceholder(), issueLabel(), WishlistList(), WishlistListProps, WishlistRemoveButton() (+29 more)
+Cohesion: 0.12
+Nodes (30): issueLabel(), WishlistList(), WishlistListProps, WishlistRemoveButton(), WishlistRemoveButtonProps, WishlistToggleButton(), WishlistToggleButtonProps, hasAppwritePublicConfig() (+22 more)
 
 ### Community 14 - "Knurdz Marketplace"
 Cohesion: 0.20
@@ -169,21 +178,21 @@ Nodes (3): devDependencies, shadcn, shadcn
 Cohesion: 0.13
 Nodes (39): AddToCartButton(), AddToCartButtonProps, CartContents(), CartContentsProps, CartLineRow(), CartLineRowProps, issueLabel(), createSessionClient() (+31 more)
 
-### Community 23 - "orders.ts"
-Cohesion: 0.05
-Nodes (76): LoginPage(), safeNextPath(), CartPage(), CheckoutBankPage(), CheckoutContinuationPageProps, CheckoutContinuationPageProps, CheckoutFreePage(), CheckoutPage() (+68 more)
+### Community 23 - "order-actions.ts"
+Cohesion: 0.10
+Nodes (28): BankSlipUploadFormProps, initialState, CheckoutForm(), CheckoutFormProps, initialState, METHOD_LABELS, FreeOrderConfirmForm(), FreeOrderConfirmFormProps (+20 more)
 
 ### Community 24 - "Knurdz Marketplace — Appwrite SCHEMA (frozen)"
 Cohesion: 0.25
 Nodes (8): Abuse guards (step 1.14), Auth roles (labels), Changelog, Connection, Console match checklist, Knurdz Marketplace — Appwrite SCHEMA (frozen), Status / method enums (canonical), Storage (step 1.8)
 
-### Community 25 - "isPaymentMethod"
-Cohesion: 0.23
-Nodes (13): asBankSlip(), asNullableString(), asNumber(), asOrder(), asOrderItem(), asPayment(), isBankSlipStatus(), isOneOf() (+5 more)
+### Community 25 - "orders/page.tsx"
+Cohesion: 0.31
+Nodes (8): OrdersPage(), asBankSlip(), asNullableString(), asNumber(), asOrder(), asOrderItem(), asPayment(), listOwnOrders()
 
 ### Community 26 - "types/index.ts"
-Cohesion: 0.13
-Nodes (30): BankSlip, Cart, CartItem, CartLine, CartLineIssue, OrderItem, Report, WishlistItem (+22 more)
+Cohesion: 0.05
+Nodes (74): OrderListRow(), OrderListRowProps, OrderTimeline(), OrderTimelineProps, PayHereCheckoutForm(), PayHereCheckoutFormProps, submitPayHereCheckoutForm(), formatOrderStatus() (+66 more)
 
 ### Community 28 - "Notify Function"
 Cohesion: 0.33
@@ -194,52 +203,84 @@ Cohesion: 0.33
 Nodes (6): Hash formula (server-only), Hash Function, Next.js client, Request, Response, Security rules (Member 4 must enforce)
 
 ### Community 30 - "seller-approvals.ts"
-Cohesion: 0.06
-Nodes (57): AdminPage(), formatCount(), formatRevenue(), AdminSellersPage(), formatAppliedAt(), approveInitial, rejectInitial, SellerApprovalRowProps (+49 more)
+Cohesion: 0.05
+Nodes (64): ADMIN_NAV, AdminLayout(), AdminPage(), formatCount(), formatRevenue(), AdminSellersPage(), formatAppliedAt(), SELLER_NAV (+56 more)
 
 ### Community 32 - "Agent reference docs"
 Cohesion: 0.40
 Nodes (5): Agent reference docs, By member, Non-negotiables, Phase 0 status, Read order (every agent session)
 
 ### Community 33 - "products.ts"
-Cohesion: 0.11
-Nodes (31): CategoryPage(), CategoryPageProps, Home(), HomeProps, SearchPage(), SearchPageProps, ProductCatalogFilters(), ProductList() (+23 more)
+Cohesion: 0.12
+Nodes (30): CategoryPage(), CategoryPageProps, Home(), HomeProps, SearchPage(), SearchPageProps, ProductCatalogFilters(), ProductList() (+22 more)
 
-### Community 38 - "order-display.ts"
-Cohesion: 0.26
-Nodes (10): OrderListRow(), OrderListRowProps, OrderTimeline(), OrderTimelineProps, formatOrderStatus(), formatPaymentMethod(), ORDER_STATUS_LABELS, PAYMENT_METHOD_LABELS (+2 more)
+### Community 38 - "getLoggedInUser"
+Cohesion: 0.20
+Nodes (20): CheckoutBankPage(), CheckoutContinuationPageProps, CheckoutFreePage(), PayHereCancelPage(), PayHereCancelPageProps, CheckoutContinuationPageProps, CheckoutPayHerePage(), PayHereReturnPage() (+12 more)
+
+### Community 39 - "services/index.ts"
+Cohesion: 0.21
+Nodes (17): BANK_SLIP_EXTENSIONS, BANK_SLIP_MIME_TYPES, IMAGE_EXTENSIONS, IMAGE_MIME_TYPES, bankSlipPermissions(), extensionOf(), publicImagePermissions(), toInputFile() (+9 more)
 
 ### Community 40 - "scripts"
 Cohesion: 0.22
 Nodes (9): scripts, build, dev, format, format:check, lint, seed, start (+1 more)
 
-### Community 42 - "free-order.ts"
-Cohesion: 0.40
-Nodes (4): normalizeOrderId(), NOT_CONFIGURED, ConfirmFreeOrderRequest, ConfirmFreeOrderResult
+### Community 41 - "orders.ts"
+Cohesion: 0.17
+Nodes (19): CancelOrderResult, CreateOrderActionState, CreateOrderInput, CreateOrderResult, ORDER_ERROR_CODES, OrderErrorCode, SubmitBankSlipInput, SubmitBankSlipResult (+11 more)
+
+### Community 42 - "profiles.ts"
+Cohesion: 0.22
+Nodes (16): AccountPage(), avatarInitial, initialState, ProfileForm(), useActionToasts(), asProfile(), createProfileForUser(), defaultDisplayName() (+8 more)
+
+### Community 43 - "server.ts"
+Cohesion: 0.22
+Nodes (13): WishlistPage(), ProductImageGallery(), ProductImageGalleryProps, getBrowserAccount(), getBrowserClient(), getAppwriteEndpoint(), getAppwriteProjectId(), getAvatarViewUrl() (+5 more)
+
+### Community 44 - "appwrite/notifications.ts"
+Cohesion: 0.31
+Nodes (12): asNotification(), asNullableString(), countOwnUnread(), createNotificationForUser(), getOwnNotificationFeed(), listOwnNotifications(), markAllOwnNotificationsRead(), markOwnNotificationRead() (+4 more)
 
 ### Community 45 - "package.json"
 Cohesion: 0.50
 Nodes (3): name, private, version
 
+### Community 46 - "categories.ts"
+Cohesion: 0.36
+Nodes (7): CategoriesPage(), asCategory(), asNullableString(), asNumber(), getCategoryBySlug(), listCategories(), Category
+
+### Community 50 - "platform-settings.ts"
+Cohesion: 0.44
+Nodes (8): asNullableString(), asPlatformSetting(), getPlatformSetting(), getPlatformSettings(), normalizePlatformSettingKey(), parsePlatformSettingJson(), withSessionTables(), PlatformSetting
+
+### Community 51 - "bank/page.tsx"
+Cohesion: 0.33
+Nodes (5): CheckoutContinuationPageProps, BankSlipUploadForm(), ALL_PLATFORM_SETTING_KEYS, PLATFORM_SETTING_KEYS, PlatformSettingKey
+
+### Community 52 - "getCart"
+Cohesion: 0.60
+Nodes (3): CartPage(), CheckoutPage(), getCart()
+
 ## Knowledge Gaps
-- **297 isolated node(s):** `npx`, `SearchParams`, `SearchParams`, `CategoryPageProps`, `CheckoutContinuationPageProps` (+292 more)
+- **300 isolated node(s):** `npx`, `SearchParams`, `SearchParams`, `CategoryPageProps`, `CheckoutContinuationPageProps` (+295 more)
   These have ≤1 connection - possible missing edges or undocumented components.
-- **11 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
+- **12 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `getLoggedInUser()` connect `orders.ts` to `services/index.ts`, `products.ts`, `auth.ts`, `button.tsx`, `types/payhere.ts`, `free-order.ts`, `wishlist.ts`, `cart.ts`, `seller-approvals.ts`?**
-  _High betweenness centrality (0.045) - this node is a cross-community bridge._
-- **Why does `Button()` connect `button.tsx` to `services/index.ts`, `products.ts`, `types/payhere.ts`, `wishlist.ts`, `error-fallback.tsx`, `cart.ts`, `orders.ts`, `seller-approvals.ts`?**
+- **Why does `getLoggedInUser()` connect `getLoggedInUser` to `appwrite/index.ts`, `auth.ts`, `button.tsx`, `reviews.ts`, `services/index.ts`, `orders.ts`, `profiles.ts`, `server.ts`, `appwrite/notifications.ts`, `wishlist.ts`, `bank/page.tsx`, `getCart`, `login/page.tsx`, `cart.ts`, `order-actions.ts`, `orders/page.tsx`, `types/index.ts`, `seller-approvals.ts`?**
+  _High betweenness centrality (0.046) - this node is a cross-community bridge._
+- **Why does `Button()` connect `button.tsx` to `products.ts`, `getLoggedInUser`, `reviews.ts`, `server.ts`, `wishlist.ts`, `categories.ts`, `error-fallback.tsx`, `getCart`, `cart.ts`, `order-actions.ts`, `orders/page.tsx`, `types/index.ts`, `seller-approvals.ts`?**
   _High betweenness centrality (0.029) - this node is a cross-community bridge._
 - **What connects `npx`, `SearchParams`, `SearchParams` to the rest of the system?**
-  _297 weakly-connected nodes found - possible documentation gaps or missing edges._
-- **Should `services/index.ts` be split into smaller, more focused modules?**
-  _Cohesion score 0.05257985257985258 - nodes in this community are weakly interconnected._
+  _300 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `auth.ts` be split into smaller, more focused modules?**
-  _Cohesion score 0.07049180327868852 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.05639097744360902 - nodes in this community are weakly interconnected._
 - **Should `devDependencies` be split into smaller, more focused modules?**
   _Cohesion score 0.09523809523809523 - nodes in this community are weakly interconnected._
 - **Should `compilerOptions` be split into smaller, more focused modules?**
   _Cohesion score 0.06896551724137931 - nodes in this community are weakly interconnected._
+- **Should `dependencies` be split into smaller, more focused modules?**
+  _Cohesion score 0.10526315789473684 - nodes in this community are weakly interconnected._

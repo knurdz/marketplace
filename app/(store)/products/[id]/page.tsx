@@ -3,15 +3,18 @@ import { notFound } from "next/navigation";
 import { AddToCartButton } from "@/components/store/add-to-cart-button";
 import { ProductImageGallery } from "@/components/store/product-image-gallery";
 import { ProductReviewsPlaceholder } from "@/components/store/product-reviews-placeholder";
+import { ReportListingButton } from "@/components/store/report-listing-button";
 import { SellerInfoCard } from "@/components/store/seller-info-card";
 import { WishlistToggleButton } from "@/components/store/wishlist-toggle-button";
 import { Button } from "@/components/ui/button";
 import { getLoggedInUser } from "@/lib/appwrite/session";
 import {
+  canReviewProduct,
   getProduct,
   getPublicSellerByUserId,
   isProductInOwnWishlist,
   listProductImages,
+  listProductReviews,
 } from "@/lib/services";
 
 type ProductPageProps = {
@@ -23,10 +26,12 @@ export default async function ProductPage({ params }: ProductPageProps) {
   const [product, user] = await Promise.all([getProduct(id), getLoggedInUser()]);
   if (!product) notFound();
 
-  const [images, seller, saved] = await Promise.all([
+  const [images, seller, saved, reviews, reviewEligibility] = await Promise.all([
     listProductImages(product.$id),
     getPublicSellerByUserId(product.sellerId),
     user ? isProductInOwnWishlist(product.$id) : Promise.resolve(false),
+    listProductReviews(product.$id),
+    user ? canReviewProduct(product.$id) : Promise.resolve({ eligible: false }),
   ]);
 
   const priceLabel = product.isFree
@@ -82,6 +87,12 @@ export default async function ProductPage({ params }: ProductPageProps) {
             loginHref={loginHref}
           />
 
+          <ReportListingButton
+            productId={product.$id}
+            isLoggedIn={Boolean(user)}
+            loginHref={loginHref}
+          />
+
           <section aria-labelledby="description-heading" className="mt-8">
             <h2
               id="description-heading"
@@ -97,7 +108,13 @@ export default async function ProductPage({ params }: ProductPageProps) {
       </div>
 
       <SellerInfoCard seller={seller} />
-      <ProductReviewsPlaceholder />
+      <ProductReviewsPlaceholder
+        productId={product.$id}
+        reviews={reviews}
+        canReview={reviewEligibility.eligible}
+        isLoggedIn={Boolean(user)}
+        loginHref={loginHref}
+      />
 
       <p className="mt-12 flex flex-wrap gap-3">
         <Button variant="outline" size="sm" asChild>

@@ -140,7 +140,7 @@
     "semantic_hash": ""
   },
   "app/admin/layout.tsx": {
-    "mtime": 1786461999.5717213,
+    "mtime": 1786463136.8449461,
     "ast_hash": "5bda039a257c909ea1f570087828d065",
     "semantic_hash": ""
   },
@@ -245,13 +245,13 @@
     "semantic_hash": ""
   },
   "lib/types/index.ts": {
-    "mtime": 1786461359.2323668,
-    "ast_hash": "35f51888451cd8c16001a89cc4afb484",
+    "mtime": 1786463657.128617,
+    "ast_hash": "f5c466041f2e9d5e2a64b07537abb7f3",
     "semantic_hash": ""
   },
   "lib/types/models.ts": {
-    "mtime": 1786461359.2353723,
-    "ast_hash": "9ee2b518fd93572ee4fae91089108cc4",
+    "mtime": 1786463657.1305752,
+    "ast_hash": "9a9ad4eb77e96a6acc8c10d7e4659b6b",
     "semantic_hash": ""
   },
   "lib/types/status.ts": {
@@ -260,8 +260,8 @@
     "semantic_hash": ""
   },
   "lib/services/index.ts": {
-    "mtime": 1786461991.0062518,
-    "ast_hash": "5c10c58f9340a8da00a2f0ca34202617",
+    "mtime": 1786463693.0425498,
+    "ast_hash": "d8f6ad8ee7bb5d66928f8ec8ee5d95cf",
     "semantic_hash": ""
   },
   "lib/services/products.ts": {
@@ -285,8 +285,8 @@
     "semantic_hash": ""
   },
   "lib/security/rate-limit.ts": {
-    "mtime": 1786461359.195539,
-    "ast_hash": "5ae0bc87bf7096b959e392d59b7f1ffd",
+    "mtime": 1786463657.1117747,
+    "ast_hash": "512eb07f5341fa3441f99d88d8625e74",
     "semantic_hash": ""
   },
   "package 2.json": {
@@ -465,8 +465,8 @@
     "semantic_hash": ""
   },
   "WORK_DISTRIBUTION.md": {
-    "mtime": 1786462713.8819766,
-    "ast_hash": "9657bdccd44664d906aa0a83bddca874",
+    "mtime": 1786463693.3273442,
+    "ast_hash": "5eceed12b8f90b520745de63e3099d40",
     "semantic_hash": ""
   },
   "docs/agent/INDEX.md": {
@@ -545,8 +545,8 @@
     "semantic_hash": ""
   },
   "app/(store)/products/[id]/page.tsx": {
-    "mtime": 1786461358.9867973,
-    "ast_hash": "f7fc806229745b070061a6e1aca25512",
+    "mtime": 1786463657.0598228,
+    "ast_hash": "67839ac3a61124adb5a6ab5a3c40e037",
     "semantic_hash": ""
   },
   "app/(store)/wishlist/page.tsx": {
@@ -620,8 +620,8 @@
     "semantic_hash": ""
   },
   "components/store/product-reviews-placeholder.tsx": {
-    "mtime": 1786461359.0267475,
-    "ast_hash": "fb9ee43339c7aa4582e8fceb51e51cf9",
+    "mtime": 1786463657.063131,
+    "ast_hash": "7acd7a55c24dc2777118303a05ac7935",
     "semantic_hash": ""
   },
   "components/store/seller-info-card.tsx": {
@@ -710,23 +710,58 @@
     "semantic_hash": ""
   },
   "app/admin/sellers/page.tsx": {
-    "mtime": 1786462055.6476007,
+    "mtime": 1786463136.8475957,
     "ast_hash": "39cc62c245779feaca6bc0d20d1f1071",
     "semantic_hash": ""
   },
   "components/admin/seller-approval-actions.tsx": {
-    "mtime": 1786462055.6415868,
+    "mtime": 1786463136.8485947,
     "ast_hash": "22667232b98cf8e661c09a5ffa670fe3",
     "semantic_hash": ""
   },
   "lib/appwrite/seller-approval-actions.ts": {
-    "mtime": 1786461990.8530762,
-    "ast_hash": "11863d7a163533b3902fcfc10fd477e5",
+    "mtime": 1786463253.6857624,
+    "ast_hash": "8a5c783672a76d3a1398c23123c4ab30",
     "semantic_hash": ""
   },
   "lib/services/seller-approvals.ts": {
-    "mtime": 1786461985.682655,
+    "mtime": 1786463136.919141,
     "ast_hash": "da8bc0de57ddebae92cb680b1ed35ec2",
+    "semantic_hash": ""
+  },
+  "components/store/report-listing-button.tsx": {
+    "mtime": 1786463657.065274,
+    "ast_hash": "2b6f429ae297ad1a25128ddf8d313f9d",
+    "semantic_hash": ""
+  },
+  "lib/services/report-actions.ts": {
+    "mtime": 1786463657.114576,
+    "ast_hash": "e454db264db4a130be7936f018d20d60",
+    "semantic_hash": ""
+  },
+  "lib/services/report-errors.ts": {
+    "mtime": 1786463657.1165538,
+    "ast_hash": "92549d0e6c7aeacef9257ec50319b144",
+    "semantic_hash": ""
+  },
+  "lib/services/reports.ts": {
+    "mtime": 1786463657.118086,
+    "ast_hash": "6525a5570536de446741fbdf175f1f61",
+    "semantic_hash": ""
+  },
+  "lib/services/review-actions.ts": {
+    "mtime": 1786463657.1192584,
+    "ast_hash": "7ad3de6e7d1a0bcf3c2071ef8ba01988",
+    "semantic_hash": ""
+  },
+  "lib/services/review-errors.ts": {
+    "mtime": 1786463657.124041,
+    "ast_hash": "5df7968f7c88807566e53d83ee15ea11",
+    "semantic_hash": ""
+  },
+  "lib/services/reviews.ts": {
+    "mtime": 1786463657.1267428,
+    "ast_hash": "9d40337ac5cbcdfbcb3d1de55456b372",
     "semantic_hash": ""
   }
 }

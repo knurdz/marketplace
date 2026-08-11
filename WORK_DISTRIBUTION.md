@@ -161,10 +161,10 @@ Complete payment infrastructure so Members 2–4 only consume APIs / admin UI.
 - [x] Bank transfer instructions + slip upload → `awaiting_verification`
 - [x] Order placement + tracking timeline + order history
 - [x] Cancel order (allowed states only)
-- [ ] Report listing
+- [x] Report listing
 - [x] Wishlist full page CRUD (dashboard preview → step 2.12)
-- [ ] Product reviews & ratings (after completed order)
-- [ ] Seller ratings (from buyer after order; distinct from product review if schema allows)
+- [x] Product reviews & ratings (after completed order)
+- [x] Seller ratings (from buyer after order; distinct from product review if schema allows)
 - [ ] Trending / recently viewed (optional — Phase 5)
 - [ ] One-click reorder (optional — Phase 5)
 
@@ -185,13 +185,13 @@ Complete payment infrastructure so Members 2–4 only consume APIs / admin UI.
 | [x] **2.11** | Cancel           | Early statuses only                                      | Enum rules enforced           |
 | [ ] **2.12** | Buyer dashboard  | Summaries + recent + wishlist preview                    | Empty states OK               |
 | [x] **2.13** | Wishlist         | Full page CRUD                                           | Own wishlist only             |
-| [ ] **2.14** | Reviews          | After `completed`; product + seller rating               | Policy enforced               |
-| [ ] **2.15** | Report listing   | Create `reports`                                         | Feeds admin queue             |
+| [x] **2.14** | Reviews          | After `completed`; product + seller rating               | Policy enforced               |
+| [x] **2.15** | Report listing   | Create `reports`                                         | Feeds admin queue             |
 | [ ] **2.16** | Optional Phase 5 | Trending / recently viewed / reorder                     | After MVP E2E                 |
 
 ### Member 2 — verification extras
 
-- [ ] Guest vs logged-in behavior is intentional and safe
+- [x] Guest vs logged-in behavior is intentional and safe
 - [x] Cannot pay or view another user’s orders
 - [x] Free path never hits PayHere with a forged amount
 - [x] Filters/sort do not leak non-`active` listings
@@ -365,4 +365,5 @@ Pick up only after Phases 1–4 are solid. Assign when claimed.
 | 2026-08-11 | Member 2 steps **2.5–2.6**: checkout shell + atomic `createOrder` (`orders` / `order_items` / `payments`); continuation stubs for 2.7–2.9 |
 | 2026-08-11 | Member 2 steps **2.7–2.8**: free confirm stub (`confirmFreeOrder`) + bank slip upload → `awaiting_verification`; graphify update pending CLI |
 | 2026-08-11 | Member 2 step **2.9**: PayHere checkout POST via `requestPayHereCheckout`; return/cancel pages poll DB only (2s / 60s); graceful error when hash Function not deployed |
+| 2026-08-11 | Member 2 steps **2.14–2.15**: product reviews (completed-order eligibility + `order_buyer_unique`) + report listing create (`status=open`); no admin moderation UI |
 | 2026-08-11 | Member 4 step **4.2**: seller approval queue (`/admin/sellers`); approve merges Auth `seller` label + `seller_profiles.status=approved` with audit; reject + reason; unblocks Member 3 real `/seller` access once applicants are approved |
