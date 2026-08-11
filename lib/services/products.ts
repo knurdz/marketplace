@@ -100,6 +100,55 @@ export async function listActiveProducts(opts?: {
   }
 }
 
+/** Normalize search query: trim, collapse whitespace, cap length. Empty → null. */
+export function normalizeProductSearchQuery(
+  raw: string | null | undefined,
+): string | null {
+  if (raw == null) return null;
+  const normalized = raw.trim().replace(/\s+/g, " ").slice(0, 64);
+  return normalized.length > 0 ? normalized : null;
+}
+
+/**
+ * Fulltext search active, available products by `title`.
+ * Empty/whitespace query returns [] (never dumps the full catalog).
+ * Requires `title_fulltext` index (setup-mvp-schema).
+ */
+export async function searchActiveProducts(
+  query: string,
+  opts?: { limit?: number },
+): Promise<Product[]> {
+  const normalized = normalizeProductSearchQuery(query);
+  if (!normalized || !hasAppwritePublicConfig()) return [];
+
+  const limit = Math.min(Math.max(opts?.limit ?? 24, 1), 48);
+
+  try {
+    const { tables } = await createPublicClient();
+    const result = await tables.listRows({
+      databaseId: DATABASE_ID,
+      tableId: TABLE_PRODUCTS,
+      queries: [
+        Query.search("title", normalized),
+        Query.equal("status", ACTIVE_PRODUCT_STATUS),
+        Query.equal("available", true),
+        Query.limit(limit),
+      ],
+    });
+
+    const products: Product[] = [];
+    for (const row of result.rows) {
+      const product = asProduct(row as unknown as Record<string, unknown>);
+      if (product && isPubliclyListed(product)) {
+        products.push(product);
+      }
+    }
+    return products;
+  } catch {
+    return [];
+  }
+}
+
 /**
  * Public product by id. Returns null if missing or not publicly listed
  * (avoids leaking draft/pending/rejected/archived listings).

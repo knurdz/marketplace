@@ -68,6 +68,15 @@ async function ensureTable(tableId, name, permissions, rowSecurity) {
   }
 }
 
+function isIdempotentColumnError(e) {
+  const msg = String(e?.message || e);
+  return (
+    msg.includes("already exists") ||
+    e?.type === "column_limit_exceeded" ||
+    msg.includes("column_limit_exceeded")
+  );
+}
+
 async function ensureString(tableId, key, size, required, opts = {}) {
   try {
     await db.createStringColumn({
@@ -80,7 +89,7 @@ async function ensureString(tableId, key, size, required, opts = {}) {
     });
     console.log(`  + string ${tableId}.${key}`);
   } catch (e) {
-    if (String(e?.message || e).includes("already exists")) return;
+    if (isIdempotentColumnError(e)) return;
     throw e;
   }
 }
@@ -97,7 +106,7 @@ async function ensureEnum(tableId, key, elements, required, opts = {}) {
     });
     console.log(`  + enum ${tableId}.${key}`);
   } catch (e) {
-    if (String(e?.message || e).includes("already exists")) return;
+    if (isIdempotentColumnError(e)) return;
     throw e;
   }
 }
@@ -113,7 +122,7 @@ async function ensureFloat(tableId, key, required, opts = {}) {
     });
     console.log(`  + float ${tableId}.${key}`);
   } catch (e) {
-    if (String(e?.message || e).includes("already exists")) return;
+    if (isIdempotentColumnError(e)) return;
     throw e;
   }
 }
@@ -129,7 +138,7 @@ async function ensureInt(tableId, key, required, opts = {}) {
     });
     console.log(`  + integer ${tableId}.${key}`);
   } catch (e) {
-    if (String(e?.message || e).includes("already exists")) return;
+    if (isIdempotentColumnError(e)) return;
     throw e;
   }
 }
@@ -145,7 +154,7 @@ async function ensureBool(tableId, key, required, opts = {}) {
     });
     console.log(`  + boolean ${tableId}.${key}`);
   } catch (e) {
-    if (String(e?.message || e).includes("already exists")) return;
+    if (isIdempotentColumnError(e)) return;
     throw e;
   }
 }
@@ -287,6 +296,9 @@ async function setupProducts() {
     "categoryId",
   ]);
   await ensureIndex("products", "price_idx", TablesDBIndexType.Key, ["price"]);
+  await ensureIndex("products", "title_fulltext", TablesDBIndexType.Fulltext, [
+    "title",
+  ]);
 }
 
 async function setupProductImages() {
