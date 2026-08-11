@@ -262,7 +262,7 @@ Complete payment infrastructure so Members 2–4 only consume APIs / admin UI.
 - [x] Seller approval queue (approve/reject + reason)
 - [ ] User management: view, ban/suspend, role tools
 - [ ] Monitor seller performance (basic metrics)
-- [ ] Listing moderation (approve/reject/remove inappropriate)
+- [x] Listing moderation (approve/reject/remove inappropriate)
 - [ ] Categories CRUD
 - [ ] All-orders oversight + payment filters
 - [ ] Dispute handling (orders flagged by buyers/sellers)
@@ -285,7 +285,7 @@ Complete payment infrastructure so Members 2–4 only consume APIs / admin UI.
 | [x] **4.1**  | Admin metrics           | Users, sellers, orders, revenue           | Admin-only                  |
 | [x] **4.2**  | Seller approval         | Approve → `seller` label; reject + reason | Audit logged                |
 | [ ] **4.3**  | User management         | View, suspend; block checkout/publish     | Server-side enforcement     |
-| [ ] **4.4**  | Listing moderation      | Approve/reject/remove                     | Status enums only           |
+| [x] **4.4**  | Listing moderation      | Approve/reject/remove                     | Status enums only           |
 | [ ] **4.5**  | Categories CRUD         | Create/update/order                       | Storefront reads them       |
 | [ ] **4.6**  | All orders + filters    | By payment method/status                  | Admin access only           |
 | [ ] **4.7**  | Bank slip queue         | Approve → `paid` + stock; reject          | Idempotent; audit           |
@@ -368,3 +368,4 @@ Pick up only after Phases 1–4 are solid. Assign when claimed.
 | 2026-08-11 | Member 2 step **2.9**: PayHere checkout POST via `requestPayHereCheckout`; return/cancel pages poll DB only (2s / 60s); graceful error when hash Function not deployed |
 | 2026-08-11 | Member 2 steps **2.14–2.15**: product reviews (completed-order eligibility + `order_buyer_unique`) + report listing create (`status=open`); no admin moderation UI |
 | 2026-08-11 | Member 4 step **4.2**: seller approval queue (`/admin/sellers`); approve merges Auth `seller` label + `seller_profiles.status=approved` with audit; reject + reason; unblocks Member 3 real `/seller` access once applicants are approved |
+| 2026-08-11 | Member 4 step **4.4**: listing moderation (`/admin/listings`); approve `pending_review`→`active`, reject→`rejected` (reason in audit meta), remove `active`→`archived`; admin SDK + status enums only; no product hard-delete |

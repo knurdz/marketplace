@@ -55,6 +55,10 @@ export {
   listPendingSellerApplications,
   maskBankAccountNumber,
 } from "./seller-approvals";
+export {
+  listPendingModerationQueue,
+  listProductsByStatus,
+} from "./listing-moderation";
 export type {
   AdminSellerApplication,
   SellerApprovalResult,
