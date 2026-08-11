@@ -46,11 +46,27 @@ export function ProfileForm({
   useActionToasts(state);
   useActionToasts(avatarState);
 
+  const profileError = Boolean(state.error);
+  const avatarError = Boolean(avatarState.error);
+  const profileErrorId = "profile-form-error";
+  const avatarErrorId = "avatar-form-error";
+
   return (
     <div className="mt-8 space-y-10">
       <form action={avatarAction} className="space-y-5">
         <p className="font-mono text-sm text-accent">$ ./profile --avatar</p>
         <h2 className="text-xl font-bold tracking-tight">Avatar</h2>
+
+        {avatarState.error ? (
+          <p
+            id={avatarErrorId}
+            role="alert"
+            aria-live="polite"
+            className="rounded-md border border-border bg-card px-3 py-2 font-mono text-sm text-accent-bright"
+          >
+            {avatarState.error}
+          </p>
+        ) : null}
 
         <div className="flex items-center gap-4">
           {avatarPreviewUrl ? (
@@ -80,6 +96,8 @@ export function ProfileForm({
               type="file"
               accept="image/jpeg,image/png,image/webp,.jpg,.jpeg,.png,.webp"
               required
+              aria-invalid={avatarError || undefined}
+              aria-describedby={avatarError ? avatarErrorId : undefined}
               className="block w-full text-sm text-muted-foreground file:mr-3 file:rounded-md file:border file:border-border file:bg-card file:px-3 file:py-1.5 file:text-foreground"
             />
           </div>
@@ -98,6 +116,17 @@ export function ProfileForm({
         <p className="font-mono text-sm text-accent">$ ./profile --update</p>
         <h2 className="text-xl font-bold tracking-tight">Profile</h2>
 
+        {state.error ? (
+          <p
+            id={profileErrorId}
+            role="alert"
+            aria-live="polite"
+            className="rounded-md border border-border bg-card px-3 py-2 font-mono text-sm text-accent-bright"
+          >
+            {state.error}
+          </p>
+        ) : null}
+
         <div className="space-y-2">
           <label htmlFor="displayName" className="block text-sm text-muted-foreground">
             Display name
@@ -109,6 +138,8 @@ export function ProfileForm({
             required
             maxLength={128}
             defaultValue={profile.displayName}
+            aria-invalid={profileError || undefined}
+            aria-describedby={profileError ? profileErrorId : undefined}
             className="w-full rounded-md border border-border bg-card px-3 py-2.5 text-foreground outline-none ring-accent focus:ring-2"
           />
         </div>
@@ -123,6 +154,8 @@ export function ProfileForm({
             type="tel"
             maxLength={32}
             defaultValue={profile.phone ?? ""}
+            aria-invalid={profileError || undefined}
+            aria-describedby={profileError ? profileErrorId : undefined}
             className="w-full rounded-md border border-border bg-card px-3 py-2.5 text-foreground outline-none ring-accent focus:ring-2"
           />
         </div>
@@ -137,6 +170,8 @@ export function ProfileForm({
             rows={3}
             maxLength={1000}
             defaultValue={profile.bio ?? ""}
+            aria-invalid={profileError || undefined}
+            aria-describedby={profileError ? profileErrorId : undefined}
             className="w-full rounded-md border border-border bg-card px-3 py-2.5 text-foreground outline-none ring-accent focus:ring-2"
           />
         </div>

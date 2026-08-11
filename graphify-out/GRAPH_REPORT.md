@@ -4,12 +4,12 @@
 - cluster-only mode — file stats not available
 
 ## Summary
-- 529 nodes · 845 edges · 40 communities (28 shown, 12 thin omitted)
+- 531 nodes · 851 edges · 40 communities (28 shown, 12 thin omitted)
 - Extraction: 100% EXTRACTED · 0% INFERRED · 0% AMBIGUOUS · INFERRED: 1 edges (avg confidence: 0.8)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `19e79bda`
+- Built from commit: `7c957279`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -20,13 +20,13 @@
 - devDependencies
 - compilerOptions
 - dependencies
+- portal-shell.tsx
 - status.ts
 - profiles.ts
 - components.json
 - cn
 - seed-demo.mjs
 - models.ts
-- portal-shell.tsx
 - products.ts
 - storage.ts
 - notifications.ts
@@ -40,9 +40,9 @@
 - roles.ts
 - page.tsx
 - page.tsx
-- layout.tsx
 - keys.ts
 - page.tsx
+- store-footer.tsx
 - badge.tsx
 - shadcn
 - proxy.ts
@@ -103,33 +103,33 @@ Nodes (30): ./*, dom, dom.iterable, esnext, **/*.mts, .next/dev/types/**/*.ts, n
 Cohesion: 0.07
 Nodes (29): appwrite, class-variance-authority, clsx, lucide-react, next, node-appwrite, devDependencies, shadcn (+21 more)
 
-### Community 6 - "status.ts"
+### Community 6 - "portal-shell.tsx"
+Cohesion: 0.11
+Nodes (10): ADMIN_NAV, SELLER_NAV, PortalNavItem, PortalShell(), PortalShellProps, SkipToContent(), StoreNavbar(), StoreNavbarProps (+2 more)
+
+### Community 7 - "status.ts"
 Cohesion: 0.10
 Nodes (23): BANK_SLIP_STATUSES, BankSlipStatus, isBankSlipStatus(), isOneOf(), isOrderStatus(), isPaymentMethod(), isPaymentStatus(), isProductStatus() (+15 more)
 
-### Community 7 - "profiles.ts"
-Cohesion: 0.14
+### Community 8 - "profiles.ts"
+Cohesion: 0.15
 Nodes (18): AccountPage(), avatarInitial, initialState, ProfileForm(), useActionToasts(), asProfile(), createProfileForUser(), defaultDisplayName() (+10 more)
 
-### Community 8 - "components.json"
+### Community 9 - "components.json"
 Cohesion: 0.09
 Nodes (21): aliases, components, hooks, lib, ui, utils, iconLibrary, menuAccent (+13 more)
 
-### Community 9 - "cn"
+### Community 10 - "cn"
 Cohesion: 0.17
 Nodes (12): Button(), buttonVariants, Input(), Label(), Separator(), SheetContent(), SheetDescription(), SheetFooter() (+4 more)
 
-### Community 10 - "seed-demo.mjs"
+### Community 11 - "seed-demo.mjs"
 Cohesion: 0.18
 Nodes (20): apiKey, CATEGORIES, client, db, DEMO_USERS, endpoint, ensureBuyerWelcomeNotification(), ensureCategory() (+12 more)
 
-### Community 11 - "models.ts"
+### Community 12 - "models.ts"
 Cohesion: 0.14
 Nodes (17): asNullableString(), asPlatformSetting(), getPlatformSetting(), getPlatformSettings(), normalizePlatformSettingKey(), withSessionTables(), BankSlip, Category (+9 more)
-
-### Community 12 - "portal-shell.tsx"
-Cohesion: 0.13
-Nodes (8): ADMIN_NAV, SELLER_NAV, PortalNavItem, PortalShell(), PortalShellProps, StoreNavbarProps, formatRelative(), NotificationBell()
 
 ### Community 13 - "products.ts"
 Cohesion: 0.23
@@ -167,7 +167,7 @@ Nodes (3): SearchParams, initialState, ResetPasswordForm()
 Cohesion: 0.47
 Nodes (5): requireLabel(), requireUser(), ROLE_LABELS, RoleLabel, userHasLabel()
 
-### Community 28 - "keys.ts"
+### Community 27 - "keys.ts"
 Cohesion: 0.50
 Nodes (3): ALL_PLATFORM_SETTING_KEYS, PLATFORM_SETTING_KEYS, PlatformSettingKey
 

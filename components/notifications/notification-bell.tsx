@@ -91,8 +91,8 @@ export function NotificationBell({ className }: { className?: string }) {
         <Button
           type="button"
           variant="ghost"
-          size="icon-sm"
-          className={cn("relative", className)}
+          size="icon"
+          className={cn("relative size-10", className)}
           aria-label={
             unread > 0
               ? `Notifications, ${unread} unread`

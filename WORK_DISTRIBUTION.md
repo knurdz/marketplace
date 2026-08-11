@@ -100,6 +100,7 @@ Use after every change that touches code or schema:
 | [x] **1.18** | Toasts + errors + loading     | Sonner toasts, segment error.tsx / loading.tsx, profile-form sample  | Toast on profile save; error/loading UI present       |
 | [x] **1.19** | Platform settings reader      | `getPlatformSetting(s)` + seeded MVP keys                            | Signed-in read; guest → null; unknown key → null      |
 | [x] **1.20** | PayHere Function interfaces   | `PAYHERE.md` + types + `requestPayHereCheckout` stub (no secrets)    | Contract frozen; missing Function → typed error       |
+| [x] **1.21** | A11y / responsive baseline    | Skip link, reduced motion, landmarks, touch targets, form alerts     | Skip→#main-content; login/profile errors wired        |
 
 - [x] In-app notifications collection + badge hook/UI (polling OK for MVP; realtime later)
 - [x] Global product search helper
@@ -109,7 +110,7 @@ Use after every change that touches code or schema:
 - [x] Platform settings read helper
 - [ ] Schema changelog when others request fields
 - [x] Coordinate PayHere Function interfaces with Member 4
-- [ ] Accessibility / responsive baseline pass
+- [x] Accessibility / responsive baseline pass
 - [ ] Fix cross-member integration issues; keep API contracts consistent
 
 ### Member 1 — done when

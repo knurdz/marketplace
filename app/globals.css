@@ -175,6 +175,7 @@
 
 html {
   color-scheme: dark;
+  overflow-x: clip;
 }
 
 html.light,
@@ -190,8 +191,20 @@ html[data-theme="light"] {
     @apply bg-background text-foreground antialiased;
     font-family: var(--font-sans);
     min-height: 100vh;
+    overflow-x: clip;
   }
   html {
     @apply font-sans;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
   }
 }
