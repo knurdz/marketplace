@@ -27,7 +27,7 @@ function NavLinks({
   className?: string;
 }) {
   return (
-    <nav className={className}>
+    <nav aria-label="Store" className={className}>
       <Link
         href="/"
         className="text-sm text-muted-foreground transition hover:text-foreground"
@@ -103,7 +103,7 @@ export function StoreNavbar({ user }: StoreNavbarProps) {
         <div className="hidden items-center gap-2 md:flex">
           {user ? (
             <>
-              <NotificationBell />
+              <NotificationBell className="size-10" />
               <Button variant="outline" size="sm" asChild>
                 <Link href="/account">Account</Link>
               </Button>
@@ -126,12 +126,13 @@ export function StoreNavbar({ user }: StoreNavbarProps) {
         </div>
 
         <div className="flex items-center gap-2 md:hidden">
-          {user ? <NotificationBell /> : null}
+          {user ? <NotificationBell className="size-10" /> : null}
           <Sheet>
             <SheetTrigger asChild>
               <Button
                 variant="outline"
-                size="icon-sm"
+                size="icon"
+                className="size-10"
                 aria-label="Open menu"
               >
                 <Menu />
