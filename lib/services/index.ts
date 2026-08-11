@@ -14,6 +14,25 @@ export {
   searchActiveProducts,
 } from "./products";
 export {
+  asCart,
+  asCartItem,
+  getCart,
+  getCartItemCount,
+  getOrCreateCart,
+} from "./cart";
+export {
+  CART_ERROR_CODES,
+  type CartActionState,
+  type CartErrorCode,
+} from "./cart-errors";
+export {
+  addToCart,
+  clearCart,
+  clearCartAndAdd,
+  removeCartItem,
+  updateCartItemQuantity,
+} from "./cart-actions";
+export {
   getPublicSellerByUserId,
 } from "./sellers";
 export type { PublicSellerInfo } from "./sellers";

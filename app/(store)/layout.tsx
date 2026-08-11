@@ -3,6 +3,7 @@ import { SkipToContent } from "@/components/layout/skip-to-content";
 import { StoreFooter } from "@/components/layout/store-footer";
 import { StoreNavbar } from "@/components/layout/store-navbar";
 import { getLoggedInUser } from "@/lib/appwrite/session";
+import { getCartItemCount } from "@/lib/services";
 
 export default async function StoreLayout({
   children,
@@ -10,11 +11,12 @@ export default async function StoreLayout({
   children: ReactNode;
 }) {
   const user = await getLoggedInUser();
+  const cartItemCount = user ? await getCartItemCount() : 0;
 
   return (
     <div className="flex min-h-screen flex-col bg-background text-foreground">
       <SkipToContent />
-      <StoreNavbar user={user} />
+      <StoreNavbar user={user} cartItemCount={cartItemCount} />
       <div
         id="main-content"
         tabIndex={-1}

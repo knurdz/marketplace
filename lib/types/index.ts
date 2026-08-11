@@ -1,5 +1,10 @@
 export type {
   BankSlip,
+  Cart,
+  CartItem,
+  CartLine,
+  CartLineIssue,
+  CartView,
   Category,
   Notification,
   Order,

@@ -1,9 +1,11 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { AddToCartButton } from "@/components/store/add-to-cart-button";
 import { ProductImageGallery } from "@/components/store/product-image-gallery";
 import { ProductReviewsPlaceholder } from "@/components/store/product-reviews-placeholder";
 import { SellerInfoCard } from "@/components/store/seller-info-card";
 import { Button } from "@/components/ui/button";
+import { getLoggedInUser } from "@/lib/appwrite/session";
 import {
   getProduct,
   getPublicSellerByUserId,
@@ -16,7 +18,7 @@ type ProductPageProps = {
 
 export default async function ProductPage({ params }: ProductPageProps) {
   const { id } = await params;
-  const product = await getProduct(id);
+  const [product, user] = await Promise.all([getProduct(id), getLoggedInUser()]);
   if (!product) notFound();
 
   const [images, seller] = await Promise.all([
@@ -27,6 +29,9 @@ export default async function ProductPage({ params }: ProductPageProps) {
   const priceLabel = product.isFree
     ? "free"
     : `${product.currency} ${product.price.toFixed(2)}`;
+
+  const canBuy = product.available && product.stock > 0;
+  const loginHref = `/login?next=${encodeURIComponent(`/products/${product.$id}`)}`;
 
   return (
     <main className="relative mx-auto w-full max-w-5xl px-6 py-16 sm:px-10">
@@ -49,6 +54,21 @@ export default async function ProductPage({ params }: ProductPageProps) {
           ) : (
             <p className="mt-2 font-mono text-xs text-muted-foreground">
               Out of stock
+            </p>
+          )}
+
+          {canBuy ? (
+            <AddToCartButton
+              productId={product.$id}
+              maxStock={product.stock}
+              isLoggedIn={Boolean(user)}
+              loginHref={loginHref}
+            />
+          ) : (
+            <p className="mt-8 text-sm text-muted-foreground">
+              {!product.available
+                ? "This item is currently unavailable."
+                : "Out of stock — check back later."}
             </p>
           )}
 
