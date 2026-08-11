@@ -67,6 +67,14 @@ export type SubmitBankSlipActionState = {
   paymentStatus?: PaymentStatus;
 };
 
+export type PollPayHerePaymentStatusActionState = {
+  ok?: boolean;
+  error?: string;
+  code?: OrderErrorCode;
+  orderStatus?: OrderStatus;
+  paymentStatus?: PaymentStatus;
+};
+
 export type SubmitBankSlipInput = {
   orderId: string;
   file: File;
