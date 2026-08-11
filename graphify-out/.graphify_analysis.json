@@ -25,12 +25,16 @@
     ],
     "1": [
       "ref",
+      "ref_dom",
+      "ref_dom_iterable",
+      "ref_esnext",
       "tsconfig_compileroptions",
       "tsconfig_compileroptions_allowjs",
       "tsconfig_compileroptions_esmoduleinterop",
       "tsconfig_compileroptions_incremental",
       "tsconfig_compileroptions_isolatedmodules",
       "tsconfig_compileroptions_jsx",
+      "tsconfig_compileroptions_lib",
       "tsconfig_compileroptions_module",
       "tsconfig_compileroptions_moduleresolution",
       "tsconfig_compileroptions_noemit",
@@ -43,19 +47,49 @@
       "tsconfig_paths"
     ],
     "2": [
+      "app_page",
+      "app_page_home",
+      "lib_appwrite_browser",
+      "lib_appwrite_browser_getbrowseraccount",
+      "lib_appwrite_browser_getbrowserclient",
+      "lib_appwrite_config",
+      "lib_appwrite_config_getappwriteendpoint",
+      "lib_appwrite_config_getappwriteprojectid",
+      "lib_appwrite_config_hasappwritepublicconfig",
+      "lib_appwrite_index",
+      "lib_appwrite_server",
+      "lib_appwrite_server_createadminclient",
+      "lib_appwrite_server_createsessionclient",
+      "lib_appwrite_session",
+      "lib_appwrite_session_getloggedinuser"
+    ],
+    "3": [
+      "appwrite",
       "next",
-      "package",
+      "node_appwrite",
       "package_dependencies",
+      "package_dependencies_appwrite",
       "package_dependencies_next",
+      "package_dependencies_node_appwrite",
       "package_dependencies_react",
       "package_dependencies_react_dom",
-      "package_name",
-      "package_private",
-      "package_version",
       "react",
       "react_dom"
     ],
-    "3": [
+    "4": [
+      "package",
+      "package_name",
+      "package_private",
+      "package_scripts",
+      "package_scripts_build",
+      "package_scripts_dev",
+      "package_scripts_format",
+      "package_scripts_format_check",
+      "package_scripts_lint",
+      "package_scripts_start",
+      "package_version"
+    ],
+    "5": [
       "ref_mts",
       "ref_next_dev_types_ts",
       "ref_next_env_d_ts",
@@ -67,27 +101,12 @@
       "tsconfig_exclude",
       "tsconfig_include"
     ],
-    "4": [
-      "package_scripts",
-      "package_scripts_build",
-      "package_scripts_dev",
-      "package_scripts_format",
-      "package_scripts_format_check",
-      "package_scripts_lint",
-      "package_scripts_start"
-    ],
-    "5": [
+    "6": [
       "app_layout",
       "app_layout_jetbrainsmono",
       "app_layout_metadata",
       "app_layout_rootlayout",
       "app_layout_spacegrotesk"
-    ],
-    "6": [
-      "ref_dom",
-      "ref_dom_iterable",
-      "ref_esnext",
-      "tsconfig_compileroptions_lib"
     ],
     "7": [
       "cursor_mcp",
@@ -95,35 +114,30 @@
       "mcp_command_npx"
     ],
     "8": [
-      "app_page",
-      "app_page_home"
-    ],
-    "9": [
       "eslint_config",
       "eslint_config_eslintconfig"
     ],
-    "10": [
+    "9": [
       "next_config",
       "next_config_nextconfig"
     ],
-    "11": [
+    "10": [
       "postcss_config",
       "postcss_config_config"
     ]
   },
   "cohesion": {
     "0": 0.09523809523809523,
-    "1": 0.11764705882352941,
-    "2": 0.18181818181818182,
-    "3": 0.2,
-    "4": 0.2857142857142857,
-    "5": 0.4,
-    "6": 0.5,
+    "1": 0.09523809523809523,
+    "2": 0.4095238095238095,
+    "3": 0.18181818181818182,
+    "4": 0.18181818181818182,
+    "5": 0.2,
+    "6": 0.4,
     "7": 0.6666666666666666,
     "8": 1.0,
     "9": 1.0,
-    "10": 1.0,
-    "11": 1.0
+    "10": 1.0
   },
   "gods": [
     {
@@ -132,14 +146,39 @@
       "degree": 16
     },
     {
+      "id": "tsconfig_include",
+      "label": "include",
+      "degree": 7
+    },
+    {
+      "id": "lib_appwrite_config_getappwriteendpoint",
+      "label": "getAppwriteEndpoint()",
+      "degree": 7
+    },
+    {
+      "id": "lib_appwrite_config_getappwriteprojectid",
+      "label": "getAppwriteProjectId()",
+      "degree": 7
+    },
+    {
       "id": "package_scripts",
       "label": "scripts",
       "degree": 7
     },
     {
-      "id": "tsconfig_include",
-      "label": "include",
-      "degree": 7
+      "id": "lib_appwrite_server_createsessionclient",
+      "label": "createSessionClient()",
+      "degree": 6
+    },
+    {
+      "id": "lib_appwrite_session_getloggedinuser",
+      "label": "getLoggedInUser()",
+      "degree": 6
+    },
+    {
+      "id": "lib_appwrite_browser_getbrowserclient",
+      "label": "getBrowserClient()",
+      "degree": 5
     },
     {
       "id": "tsconfig_compileroptions_lib",
@@ -147,37 +186,68 @@
       "degree": 4
     },
     {
-      "id": "cursor_mcp_mcp_server_shadcn",
-      "label": "shadcn",
-      "degree": 2
-    },
-    {
-      "id": "package_dependencies_next",
-      "label": "next",
-      "degree": 2
-    },
-    {
-      "id": "package_dependencies_react",
-      "label": "react",
-      "degree": 2
-    },
-    {
-      "id": "package_dependencies_react_dom",
-      "label": "react-dom",
-      "degree": 2
-    },
-    {
-      "id": "package_devdependencies_tailwindcss_postcss",
-      "label": "@tailwindcss/postcss",
-      "degree": 2
-    },
-    {
-      "id": "package_devdependencies_types_node",
-      "label": "@types/node",
-      "degree": 2
+      "id": "lib_appwrite_config_hasappwritepublicconfig",
+      "label": "hasAppwritePublicConfig()",
+      "degree": 4
     }
   ],
-  "surprises": [],
+  "surprises": [
+    {
+      "source": "Home()",
+      "target": "getLoggedInUser()",
+      "source_files": [
+        "app/page.tsx",
+        "lib/appwrite/session.ts"
+      ],
+      "confidence": "EXTRACTED",
+      "relation": "calls",
+      "why": "connects across different repos/directories; peripheral node `Home()` unexpectedly reaches hub `getLoggedInUser()`"
+    },
+    {
+      "source": "getBrowserClient()",
+      "target": "getAppwriteEndpoint()",
+      "source_files": [
+        "lib/appwrite/browser.ts",
+        "lib/appwrite/config.ts"
+      ],
+      "confidence": "EXTRACTED",
+      "relation": "calls",
+      "why": "cross-file semantic connection"
+    },
+    {
+      "source": "getBrowserClient()",
+      "target": "getAppwriteProjectId()",
+      "source_files": [
+        "lib/appwrite/browser.ts",
+        "lib/appwrite/config.ts"
+      ],
+      "confidence": "EXTRACTED",
+      "relation": "calls",
+      "why": "cross-file semantic connection"
+    },
+    {
+      "source": "createAdminClient()",
+      "target": "getAppwriteEndpoint()",
+      "source_files": [
+        "lib/appwrite/server.ts",
+        "lib/appwrite/config.ts"
+      ],
+      "confidence": "EXTRACTED",
+      "relation": "calls",
+      "why": "cross-file semantic connection"
+    },
+    {
+      "source": "createSessionClient()",
+      "target": "getAppwriteEndpoint()",
+      "source_files": [
+        "lib/appwrite/server.ts",
+        "lib/appwrite/config.ts"
+      ],
+      "confidence": "EXTRACTED",
+      "relation": "calls",
+      "why": "cross-file semantic connection"
+    }
+  ],
   "tokens": {
     "input": 0,
     "output": 0

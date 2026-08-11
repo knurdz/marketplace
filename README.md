@@ -51,8 +51,21 @@ Open [http://localhost:3000](http://localhost:3000). The UI theme matches [knurd
 | `npm run format:check` | Prettier check                 |
 | `npm run build`        | Production build               |
 
-Fill `.env.local` when Appwrite / PayHere wiring lands (step 1.2+). Do not commit secrets; only endpoint, project id, and public app URL may use `NEXT_PUBLIC_*`.
+Fill `.env.local` with Appwrite values (see below). Do not commit secrets; only endpoint, project id, and public app URL may use `NEXT_PUBLIC_*`.
+
+## Appwrite setup
+
+1. Copy env: `cp .env.example .env.local`
+2. In [Appwrite Console](https://cloud.appwrite.io/console) open the **Knurdz Marketplace** project.
+3. Set in `.env.local`:
+   - `NEXT_PUBLIC_APPWRITE_ENDPOINT=https://sgp.cloud.appwrite.io/v1` (sgp region)
+   - `NEXT_PUBLIC_APPWRITE_PROJECT_ID=` project id from **Settings**
+   - `APPWRITE_API_KEY=` a server API key with at least **`sessions.write`** (needed for SSR auth in step 1.3; never `NEXT_PUBLIC_*`)
+   - `NEXT_PUBLIC_APP_URL=http://localhost:3000` for local dev
+4. Under **Add a platform**, add a **Web** app with hostname `localhost` (required for browser SDK CORS).
+
+Clients live in [`lib/appwrite/`](./lib/appwrite/): browser (`appwrite`) + server session/admin (`node-appwrite`). Session cookie name: `knurdz_session` (set in auth step 1.3).
 
 ## Status
 
-Foundation bootstrap (step 1.1) is in progress. Schema and remaining Phase 0 work will land as Member 1 completes steps 1.2–1.13.
+Steps **1.1–1.2** (bootstrap + Appwrite clients) are in place. Auth pages and remaining Phase 0 work continue in steps 1.3–1.13.

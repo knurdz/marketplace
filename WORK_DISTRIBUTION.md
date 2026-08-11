@@ -60,7 +60,7 @@ Use after every change that touches code or schema:
 ### Phase 0 — blockers (do before others ship against APIs)
 
 - [x] Next.js (App Router) + TypeScript + lint/format + `.env.example`
-- [ ] Appwrite project wiring (browser + server clients)
+- [x] Appwrite project wiring (browser + server clients)
 - [ ] Auth: register, login, logout, session, password reset, email verify
 - [ ] Optional phone field on profile / registration (not required for MVP login)
 - [ ] Role model (labels/teams) + middleware guards for `/seller`, `/admin`
@@ -76,7 +76,7 @@ Use after every change that touches code or schema:
 | Step         | Goal                          | Do                                                                   | Verify                                            |
 | ------------ | ----------------------------- | -------------------------------------------------------------------- | ------------------------------------------------- |
 | [x] **1.1**  | Bootstrap Next.js             | App Router, TS, ESLint/Prettier, `.env.example`, README run steps    | `npm run dev` works                               |
-| [ ] **1.2**  | Appwrite clients              | Browser + server clients in `lib/appwrite`; env documented           | Session null-safe / project reachable             |
+| [x] **1.2**  | Appwrite clients              | Browser + server clients in `lib/appwrite`; env documented           | Session null-safe / project reachable             |
 | [ ] **1.3**  | Auth pages                    | Register, login, logout, session display                             | Round-trip auth                                   |
 | [ ] **1.4**  | Password reset + email verify | Recovery + verify flows                                              | Links work in dev                                 |
 | [ ] **1.5**  | Profiles                      | `profiles` linked to `userId`; create on register                    | Profile after signup; own-only update             |
