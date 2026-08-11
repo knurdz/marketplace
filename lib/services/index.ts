@@ -5,12 +5,18 @@ export {
 } from "./categories";
 export {
   asProduct,
+  asProductImage,
   getProduct,
   listActiveProducts,
+  listProductImages,
   normalizeProductSearchQuery,
   parseProductCatalogParams,
   searchActiveProducts,
 } from "./products";
+export {
+  getPublicSellerByUserId,
+} from "./sellers";
+export type { PublicSellerInfo } from "./sellers";
 export type { ProductCatalogParams, ProductCatalogSort } from "./products";
 export {
   asNotification,

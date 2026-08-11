@@ -1,10 +1,11 @@
+import Link from "next/link";
 import type { Product } from "@/lib/types";
 
 type ProductListProps = {
   products: Product[];
 };
 
-/** Presentational active-listing rows (titles non-links until product detail). */
+/** Presentational active-listing rows linked to product detail. */
 export function ProductList({ products }: ProductListProps) {
   if (products.length === 0) return null;
 
@@ -15,7 +16,12 @@ export function ProductList({ products }: ProductListProps) {
           key={product.$id}
           className="flex flex-wrap items-baseline justify-between gap-2 border-b border-border py-3"
         >
-          <span className="font-medium tracking-tight">{product.title}</span>
+          <Link
+            href={`/products/${product.$id}`}
+            className="font-medium tracking-tight hover:text-accent"
+          >
+            {product.title}
+          </Link>
           <span className="font-mono text-sm text-muted-foreground">
             {product.isFree
               ? "free"
