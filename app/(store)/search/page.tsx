@@ -3,6 +3,7 @@ import {
   normalizeProductSearchQuery,
   searchActiveProducts,
 } from "@/lib/services";
+import { ProductList } from "@/components/store/product-list";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
@@ -62,23 +63,9 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
             {products.length} result{products.length === 1 ? "" : "s"} for “
             {normalized}”
           </p>
-          <ul className="mt-4 space-y-3">
-            {products.map((product) => (
-              <li
-                key={product.$id}
-                className="flex flex-wrap items-baseline justify-between gap-2 border-b border-border py-3"
-              >
-                <span className="font-medium tracking-tight">
-                  {product.title}
-                </span>
-                <span className="font-mono text-sm text-muted-foreground">
-                  {product.isFree
-                    ? "free"
-                    : `${product.currency} ${product.price.toFixed(2)}`}
-                </span>
-              </li>
-            ))}
-          </ul>
+          <div className="mt-4">
+            <ProductList products={products} />
+          </div>
         </>
       )}
 

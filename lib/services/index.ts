@@ -1,4 +1,9 @@
 export {
+  asCategory,
+  getCategoryBySlug,
+  listCategories,
+} from "./categories";
+export {
   asProduct,
   getProduct,
   listActiveProducts,

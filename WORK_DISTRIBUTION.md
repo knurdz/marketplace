@@ -172,7 +172,7 @@ Complete payment infrastructure so Members 2–4 only consume APIs / admin UI.
 
 | Step         | Goal             | Do                                                       | Verify                        |
 | ------------ | ---------------- | -------------------------------------------------------- | ----------------------------- |
-| [ ] **2.1**  | Browse list      | Category list + product grid (`status=active` only)      | Non-active never shown        |
+| [x] **2.1**  | Browse list      | Category list + product grid (`status=active` only)      | Non-active never shown        |
 | [ ] **2.2**  | Filters & sort   | Price, category, sort by newest/price                    | Matches SCHEMA indexes        |
 | [ ] **2.3**  | Product detail   | Images, description, seller info, reviews slot           | 404 for inactive              |
 | [ ] **2.4**  | Cart             | Add/update/remove; single-seller or warn on multi-seller | Persist for logged-in user    |

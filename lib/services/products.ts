@@ -65,26 +65,31 @@ function isPubliclyListed(product: Product): boolean {
 
 /**
  * List storefront products: `status=active` and `available=true` only.
+ * Optional `categoryId` narrows via `status_category_idx` (still active-only).
  * Uses public TablesDB client (table has read(any)); never returns inactive.
  */
 export async function listActiveProducts(opts?: {
   limit?: number;
+  categoryId?: string;
 }): Promise<Product[]> {
   if (!hasAppwritePublicConfig()) return [];
 
   const limit = Math.min(Math.max(opts?.limit ?? 24, 1), 100);
+  const categoryId = opts?.categoryId?.trim() || null;
 
   try {
     const { tables } = await createPublicClient();
+    const queries = [
+      Query.equal("status", ACTIVE_PRODUCT_STATUS),
+      Query.equal("available", true),
+      ...(categoryId ? [Query.equal("categoryId", categoryId)] : []),
+      Query.orderDesc("$createdAt"),
+      Query.limit(limit),
+    ];
     const result = await tables.listRows({
       databaseId: DATABASE_ID,
       tableId: TABLE_PRODUCTS,
-      queries: [
-        Query.equal("status", ACTIVE_PRODUCT_STATUS),
-        Query.equal("available", true),
-        Query.orderDesc("$createdAt"),
-        Query.limit(limit),
-      ],
+      queries,
     });
 
     const products: Product[] = [];
