@@ -1,3 +1,5 @@
+import Link from "next/link";
+import { signOut } from "@/lib/appwrite/auth";
 import { getLoggedInUser } from "@/lib/appwrite/session";
 
 export default async function Home() {
@@ -30,18 +32,37 @@ export default async function Home() {
         </p>
 
         <div className="mt-10 flex flex-wrap gap-4">
-          <a
+          <Link
             href="#"
             className="inline-flex items-center justify-center rounded-md bg-foreground px-5 py-2.5 text-sm font-medium text-background transition hover:opacity-90"
           >
             Browse
-          </a>
-          <a
-            href="#"
-            className="inline-flex items-center justify-center rounded-md border border-border bg-transparent px-5 py-2.5 font-mono text-sm text-foreground transition hover:bg-card"
-          >
-            Sign in
-          </a>
+          </Link>
+          {user ? (
+            <>
+              <Link
+                href="/account"
+                className="inline-flex items-center justify-center rounded-md border border-border bg-transparent px-5 py-2.5 font-mono text-sm text-foreground transition hover:bg-card"
+              >
+                Account
+              </Link>
+              <form action={signOut}>
+                <button
+                  type="submit"
+                  className="inline-flex items-center justify-center rounded-md border border-border bg-transparent px-5 py-2.5 font-mono text-sm text-foreground transition hover:bg-card"
+                >
+                  Sign out
+                </button>
+              </form>
+            </>
+          ) : (
+            <Link
+              href="/login"
+              className="inline-flex items-center justify-center rounded-md border border-border bg-transparent px-5 py-2.5 font-mono text-sm text-foreground transition hover:bg-card"
+            >
+              Sign in
+            </Link>
+          )}
         </div>
       </div>
     </main>

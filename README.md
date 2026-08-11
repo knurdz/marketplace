@@ -64,8 +64,16 @@ Fill `.env.local` with Appwrite values (see below). Do not commit secrets; only 
    - `NEXT_PUBLIC_APP_URL=http://localhost:3000` for local dev
 4. Under **Add a platform**, add a **Web** app with hostname `localhost` (required for browser SDK CORS).
 
-Clients live in [`lib/appwrite/`](./lib/appwrite/): browser (`appwrite`) + server session/admin (`node-appwrite`). Session cookie name: `knurdz_session` (set in auth step 1.3).
+Clients live in [`lib/appwrite/`](./lib/appwrite/): browser (`appwrite`) + server session/admin (`node-appwrite`). Session cookie name: `knurdz_session`.
+
+### Auth routes
+
+| Path        | Purpose                    |
+| ----------- | -------------------------- |
+| `/login`    | Email/password sign in     |
+| `/register` | Create account             |
+| `/account`  | Session display + sign out |
 
 ## Status
 
-Steps **1.1–1.2** (bootstrap + Appwrite clients) are in place. Auth pages and remaining Phase 0 work continue in steps 1.3–1.13.
+Steps **1.1–1.3** (bootstrap, Appwrite clients, auth pages) are in place. Password reset / email verify and remaining Phase 0 work continue in steps 1.4–1.13.
