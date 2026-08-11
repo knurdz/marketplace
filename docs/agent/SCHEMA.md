@@ -367,3 +367,4 @@ Upload helpers: [`lib/appwrite/storage.ts`](../../lib/appwrite/storage.ts).
 | 2026-08-11 | Initial freeze (step 1.7) |
 | 2026-08-11 | Storage buckets + helpers (step 1.8) |
 | 2026-08-11 | TS status/types at `lib/types/` (step 1.10) |
+| 2026-08-11 | Phase 0 complete — demo seed + done gate (steps 1.12–1.13) |
