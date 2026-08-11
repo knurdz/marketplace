@@ -28,16 +28,16 @@
 
 Use after every change that touches code or schema:
 
-- [ ] Re-read own changes end-to-end; no uncertain behavior left unresolved
-- [ ] AuthZ checked (roles/labels + Appwrite permissions; not UI-only)
-- [ ] No secrets in client / `NEXT_PUBLIC_*`
+- [x] Re-read own changes end-to-end; no uncertain behavior left unresolved
+- [x] AuthZ checked (roles/labels + Appwrite permissions; not UI-only)
+- [x] No secrets in client / `NEXT_PUBLIC_*`
 - [ ] IDOR / ownership checks on reads & writes you added
 - [ ] Inputs validated (frontend + server); uploads constrained if applicable
 - [ ] Payment paths (if touched): notify/hash trusted; idempotent; return_url not sole source of truth
 - [ ] Graphify consulted before work (if graph exists) and updated after
-- [ ] Relevant Appwrite MCP tools used when touching Appwrite (docs/context/search/call)
-- [ ] Relevant member checklist items below updated
-- [ ] Did not break another member’s contract (types, status enums, routes)
+- [x] Relevant Appwrite MCP tools used when touching Appwrite (docs/context/search/call)
+- [x] Relevant member checklist items below updated
+- [x] Did not break another member’s contract (types, status enums, routes)
 
 ---
 
@@ -258,7 +258,7 @@ Complete payment infrastructure so Members 2–4 only consume APIs / admin UI.
 
 ### Tasks
 
-- [ ] Admin dashboard: total users, sellers, orders, revenue insights
+- [x] Admin dashboard: total users, sellers, orders, revenue insights
 - [ ] Seller approval queue (approve/reject + reason)
 - [ ] User management: view, ban/suspend, role tools
 - [ ] Monitor seller performance (basic metrics)
@@ -282,7 +282,7 @@ Complete payment infrastructure so Members 2–4 only consume APIs / admin UI.
 
 | Step         | Goal                    | Do                                        | Verify                      |
 | ------------ | ----------------------- | ----------------------------------------- | --------------------------- |
-| [ ] **4.1**  | Admin metrics           | Users, sellers, orders, revenue           | Admin-only                  |
+| [x] **4.1**  | Admin metrics           | Users, sellers, orders, revenue           | Admin-only                  |
 | [ ] **4.2**  | Seller approval         | Approve → `seller` label; reject + reason | Audit logged                |
 | [ ] **4.3**  | User management         | View, suspend; block checkout/publish     | Server-side enforcement     |
 | [ ] **4.4**  | Listing moderation      | Approve/reject/remove                     | Status enums only           |
