@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { FreeOrderConfirmForm } from "@/components/store/free-order-confirm-form";
 import { getLoggedInUser } from "@/lib/appwrite/session";
