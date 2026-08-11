@@ -120,3 +120,10 @@ export type Notification = {
   meta: string | null;
   $createdAt?: string;
 };
+
+export type PlatformSetting = {
+  $id: string;
+  key: string;
+  value: string;
+  description: string | null;
+};

@@ -245,14 +245,14 @@
     "semantic_hash": "5a6fd53fdcf2be529e9cc0b718fde352"
   },
   "lib/types/index.ts": {
-    "mtime": 1786435724.4043689,
-    "ast_hash": "e1bdcbfc2e2424c4fab3de405d4e73ed",
-    "semantic_hash": "e1bdcbfc2e2424c4fab3de405d4e73ed"
+    "mtime": 1786436977.162329,
+    "ast_hash": "ae3f3b521ad7f6ccb0c777f4714dd732",
+    "semantic_hash": "ae3f3b521ad7f6ccb0c777f4714dd732"
   },
   "lib/types/models.ts": {
-    "mtime": 1786435700.937107,
-    "ast_hash": "197d1d8a355db1d0d35b7eb5c5ac00b5",
-    "semantic_hash": "197d1d8a355db1d0d35b7eb5c5ac00b5"
+    "mtime": 1786436964.7438712,
+    "ast_hash": "e1d9434f5b93898e76ba0f37fd8737f3",
+    "semantic_hash": "e1d9434f5b93898e76ba0f37fd8737f3"
   },
   "lib/types/status.ts": {
     "mtime": 1786434623.4559352,
@@ -260,9 +260,9 @@
     "semantic_hash": "6247950c7b70165c09153d62f99539b1"
   },
   "lib/services/index.ts": {
-    "mtime": 1786436156.8883817,
-    "ast_hash": "64ddb682ab632ec0c0971806ddc740dd",
-    "semantic_hash": "64ddb682ab632ec0c0971806ddc740dd"
+    "mtime": 1786436985.4265592,
+    "ast_hash": "4433a09d7f1bae6542bcc40584836cf1",
+    "semantic_hash": "4433a09d7f1bae6542bcc40584836cf1"
   },
   "lib/services/products.ts": {
     "mtime": 1786436156.2707891,
@@ -280,9 +280,9 @@
     "semantic_hash": "5aab0a51e247bf094afdfb51a1bff2f9"
   },
   "scripts/seed-demo.mjs": {
-    "mtime": 1786435865.6313875,
-    "ast_hash": "36a36f493dc208b9131030115ae0c793",
-    "semantic_hash": "36a36f493dc208b9131030115ae0c793"
+    "mtime": 1786437000.74829,
+    "ast_hash": "f5a076a53a5c67f98e6ee7235abfed5a",
+    "semantic_hash": "f5a076a53a5c67f98e6ee7235abfed5a"
   },
   "lib/security/rate-limit.ts": {
     "mtime": 1786435373.5230079,
@@ -423,5 +423,15 @@
     "mtime": 1786436684.6372268,
     "ast_hash": "b801c1f757be393593a25da4d2f1dfd0",
     "semantic_hash": "b801c1f757be393593a25da4d2f1dfd0"
+  },
+  "lib/platform-settings/keys.ts": {
+    "mtime": 1786436963.511923,
+    "ast_hash": "4d87111101528734cc5f687cc90f55c4",
+    "semantic_hash": "4d87111101528734cc5f687cc90f55c4"
+  },
+  "lib/services/platform-settings.ts": {
+    "mtime": 1786436979.9389253,
+    "ast_hash": "6846f8ad6960dcdd28fe9afb5b5a3cbe",
+    "semantic_hash": "6846f8ad6960dcdd28fe9afb5b5a3cbe"
   }
 }

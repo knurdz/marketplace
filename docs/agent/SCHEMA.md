@@ -321,6 +321,8 @@ Server-action rate limits live in [`lib/security/rate-limit.ts`](../../lib/secur
 
 **Indexes:** `key_unique`
 
+**App read path (step 1.19):** [`getPlatformSetting`](../../lib/services/platform-settings.ts) / `getPlatformSettings` via session client (signed-in only — matches `read(users)`). Key constants: [`lib/platform-settings/keys.ts`](../../lib/platform-settings/keys.ts). Writes: admin SDK / seed only (no admin UI in 1.19). Do not store PayHere merchant secrets here.
+
 ---
 
 ### `audit_logs`
@@ -378,3 +380,4 @@ Uploads are rate-limited in `uploadFile` (see Abuse guards above).
 | 2026-08-11 | Auth/upload rate limits (step 1.14) |
 | 2026-08-11 | Notifications service + badge (step 1.15) |
 | 2026-08-11 | Product title fulltext + searchActiveProducts (step 1.16) |
+| 2026-08-11 | Platform settings read helpers + seed keys (step 1.19) |

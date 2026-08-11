@@ -16,6 +16,13 @@ export {
   safeNotificationLink,
 } from "./notifications";
 export type { NotificationActionState } from "./notifications";
+export {
+  asPlatformSetting,
+  getPlatformSetting,
+  getPlatformSettings,
+  normalizePlatformSettingKey,
+  parsePlatformSettingJson,
+} from "./platform-settings";
 export { getSessionUser } from "./session";
 export {
   deleteFile,
