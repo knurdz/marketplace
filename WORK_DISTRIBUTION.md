@@ -97,12 +97,13 @@ Use after every change that touches code or schema:
 | [x] **1.15** | Notifications badge           | Own-only service + polling bell in store/portal nav + demo seed      | Unread badge; mark read; guest has no bell            |
 | [x] **1.16** | Global product search         | `title_fulltext` + `searchActiveProducts` + `/search` verify UI      | Active-only results; empty q → []; demo “sticker” hits |
 | [x] **1.17** | Legal / FAQ pages             | Static Terms, Privacy, FAQ + store footer links                      | Routes render; footer links work                      |
+| [x] **1.18** | Toasts + errors + loading     | Sonner toasts, segment error.tsx / loading.tsx, profile-form sample  | Toast on profile save; error/loading UI present       |
 
 - [x] In-app notifications collection + badge hook/UI (polling OK for MVP; realtime later)
 - [x] Global product search helper
 - [x] Basic rate limiting / abuse guards on sensitive auth & upload endpoints (or Function-level)
 - [x] Legal / FAQ static pages
-- [ ] Toasts + error boundary + loading-state patterns
+- [x] Toasts + error boundary + loading-state patterns
 - [ ] Platform settings read helper
 - [ ] Schema changelog when others request fields
 - [ ] Coordinate PayHere Function interfaces with Member 4

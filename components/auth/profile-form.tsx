@@ -1,15 +1,31 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useEffect, useRef } from "react";
 import {
   updateOwnAvatar,
   updateOwnProfile,
   type Profile,
   type ProfileActionState,
 } from "@/lib/appwrite/profiles";
+import { toast } from "@/lib/ui/toast";
 
 const initialState: ProfileActionState = {};
 const avatarInitial: ProfileActionState = {};
+
+function useActionToasts(state: ProfileActionState) {
+  const last = useRef<string | null>(null);
+  useEffect(() => {
+    const key = state.error
+      ? `e:${state.error}`
+      : state.success
+        ? `s:${state.success}`
+        : null;
+    if (!key || key === last.current) return;
+    last.current = key;
+    if (state.error) toast.error(state.error);
+    else if (state.success) toast.success(state.success);
+  }, [state.error, state.success]);
+}
 
 export function ProfileForm({
   profile,
@@ -27,28 +43,14 @@ export function ProfileForm({
     avatarInitial,
   );
 
+  useActionToasts(state);
+  useActionToasts(avatarState);
+
   return (
     <div className="mt-8 space-y-10">
       <form action={avatarAction} className="space-y-5">
         <p className="font-mono text-sm text-accent">$ ./profile --avatar</p>
         <h2 className="text-xl font-bold tracking-tight">Avatar</h2>
-
-        {avatarState?.error ? (
-          <p
-            role="alert"
-            className="rounded-md border border-border bg-card px-3 py-2 font-mono text-sm text-accent-bright"
-          >
-            {avatarState.error}
-          </p>
-        ) : null}
-        {avatarState?.success ? (
-          <p
-            role="status"
-            className="rounded-md border border-border bg-card px-3 py-2 font-mono text-sm text-accent"
-          >
-            {avatarState.success}
-          </p>
-        ) : null}
 
         <div className="flex items-center gap-4">
           {avatarPreviewUrl ? (
@@ -95,23 +97,6 @@ export function ProfileForm({
       <form action={formAction} className="space-y-5">
         <p className="font-mono text-sm text-accent">$ ./profile --update</p>
         <h2 className="text-xl font-bold tracking-tight">Profile</h2>
-
-        {state?.error ? (
-          <p
-            role="alert"
-            className="rounded-md border border-border bg-card px-3 py-2 font-mono text-sm text-accent-bright"
-          >
-            {state.error}
-          </p>
-        ) : null}
-        {state?.success ? (
-          <p
-            role="status"
-            className="rounded-md border border-border bg-card px-3 py-2 font-mono text-sm text-accent"
-          >
-            {state.success}
-          </p>
-        ) : null}
 
         <div className="space-y-2">
           <label htmlFor="displayName" className="block text-sm text-muted-foreground">

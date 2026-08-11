@@ -167,45 +167,18 @@
       "package_dependencies_react",
       "package_dependencies_react_dom",
       "package_dependencies_shadcn",
+      "package_dependencies_sonner",
       "package_dependencies_tailwind_merge",
       "package_dependencies_tw_animate_css",
       "radix_ui",
       "react",
       "react_dom",
       "shadcn",
+      "sonner",
       "tailwind_merge",
       "tw_animate_css"
     ],
     "5": [
-      "app_layout",
-      "app_layout_jetbrainsmono",
-      "app_layout_metadata",
-      "app_layout_rootlayout",
-      "app_layout_spacegrotesk",
-      "components_ui_button",
-      "components_ui_button_button",
-      "components_ui_button_buttonvariants",
-      "components_ui_input",
-      "components_ui_input_input",
-      "components_ui_label",
-      "components_ui_label_label",
-      "components_ui_separator",
-      "components_ui_separator_separator",
-      "components_ui_sheet",
-      "components_ui_sheet_sheet",
-      "components_ui_sheet_sheetclose",
-      "components_ui_sheet_sheetcontent",
-      "components_ui_sheet_sheetdescription",
-      "components_ui_sheet_sheetfooter",
-      "components_ui_sheet_sheetheader",
-      "components_ui_sheet_sheetoverlay",
-      "components_ui_sheet_sheetportal",
-      "components_ui_sheet_sheettitle",
-      "components_ui_sheet_sheettrigger",
-      "lib_utils",
-      "lib_utils_cn"
-    ],
-    "6": [
       "lib_types_status",
       "lib_types_status_bank_slip_statuses",
       "lib_types_status_bankslipstatus",
@@ -232,6 +205,31 @@
       "lib_types_status_seller_statuses",
       "lib_types_status_sellerstatus"
     ],
+    "6": [
+      "app_auth_account_page",
+      "app_auth_account_page_accountpage",
+      "components_auth_profile_form",
+      "components_auth_profile_form_avatarinitial",
+      "components_auth_profile_form_initialstate",
+      "components_auth_profile_form_profileform",
+      "components_auth_profile_form_useactiontoasts",
+      "lib_appwrite_profiles",
+      "lib_appwrite_profiles_asprofile",
+      "lib_appwrite_profiles_createprofileforuser",
+      "lib_appwrite_profiles_defaultdisplayname",
+      "lib_appwrite_profiles_getownprofile",
+      "lib_appwrite_profiles_profile",
+      "lib_appwrite_profiles_profileactionstate",
+      "lib_appwrite_profiles_readstring",
+      "lib_appwrite_profiles_updateownavatar",
+      "lib_appwrite_profiles_updateownprofile",
+      "lib_appwrite_storage_urls",
+      "lib_appwrite_storage_urls_getavatarpreviewurl",
+      "lib_appwrite_storage_urls_getavatarviewurl",
+      "lib_appwrite_storage_urls_getfilepreviewurl",
+      "lib_appwrite_storage_urls_getfileviewurl",
+      "lib_ui_toast"
+    ],
     "7": [
       "components",
       "components_aliases",
@@ -257,27 +255,28 @@
       "components_tsx"
     ],
     "8": [
-      "app_auth_account_page",
-      "app_auth_account_page_accountpage",
-      "components_auth_profile_form",
-      "components_auth_profile_form_avatarinitial",
-      "components_auth_profile_form_initialstate",
-      "components_auth_profile_form_profileform",
-      "lib_appwrite_profiles",
-      "lib_appwrite_profiles_asprofile",
-      "lib_appwrite_profiles_createprofileforuser",
-      "lib_appwrite_profiles_defaultdisplayname",
-      "lib_appwrite_profiles_getownprofile",
-      "lib_appwrite_profiles_profile",
-      "lib_appwrite_profiles_profileactionstate",
-      "lib_appwrite_profiles_readstring",
-      "lib_appwrite_profiles_updateownavatar",
-      "lib_appwrite_profiles_updateownprofile",
-      "lib_appwrite_storage_urls",
-      "lib_appwrite_storage_urls_getavatarpreviewurl",
-      "lib_appwrite_storage_urls_getavatarviewurl",
-      "lib_appwrite_storage_urls_getfilepreviewurl",
-      "lib_appwrite_storage_urls_getfileviewurl"
+      "components_ui_button",
+      "components_ui_button_button",
+      "components_ui_button_buttonvariants",
+      "components_ui_input",
+      "components_ui_input_input",
+      "components_ui_label",
+      "components_ui_label_label",
+      "components_ui_separator",
+      "components_ui_separator_separator",
+      "components_ui_sheet",
+      "components_ui_sheet_sheet",
+      "components_ui_sheet_sheetclose",
+      "components_ui_sheet_sheetcontent",
+      "components_ui_sheet_sheetdescription",
+      "components_ui_sheet_sheetfooter",
+      "components_ui_sheet_sheetheader",
+      "components_ui_sheet_sheetoverlay",
+      "components_ui_sheet_sheetportal",
+      "components_ui_sheet_sheettitle",
+      "components_ui_sheet_sheettrigger",
+      "lib_utils",
+      "lib_utils_cn"
     ],
     "9": [
       "lib_appwrite_browser",
@@ -399,6 +398,21 @@
       "lib_services_notifications"
     ],
     "15": [
+      "app_admin_error",
+      "app_admin_error_adminerror",
+      "app_auth_error",
+      "app_auth_error_autherror",
+      "app_error",
+      "app_error_globalerror",
+      "app_seller_error",
+      "app_seller_error_sellererror",
+      "app_store_error",
+      "app_store_error_storeerror",
+      "components_ui_error_fallback",
+      "components_ui_error_fallback_errorfallback",
+      "components_ui_error_fallback_errorfallbackprops"
+    ],
+    "16": [
       "lib_types_index",
       "lib_types_models",
       "lib_types_models_bankslip",
@@ -412,7 +426,19 @@
       "lib_types_models_report",
       "lib_types_models_sellerprofile"
     ],
-    "16": [
+    "17": [
+      "app_admin_loading",
+      "app_admin_loading_adminloading",
+      "app_auth_loading",
+      "app_auth_loading_authloading",
+      "app_seller_loading",
+      "app_seller_loading_sellerloading",
+      "app_store_loading",
+      "app_store_loading_storeloading",
+      "components_ui_page_loader",
+      "components_ui_page_loader_pageloader"
+    ],
+    "18": [
       "app_store_faq_page",
       "app_store_faq_page_faqpage",
       "app_store_legal_privacy_page",
@@ -424,7 +450,7 @@
       "components_legal_legal_page_legalpageprops",
       "components_legal_legal_page_legalsection"
     ],
-    "17": [
+    "19": [
       "scripts_setup_storage_buckets",
       "scripts_setup_storage_buckets_apikey",
       "scripts_setup_storage_buckets_bucketcreateperms",
@@ -436,7 +462,7 @@
       "scripts_setup_storage_buckets_projectid",
       "scripts_setup_storage_buckets_storage"
     ],
-    "18": [
+    "20": [
       "components_ui_popover",
       "components_ui_popover_popover",
       "components_ui_popover_popoveranchor",
@@ -446,7 +472,16 @@
       "components_ui_popover_popovertitle",
       "components_ui_popover_popovertrigger"
     ],
-    "19": [
+    "21": [
+      "app_layout",
+      "app_layout_jetbrainsmono",
+      "app_layout_metadata",
+      "app_layout_rootlayout",
+      "app_layout_spacegrotesk",
+      "components_ui_sonner",
+      "components_ui_sonner_toaster"
+    ],
+    "22": [
       "app_auth_login_page",
       "app_auth_login_page_loginpage",
       "app_auth_login_page_safenextpath",
@@ -454,7 +489,7 @@
       "components_auth_login_form_initialstate",
       "components_auth_login_form_loginform"
     ],
-    "20": [
+    "23": [
       "app_auth_reset_password_page",
       "app_auth_reset_password_page_resetpasswordpage",
       "app_auth_reset_password_page_searchparams",
@@ -462,7 +497,7 @@
       "components_auth_reset_password_form_initialstate",
       "components_auth_reset_password_form_resetpasswordform"
     ],
-    "21": [
+    "24": [
       "lib_appwrite_roles",
       "lib_appwrite_roles_requirelabel",
       "lib_appwrite_roles_requireuser",
@@ -470,72 +505,72 @@
       "lib_appwrite_roles_rolelabel",
       "lib_appwrite_roles_userhaslabel"
     ],
-    "22": [
+    "25": [
       "app_auth_forgot_password_page",
       "app_auth_forgot_password_page_forgotpasswordpage",
       "components_auth_forgot_password_form",
       "components_auth_forgot_password_form_forgotpasswordform",
       "components_auth_forgot_password_form_initialstate"
     ],
-    "23": [
+    "26": [
       "app_auth_register_page",
       "app_auth_register_page_registerpage",
       "components_auth_register_form",
       "components_auth_register_form_initialstate",
       "components_auth_register_form_registerform"
     ],
-    "24": [
+    "27": [
       "app_store_layout",
       "app_store_layout_storelayout",
       "components_layout_store_footer",
       "components_layout_store_footer_footer_links",
       "components_layout_store_footer_storefooter"
     ],
-    "25": [
+    "28": [
       "app_auth_verify_email_page",
       "app_auth_verify_email_page_searchparams",
       "app_auth_verify_email_page_verifyemailpage"
     ],
-    "26": [
+    "29": [
       "components_ui_badge",
       "components_ui_badge_badge",
       "components_ui_badge_badgevariants"
     ],
-    "27": [
+    "30": [
       "cursor_mcp",
       "cursor_mcp_mcp_server_shadcn",
       "mcp_command_npx"
     ],
-    "28": [
+    "31": [
       "proxy",
       "proxy_config",
       "proxy_proxy"
     ],
-    "29": [
+    "32": [
       "app_admin_page",
       "app_admin_page_adminpage"
     ],
-    "30": [
+    "33": [
       "app_auth_layout",
       "app_auth_layout_authlayout"
     ],
-    "31": [
+    "34": [
       "app_seller_page",
       "app_seller_page_sellerpage"
     ],
-    "32": [
+    "35": [
       "eslint_config",
       "eslint_config_eslintconfig"
     ],
-    "33": [
+    "36": [
       "next_config",
       "next_config_nextconfig"
     ],
-    "34": [
+    "37": [
       "postcss_config",
       "postcss_config_config"
     ],
-    "35": [
+    "38": [
       "lib_services_uploads"
     ]
   },
@@ -544,48 +579,51 @@
     "1": 0.12857142857142856,
     "2": 0.06060606060606061,
     "3": 0.06451612903225806,
-    "4": 0.07142857142857142,
-    "5": 0.13105413105413105,
-    "6": 0.10333333333333333,
+    "4": 0.06666666666666667,
+    "5": 0.10333333333333333,
+    "6": 0.1422924901185771,
     "7": 0.09090909090909091,
-    "8": 0.19047619047619047,
+    "8": 0.16883116883116883,
     "9": 0.14736842105263157,
     "10": 0.13450292397660818,
     "11": 0.19298245614035087,
     "12": 0.2549019607843137,
     "13": 0.225,
     "14": 0.44761904761904764,
-    "15": 0.3181818181818182,
-    "16": 0.3333333333333333,
-    "17": 0.24444444444444444,
-    "18": 0.25,
-    "19": 0.4666666666666667,
-    "20": 0.4,
-    "21": 0.4666666666666667,
-    "22": 0.5,
-    "23": 0.5,
-    "24": 0.5,
-    "25": 0.6666666666666666,
-    "26": 1.0,
-    "27": 0.6666666666666666,
+    "15": 0.21794871794871795,
+    "16": 0.3181818181818182,
+    "17": 0.28888888888888886,
+    "18": 0.3333333333333333,
+    "19": 0.24444444444444444,
+    "20": 0.25,
+    "21": 0.3333333333333333,
+    "22": 0.4666666666666667,
+    "23": 0.4,
+    "24": 0.4666666666666667,
+    "25": 0.5,
+    "26": 0.5,
+    "27": 0.5,
     "28": 0.6666666666666666,
     "29": 1.0,
-    "30": 1.0,
-    "31": 1.0,
+    "30": 0.6666666666666666,
+    "31": 0.6666666666666666,
     "32": 1.0,
     "33": 1.0,
     "34": 1.0,
-    "35": 1.0
+    "35": 1.0,
+    "36": 1.0,
+    "37": 1.0,
+    "38": 1.0
   },
   "gods": [
     {
-      "id": "lib_utils_cn",
-      "label": "cn()",
-      "degree": 18
-    },
-    {
       "id": "tsconfig_compileroptions",
       "label": "compilerOptions",
+      "degree": 16
+    },
+    {
+      "id": "lib_utils_cn",
+      "label": "cn()",
       "degree": 16
     },
     {
@@ -642,39 +680,6 @@
       "why": "inferred connection - not explicitly stated in source; connects across different repos/directories; peripheral node `ResendVerificationForm()` unexpectedly reaches hub `requestEmailVerification()`"
     },
     {
-      "source": "RootLayout()",
-      "target": "cn()",
-      "source_files": [
-        "app/layout.tsx",
-        "lib/utils.ts"
-      ],
-      "confidence": "EXTRACTED",
-      "relation": "calls",
-      "why": "connects across different repos/directories; peripheral node `RootLayout()` unexpectedly reaches hub `cn()`"
-    },
-    {
-      "source": "ProfileForm()",
-      "target": "updateOwnAvatar()",
-      "source_files": [
-        "components/auth/profile-form.tsx",
-        "lib/appwrite/profiles.ts"
-      ],
-      "confidence": "INFERRED",
-      "relation": "indirect_call",
-      "why": "inferred connection - not explicitly stated in source; connects across different repos/directories"
-    },
-    {
-      "source": "ProfileForm()",
-      "target": "updateOwnProfile()",
-      "source_files": [
-        "components/auth/profile-form.tsx",
-        "lib/appwrite/profiles.ts"
-      ],
-      "confidence": "INFERRED",
-      "relation": "indirect_call",
-      "why": "inferred connection - not explicitly stated in source; connects across different repos/directories"
-    },
-    {
       "source": "Input()",
       "target": "cn()",
       "source_files": [
@@ -684,6 +689,39 @@
       "confidence": "EXTRACTED",
       "relation": "calls",
       "why": "connects across different repos/directories; peripheral node `Input()` unexpectedly reaches hub `cn()`"
+    },
+    {
+      "source": "Label()",
+      "target": "cn()",
+      "source_files": [
+        "components/ui/label.tsx",
+        "lib/utils.ts"
+      ],
+      "confidence": "EXTRACTED",
+      "relation": "calls",
+      "why": "connects across different repos/directories; peripheral node `Label()` unexpectedly reaches hub `cn()`"
+    },
+    {
+      "source": "Separator()",
+      "target": "cn()",
+      "source_files": [
+        "components/ui/separator.tsx",
+        "lib/utils.ts"
+      ],
+      "confidence": "EXTRACTED",
+      "relation": "calls",
+      "why": "connects across different repos/directories; peripheral node `Separator()` unexpectedly reaches hub `cn()`"
+    },
+    {
+      "source": "SheetOverlay()",
+      "target": "cn()",
+      "source_files": [
+        "components/ui/sheet.tsx",
+        "lib/utils.ts"
+      ],
+      "confidence": "EXTRACTED",
+      "relation": "calls",
+      "why": "connects across different repos/directories; peripheral node `SheetOverlay()` unexpectedly reaches hub `cn()`"
     }
   ],
   "questions": [
@@ -695,7 +733,7 @@
     {
       "type": "isolated_nodes",
       "question": "What connects `npx`, `eslintConfig`, `nextConfig` to the rest of the system?",
-      "why": "156 weakly-connected nodes found - possible documentation gaps or missing edges."
+      "why": "160 weakly-connected nodes found - possible documentation gaps or missing edges."
     },
     {
       "type": "low_cohesion",
@@ -715,12 +753,12 @@
     {
       "type": "low_cohesion",
       "question": "Should `dependencies` be split into smaller, more focused modules?",
-      "why": "Cohesion score 0.07142857142857142 - nodes in this community are weakly interconnected."
+      "why": "Cohesion score 0.06666666666666667 - nodes in this community are weakly interconnected."
     },
     {
       "type": "low_cohesion",
-      "question": "Should `cn` be split into smaller, more focused modules?",
-      "why": "Cohesion score 0.13105413105413105 - nodes in this community are weakly interconnected."
+      "question": "Should `status.ts` be split into smaller, more focused modules?",
+      "why": "Cohesion score 0.10333333333333333 - nodes in this community are weakly interconnected."
     }
   ]
 }

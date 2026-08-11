@@ -177,7 +177,7 @@ None (you start first). Coordinate PayHere Function **interfaces** with Member 4
 | **1.12** | Seed script                   | Admin, seller, buyer, categories, sample product                          | One command seeds                          | “Document demo passwords in README only locally — not production secrets.”  |
 | **1.13** | Done gate                     | Teammates can auth, open shells, upload, read products                    | Member 1 “done when”                       | Announce unblock to team                                                    |
 
-**Phase 1 (after unblock, interleaved):** **1.14** rate limits on auth/upload; **1.15** notifications badge; **1.16** search helper; **1.17** legal/FAQ pages; toasts/error boundaries; platform settings reader; a11y pass; integration support.
+**Phase 1 (after unblock, interleaved):** **1.14** rate limits on auth/upload; **1.15** notifications badge; **1.16** search helper; **1.17** legal/FAQ pages; **1.18** toasts/error/loading; platform settings reader; a11y pass; integration support.
 
 ### Member 1 — Definition of done
 
