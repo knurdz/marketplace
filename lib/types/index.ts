@@ -13,6 +13,7 @@ export type {
   PlatformSetting,
   Product,
   ProductImage,
+  Review,
   Report,
   SellerProfile,
   WishlistItem,

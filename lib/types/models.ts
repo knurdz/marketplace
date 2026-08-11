@@ -161,6 +161,18 @@ export type BankSlip = {
   reviewNote: string | null;
 };
 
+export type Review = {
+  $id: string;
+  orderId: string;
+  productId: string;
+  buyerId: string;
+  sellerId: string;
+  productRating: number;
+  sellerRating: number | null;
+  comment: string | null;
+  $createdAt?: string;
+};
+
 export type Report = {
   $id: string;
   reporterId: string;

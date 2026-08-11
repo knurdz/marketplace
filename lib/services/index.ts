@@ -49,6 +49,23 @@ export {
   toggleWishlistProduct,
 } from "./wishlist-actions";
 export {
+  asReview,
+  canReviewProduct,
+  listProductReviews,
+} from "./reviews";
+export {
+  REVIEW_ERROR_CODES,
+  type ReviewActionState,
+  type ReviewErrorCode,
+} from "./review-errors";
+export { createProductReview } from "./review-actions";
+export { createProductReport } from "./report-actions";
+export {
+  REPORT_ERROR_CODES,
+  type ReportActionState,
+  type ReportErrorCode,
+} from "./report-errors";
+export {
   getPublicSellerByUserId,
   getSellerBankDetailsForCheckout,
 } from "./sellers";
