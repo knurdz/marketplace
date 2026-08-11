@@ -1,11 +1,37 @@
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import { ProductCatalogFilters } from "@/components/store/product-catalog-filters";
 import { ProductList } from "@/components/store/product-list";
-import { getSessionUser, listActiveProducts } from "@/lib/services";
+import {
+  getSessionUser,
+  listActiveProducts,
+  parseProductCatalogParams,
+} from "@/lib/services";
 
-export default async function Home() {
+type HomeProps = {
+  searchParams: Promise<{
+    minPrice?: string;
+    maxPrice?: string;
+    sort?: string;
+  }>;
+};
+
+export default async function Home({ searchParams }: HomeProps) {
   const user = await getSessionUser();
-  const products = await listActiveProducts({ limit: 8 });
+  const params = await searchParams;
+  const catalogParams = parseProductCatalogParams(params);
+  const products = await listActiveProducts({
+    limit: 24,
+    minPrice: catalogParams.minPrice,
+    maxPrice: catalogParams.maxPrice,
+    sort: catalogParams.sort,
+    invalidPriceRange: catalogParams.invalidPriceRange,
+  });
+
+  const hasActiveFilters =
+    catalogParams.minPrice != null ||
+    catalogParams.maxPrice != null ||
+    catalogParams.sort !== "newest";
 
   return (
     <main className="relative overflow-hidden">
@@ -63,9 +89,17 @@ export default async function Home() {
           <code className="font-mono text-xs">status=active</code>.
         </p>
 
-        {products.length === 0 ? (
+        <ProductCatalogFilters action="/" defaults={catalogParams} />
+
+        {catalogParams.invalidPriceRange ? (
           <p className="mt-8 font-mono text-sm text-muted-foreground">
-            No active products yet. Seed lands in step 1.12.
+            Minimum price cannot be greater than maximum price.
+          </p>
+        ) : products.length === 0 ? (
+          <p className="mt-8 font-mono text-sm text-muted-foreground">
+            {hasActiveFilters
+              ? "No active products match these filters."
+              : "No active products yet. Seed lands in step 1.12."}
           </p>
         ) : (
           <div className="mt-8">

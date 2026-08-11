@@ -1,23 +1,42 @@
 import Link from "next/link";
 import {
   normalizeProductSearchQuery,
+  parseProductCatalogParams,
   searchActiveProducts,
 } from "@/lib/services";
+import { ProductCatalogFilters } from "@/components/store/product-catalog-filters";
 import { ProductList } from "@/components/store/product-list";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
 type SearchPageProps = {
-  searchParams: Promise<{ q?: string }>;
+  searchParams: Promise<{
+    q?: string;
+    minPrice?: string;
+    maxPrice?: string;
+    sort?: string;
+  }>;
 };
 
 export default async function SearchPage({ searchParams }: SearchPageProps) {
   const params = await searchParams;
   const rawQ = typeof params.q === "string" ? params.q : "";
   const normalized = normalizeProductSearchQuery(rawQ);
-  const products = normalized
-    ? await searchActiveProducts(normalized, { limit: 24 })
-    : [];
+  const catalogParams = parseProductCatalogParams(params);
+  const products =
+    normalized && !catalogParams.invalidPriceRange
+      ? await searchActiveProducts(normalized, {
+          limit: 24,
+          minPrice: catalogParams.minPrice,
+          maxPrice: catalogParams.maxPrice,
+          sort: catalogParams.sort,
+        })
+      : [];
+
+  const hasActiveFilters =
+    catalogParams.minPrice != null ||
+    catalogParams.maxPrice != null ||
+    catalogParams.sort !== "newest";
 
   return (
     <main className="relative mx-auto w-full max-w-5xl px-6 py-16 sm:px-10">
@@ -49,13 +68,27 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
         </Button>
       </form>
 
+      {normalized ? (
+        <ProductCatalogFilters
+          action="/search"
+          defaults={catalogParams}
+          preserve={{ q: normalized }}
+        />
+      ) : null}
+
       {!normalized ? (
         <p className="mt-10 font-mono text-sm text-muted-foreground">
           Enter a query to search active products.
         </p>
+      ) : catalogParams.invalidPriceRange ? (
+        <p className="mt-10 font-mono text-sm text-muted-foreground">
+          Minimum price cannot be greater than maximum price.
+        </p>
       ) : products.length === 0 ? (
         <p className="mt-10 font-mono text-sm text-muted-foreground">
-          No active products matched “{normalized}”.
+          {hasActiveFilters
+            ? `No active products matched “${normalized}” with these filters.`
+            : `No active products matched “${normalized}”.`}
         </p>
       ) : (
         <>

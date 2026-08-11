@@ -8,8 +8,10 @@ export {
   getProduct,
   listActiveProducts,
   normalizeProductSearchQuery,
+  parseProductCatalogParams,
   searchActiveProducts,
 } from "./products";
+export type { ProductCatalogParams, ProductCatalogSort } from "./products";
 export {
   asNotification,
   countOwnUnread,
