@@ -154,7 +154,7 @@ Complete payment infrastructure so Members 2–4 only consume APIs / admin UI.
 - [ ] Buyer dashboard: order summary (pending/completed), recent purchases, wishlist preview
 - [x] Browse: categories, filters, sorting
 - [x] Product detail: images, description, seller info, ratings & reviews display
-- [ ] Cart add/update/remove
+- [x] Cart add/update/remove
 - [ ] Checkout (address + method: PayHere / bank / free) — **UX only**; calls Member 1 payment APIs
 - [ ] Free checkout path — UI + create order; confirm via **Member 1** free-confirm API
 - [ ] PayHere redirect + return/cancel pages (status from DB) — **UX only**; no merchant secret; uses Member 1 hash Function
@@ -175,7 +175,7 @@ Complete payment infrastructure so Members 2–4 only consume APIs / admin UI.
 | [x] **2.1**  | Browse list      | Category list + product grid (`status=active` only)      | Non-active never shown        |
 | [x] **2.2**  | Filters & sort   | Price, category, sort by newest/price                    | Matches SCHEMA indexes        |
 | [x] **2.3**  | Product detail   | Images, description, seller info, reviews slot           | 404 for inactive              |
-| [ ] **2.4**  | Cart             | Add/update/remove; single-seller or warn on multi-seller | Persist for logged-in user    |
+| [x] **2.4**  | Cart             | Add/update/remove; single-seller or warn on multi-seller | Persist for logged-in user    |
 | [ ] **2.5**  | Checkout shell   | Address + method radio (payhere/bank/free)               | Validation clear              |
 | [ ] **2.6**  | Create order     | `orders` + `order_items` + `payments`                    | Ownership = current user      |
 | [ ] **2.7**  | Free path        | Confirm paid via **Member 1** free-confirm API           | No forged amount / no PayHere |

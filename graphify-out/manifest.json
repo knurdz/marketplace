@@ -190,9 +190,9 @@
     "semantic_hash": "bed30d8f5cf3d4a23ac35887d5aff856"
   },
   "app/(store)/layout.tsx": {
-    "mtime": 1786445555.4764738,
-    "ast_hash": "3ac95d42788c2b9682e5551ddae0fa80",
-    "semantic_hash": "3ac95d42788c2b9682e5551ddae0fa80"
+    "mtime": 1786451404.5603044,
+    "ast_hash": "9f64086dd3da8070f52ae3dbefe4ddd2",
+    "semantic_hash": ""
   },
   "app/(store)/page.tsx": {
     "mtime": 1786449943.244112,
@@ -210,9 +210,9 @@
     "semantic_hash": "9eb3f2924df6cb379fd70b90ff500b77"
   },
   "components/layout/store-navbar.tsx": {
-    "mtime": 1786445555.517099,
-    "ast_hash": "d654389a8b6f1421f0f32b94322add0f",
-    "semantic_hash": "d654389a8b6f1421f0f32b94322add0f"
+    "mtime": 1786451408.363227,
+    "ast_hash": "cfaba6061b37c0065cd4adcfab76af7b",
+    "semantic_hash": ""
   },
   "components/ui/button.tsx": {
     "mtime": 1786445555.517099,
@@ -245,14 +245,14 @@
     "semantic_hash": "1d8011eb18769078bf77502b220daa5e"
   },
   "lib/types/index.ts": {
-    "mtime": 1786445555.59333,
-    "ast_hash": "b026cb9476ed685376fa7ff39cb8148a",
-    "semantic_hash": "b026cb9476ed685376fa7ff39cb8148a"
+    "mtime": 1786451352.2013166,
+    "ast_hash": "adf407a32219e9ee7a9069914bffc912",
+    "semantic_hash": ""
   },
   "lib/types/models.ts": {
-    "mtime": 1786445555.59333,
-    "ast_hash": "0ecf0354fe70690131de804262143176",
-    "semantic_hash": "0ecf0354fe70690131de804262143176"
+    "mtime": 1786451352.2013166,
+    "ast_hash": "01a04c8fbc9fa5663dfbcd2e049c135c",
+    "semantic_hash": ""
   },
   "lib/types/status.ts": {
     "mtime": 1786445555.5991373,
@@ -260,9 +260,9 @@
     "semantic_hash": "a4d8fdb230a529924b0e2e0bdd2705c7"
   },
   "lib/services/index.ts": {
-    "mtime": 1786450768.9094167,
-    "ast_hash": "87530f49025188bccc8357f4695dca05",
-    "semantic_hash": "87530f49025188bccc8357f4695dca05"
+    "mtime": 1786451467.8379624,
+    "ast_hash": "a24ec5dfe821d83f1185c92dac37cda0",
+    "semantic_hash": ""
   },
   "lib/services/products.ts": {
     "mtime": 1786450763.7245924,
@@ -285,9 +285,9 @@
     "semantic_hash": "6fdda632c10f36f213f9f9d3df77af4b"
   },
   "lib/security/rate-limit.ts": {
-    "mtime": 1786445555.5829465,
-    "ast_hash": "9ea9bf6a3dd4fd138f0ceb376d429390",
-    "semantic_hash": "9ea9bf6a3dd4fd138f0ceb376d429390"
+    "mtime": 1786451352.2013166,
+    "ast_hash": "796410c29495ee9a98be417de51e1d6c",
+    "semantic_hash": ""
   },
   "package 2.json": {
     "mtime": 1786445555.6019773,
@@ -480,8 +480,8 @@
     "semantic_hash": ""
   },
   "WORK_DISTRIBUTION.md": {
-    "mtime": 1786448620.341813,
-    "ast_hash": "6c8adac7bff35b83e7c95da70bb302ed",
+    "mtime": 1786451558.4698634,
+    "ast_hash": "1aee2c83cf4d20169ee0bb70aa4a281b",
     "semantic_hash": ""
   },
   "docs/agent/INDEX.md": {
@@ -505,9 +505,9 @@
     "semantic_hash": ""
   },
   "app/(store)/products/[id]/page.tsx": {
-    "mtime": 1786450767.099257,
-    "ast_hash": "3cd7e6769cbc42316b76d8e2c4017ed1",
-    "semantic_hash": "3cd7e6769cbc42316b76d8e2c4017ed1"
+    "mtime": 1786451403.4159832,
+    "ast_hash": "4ffdcd44aa692e50598da188c9c8a136",
+    "semantic_hash": ""
   },
   "components/store/product-catalog-filters.tsx": {
     "mtime": 1786449938.8414347,
@@ -533,5 +533,35 @@
     "mtime": 1786450763.0377936,
     "ast_hash": "eb4108788c1503dfcb44e4380700f692",
     "semantic_hash": "eb4108788c1503dfcb44e4380700f692"
+  },
+  "app/(store)/cart/page.tsx": {
+    "mtime": 1786451397.570632,
+    "ast_hash": "bc2cd917fd8a71526220d7debc235e1b",
+    "semantic_hash": ""
+  },
+  "components/store/add-to-cart-button.tsx": {
+    "mtime": 1786451467.5606487,
+    "ast_hash": "79b488eb847f3bdf05ebb86aa7545c9c",
+    "semantic_hash": ""
+  },
+  "components/store/cart-contents.tsx": {
+    "mtime": 1786451396.0834851,
+    "ast_hash": "058c6fd3df1334e797124bf7e6d7739b",
+    "semantic_hash": ""
+  },
+  "lib/services/cart-actions.ts": {
+    "mtime": 1786451468.7910693,
+    "ast_hash": "bbebe60cdb070387b19c0c854d7cefef",
+    "semantic_hash": ""
+  },
+  "lib/services/cart-errors.ts": {
+    "mtime": 1786451467.5631666,
+    "ast_hash": "48dfb6c624a9d405448debd73c9c020c",
+    "semantic_hash": ""
+  },
+  "lib/services/cart.ts": {
+    "mtime": 1786451467.5606487,
+    "ast_hash": "4766cb0f7f584785841c027e629c56bf",
+    "semantic_hash": ""
   }
 }

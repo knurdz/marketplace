@@ -22,6 +22,7 @@ export const RATE_LIMITS = {
   recoveryComplete: { limit: 10, windowMs: 15 * MS_MINUTE },
   verifyComplete: { limit: 10, windowMs: 15 * MS_MINUTE },
   upload: { limit: 20, windowMs: MS_HOUR },
+  cart: { limit: 60, windowMs: MS_MINUTE },
 } as const;
 
 type BucketHits = number[];

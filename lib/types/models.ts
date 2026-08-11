@@ -43,6 +43,47 @@ export type ProductImage = {
   alt: string | null;
 };
 
+export type Cart = {
+  $id: string;
+  userId: string;
+  sellerId: string | null;
+};
+
+export type CartItem = {
+  $id: string;
+  cartId: string;
+  productId: string;
+  quantity: number;
+  unitPrice: number;
+};
+
+/** Live product join + validation flags for cart UI. */
+export type CartLineIssue =
+  | "ok"
+  | "out_of_stock"
+  | "unavailable"
+  | "inactive"
+  | "missing";
+
+export type CartLine = {
+  item: CartItem;
+  productTitle: string | null;
+  productStock: number;
+  productAvailable: boolean;
+  productCurrency: string;
+  lineTotal: number;
+  issue: CartLineIssue;
+  purchasable: boolean;
+};
+
+export type CartView = {
+  cart: Cart | null;
+  lines: CartLine[];
+  itemCount: number;
+  subtotal: number;
+  hasIssues: boolean;
+};
+
 export type SellerProfile = {
   $id: string;
   userId: string;
