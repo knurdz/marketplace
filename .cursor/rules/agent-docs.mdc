@@ -1,0 +1,16 @@
+---
+description: Point agents at docs/agent + root WORK_DISTRIBUTION
+alwaysApply: true
+---
+
+# Agent documentation
+
+Before planning or implementing, read:
+
+1. `docs/agent/INDEX.md`
+2. `WORK_DISTRIBUTION.md` (repo root — checklists + numbered steps)
+3. `docs/agent/MEMBER_IMPLEMENTATION_GUIDE.md` (your Member section)
+4. `.cursor/rules/*`
+5. `docs/agent/SCHEMA.md` and `docs/agent/PAYHERE.md` when they exist
+
+Implement **one numbered step** at a time. Tick the matching step in `WORK_DISTRIBUTION.md` when done. Do not commit unless the human explicitly asks.
