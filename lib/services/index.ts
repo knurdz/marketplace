@@ -1,3 +1,5 @@
+export { getAdminMetrics } from "./admin-metrics";
+export type { AdminMetrics } from "./admin-metrics";
 export {
   asProduct,
   getProduct,
@@ -23,10 +25,7 @@ export {
   normalizePlatformSettingKey,
   parsePlatformSettingJson,
 } from "./platform-settings";
-export {
-  normalizePayHereOrderId,
-  requestPayHereCheckout,
-} from "./payhere";
+export { requestPayHereCheckout } from "./payhere";
 export { getSessionUser } from "./session";
 export {
   deleteFile,

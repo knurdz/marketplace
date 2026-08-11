@@ -25,8 +25,8 @@ const NOT_CONFIGURED =
 const GENERIC_FAILURE =
   "Unable to start PayHere checkout. Please try again later.";
 
-/** Normalize orderId; empty/invalid → null. */
-export function normalizePayHereOrderId(
+/** Normalize orderId; empty/invalid → null. Not exported — "use server" files may only export async actions. */
+function normalizePayHereOrderId(
   raw: string | null | undefined,
 ): string | null {
   if (raw == null) return null;
