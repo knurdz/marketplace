@@ -45,9 +45,9 @@
     "semantic_hash": "81d673fe55b4ffd76617bb0f2cc41940"
   },
   "lib/appwrite/index.ts": {
-    "mtime": 1786428912.6361454,
-    "ast_hash": "b0ac995098494156060190978815963f",
-    "semantic_hash": "b0ac995098494156060190978815963f"
+    "mtime": 1786435731.3498976,
+    "ast_hash": "bb8ab407979f02e21dd9c3be6aadb3eb",
+    "semantic_hash": "bb8ab407979f02e21dd9c3be6aadb3eb"
   },
   "lib/appwrite/server.ts": {
     "mtime": 1786434623.4559107,
@@ -205,14 +205,14 @@
     "semantic_hash": "a0238eb4ceb9341a82b6e3640ca96743"
   },
   "components/layout/portal-shell.tsx": {
-    "mtime": 1786428857.3261483,
-    "ast_hash": "c429bb81ae2d9ae99da1d236828df2f9",
-    "semantic_hash": "c429bb81ae2d9ae99da1d236828df2f9"
+    "mtime": 1786435793.5370257,
+    "ast_hash": "c9b50d257888426719b3be565bd4872b",
+    "semantic_hash": "c9b50d257888426719b3be565bd4872b"
   },
   "components/layout/store-navbar.tsx": {
-    "mtime": 1786428857.3295236,
-    "ast_hash": "42de5c7f91d30fc548359e6e0f70fdcf",
-    "semantic_hash": "42de5c7f91d30fc548359e6e0f70fdcf"
+    "mtime": 1786435790.705335,
+    "ast_hash": "46bc3f7d403082a94b480ffca62535fc",
+    "semantic_hash": "46bc3f7d403082a94b480ffca62535fc"
   },
   "components/ui/button.tsx": {
     "mtime": 1786428730.8482575,
@@ -245,14 +245,14 @@
     "semantic_hash": "5a6fd53fdcf2be529e9cc0b718fde352"
   },
   "lib/types/index.ts": {
-    "mtime": 1786434623.4559522,
-    "ast_hash": "83364911aa0cdc144ad76579bd91f7ae",
-    "semantic_hash": "83364911aa0cdc144ad76579bd91f7ae"
+    "mtime": 1786435724.4043689,
+    "ast_hash": "e1bdcbfc2e2424c4fab3de405d4e73ed",
+    "semantic_hash": "e1bdcbfc2e2424c4fab3de405d4e73ed"
   },
   "lib/types/models.ts": {
-    "mtime": 1786434623.5008638,
-    "ast_hash": "deed734f426071ac3ade509704096d2f",
-    "semantic_hash": "deed734f426071ac3ade509704096d2f"
+    "mtime": 1786435700.937107,
+    "ast_hash": "197d1d8a355db1d0d35b7eb5c5ac00b5",
+    "semantic_hash": "197d1d8a355db1d0d35b7eb5c5ac00b5"
   },
   "lib/types/status.ts": {
     "mtime": 1786434623.4559352,
@@ -260,9 +260,9 @@
     "semantic_hash": "6247950c7b70165c09153d62f99539b1"
   },
   "lib/services/index.ts": {
-    "mtime": 1786434623.4560447,
-    "ast_hash": "314a2b9682c273264b3d37e46d779f5b",
-    "semantic_hash": "314a2b9682c273264b3d37e46d779f5b"
+    "mtime": 1786435735.8659263,
+    "ast_hash": "65215ac9dd938ee91e68a6e18bc9c13c",
+    "semantic_hash": "65215ac9dd938ee91e68a6e18bc9c13c"
   },
   "lib/services/products.ts": {
     "mtime": 1786434623.5008035,
@@ -280,9 +280,9 @@
     "semantic_hash": "5aab0a51e247bf094afdfb51a1bff2f9"
   },
   "scripts/seed-demo.mjs": {
-    "mtime": 1786429787.9410448,
-    "ast_hash": "349f624774b64eff159fdde125285ade",
-    "semantic_hash": "349f624774b64eff159fdde125285ade"
+    "mtime": 1786435865.6313875,
+    "ast_hash": "36a36f493dc208b9131030115ae0c793",
+    "semantic_hash": "36a36f493dc208b9131030115ae0c793"
   },
   "lib/security/rate-limit.ts": {
     "mtime": 1786435373.5230079,
@@ -298,5 +298,35 @@
     "mtime": 1786420667.0,
     "ast_hash": "eab93c3b42ab659b1ee972a143426f1b",
     "semantic_hash": "eab93c3b42ab659b1ee972a143426f1b"
+  },
+  "components/notifications/notification-bell.tsx": {
+    "mtime": 1786435839.6049147,
+    "ast_hash": "3292ac39b9a915796bbaef39b67952b9",
+    "semantic_hash": "3292ac39b9a915796bbaef39b67952b9"
+  },
+  "components/ui/badge.tsx": {
+    "mtime": 1786435694.0974503,
+    "ast_hash": "633c33997e6137921ae433dd2dd0cb31",
+    "semantic_hash": "633c33997e6137921ae433dd2dd0cb31"
+  },
+  "components/ui/popover.tsx": {
+    "mtime": 1786435694.0657601,
+    "ast_hash": "32bf79a82d9ed7f3256592f7c0ca4a62",
+    "semantic_hash": "32bf79a82d9ed7f3256592f7c0ca4a62"
+  },
+  "lib/appwrite/notification-actions.ts": {
+    "mtime": 1786435835.6889982,
+    "ast_hash": "d3cc55443a55f2fe7d3eb31d995a7acf",
+    "semantic_hash": "d3cc55443a55f2fe7d3eb31d995a7acf"
+  },
+  "lib/appwrite/notifications.ts": {
+    "mtime": 1786435833.9596617,
+    "ast_hash": "853cbc89d5e6c5a14dea324e83cead15",
+    "semantic_hash": "853cbc89d5e6c5a14dea324e83cead15"
+  },
+  "lib/services/notifications.ts": {
+    "mtime": 1786435853.6654458,
+    "ast_hash": "ae5a153cbafa75f3c8f886c172a2abff",
+    "semantic_hash": "ae5a153cbafa75f3c8f886c172a2abff"
   }
 }

@@ -2,6 +2,7 @@ import Link from "next/link";
 import type { ReactNode } from "react";
 import { Menu } from "lucide-react";
 import { signOut } from "@/lib/appwrite/auth";
+import { NotificationBell } from "@/components/notifications/notification-bell";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import {
@@ -114,9 +115,12 @@ export function PortalShell({
           <p className="hidden font-mono text-xs text-muted-foreground md:block">
             Empty shell — features arrive in later steps
           </p>
-          <Button variant="ghost" size="sm" asChild className="ml-auto md:ml-0">
-            <Link href="/account">Account</Link>
-          </Button>
+          <div className="ml-auto flex items-center gap-2 md:ml-0">
+            <NotificationBell />
+            <Button variant="ghost" size="sm" asChild>
+              <Link href="/account">Account</Link>
+            </Button>
+          </div>
         </header>
         <main className="flex-1 px-4 py-8 md:px-8">{children}</main>
       </div>

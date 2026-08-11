@@ -1,6 +1,7 @@
 export type {
   BankSlip,
   Category,
+  Notification,
   Order,
   OrderItem,
   Payment,

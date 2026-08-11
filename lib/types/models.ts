@@ -108,3 +108,15 @@ export type Report = {
   details: string | null;
   status: ReportStatus;
 };
+
+export type Notification = {
+  $id: string;
+  userId: string;
+  type: string;
+  title: string;
+  body: string;
+  read: boolean;
+  link: string | null;
+  meta: string | null;
+  $createdAt?: string;
+};
