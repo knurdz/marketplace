@@ -25,6 +25,17 @@ export function getAppwriteProjectId(): string {
   return projectId;
 }
 
+/** Public app origin for recovery/verify redirect URLs (must match a Web platform hostname). */
+export function getAppUrl(): string {
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL?.trim().replace(/\/$/, "");
+  if (!appUrl) {
+    throw new Error(
+      "Missing NEXT_PUBLIC_APP_URL. Set it in .env.local (e.g. http://localhost:3000).",
+    );
+  }
+  return appUrl;
+}
+
 /** True when public Appwrite env is present (does not check API key). */
 export function hasAppwritePublicConfig(): boolean {
   return Boolean(
