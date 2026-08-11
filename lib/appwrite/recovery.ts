@@ -2,8 +2,17 @@
 
 import { redirect, unstable_rethrow } from "next/navigation";
 import { AppwriteException } from "node-appwrite";
+import {
+  assertRateLimit,
+  assertRateLimits,
+  getClientIp,
+  normalizeEmailKey,
+  RATE_LIMIT_MESSAGE,
+  RATE_LIMITS,
+} from "@/lib/security/rate-limit";
 import { getAppUrl } from "./config";
 import { createPublicClient, createSessionClient } from "./server";
+import { getLoggedInUser } from "./session";
 
 export type RecoveryActionState = {
   error?: string;
@@ -33,8 +42,12 @@ function mapRecoveryError(error: unknown): string {
   return "Something went wrong. Please try again.";
 }
 
+const RECOVERY_SUCCESS =
+  "If an account exists for that email, a reset link has been sent. Check your inbox.";
+
 /**
  * Always returns a generic success message so we do not leak whether the email exists.
+ * Rate-limited responses use the same success shape (anti-enumeration).
  */
 export async function requestPasswordRecovery(
   _prev: RecoveryActionState,
@@ -43,6 +56,24 @@ export async function requestPasswordRecovery(
   const email = readString(formData, "email");
   if (!email) {
     return { error: "Email is required." };
+  }
+
+  const ip = await getClientIp();
+  const emailKey = normalizeEmailKey(email);
+  const recoveryLimit = assertRateLimits([
+    {
+      bucket: "auth.recovery",
+      key: `email:${emailKey}`,
+      ...RATE_LIMITS.recovery,
+    },
+    {
+      bucket: "auth.recovery",
+      key: `ip:${ip}`,
+      ...RATE_LIMITS.recovery,
+    },
+  ]);
+  if (!recoveryLimit.ok) {
+    return { success: RECOVERY_SUCCESS };
   }
 
   try {
@@ -62,10 +93,7 @@ export async function requestPasswordRecovery(
     }
   }
 
-  return {
-    success:
-      "If an account exists for that email, a reset link has been sent. Check your inbox.",
-  };
+  return { success: RECOVERY_SUCCESS };
 }
 
 export async function completePasswordRecovery(
@@ -90,6 +118,16 @@ export async function completePasswordRecovery(
     return { error: "Passwords do not match." };
   }
 
+  const ip = await getClientIp();
+  const completeLimit = assertRateLimit({
+    bucket: "auth.recovery_complete",
+    key: `ip:${ip}`,
+    ...RATE_LIMITS.recoveryComplete,
+  });
+  if (!completeLimit.ok) {
+    return { error: RATE_LIMIT_MESSAGE };
+  }
+
   try {
     const { account } = await createPublicClient();
     await account.updateRecovery({
@@ -111,6 +149,21 @@ export async function requestEmailVerification(
 ): Promise<RecoveryActionState> {
   void prev;
   void formData;
+
+  const user = await getLoggedInUser();
+  if (!user) {
+    return { error: "You must be signed in to verify your email." };
+  }
+
+  const verifyLimit = assertRateLimit({
+    bucket: "auth.verify_resend",
+    key: `user:${user.$id}`,
+    ...RATE_LIMITS.verifyResend,
+  });
+  if (!verifyLimit.ok) {
+    return { error: RATE_LIMIT_MESSAGE };
+  }
+
   try {
     const { account } = await createSessionClient();
     await account.createVerification({
@@ -138,6 +191,16 @@ export async function completeEmailVerification(
       ok: false,
       error: "This verification link is missing required parameters.",
     };
+  }
+
+  const ip = await getClientIp();
+  const verifyLimit = assertRateLimit({
+    bucket: "auth.verify_complete",
+    key: `ip:${ip}`,
+    ...RATE_LIMITS.verifyComplete,
+  });
+  if (!verifyLimit.ok) {
+    return { ok: false, error: RATE_LIMIT_MESSAGE };
   }
 
   try {

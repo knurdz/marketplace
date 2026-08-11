@@ -86,6 +86,44 @@
       "scripts_setup_mvp_schema_waitcolumnsavailable"
     ],
     "2": [
+      "components_auth_resend_verification_form",
+      "components_auth_resend_verification_form_initialstate",
+      "components_auth_resend_verification_form_resendverificationform",
+      "lib_appwrite_auth",
+      "lib_appwrite_auth_authactionstate",
+      "lib_appwrite_auth_mapautherror",
+      "lib_appwrite_auth_readstring",
+      "lib_appwrite_auth_rollbacksignup",
+      "lib_appwrite_auth_safenextpath",
+      "lib_appwrite_auth_setsessioncookie",
+      "lib_appwrite_auth_signinwithemail",
+      "lib_appwrite_auth_signout",
+      "lib_appwrite_auth_signupwithemail",
+      "lib_appwrite_recovery",
+      "lib_appwrite_recovery_completeemailverification",
+      "lib_appwrite_recovery_completepasswordrecovery",
+      "lib_appwrite_recovery_maprecoveryerror",
+      "lib_appwrite_recovery_readstring",
+      "lib_appwrite_recovery_recoveryactionstate",
+      "lib_appwrite_recovery_requestemailverification",
+      "lib_appwrite_recovery_requestpasswordrecovery",
+      "lib_security_rate_limit",
+      "lib_security_rate_limit_assertratelimit",
+      "lib_security_rate_limit_assertratelimits",
+      "lib_security_rate_limit_buckethits",
+      "lib_security_rate_limit_getclientip",
+      "lib_security_rate_limit_normalizeemailkey",
+      "lib_security_rate_limit_peekratelimit",
+      "lib_security_rate_limit_pruneifneeded",
+      "lib_security_rate_limit_rate_limit_message",
+      "lib_security_rate_limit_rate_limits",
+      "lib_security_rate_limit_ratelimitblocked",
+      "lib_security_rate_limit_ratelimitok",
+      "lib_security_rate_limit_ratelimitresult",
+      "lib_security_rate_limit_resetratelimitstorefortests",
+      "lib_security_rate_limit_store"
+    ],
+    "3": [
       "lib_types_index",
       "lib_types_models",
       "lib_types_models_bankslip",
@@ -122,42 +160,6 @@
       "lib_types_status_reportstatus",
       "lib_types_status_seller_statuses",
       "lib_types_status_sellerstatus"
-    ],
-    "3": [
-      "lib_appwrite_browser",
-      "lib_appwrite_browser_getbrowseraccount",
-      "lib_appwrite_browser_getbrowserclient",
-      "lib_appwrite_config",
-      "lib_appwrite_config_all_bucket_ids",
-      "lib_appwrite_config_all_table_ids",
-      "lib_appwrite_config_bank_slip_extensions",
-      "lib_appwrite_config_bank_slip_mime_types",
-      "lib_appwrite_config_getappwriteendpoint",
-      "lib_appwrite_config_getappwriteprojectid",
-      "lib_appwrite_config_hasappwritepublicconfig",
-      "lib_appwrite_config_image_extensions",
-      "lib_appwrite_config_image_mime_types",
-      "lib_appwrite_server",
-      "lib_appwrite_server_createadminclient",
-      "lib_appwrite_server_createsessionclient",
-      "lib_appwrite_session",
-      "lib_appwrite_session_getloggedinuser",
-      "lib_appwrite_storage",
-      "lib_appwrite_storage_bankslippermissions",
-      "lib_appwrite_storage_deletefile",
-      "lib_appwrite_storage_deletefileasadmin",
-      "lib_appwrite_storage_extensionof",
-      "lib_appwrite_storage_isappwritestorageerror",
-      "lib_appwrite_storage_publicimagepermissions",
-      "lib_appwrite_storage_toinputfile",
-      "lib_appwrite_storage_uploadavatar",
-      "lib_appwrite_storage_uploadbankslip",
-      "lib_appwrite_storage_uploadfile",
-      "lib_appwrite_storage_uploadproductimage",
-      "lib_appwrite_storage_uploadvalidationerror",
-      "lib_appwrite_storage_uploadvalidationok",
-      "lib_appwrite_storage_uploadvalidationresult",
-      "lib_appwrite_storage_validateupload"
     ],
     "4": [
       "eslint",
@@ -228,41 +230,15 @@
       "tsconfig_paths"
     ],
     "6": [
-      "app_store_page",
-      "app_store_page_home",
-      "components_auth_resend_verification_form",
-      "components_auth_resend_verification_form_initialstate",
-      "components_auth_resend_verification_form_resendverificationform",
-      "lib_appwrite_config_getappurl",
-      "lib_appwrite_recovery",
-      "lib_appwrite_recovery_completeemailverification",
-      "lib_appwrite_recovery_completepasswordrecovery",
-      "lib_appwrite_recovery_maprecoveryerror",
-      "lib_appwrite_recovery_readstring",
-      "lib_appwrite_recovery_recoveryactionstate",
-      "lib_appwrite_recovery_requestemailverification",
-      "lib_appwrite_recovery_requestpasswordrecovery",
-      "lib_appwrite_server_createpublicclient",
-      "lib_services_index",
-      "lib_services_products",
-      "lib_services_products_asboolean",
-      "lib_services_products_asnullablestring",
-      "lib_services_products_asnumber",
-      "lib_services_products_asproduct",
-      "lib_services_products_getproduct",
-      "lib_services_products_ispubliclylisted",
-      "lib_services_products_listactiveproducts",
-      "lib_services_session",
-      "lib_services_session_getsessionuser",
-      "lib_services_uploads"
-    ],
-    "7": [
       "appwrite",
       "class_variance_authority",
       "clsx",
       "lucide_react",
       "next",
       "node_appwrite",
+      "package_2",
+      "package_2_devdependencies",
+      "package_2_devdependencies_shadcn",
       "package_dependencies",
       "package_dependencies_appwrite",
       "package_dependencies_class_variance_authority",
@@ -283,7 +259,7 @@
       "tailwind_merge",
       "tw_animate_css"
     ],
-    "8": [
+    "7": [
       "app_auth_account_page",
       "app_auth_account_page_accountpage",
       "components_auth_profile_form",
@@ -307,7 +283,7 @@
       "lib_appwrite_storage_urls_getfilepreviewurl",
       "lib_appwrite_storage_urls_getfileviewurl"
     ],
-    "9": [
+    "8": [
       "components",
       "components_aliases",
       "components_aliases_components",
@@ -331,6 +307,27 @@
       "components_tailwind_prefix",
       "components_tsx"
     ],
+    "9": [
+      "lib_appwrite_browser",
+      "lib_appwrite_browser_getbrowseraccount",
+      "lib_appwrite_browser_getbrowserclient",
+      "lib_appwrite_config",
+      "lib_appwrite_config_all_bucket_ids",
+      "lib_appwrite_config_all_table_ids",
+      "lib_appwrite_config_bank_slip_extensions",
+      "lib_appwrite_config_bank_slip_mime_types",
+      "lib_appwrite_config_getappurl",
+      "lib_appwrite_config_getappwriteendpoint",
+      "lib_appwrite_config_getappwriteprojectid",
+      "lib_appwrite_config_hasappwritepublicconfig",
+      "lib_appwrite_config_image_extensions",
+      "lib_appwrite_config_image_mime_types",
+      "lib_appwrite_server",
+      "lib_appwrite_server_createadminclient",
+      "lib_appwrite_server_createsessionclient",
+      "lib_appwrite_session",
+      "lib_appwrite_session_getloggedinuser"
+    ],
     "10": [
       "scripts_seed_demo",
       "scripts_seed_demo_apikey",
@@ -352,24 +349,41 @@
       "scripts_seed_demo_users"
     ],
     "11": [
-      "lib_appwrite_auth",
-      "lib_appwrite_auth_authactionstate",
-      "lib_appwrite_auth_mapautherror",
-      "lib_appwrite_auth_readstring",
-      "lib_appwrite_auth_rollbacksignup",
-      "lib_appwrite_auth_safenextpath",
-      "lib_appwrite_auth_setsessioncookie",
-      "lib_appwrite_auth_signinwithemail",
-      "lib_appwrite_auth_signout",
-      "lib_appwrite_auth_signupwithemail",
-      "lib_appwrite_roles",
-      "lib_appwrite_roles_requirelabel",
-      "lib_appwrite_roles_requireuser",
-      "lib_appwrite_roles_role_labels",
-      "lib_appwrite_roles_rolelabel",
-      "lib_appwrite_roles_userhaslabel"
+      "lib_appwrite_storage",
+      "lib_appwrite_storage_bankslippermissions",
+      "lib_appwrite_storage_deletefile",
+      "lib_appwrite_storage_deletefileasadmin",
+      "lib_appwrite_storage_extensionof",
+      "lib_appwrite_storage_isappwritestorageerror",
+      "lib_appwrite_storage_publicimagepermissions",
+      "lib_appwrite_storage_toinputfile",
+      "lib_appwrite_storage_uploadavatar",
+      "lib_appwrite_storage_uploadbankslip",
+      "lib_appwrite_storage_uploadfile",
+      "lib_appwrite_storage_uploadproductimage",
+      "lib_appwrite_storage_uploadvalidationerror",
+      "lib_appwrite_storage_uploadvalidationok",
+      "lib_appwrite_storage_uploadvalidationresult",
+      "lib_appwrite_storage_validateupload"
     ],
     "12": [
+      "app_store_page",
+      "app_store_page_home",
+      "lib_appwrite_server_createpublicclient",
+      "lib_services_index",
+      "lib_services_products",
+      "lib_services_products_asboolean",
+      "lib_services_products_asnullablestring",
+      "lib_services_products_asnumber",
+      "lib_services_products_asproduct",
+      "lib_services_products_getproduct",
+      "lib_services_products_ispubliclylisted",
+      "lib_services_products_listactiveproducts",
+      "lib_services_session",
+      "lib_services_session_getsessionuser",
+      "lib_services_uploads"
+    ],
+    "13": [
       "scripts_setup_storage_buckets",
       "scripts_setup_storage_buckets_apikey",
       "scripts_setup_storage_buckets_bucketcreateperms",
@@ -381,7 +395,7 @@
       "scripts_setup_storage_buckets_projectid",
       "scripts_setup_storage_buckets_storage"
     ],
-    "13": [
+    "14": [
       "app_auth_login_page",
       "app_auth_login_page_loginpage",
       "app_auth_login_page_safenextpath",
@@ -389,7 +403,7 @@
       "components_auth_login_form_initialstate",
       "components_auth_login_form_loginform"
     ],
-    "14": [
+    "15": [
       "app_auth_reset_password_page",
       "app_auth_reset_password_page_resetpasswordpage",
       "app_auth_reset_password_page_searchparams",
@@ -397,56 +411,64 @@
       "components_auth_reset_password_form_initialstate",
       "components_auth_reset_password_form_resetpasswordform"
     ],
-    "15": [
+    "16": [
+      "lib_appwrite_roles",
+      "lib_appwrite_roles_requirelabel",
+      "lib_appwrite_roles_requireuser",
+      "lib_appwrite_roles_role_labels",
+      "lib_appwrite_roles_rolelabel",
+      "lib_appwrite_roles_userhaslabel"
+    ],
+    "17": [
       "app_auth_forgot_password_page",
       "app_auth_forgot_password_page_forgotpasswordpage",
       "components_auth_forgot_password_form",
       "components_auth_forgot_password_form_forgotpasswordform",
       "components_auth_forgot_password_form_initialstate"
     ],
-    "16": [
+    "18": [
       "app_auth_register_page",
       "app_auth_register_page_registerpage",
       "components_auth_register_form",
       "components_auth_register_form_initialstate",
       "components_auth_register_form_registerform"
     ],
-    "17": [
+    "19": [
       "app_auth_verify_email_page",
       "app_auth_verify_email_page_searchparams",
       "app_auth_verify_email_page_verifyemailpage"
     ],
-    "18": [
+    "20": [
       "cursor_mcp",
       "cursor_mcp_mcp_server_shadcn",
       "mcp_command_npx"
     ],
-    "19": [
+    "21": [
       "proxy",
       "proxy_config",
       "proxy_proxy"
     ],
-    "20": [
+    "22": [
       "app_admin_page",
       "app_admin_page_adminpage"
     ],
-    "21": [
+    "23": [
       "app_auth_layout",
       "app_auth_layout_authlayout"
     ],
-    "22": [
+    "24": [
       "app_seller_page",
       "app_seller_page_sellerpage"
     ],
-    "23": [
+    "25": [
       "eslint_config",
       "eslint_config_eslintconfig"
     ],
-    "24": [
+    "26": [
       "next_config",
       "next_config_nextconfig"
     ],
-    "25": [
+    "27": [
       "postcss_config",
       "postcss_config_config"
     ]
@@ -454,30 +476,32 @@
   "cohesion": {
     "0": 0.0919661733615222,
     "1": 0.18768768768768768,
-    "2": 0.13015873015873017,
-    "3": 0.1140819964349376,
+    "2": 0.12857142857142856,
+    "3": 0.13015873015873017,
     "4": 0.06060606060606061,
     "5": 0.06451612903225806,
-    "6": 0.1623931623931624,
-    "7": 0.08,
-    "8": 0.22510822510822512,
-    "9": 0.09090909090909091,
+    "6": 0.07142857142857142,
+    "7": 0.22510822510822512,
+    "8": 0.09090909090909091,
+    "9": 0.15789473684210525,
     "10": 0.1830065359477124,
-    "11": 0.21666666666666667,
-    "12": 0.24444444444444444,
-    "13": 0.4666666666666667,
-    "14": 0.4,
-    "15": 0.5,
-    "16": 0.5,
-    "17": 0.6666666666666666,
-    "18": 0.6666666666666666,
+    "11": 0.225,
+    "12": 0.29523809523809524,
+    "13": 0.24444444444444444,
+    "14": 0.4666666666666667,
+    "15": 0.4,
+    "16": 0.4666666666666667,
+    "17": 0.5,
+    "18": 0.5,
     "19": 0.6666666666666666,
-    "20": 1.0,
-    "21": 1.0,
+    "20": 0.6666666666666666,
+    "21": 0.6666666666666666,
     "22": 1.0,
     "23": 1.0,
     "24": 1.0,
-    "25": 1.0
+    "25": 1.0,
+    "26": 1.0,
+    "27": 1.0
   },
   "gods": [
     {
@@ -516,6 +540,11 @@
       "degree": 15
     },
     {
+      "id": "lib_security_rate_limit_assertratelimit",
+      "label": "assertRateLimit()",
+      "degree": 11
+    },
+    {
       "id": "scripts_setup_mvp_schema_setupproducts",
       "label": "setupProducts()",
       "degree": 10
@@ -523,11 +552,6 @@
     {
       "id": "scripts_setup_mvp_schema_setupcartitems",
       "label": "setupCartItems()",
-      "degree": 8
-    },
-    {
-      "id": "scripts_setup_mvp_schema_setuporders",
-      "label": "setupOrders()",
       "degree": 8
     }
   ],
@@ -588,8 +612,41 @@
       "why": "connects across different repos/directories; peripheral node `SideNav()` unexpectedly reaches hub `cn()`"
     }
   ],
-  "tokens": {
-    "input": 0,
-    "output": 0
-  }
+  "questions": [
+    {
+      "type": "bridge_node",
+      "question": "Why does `dependencies` connect `dependencies` to `devDependencies`?",
+      "why": "High betweenness centrality (0.014) - this node is a cross-community bridge."
+    },
+    {
+      "type": "isolated_nodes",
+      "question": "What connects `npx`, `eslintConfig`, `nextConfig` to the rest of the system?",
+      "why": "139 weakly-connected nodes found - possible documentation gaps or missing edges."
+    },
+    {
+      "type": "low_cohesion",
+      "question": "Should `cn` be split into smaller, more focused modules?",
+      "why": "Cohesion score 0.0919661733615222 - nodes in this community are weakly interconnected."
+    },
+    {
+      "type": "low_cohesion",
+      "question": "Should `rate-limit.ts` be split into smaller, more focused modules?",
+      "why": "Cohesion score 0.12857142857142856 - nodes in this community are weakly interconnected."
+    },
+    {
+      "type": "low_cohesion",
+      "question": "Should `index.ts` be split into smaller, more focused modules?",
+      "why": "Cohesion score 0.13015873015873017 - nodes in this community are weakly interconnected."
+    },
+    {
+      "type": "low_cohesion",
+      "question": "Should `devDependencies` be split into smaller, more focused modules?",
+      "why": "Cohesion score 0.06060606060606061 - nodes in this community are weakly interconnected."
+    },
+    {
+      "type": "low_cohesion",
+      "question": "Should `compilerOptions` be split into smaller, more focused modules?",
+      "why": "Cohesion score 0.06451612903225806 - nodes in this community are weakly interconnected."
+    }
+  ]
 }
