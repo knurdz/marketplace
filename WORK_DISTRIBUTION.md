@@ -162,7 +162,7 @@ Complete payment infrastructure so Members 2–4 only consume APIs / admin UI.
 - [x] Order placement + tracking timeline + order history
 - [x] Cancel order (allowed states only)
 - [ ] Report listing
-- [ ] Wishlist (full page; preview on dashboard)
+- [x] Wishlist full page CRUD (dashboard preview → step 2.12)
 - [ ] Product reviews & ratings (after completed order)
 - [ ] Seller ratings (from buyer after order; distinct from product review if schema allows)
 - [ ] Trending / recently viewed (optional — Phase 5)
@@ -184,7 +184,7 @@ Complete payment infrastructure so Members 2–4 only consume APIs / admin UI.
 | [x] **2.10** | Orders UI        | List + detail timeline                                   | IDOR: no other users’ orders  |
 | [x] **2.11** | Cancel           | Early statuses only                                      | Enum rules enforced           |
 | [ ] **2.12** | Buyer dashboard  | Summaries + recent + wishlist preview                    | Empty states OK               |
-| [ ] **2.13** | Wishlist         | Full page CRUD                                           | Own wishlist only             |
+| [x] **2.13** | Wishlist         | Full page CRUD                                           | Own wishlist only             |
 | [ ] **2.14** | Reviews          | After `completed`; product + seller rating               | Policy enforced               |
 | [ ] **2.15** | Report listing   | Create `reports`                                         | Feeds admin queue             |
 | [ ] **2.16** | Optional Phase 5 | Trending / recently viewed / reorder                     | After MVP E2E                 |

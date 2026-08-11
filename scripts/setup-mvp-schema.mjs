@@ -364,6 +364,30 @@ async function setupCartItems() {
   ]);
 }
 
+async function setupWishlistItems() {
+  await ensureTable(
+    "wishlist_items",
+    "Wishlist Items",
+    [Permission.create(Role.users())],
+    true,
+  );
+  await ensureString("wishlist_items", "userId", 36, true);
+  await ensureString("wishlist_items", "productId", 36, true);
+  await waitColumnsAvailable("wishlist_items", ["userId", "productId"]);
+  await ensureIndex("wishlist_items", "userId_idx", TablesDBIndexType.Key, [
+    "userId",
+  ]);
+  await ensureIndex(
+    "wishlist_items",
+    "user_product_unique",
+    TablesDBIndexType.Unique,
+    ["userId", "productId"],
+  );
+  await ensureIndex("wishlist_items", "productId_idx", TablesDBIndexType.Key, [
+    "productId",
+  ]);
+}
+
 async function setupOrders() {
   await ensureTable(
     "orders",
@@ -645,6 +669,7 @@ async function main() {
   await setupProductImages();
   await setupCarts();
   await setupCartItems();
+  await setupWishlistItems();
   await setupOrders();
   await setupOrderItems();
   await setupPayments();

@@ -84,6 +84,26 @@ export type CartView = {
   hasIssues: boolean;
 };
 
+export type WishlistItem = {
+  $id: string;
+  userId: string;
+  productId: string;
+};
+
+/** Live product join + validation flags for wishlist UI. */
+export type WishlistLineIssue = "ok" | "inactive" | "unavailable" | "missing";
+
+export type WishlistLine = {
+  item: WishlistItem;
+  product: Product | null;
+  issue: WishlistLineIssue;
+};
+
+export type WishlistView = {
+  lines: WishlistLine[];
+  itemCount: number;
+};
+
 export type SellerProfile = {
   $id: string;
   userId: string;

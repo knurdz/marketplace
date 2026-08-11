@@ -19,6 +19,7 @@ export const TABLE_PRODUCTS = "products";
 export const TABLE_PRODUCT_IMAGES = "product_images";
 export const TABLE_CARTS = "carts";
 export const TABLE_CART_ITEMS = "cart_items";
+export const TABLE_WISHLIST_ITEMS = "wishlist_items";
 export const TABLE_ORDERS = "orders";
 export const TABLE_ORDER_ITEMS = "order_items";
 export const TABLE_PAYMENTS = "payments";
@@ -38,6 +39,7 @@ export const ALL_TABLE_IDS = [
   TABLE_PRODUCT_IMAGES,
   TABLE_CARTS,
   TABLE_CART_ITEMS,
+  TABLE_WISHLIST_ITEMS,
   TABLE_ORDERS,
   TABLE_ORDER_ITEMS,
   TABLE_PAYMENTS,

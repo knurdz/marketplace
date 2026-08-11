@@ -33,6 +33,22 @@ export {
   updateCartItemQuantity,
 } from "./cart-actions";
 export {
+  asWishlistItem,
+  getOwnWishlistView,
+  isProductInOwnWishlist,
+  listOwnWishlistItems,
+} from "./wishlist";
+export {
+  WISHLIST_ERROR_CODES,
+  type WishlistActionState,
+  type WishlistErrorCode,
+} from "./wishlist-errors";
+export {
+  addToWishlist,
+  removeFromWishlist,
+  toggleWishlistProduct,
+} from "./wishlist-actions";
+export {
   getPublicSellerByUserId,
   getSellerBankDetailsForCheckout,
 } from "./sellers";
