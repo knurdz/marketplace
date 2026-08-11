@@ -1,9 +1,11 @@
 "use server";
 
 import { AppwriteException, Permission, Role } from "node-appwrite";
-import { DATABASE_ID, TABLE_PROFILES } from "./config";
+import { revalidatePath } from "next/cache";
+import { BUCKET_AVATARS, DATABASE_ID, TABLE_PROFILES } from "./config";
 import { createAdminClient, createSessionClient } from "./server";
 import { getLoggedInUser } from "./session";
+import { deleteFile, uploadAvatar } from "./storage";
 
 export type Profile = {
   $id: string;
@@ -150,7 +152,7 @@ export async function updateOwnProfile(
         displayName,
         phone: phone || null,
         bio: bio || null,
-        // Never allow client to change userId / avatar here (avatar in 1.8).
+        // Never allow client to change userId / avatar here.
         userId: user.$id,
       },
     });
@@ -164,5 +166,86 @@ export async function updateOwnProfile(
     return { error: "Could not update profile. Please try again." };
   }
 
+  revalidatePath("/account");
   return { success: "Profile updated." };
+}
+
+/**
+ * Upload avatar for the signed-in user only.
+ * Never trusts a client-supplied fileId; always uses session userId row.
+ */
+export async function updateOwnAvatar(
+  _prev: ProfileActionState,
+  formData: FormData,
+): Promise<ProfileActionState> {
+  const user = await getLoggedInUser();
+  if (!user) {
+    return { error: "You must be signed in to update your avatar." };
+  }
+
+  const file = formData.get("avatar");
+  if (!(file instanceof File) || file.size <= 0) {
+    return { error: "Choose an image file to upload." };
+  }
+
+  let uploadedFileId: string | null = null;
+  let previousFileId: string | null = null;
+
+  try {
+    const { tables } = await createSessionClient();
+    const existing = await tables.getRow({
+      databaseId: DATABASE_ID,
+      tableId: TABLE_PROFILES,
+      rowId: user.$id,
+    });
+    const existingProfile = asProfile(
+      existing as unknown as Record<string, unknown>,
+    );
+    if (existingProfile.userId !== user.$id) {
+      return { error: "Not allowed to update this profile." };
+    }
+    previousFileId = existingProfile.avatarFileId;
+
+    const { fileId } = await uploadAvatar(file);
+    uploadedFileId = fileId;
+
+    await tables.updateRow({
+      databaseId: DATABASE_ID,
+      tableId: TABLE_PROFILES,
+      rowId: user.$id,
+      data: {
+        avatarFileId: fileId,
+        userId: user.$id,
+      },
+    });
+
+    if (previousFileId && previousFileId !== fileId) {
+      try {
+        await deleteFile(BUCKET_AVATARS, previousFileId);
+      } catch {
+        // Best-effort cleanup; new avatar is already linked.
+      }
+    }
+  } catch (error) {
+    if (uploadedFileId) {
+      try {
+        await deleteFile(BUCKET_AVATARS, uploadedFileId);
+      } catch {
+        // Ignore cleanup failure.
+      }
+    }
+    if (error instanceof Error && !(error instanceof AppwriteException)) {
+      return { error: error.message };
+    }
+    if (error instanceof AppwriteException) {
+      if (error.code === 401 || error.code === 404) {
+        return { error: "Not allowed to update this profile." };
+      }
+      return { error: "Could not upload avatar. Please try again." };
+    }
+    return { error: "Could not upload avatar. Please try again." };
+  }
+
+  revalidatePath("/account");
+  return { success: "Avatar updated." };
 }

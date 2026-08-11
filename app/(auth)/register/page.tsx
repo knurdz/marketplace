@@ -12,7 +12,7 @@ export default async function RegisterPage() {
     <div>
       <p className="font-mono text-sm text-accent">$ ./auth --register</p>
       <h1 className="mt-4 text-3xl font-bold tracking-tight">Create account</h1>
-      <p className="mt-2 text-sm text-muted">
+      <p className="mt-2 text-sm text-muted-foreground">
         Email and password — phone is optional later.
       </p>
       <div className="mt-8">

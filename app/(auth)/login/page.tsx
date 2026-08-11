@@ -26,7 +26,7 @@ export default async function LoginPage({
     <div>
       <p className="font-mono text-sm text-accent">$ ./auth --login</p>
       <h1 className="mt-4 text-3xl font-bold tracking-tight">Sign in</h1>
-      <p className="mt-2 text-sm text-muted">
+      <p className="mt-2 text-sm text-muted-foreground">
         Use your Knurdz Marketplace account.
       </p>
       <div className="mt-8">

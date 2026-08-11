@@ -35,7 +35,7 @@ export function ForgotPasswordForm() {
       ) : null}
 
       <div className="space-y-2">
-        <label htmlFor="email" className="block text-sm text-muted">
+        <label htmlFor="email" className="block text-sm text-muted-foreground">
           Email
         </label>
         <input
@@ -56,7 +56,7 @@ export function ForgotPasswordForm() {
         {pending ? "Sending…" : "Send reset link"}
       </button>
 
-      <p className="font-mono text-sm text-muted">
+      <p className="font-mono text-sm text-muted-foreground">
         <Link href="/login" className="text-accent hover:underline">
           Back to sign in
         </Link>

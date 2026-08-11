@@ -49,6 +49,45 @@ export const ALL_TABLE_IDS = [
   TABLE_AUDIT_LOGS,
 ] as const;
 
+/** Storage bucket IDs — must match Appwrite console / docs/agent/SCHEMA.md. */
+export const BUCKET_AVATARS = "avatars";
+export const BUCKET_PRODUCT_IMAGES = "product-images";
+export const BUCKET_BANK_SLIPS = "bank-slips";
+
+export const ALL_BUCKET_IDS = [
+  BUCKET_AVATARS,
+  BUCKET_PRODUCT_IMAGES,
+  BUCKET_BANK_SLIPS,
+] as const;
+
+/** Max upload sizes (bytes) — mirror bucket settings. */
+export const AVATAR_MAX_BYTES = 2 * 1024 * 1024; // 2MB
+export const PRODUCT_IMAGE_MAX_BYTES = 5 * 1024 * 1024; // 5MB
+export const BANK_SLIP_MAX_BYTES = 5 * 1024 * 1024; // 5MB
+
+export const IMAGE_MIME_TYPES = [
+  "image/jpeg",
+  "image/png",
+  "image/webp",
+] as const;
+
+export const IMAGE_EXTENSIONS = ["jpg", "jpeg", "png", "webp"] as const;
+
+export const BANK_SLIP_MIME_TYPES = [
+  "image/jpeg",
+  "image/png",
+  "image/webp",
+  "application/pdf",
+] as const;
+
+export const BANK_SLIP_EXTENSIONS = [
+  "jpg",
+  "jpeg",
+  "png",
+  "webp",
+  "pdf",
+] as const;
+
 export function getAppwriteEndpoint(): string {
   const endpoint = process.env.NEXT_PUBLIC_APPWRITE_ENDPOINT?.trim();
   if (!endpoint) {

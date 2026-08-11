@@ -1,11 +1,24 @@
 export default function AdminPage() {
   return (
-    <main className="mx-auto max-w-lg px-6 py-16 text-foreground">
-      <p className="font-mono text-sm text-accent">$ ./admin --shell</p>
-      <h1 className="mt-4 text-3xl font-bold tracking-tight">Admin</h1>
-      <p className="mt-2 text-sm text-muted">
-        Placeholder portal. Full UI shell arrives in step 1.9.
+    <div className="mx-auto max-w-3xl">
+      <p className="font-mono text-sm text-accent">$ ./admin --dashboard</p>
+      <h2 className="mt-3 text-3xl font-bold tracking-tight">Dashboard</h2>
+      <p className="mt-2 max-w-xl text-sm text-muted-foreground">
+        Empty admin shell. Approvals, moderation, and bank verification land in
+        Member 4 steps.
       </p>
-    </main>
+
+      <div className="mt-10 grid gap-4 sm:grid-cols-3">
+        {["Pending sellers", "Open reports", "Bank slips"].map((label) => (
+          <div
+            key={label}
+            className="rounded-md border border-border bg-card px-4 py-5"
+          >
+            <p className="font-mono text-xs text-muted-foreground">{label}</p>
+            <p className="mt-2 text-2xl font-bold tracking-tight">—</p>
+          </div>
+        ))}
+      </div>
+    </div>
   );
 }

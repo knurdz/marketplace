@@ -24,7 +24,7 @@ export function RegisterForm() {
       ) : null}
 
       <div className="space-y-2">
-        <label htmlFor="name" className="block text-sm text-muted">
+        <label htmlFor="name" className="block text-sm text-muted-foreground">
           Name
         </label>
         <input
@@ -37,7 +37,7 @@ export function RegisterForm() {
       </div>
 
       <div className="space-y-2">
-        <label htmlFor="email" className="block text-sm text-muted">
+        <label htmlFor="email" className="block text-sm text-muted-foreground">
           Email
         </label>
         <input
@@ -51,7 +51,7 @@ export function RegisterForm() {
       </div>
 
       <div className="space-y-2">
-        <label htmlFor="password" className="block text-sm text-muted">
+        <label htmlFor="password" className="block text-sm text-muted-foreground">
           Password
         </label>
         <input
@@ -73,7 +73,7 @@ export function RegisterForm() {
         {pending ? "Creating account…" : "Create account"}
       </button>
 
-      <p className="font-mono text-sm text-muted">
+      <p className="font-mono text-sm text-muted-foreground">
         Already registered?{" "}
         <Link href="/login" className="text-accent hover:underline">
           Sign in

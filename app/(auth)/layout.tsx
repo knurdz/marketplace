@@ -11,7 +11,7 @@ export default function AuthLayout({ children }: { children: ReactNode }) {
       <div className="relative mx-auto flex min-h-screen w-full max-w-md flex-col justify-center px-6 py-16">
         <Link
           href="/"
-          className="mb-8 font-mono text-sm text-muted transition hover:text-foreground"
+          className="mb-8 font-mono text-sm text-muted-foreground transition hover:text-foreground"
         >
           ← Knurdz
           <span className="text-accent">.</span>

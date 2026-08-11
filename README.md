@@ -65,7 +65,7 @@ Fill `.env.local` with Appwrite values (see below). Do not commit secrets; only 
 4. Under **Add a platform**, add a **Web** app with hostname `localhost` (required for browser SDK CORS and recovery/verify redirect URLs).
 5. Set `NEXT_PUBLIC_APP_URL` to the same origin you open in the browser (e.g. `http://localhost:3000`) so password-reset and email-verify links redirect correctly.
 
-Clients live in [`lib/appwrite/`](./lib/appwrite/): browser (`appwrite`) + server session/admin (`node-appwrite`). Session cookie name: `knurdz_session`. TablesDB database id: `marketplace` — full table contract in [`docs/agent/SCHEMA.md`](./docs/agent/SCHEMA.md). Re-apply with `node --env-file=.env.local scripts/setup-mvp-schema.mjs`.
+Clients live in [`lib/appwrite/`](./lib/appwrite/): browser (`appwrite`) + server session/admin (`node-appwrite`). Session cookie name: `knurdz_session`. TablesDB database id: `marketplace` — full table contract in [`docs/agent/SCHEMA.md`](./docs/agent/SCHEMA.md). Re-apply with `node --env-file=.env.local scripts/setup-mvp-schema.mjs`. Storage buckets (`avatars`, `product-images`, `bank-slips`): `node --env-file=.env.local scripts/setup-storage-buckets.mjs` (API key needs **storage** write).
 
 ### Auth routes
 
@@ -82,4 +82,4 @@ Clients live in [`lib/appwrite/`](./lib/appwrite/): browser (`appwrite`) + serve
 
 ## Status
 
-Steps **1.1–1.7** (bootstrap through schema freeze) are in place. Storage, shells, and remaining Phase 0 work continue in steps 1.8–1.13.
+Steps **1.1–1.9** (bootstrap through UI shells) are in place. Shared types, services, and seed continue in steps 1.10–1.13.
