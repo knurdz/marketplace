@@ -4,11 +4,11 @@ Multi-role marketplace web app built with **Next.js** (frontend) and **Appwrite*
 
 ## Portals
 
-| Portal | Who | Purpose |
-|--------|-----|---------|
-| Storefront | Buyers | Browse, cart, checkout, orders |
-| Seller | Approved sellers | Listings, inventory, fulfillment |
-| Admin | Admins | Approvals, moderation, payments oversight |
+| Portal     | Who              | Purpose                                   |
+| ---------- | ---------------- | ----------------------------------------- |
+| Storefront | Buyers           | Browse, cart, checkout, orders            |
+| Seller     | Approved sellers | Listings, inventory, fulfillment          |
+| Admin      | Admins           | Approvals, moderation, payments oversight |
 
 ## Payments (MVP)
 
@@ -16,16 +16,43 @@ Multi-role marketplace web app built with **Next.js** (frontend) and **Appwrite*
 - **Bank transfer** — instructions + slip upload, then verification
 - **Free** — zero-price listings / checkout without a gateway
 
-## Team
+## Team & agent docs
 
-Work is split across 4 members. See **[WORK_DISTRIBUTION.md](./WORK_DISTRIBUTION.md)** for ownership, tasks, and checklists.
+| Doc                                       | Location                                                                                   |
+| ----------------------------------------- | ------------------------------------------------------------------------------------------ |
+| Work distribution, checklists, step plans | [`WORK_DISTRIBUTION.md`](./WORK_DISTRIBUTION.md) _(root)_                                  |
+| Agent reference index                     | [`docs/agent/INDEX.md`](./docs/agent/INDEX.md)                                             |
+| Member implementation guide               | [`docs/agent/MEMBER_IMPLEMENTATION_GUIDE.md`](./docs/agent/MEMBER_IMPLEMENTATION_GUIDE.md) |
+| Cursor rules                              | [`.cursor/rules/`](./.cursor/rules/)                                                       |
 
 Member **1** finishes foundation (auth, schema, UI kit, guards) before others implement against live APIs.
 
 ## Agent / quality rules
 
-Project Cursor rules live in `.cursor/rules/`. Priority: **security and build quality first** — never trade them for speed or token savings. Agents must use **graphify** before/after implementations and tick relevant checklist items in `WORK_DISTRIBUTION.md`.
+Priority: **security and build quality first**. Agents must use **graphify** before/after implementations, use only approved MCPs, tick checklist items in `WORK_DISTRIBUTION.md`, and **never** commit/PR/merge unless a human explicitly asks.
+
+## Getting started
+
+Requires Node.js 20+ and npm.
+
+```bash
+cp .env.example .env.local
+npm install
+npm run dev
+```
+
+Open [http://localhost:3000](http://localhost:3000). The UI theme matches [knurdz.org](https://knurdz.org) (dark canvas, Space Grotesk, accent green).
+
+| Script                 | Purpose                        |
+| ---------------------- | ------------------------------ |
+| `npm run dev`          | Start local Next.js dev server |
+| `npm run lint`         | ESLint                         |
+| `npm run format`       | Prettier write                 |
+| `npm run format:check` | Prettier check                 |
+| `npm run build`        | Production build               |
+
+Fill `.env.local` when Appwrite / PayHere wiring lands (step 1.2+). Do not commit secrets; only endpoint, project id, and public app URL may use `NEXT_PUBLIC_*`.
 
 ## Status
 
-Early setup. Schema and app code will land as Member 1 completes Phase 0.
+Foundation bootstrap (step 1.1) is in progress. Schema and remaining Phase 0 work will land as Member 1 completes steps 1.2–1.13.

@@ -1,10 +1,11 @@
 # Work Distribution — Knurdz Marketplace
 
 > Living document. Update when ownership or MVP scope changes.  
-> Agents: after each implementation, check off every **relevant** box below for your change.
+> Agents: after each implementation, check off every **relevant** box below for your change.  
+> Detailed step plans + agent how-to: [`docs/agent/`](./docs/agent/) (start with `docs/agent/INDEX.md`).
 
 **Stack:** Next.js · Appwrite · PayHere sandbox · bank transfer · free selling  
-**Roles:** Admin · Seller · Buyer  
+**Roles:** Admin · Seller · Buyer
 
 **Sources merged:** prior Knurdz analysis + team “Full Feature Analysis” report (keep stronger options; no duplicate tasks).
 
@@ -42,13 +43,13 @@ Use after every change that touches code or schema:
 
 ## Development phases (team sync)
 
-| Phase | Focus | Primary owners |
-|-------|--------|----------------|
-| 1 — Foundation | Auth, DB, storage, shells, guards | Member 1 |
-| 2 — Core marketplace | Listings, cart, checkout, orders | Members 2–3 |
-| 3 — Role systems | Seller dashboard, admin panel | Members 3–4 |
-| 4 — Payments | PayHere Functions + bank verify E2E | Members 2 + 4 |
-| 5 — Enhancements | Reviews, notifications, creative backlog | As capacity allows |
+| Phase                | Focus                                    | Primary owners     |
+| -------------------- | ---------------------------------------- | ------------------ |
+| 1 — Foundation       | Auth, DB, storage, shells, guards        | Member 1           |
+| 2 — Core marketplace | Listings, cart, checkout, orders         | Members 2–3        |
+| 3 — Role systems     | Seller dashboard, admin panel            | Members 3–4        |
+| 4 — Payments         | PayHere Functions + bank verify E2E      | Members 2 + 4      |
+| 5 — Enhancements     | Reviews, notifications, creative backlog | As capacity allows |
 
 ---
 
@@ -58,17 +59,35 @@ Use after every change that touches code or schema:
 
 ### Phase 0 — blockers (do before others ship against APIs)
 
-- [ ] Next.js (App Router) + TypeScript + lint/format + `.env.example`
+- [x] Next.js (App Router) + TypeScript + lint/format + `.env.example`
 - [ ] Appwrite project wiring (browser + server clients)
 - [ ] Auth: register, login, logout, session, password reset, email verify
 - [ ] Optional phone field on profile / registration (not required for MVP login)
 - [ ] Role model (labels/teams) + middleware guards for `/seller`, `/admin`
-- [ ] Database collections + indexes + permissions documented (`SCHEMA.md` or equivalent) — include at least: profiles/users, products, orders, order_items, payments, reviews (+ seller_profiles, categories, notifications, audit as needed)
+- [ ] Database collections + indexes + permissions documented (`docs/agent/SCHEMA.md` when created) — include at least: profiles/users, products, orders, order_items, payments, reviews (+ seller_profiles, categories, notifications, audit as needed)
 - [ ] Storage buckets + shared upload helper
 - [ ] UI kit / layout shells (store, seller, admin empty shells) + navbar/routing
 - [ ] Shared order/payment status enums & types + thin service layer / API contracts for other members
 - [ ] Seed: demo admin, seller, buyer, categories
-- [ ] README setup so teammates can clone and run
+- [x] README setup so teammates can clone and run
+
+### Phase 0 — step-by-step plan (implement one step at a time)
+
+| Step         | Goal                          | Do                                                                   | Verify                                            |
+| ------------ | ----------------------------- | -------------------------------------------------------------------- | ------------------------------------------------- |
+| [x] **1.1**  | Bootstrap Next.js             | App Router, TS, ESLint/Prettier, `.env.example`, README run steps    | `npm run dev` works                               |
+| [ ] **1.2**  | Appwrite clients              | Browser + server clients in `lib/appwrite`; env documented           | Session null-safe / project reachable             |
+| [ ] **1.3**  | Auth pages                    | Register, login, logout, session display                             | Round-trip auth                                   |
+| [ ] **1.4**  | Password reset + email verify | Recovery + verify flows                                              | Links work in dev                                 |
+| [ ] **1.5**  | Profiles                      | `profiles` linked to `userId`; create on register                    | Profile after signup; own-only update             |
+| [ ] **1.6**  | Roles & guards                | Labels/teams; middleware for `/seller`, `/admin`                     | Buyer blocked from admin                          |
+| [ ] **1.7**  | Schema + collections          | All MVP collections + indexes + permissions → `docs/agent/SCHEMA.md` | Doc matches console                               |
+| [ ] **1.8**  | Storage                       | Buckets + upload helper (private bank slips)                         | Avatar upload works                               |
+| [ ] **1.9**  | UI kit + shells               | Store/seller/admin layouts + navbar                                  | Empty dashboards render                           |
+| [ ] **1.10** | Shared types/enums            | Product/order/payment statuses exported                              | Single source of truth                            |
+| [ ] **1.11** | Thin services                 | Session/product/upload helpers                                       | Others can import contracts                       |
+| [ ] **1.12** | Seed                          | Admin, seller, buyer, categories, sample product                     | One-command seed                                  |
+| [ ] **1.13** | Done gate                     | Announce unblock                                                     | Teammates can auth, shells, upload, read products |
 
 ### Phase 1 — ongoing
 
@@ -114,6 +133,27 @@ Use after every change that touches code or schema:
 - [ ] Trending / recently viewed (optional — Phase 5)
 - [ ] One-click reorder (optional — Phase 5)
 
+### Step-by-step plan (implement one step at a time)
+
+| Step         | Goal             | Do                                                       | Verify                        |
+| ------------ | ---------------- | -------------------------------------------------------- | ----------------------------- |
+| [ ] **2.1**  | Browse list      | Category list + product grid (`status=active` only)      | Non-active never shown        |
+| [ ] **2.2**  | Filters & sort   | Price, category, sort by newest/price                    | Matches SCHEMA indexes        |
+| [ ] **2.3**  | Product detail   | Images, description, seller info, reviews slot           | 404 for inactive              |
+| [ ] **2.4**  | Cart             | Add/update/remove; single-seller or warn on multi-seller | Persist for logged-in user    |
+| [ ] **2.5**  | Checkout shell   | Address + method radio (payhere/bank/free)               | Validation clear              |
+| [ ] **2.6**  | Create order     | `orders` + `order_items` + `payments`                    | Ownership = current user      |
+| [ ] **2.7**  | Free path        | Confirm paid via agreed secure server path               | No forged amount / no PayHere |
+| [ ] **2.8**  | Bank path UX     | Instructions + slip upload → `awaiting_verification`     | Private bucket                |
+| [ ] **2.9**  | PayHere UX       | Hash Function + sandbox form; return/cancel poll DB      | No merchant secret in client  |
+| [ ] **2.10** | Orders UI        | List + detail timeline                                   | IDOR: no other users’ orders  |
+| [ ] **2.11** | Cancel           | Early statuses only                                      | Enum rules enforced           |
+| [ ] **2.12** | Buyer dashboard  | Summaries + recent + wishlist preview                    | Empty states OK               |
+| [ ] **2.13** | Wishlist         | Full page CRUD                                           | Own wishlist only             |
+| [ ] **2.14** | Reviews          | After `completed`; product + seller rating               | Policy enforced               |
+| [ ] **2.15** | Report listing   | Create `reports`                                         | Feeds admin queue             |
+| [ ] **2.16** | Optional Phase 5 | Trending / recently viewed / reorder                     | After MVP E2E                 |
+
 ### Member 2 — verification extras
 
 - [ ] Guest vs logged-in behavior is intentional and safe
@@ -145,6 +185,26 @@ Use after every change that touches code or schema:
 - [ ] Seller settings / policy text
 - [ ] Buyer ↔ seller messaging (optional / Phase 5 — basic threads only if started)
 - [ ] Optional: own-order bank verify (only if policy updated)
+
+### Step-by-step plan (implement one step at a time)
+
+| Step         | Goal           | Do                                                  | Verify                            |
+| ------------ | -------------- | --------------------------------------------------- | --------------------------------- |
+| [ ] **3.1**  | Apply form     | `seller_profiles` status=`pending`                  | One application per user          |
+| [ ] **3.2**  | Status screens | Pending / rejected / approved gate                  | `/seller` blocked if not approved |
+| [ ] **3.3**  | Shop profile   | Name, bio, banner; public shop page                 | Approved shops only public        |
+| [ ] **3.4**  | Create product | Draft + images                                      | Own `sellerId` only               |
+| [ ] **3.5**  | Edit / archive | Update / archive                                    | Cannot edit others’ products      |
+| [ ] **3.6**  | Publish flow   | `draft` → `pending_review` / `active` per policy    | Align with Member 4 moderation    |
+| [ ] **3.7**  | Inventory      | Stock + availability toggle                         | Unavailable hides buy CTA         |
+| [ ] **3.8**  | Free listing   | `price=0` / `isFree`                                | Buyer free path works             |
+| [ ] **3.9**  | Dashboard KPIs | Orders, revenue, pending                            | Own data only                     |
+| [ ] **3.10** | Order inbox    | List seller’s orders                                | Filter by sellerId                |
+| [ ] **3.11** | Fulfillment    | `processing` → `shipped`/`ready_pickup` → completed | Invalid transitions rejected      |
+| [ ] **3.12** | Bank details   | Fields for buyer bank checkout                      | Least exposure                    |
+| [ ] **3.13** | Earnings       | Paid orders; manual payout note                     | Matches `paid` payments           |
+| [ ] **3.14** | Settings       | Policy text                                         | Visible on shop/product           |
+| [ ] **3.15** | Optional       | Messaging / own bank verify                         | Only if policy updated            |
 
 ### Member 3 — verification extras
 
@@ -186,6 +246,29 @@ Use after every change that touches code or schema:
 - [ ] Discount coupons admin CRUD (optional — Phase 5)
 - [ ] Sandbox demo / test-card notes
 
+### Step-by-step plan (implement one step at a time)
+
+| Step         | Goal                    | Do                                        | Verify                      |
+| ------------ | ----------------------- | ----------------------------------------- | --------------------------- |
+| [ ] **4.1**  | Admin metrics           | Users, sellers, orders, revenue           | Admin-only                  |
+| [ ] **4.2**  | Seller approval         | Approve → `seller` label; reject + reason | Audit logged                |
+| [ ] **4.3**  | User management         | View, suspend; block checkout/publish     | Server-side enforcement     |
+| [ ] **4.4**  | Listing moderation      | Approve/reject/remove                     | Status enums only           |
+| [ ] **4.5**  | Categories CRUD         | Create/update/order                       | Storefront reads them       |
+| [ ] **4.6**  | All orders + filters    | By payment method/status                  | Admin access only           |
+| [ ] **4.7**  | Bank slip queue         | Approve → `paid` + stock; reject          | Idempotent; audit           |
+| [ ] **4.8**  | PayHere hash Function   | orderId → form fields + hash              | Secret in Function env only |
+| [ ] **4.9**  | PayHere notify Function | Verify md5sig; paid once; stock once      | Replay-safe                 |
+| [ ] **4.10** | Webhook log UI          | Failed/raw notify view                    | No secrets in UI            |
+| [ ] **4.11** | Contract with M2        | Document hash + free-confirm API          | In `docs/agent/`            |
+| [ ] **4.12** | Reports / disputes      | Triage workflow                           | Status transitions          |
+| [ ] **4.13** | Platform settings       | Sandbox, bank copy, fees                  | Safe public fields only     |
+| [ ] **4.14** | Audit viewer            | List admin actions                        | Append-only                 |
+| [ ] **4.15** | Analytics               | Sales + user growth                       | No PII leakage              |
+| [ ] **4.16** | Badges + fraud flags    | Verification badge; rule flags            | Rules documented            |
+| [ ] **4.17** | Sandbox notes           | Test cards / demo script                  | Human-runnable              |
+| [ ] **4.18** | Optional Phase 5        | Featured listings, coupons                | After E2E                   |
+
 ### Member 4 — verification extras
 
 - [ ] Merchant secret only in Function env
@@ -200,39 +283,39 @@ Use after every change that touches code or schema:
 
 Pick up only after Phases 1–4 are solid. Assign when claimed.
 
-| ID | Item | Suggested owner |
-|----|------|-----------------|
-| X01 | CAPTCHA on register/login (optional) | Member 1 |
-| X02 | Dark/light mode | Member 1 |
-| X03 | Realtime notifications (vs polling) | Member 1 |
-| X04 | AI product recommendations | Later |
-| X05 | Referral system | Later |
-| X06 | Full chat system beyond basic threads | Members 2–3 |
-| X07 | Appwrite scale monitoring / limit awareness | Member 1 + 4 |
+| ID  | Item                                        | Suggested owner |
+| --- | ------------------------------------------- | --------------- |
+| X01 | CAPTCHA on register/login (optional)        | Member 1        |
+| X02 | Dark/light mode                             | Member 1        |
+| X03 | Realtime notifications (vs polling)         | Member 1        |
+| X04 | AI product recommendations                  | Later           |
+| X05 | Referral system                             | Later           |
+| X06 | Full chat system beyond basic threads       | Members 2–3     |
+| X07 | Appwrite scale monitoring / limit awareness | Member 1 + 4    |
 
 ---
 
 ## Risks (track while implementing)
 
-| Risk | Mitigation |
-|------|------------|
-| Bank transfer verification delays | Clear buyer status + admin queue SLAs; reminders |
-| Fake sellers / spam | Approval gate, badges, reports, suspend tools |
-| Appwrite limits | Lean queries, indexes, avoid N+1; monitor usage |
-| UI scope creep | Freeze MVP checklists; park extras in backlog above |
-| Payment secret leakage | Member 4 Functions only; Member 2 UX-only PayHere |
+| Risk                              | Mitigation                                          |
+| --------------------------------- | --------------------------------------------------- |
+| Bank transfer verification delays | Clear buyer status + admin queue SLAs; reminders    |
+| Fake sellers / spam               | Approval gate, badges, reports, suspend tools       |
+| Appwrite limits                   | Lean queries, indexes, avoid N+1; monitor usage     |
+| UI scope creep                    | Freeze MVP checklists; park extras in backlog above |
+| Payment secret leakage            | Member 4 Functions only; Member 2 UX-only PayHere   |
 
 ---
 
 ## Suggested timeline
 
-| When | Focus |
-|------|--------|
-| Week 1 | Member 1 Phase 0; others wireframe / mock only |
-| Week 1 end | Schema freeze v1 + seed |
-| Weeks 2–3 | Members 2–4 implement portals (Phases 2–3) |
-| Week 3 | E2E payments (Phase 4): PayHere + bank + free |
-| Week 4 | Hardening, demo, Phase 5 extras if ahead |
+| When       | Focus                                          |
+| ---------- | ---------------------------------------------- |
+| Week 1     | Member 1 Phase 0; others wireframe / mock only |
+| Week 1 end | Schema freeze v1 + seed                        |
+| Weeks 2–3  | Members 2–4 implement portals (Phases 2–3)     |
+| Week 3     | E2E payments (Phase 4): PayHere + bank + free  |
+| Week 4     | Hardening, demo, Phase 5 extras if ahead       |
 
 ---
 
@@ -247,7 +330,8 @@ Pick up only after Phases 1–4 are solid. Assign when claimed.
 
 ## Change log
 
-| Date | Change |
-|------|--------|
-| 2026-08-10 | Initial distribution from project analysis |
+| Date       | Change                                                                                                                                                                                                |
+| ---------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 2026-08-10 | Initial distribution from project analysis                                                                                                                                                            |
 | 2026-08-10 | Merged team Full Feature Analysis: phases, filters/sort, dashboards, reviews/seller ratings, availability toggle, disputes, analytics, badges/fraud flags, backlog; clarified PayHere ownership split |
+| 2026-08-10 | Added numbered step plans (1.1–4.18) matching `docs/agent/MEMBER_IMPLEMENTATION_GUIDE.md`                                                                                                             |
