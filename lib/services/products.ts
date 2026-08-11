@@ -1,11 +1,12 @@
 import { AppwriteException, Query } from "node-appwrite";
 import {
   DATABASE_ID,
+  TABLE_PRODUCT_IMAGES,
   TABLE_PRODUCTS,
   hasAppwritePublicConfig,
 } from "@/lib/appwrite/config";
 import { createPublicClient } from "@/lib/appwrite/server";
-import type { Product } from "@/lib/types";
+import type { Product, ProductImage } from "@/lib/types";
 import {
   ACTIVE_PRODUCT_STATUS,
   isProductStatus,
@@ -276,5 +277,58 @@ export async function getProduct(id: string): Promise<Product | null> {
       return null;
     }
     return null;
+  }
+}
+
+/** Map a TablesDB row to ProductImage; returns null if required fields are missing. */
+export function asProductImage(
+  row: Record<string, unknown>,
+): ProductImage | null {
+  const $id = asNullableString(row.$id);
+  const productId = asNullableString(row.productId);
+  const fileId = asNullableString(row.fileId);
+  if (!$id || !productId || !fileId) return null;
+
+  return {
+    $id,
+    productId,
+    fileId,
+    sortOrder: Math.max(0, Math.floor(asNumber(row.sortOrder))),
+    alt: asNullableString(row.alt),
+  };
+}
+
+/**
+ * List images for a product (table has read(any)).
+ * Ordered by sortOrder ascending. Scoped to the given productId only.
+ */
+export async function listProductImages(
+  productId: string,
+): Promise<ProductImage[]> {
+  const trimmed = productId?.trim();
+  if (!trimmed || !hasAppwritePublicConfig()) return [];
+
+  try {
+    const { tables } = await createPublicClient();
+    const result = await tables.listRows({
+      databaseId: DATABASE_ID,
+      tableId: TABLE_PRODUCT_IMAGES,
+      queries: [
+        Query.equal("productId", trimmed),
+        Query.orderAsc("sortOrder"),
+        Query.limit(24),
+      ],
+    });
+
+    const images: ProductImage[] = [];
+    for (const row of result.rows) {
+      const image = asProductImage(row as unknown as Record<string, unknown>);
+      if (image && image.productId === trimmed) {
+        images.push(image);
+      }
+    }
+    return images;
+  } catch {
+    return [];
   }
 }
