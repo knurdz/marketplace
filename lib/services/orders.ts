@@ -1,6 +1,7 @@
-import { ID, Permission, Role } from "node-appwrite";
+import { ID, Permission, Query, Role } from "node-appwrite";
 import {
   DATABASE_ID,
+  TABLE_BANK_SLIPS,
   TABLE_ORDER_ITEMS,
   TABLE_ORDERS,
   TABLE_PAYMENTS,
@@ -8,15 +9,24 @@ import {
 } from "@/lib/appwrite/config";
 import { createSessionClient } from "@/lib/appwrite/server";
 import { getLoggedInUser } from "@/lib/appwrite/session";
+import { uploadBankSlip } from "./uploads";
 import {
   assertRateLimit,
   getClientIp,
   RATE_LIMIT_MESSAGE,
   RATE_LIMITS,
 } from "@/lib/security/rate-limit";
-import type { Order, OrderItem, Payment, PaymentMethod, Product } from "@/lib/types";
+import type {
+  BankSlip,
+  Order,
+  OrderItem,
+  Payment,
+  PaymentMethod,
+  Product,
+} from "@/lib/types";
 import {
   ACTIVE_PRODUCT_STATUS,
+  isBankSlipStatus,
   isOrderStatus,
   isPaymentMethod,
   isPaymentStatus,
@@ -28,9 +38,15 @@ import {
   type CreateOrderInput,
   type CreateOrderResult,
   type OrderErrorCode,
+  type SubmitBankSlipInput,
+  type SubmitBankSlipResult,
 } from "./order-errors";
 
 export type { CreateOrderInput, CreateOrderResult } from "./order-errors";
+export type {
+  SubmitBankSlipInput,
+  SubmitBankSlipResult,
+} from "./order-errors";
 export {
   ORDER_ERROR_CODES,
   type CreateOrderActionState,
@@ -133,6 +149,47 @@ export function asPayment(row: Record<string, unknown>): Payment | null {
   };
 }
 
+export function asBankSlip(row: Record<string, unknown>): BankSlip | null {
+  const $id = asNullableString(row.$id);
+  const paymentId = asNullableString(row.paymentId);
+  const orderId = asNullableString(row.orderId);
+  const fileId = asNullableString(row.fileId);
+  const uploadedBy = asNullableString(row.uploadedBy);
+  const statusRaw = row.status;
+
+  if (
+    !$id ||
+    !paymentId ||
+    !orderId ||
+    !fileId ||
+    !uploadedBy ||
+    !isBankSlipStatus(statusRaw)
+  ) {
+    return null;
+  }
+
+  return {
+    $id,
+    paymentId,
+    orderId,
+    fileId,
+    uploadedBy,
+    status: statusRaw,
+    reviewedBy: asNullableString(row.reviewedBy),
+    reviewNote: asNullableString(row.reviewNote),
+  };
+}
+
+function bankSlipRowPermissions(): string[] {
+  return [
+    Permission.read(Role.label("admin")),
+    Permission.update(Role.label("admin")),
+    Permission.delete(Role.label("admin")),
+  ];
+}
+
+const BANK_SLIP_ALLOWED_PAYMENT_STATUSES = ["pending", "awaiting_verification"] as const;
+
 function orderRowPermissions(buyerId: string, sellerId: string): string[] {
   return [
     Permission.read(Role.user(buyerId)),
@@ -163,11 +220,11 @@ async function assertCheckoutRateLimit(userId: string): Promise<void> {
   }
 }
 
-function fail(
+function fail<T extends { ok: false; error: string; code?: OrderErrorCode }>(
   error: string,
   code: OrderErrorCode,
-): CreateOrderResult {
-  return { ok: false, error, code };
+): T {
+  return { ok: false, error, code } as T;
 }
 
 export function serializeShippingAddress(input: {
@@ -281,11 +338,42 @@ export async function getOwnOrder(orderId: string): Promise<Order | null> {
   }
 }
 
-export async function createOrder(
-  input: CreateOrderInput,
-): Promise<CreateOrderResult> {
+/** Load the payment row for an order owned by the signed-in buyer (IDOR-safe). */
+export async function getOwnPaymentForOrder(
+  orderId: string,
+): Promise<Payment | null> {
+  if (!hasAppwritePublicConfig()) return null;
+
+  const order = await getOwnOrder(orderId);
+  if (!order) return null;
+
+  const trimmed = orderId.trim();
+  if (!trimmed) return null;
+
+  try {
+    const { tables } = await createSessionClient();
+    const result = await tables.listRows({
+      databaseId: DATABASE_ID,
+      tableId: TABLE_PAYMENTS,
+      queries: [Query.equal("orderId", trimmed), Query.limit(1)],
+    });
+
+    const row = result.rows[0];
+    if (!row) return null;
+
+    const payment = asPayment(row as unknown as Record<string, unknown>);
+    if (!payment || payment.orderId !== order.$id) return null;
+    return payment;
+  } catch {
+    return null;
+  }
+}
+
+export async function submitBankSlip(
+  input: SubmitBankSlipInput,
+): Promise<SubmitBankSlipResult> {
   if (!hasAppwritePublicConfig()) {
-    return fail(
+    return fail<SubmitBankSlipResult>(
       "Checkout is not configured yet.",
       ORDER_ERROR_CODES.NOT_ALLOWED,
     );
@@ -293,7 +381,114 @@ export async function createOrder(
 
   const user = await getLoggedInUser();
   if (!user) {
-    return fail(
+    return fail<SubmitBankSlipResult>(
+      "You must be signed in to upload a bank slip.",
+      ORDER_ERROR_CODES.NOT_AUTHENTICATED,
+    );
+  }
+
+  const orderId = input.orderId?.trim();
+  if (!orderId) {
+    return fail<SubmitBankSlipResult>("Invalid order id.", ORDER_ERROR_CODES.NOT_FOUND);
+  }
+
+  const order = await getOwnOrder(orderId);
+  if (!order) {
+    return fail<SubmitBankSlipResult>("Order not found.", ORDER_ERROR_CODES.NOT_FOUND);
+  }
+
+  if (order.paymentMethod !== "bank_transfer") {
+    return fail<SubmitBankSlipResult>(
+      "This order is not a bank transfer checkout.",
+      ORDER_ERROR_CODES.WRONG_METHOD,
+    );
+  }
+
+  const payment = await getOwnPaymentForOrder(orderId);
+  if (!payment || payment.method !== "bank_transfer") {
+    return fail<SubmitBankSlipResult>("Payment not found.", ORDER_ERROR_CODES.NOT_FOUND);
+  }
+
+  if (
+    !BANK_SLIP_ALLOWED_PAYMENT_STATUSES.includes(
+      payment.status as (typeof BANK_SLIP_ALLOWED_PAYMENT_STATUSES)[number],
+    )
+  ) {
+    return fail<SubmitBankSlipResult>(
+      "This payment can no longer accept a bank slip upload.",
+      ORDER_ERROR_CODES.PAYMENT_STATE_INVALID,
+    );
+  }
+
+  let fileId: string;
+  try {
+    const uploaded = await uploadBankSlip(input.file);
+    fileId = uploaded.fileId;
+  } catch (error) {
+    const message =
+      error instanceof Error && error.message.length > 0
+        ? error.message
+        : "Could not upload your bank slip.";
+    return fail<SubmitBankSlipResult>(message, ORDER_ERROR_CODES.SLIP_UPLOAD_FAILED);
+  }
+
+  try {
+    const { tables } = await createSessionClient();
+
+    await tables.createRow({
+      databaseId: DATABASE_ID,
+      tableId: TABLE_BANK_SLIPS,
+      rowId: ID.unique(),
+      data: {
+        paymentId: payment.$id,
+        orderId: order.$id,
+        fileId,
+        uploadedBy: user.$id,
+        status: "pending",
+      },
+      permissions: bankSlipRowPermissions(),
+    });
+
+    await tables.updateRow({
+      databaseId: DATABASE_ID,
+      tableId: TABLE_PAYMENTS,
+      rowId: payment.$id,
+      data: { status: "awaiting_verification" },
+    });
+
+    await tables.updateRow({
+      databaseId: DATABASE_ID,
+      tableId: TABLE_ORDERS,
+      rowId: order.$id,
+      data: { status: "payment_review" },
+    });
+  } catch {
+    return fail<SubmitBankSlipResult>(
+      "Could not save your bank slip. Please try again.",
+      ORDER_ERROR_CODES.UPDATE_FAILED,
+    );
+  }
+
+  return {
+    ok: true,
+    orderStatus: "payment_review",
+    paymentStatus: "awaiting_verification",
+  };
+}
+
+export async function createOrder(
+  input: CreateOrderInput,
+): Promise<CreateOrderResult> {
+  if (!hasAppwritePublicConfig()) {
+    return fail<CreateOrderResult>(
+      "Checkout is not configured yet.",
+      ORDER_ERROR_CODES.NOT_ALLOWED,
+    );
+  }
+
+  const user = await getLoggedInUser();
+  if (!user) {
+    return fail<CreateOrderResult>(
       "You must be signed in to checkout.",
       ORDER_ERROR_CODES.NOT_AUTHENTICATED,
     );
@@ -305,22 +500,22 @@ export async function createOrder(
     if (error instanceof Error) {
       const code = (error as Error & { code?: OrderErrorCode }).code;
       if (code === ORDER_ERROR_CODES.RATE_LIMITED) {
-        return fail(error.message, code);
+        return fail<CreateOrderResult>(error.message, code);
       }
     }
-    return fail(RATE_LIMIT_MESSAGE, ORDER_ERROR_CODES.RATE_LIMITED);
+    return fail<CreateOrderResult>(RATE_LIMIT_MESSAGE, ORDER_ERROR_CODES.RATE_LIMITED);
   }
 
   const shippingAddress = serializeShippingAddress(input);
   if (!shippingAddress) {
-    return fail(
+    return fail<CreateOrderResult>(
       "Enter a complete shipping address.",
       ORDER_ERROR_CODES.ADDRESS_INVALID,
     );
   }
 
   if (!isPaymentMethod(input.paymentMethod)) {
-    return fail(
+    return fail<CreateOrderResult>(
       "Choose a valid payment method.",
       ORDER_ERROR_CODES.PAYMENT_METHOD_INVALID,
     );
@@ -330,18 +525,18 @@ export async function createOrder(
   const { cart, lines, hasIssues } = cartView;
 
   if (!cart || lines.length === 0) {
-    return fail("Your cart is empty.", ORDER_ERROR_CODES.CART_EMPTY);
+    return fail<CreateOrderResult>("Your cart is empty.", ORDER_ERROR_CODES.CART_EMPTY);
   }
 
   if (hasIssues) {
-    return fail(
+    return fail<CreateOrderResult>(
       "Some cart items need attention before checkout.",
       ORDER_ERROR_CODES.CART_ISSUES,
     );
   }
 
   if (!cart.sellerId) {
-    return fail(
+    return fail<CreateOrderResult>(
       "Could not determine the seller for this cart.",
       ORDER_ERROR_CODES.SELLER_MISSING,
     );
@@ -352,7 +547,7 @@ export async function createOrder(
 
   for (const line of lines) {
     if (!line.purchasable) {
-      return fail(
+      return fail<CreateOrderResult>(
         "Some products are no longer available.",
         ORDER_ERROR_CODES.PRODUCT_UNAVAILABLE,
       );
@@ -360,14 +555,14 @@ export async function createOrder(
 
     const product = await getProduct(line.item.productId);
     if (!product || !isPurchasableProduct(product)) {
-      return fail(
+      return fail<CreateOrderResult>(
         "Some products are no longer available.",
         ORDER_ERROR_CODES.PRODUCT_UNAVAILABLE,
       );
     }
 
     if (line.item.quantity > product.stock) {
-      return fail(
+      return fail<CreateOrderResult>(
         `Only ${product.stock} in stock for "${product.title}".`,
         ORDER_ERROR_CODES.PRODUCT_UNAVAILABLE,
       );
@@ -376,7 +571,7 @@ export async function createOrder(
     if (currency === null) {
       currency = product.currency;
     } else if (currency !== product.currency) {
-      return fail(
+      return fail<CreateOrderResult>(
         "Cart items must share the same currency.",
         ORDER_ERROR_CODES.CURRENCY_MISMATCH,
       );
@@ -399,7 +594,7 @@ export async function createOrder(
   const resolvedCurrency = currency ?? "LKR";
 
   if (input.paymentMethod === "free" && totalAmount !== 0) {
-    return fail(
+    return fail<CreateOrderResult>(
       "Free checkout is only available when the order total is zero.",
       ORDER_ERROR_CODES.PAYMENT_METHOD_MISMATCH,
     );
@@ -410,7 +605,7 @@ export async function createOrder(
       input.paymentMethod === "bank_transfer") &&
     totalAmount <= 0
   ) {
-    return fail(
+    return fail<CreateOrderResult>(
       "Choose free checkout for zero-total orders.",
       ORDER_ERROR_CODES.PAYMENT_METHOD_MISMATCH,
     );
@@ -480,7 +675,7 @@ export async function createOrder(
     paymentId = paymentRow.$id;
   } catch {
     await rollbackOrderRows({ orderId, orderItemIds, paymentId });
-    return fail(
+    return fail<CreateOrderResult>(
       "Could not place your order. Please try again.",
       ORDER_ERROR_CODES.CREATE_FAILED,
     );

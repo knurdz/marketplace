@@ -34,8 +34,12 @@ export {
 } from "./cart-actions";
 export {
   getPublicSellerByUserId,
+  getSellerBankDetailsForCheckout,
 } from "./sellers";
-export type { PublicSellerInfo } from "./sellers";
+export type {
+  CheckoutSellerBankDetails,
+  PublicSellerInfo,
+} from "./sellers";
 export type { ProductCatalogParams, ProductCatalogSort } from "./products";
 export {
   asNotification,
@@ -56,6 +60,7 @@ export {
   parsePlatformSettingJson,
 } from "./platform-settings";
 export { requestPayHereCheckout } from "./payhere";
+export { confirmFreeOrder } from "./free-order";
 export { getSessionUser } from "./session";
 export {
   deleteFile,

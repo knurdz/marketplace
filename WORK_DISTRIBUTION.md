@@ -156,9 +156,9 @@ Complete payment infrastructure so Members 2–4 only consume APIs / admin UI.
 - [x] Product detail: images, description, seller info, ratings & reviews display
 - [x] Cart add/update/remove
 - [x] Checkout (address + method: PayHere / bank / free) — **UX only**; calls Member 1 payment APIs
-- [ ] Free checkout path — UI + create order; confirm via **Member 1** free-confirm API
+- [x] Free checkout path — UI + create order; confirm via **Member 1** free-confirm API (stub until 1.24)
 - [ ] PayHere redirect + return/cancel pages (status from DB) — **UX only**; no merchant secret; uses Member 1 hash Function
-- [ ] Bank transfer instructions + slip upload
+- [x] Bank transfer instructions + slip upload → `awaiting_verification`
 - [ ] Order placement + tracking timeline + order history
 - [ ] Cancel order (allowed states only)
 - [ ] Report listing
@@ -178,8 +178,8 @@ Complete payment infrastructure so Members 2–4 only consume APIs / admin UI.
 | [x] **2.4**  | Cart             | Add/update/remove; single-seller or warn on multi-seller | Persist for logged-in user    |
 | [x] **2.5**  | Checkout shell   | Address + method radio (payhere/bank/free)               | Validation clear              |
 | [x] **2.6**  | Create order     | `orders` + `order_items` + `payments`                    | Ownership = current user      |
-| [ ] **2.7**  | Free path        | Confirm paid via **Member 1** free-confirm API           | No forged amount / no PayHere |
-| [ ] **2.8**  | Bank path UX     | Instructions + slip upload → `awaiting_verification`     | Private bucket                |
+| [x] **2.7**  | Free path        | Confirm paid via **Member 1** free-confirm API           | No forged amount / no PayHere |
+| [x] **2.8**  | Bank path UX     | Instructions + slip upload → `awaiting_verification`     | Private bucket                |
 | [ ] **2.9**  | PayHere UX       | Call **Member 1** hash Function; sandbox form; poll DB   | No merchant secret in client  |
 | [ ] **2.10** | Orders UI        | List + detail timeline                                   | IDOR: no other users’ orders  |
 | [ ] **2.11** | Cancel           | Early statuses only                                      | Enum rules enforced           |
@@ -193,7 +193,7 @@ Complete payment infrastructure so Members 2–4 only consume APIs / admin UI.
 
 - [ ] Guest vs logged-in behavior is intentional and safe
 - [ ] Cannot pay or view another user’s orders
-- [ ] Free path never hits PayHere with a forged amount
+- [x] Free path never hits PayHere with a forged amount
 - [x] Filters/sort do not leak non-`active` listings
 
 ---
@@ -363,4 +363,5 @@ Pick up only after Phases 1–4 are solid. Assign when claimed.
 | 2026-08-10 | Merged team Full Feature Analysis: phases, filters/sort, dashboards, reviews/seller ratings, availability toggle, disputes, analytics, badges/fraud flags, backlog; clarified PayHere ownership split |
 | 2026-08-10 | Added numbered step plans (1.1–4.18) matching `docs/agent/MEMBER_IMPLEMENTATION_GUIDE.md`                                                                                                             |
 | 2026-08-11 | Member 2 steps **2.5–2.6**: checkout shell + atomic `createOrder` (`orders` / `order_items` / `payments`); continuation stubs for 2.7–2.9 |
+| 2026-08-11 | Member 2 steps **2.7–2.8**: free confirm stub (`confirmFreeOrder`) + bank slip upload → `awaiting_verification`; graphify update pending CLI |
 | 2026-08-11 | **Payment setup → Member 1** (steps 1.22–1.28). Removed PayHere Functions from Members 2 & 4; Member 2 keeps checkout UX only; Member 4 keeps bank-slip admin UI |
