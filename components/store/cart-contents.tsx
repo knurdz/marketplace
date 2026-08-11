@@ -182,9 +182,15 @@ export function CartContents({ cartView }: CartContentsProps) {
       ) : null}
 
       <div className="flex flex-wrap gap-3">
-        <Button type="button" variant="outline" size="sm" disabled>
-          Checkout (coming in step 2.5)
-        </Button>
+        {hasIssues ? (
+          <Button type="button" variant="outline" size="sm" disabled>
+            Checkout
+          </Button>
+        ) : (
+          <Button type="button" variant="outline" size="sm" asChild>
+            <Link href="/checkout">Checkout</Link>
+          </Button>
+        )}
         <Button
           type="button"
           variant="ghost"
