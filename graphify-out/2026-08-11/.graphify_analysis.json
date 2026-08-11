@@ -1411,8 +1411,41 @@
       "why": "inferred connection - not explicitly stated in source; connects across different repos/directories; bridges separate communities"
     }
   ],
-  "tokens": {
-    "input": 0,
-    "output": 0
-  }
+  "questions": [
+    {
+      "type": "bridge_node",
+      "question": "Why does `getLoggedInUser()` connect `getLoggedInUser` to `types/index.ts`, `seller-approvals.ts`, `auth.ts`, `services/index.ts`, `createAdminClient`, `createSessionClient`, `free-order-confirm-form.tsx`, `button.tsx`, `appwrite/index.ts`, `orders.ts`, `dashboard/page.tsx`, `storage.ts`, `profiles.ts`, `appwrite/notifications.ts`, `getOwnOrder`, `storage-urls.ts`, `bank/page.tsx`?",
+      "why": "High betweenness centrality (0.063) - this node is a cross-community bridge."
+    },
+    {
+      "type": "bridge_node",
+      "question": "Why does `Button()` connect `button.tsx` to `seller-approvals.ts`, `services/index.ts`, `createAdminClient`, `product-catalog-filters.tsx`, `createSessionClient`, `free-order-confirm-form.tsx`, `portal-shell.tsx`, `search/page.tsx`, `dashboard/page.tsx`, `cn`, `getLoggedInUser`, `getOwnOrder`, `order-actions.ts`, `error-fallback.tsx`, `bank/page.tsx`?",
+      "why": "High betweenness centrality (0.031) - this node is a cross-community bridge."
+    },
+    {
+      "type": "bridge_node",
+      "question": "Why does `createAdminClient()` connect `createAdminClient` to `seller-approvals.ts`, `auth.ts`, `appwrite/index.ts`, `storage.ts`, `profiles.ts`, `appwrite/notifications.ts`, `storage-urls.ts`?",
+      "why": "High betweenness centrality (0.016) - this node is a cross-community bridge."
+    },
+    {
+      "type": "isolated_nodes",
+      "question": "What connects `npx`, `SearchParams`, `SearchParams` to the rest of the system?",
+      "why": "297 weakly-connected nodes found - possible documentation gaps or missing edges."
+    },
+    {
+      "type": "low_cohesion",
+      "question": "Should `types/index.ts` be split into smaller, more focused modules?",
+      "why": "Cohesion score 0.05048766494549627 - nodes in this community are weakly interconnected."
+    },
+    {
+      "type": "low_cohesion",
+      "question": "Should `seller-approvals.ts` be split into smaller, more focused modules?",
+      "why": "Cohesion score 0.05297334244702666 - nodes in this community are weakly interconnected."
+    },
+    {
+      "type": "low_cohesion",
+      "question": "Should `auth.ts` be split into smaller, more focused modules?",
+      "why": "Cohesion score 0.05741626794258373 - nodes in this community are weakly interconnected."
+    }
+  ]
 }
