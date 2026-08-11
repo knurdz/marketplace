@@ -222,11 +222,11 @@ async function assertCheckoutRateLimit(userId: string): Promise<void> {
   }
 }
 
-function fail<T extends { ok: false; error: string; code?: OrderErrorCode }>(
+function fail<T extends { ok: boolean }>(
   error: string,
   code: OrderErrorCode,
-): T {
-  return { ok: false, error, code } as T;
+): Extract<T, { ok: false }> {
+  return { ok: false, error, code } as unknown as Extract<T, { ok: false }>;
 }
 
 export function serializeShippingAddress(input: {
