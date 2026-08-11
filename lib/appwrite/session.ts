@@ -13,7 +13,12 @@ export async function getLoggedInUser(): Promise<Models.User<Models.Preferences>
 
   try {
     const { account } = await createSessionClient();
-    return await account.get();
+    const user = await account.get();
+    // Disabled accounts must not pass auth chokepoints (suspend enforcement).
+    if (user.status === false) {
+      return null;
+    }
+    return user;
   } catch {
     return null;
   }

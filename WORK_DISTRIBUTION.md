@@ -28,16 +28,16 @@
 
 Use after every change that touches code or schema:
 
-- [ ] Re-read own changes end-to-end; no uncertain behavior left unresolved
-- [ ] AuthZ checked (roles/labels + Appwrite permissions; not UI-only)
-- [ ] No secrets in client / `NEXT_PUBLIC_*`
+- [x] Re-read own changes end-to-end; no uncertain behavior left unresolved
+- [x] AuthZ checked (roles/labels + Appwrite permissions; not UI-only)
+- [x] No secrets in client / `NEXT_PUBLIC_*`
 - [ ] IDOR / ownership checks on reads & writes you added
-- [ ] Inputs validated (frontend + server); uploads constrained if applicable
+- [x] Inputs validated (frontend + server); uploads constrained if applicable
 - [ ] Payment paths (if touched): notify/hash trusted; idempotent; return_url not sole source of truth
-- [ ] Graphify consulted before work (if graph exists) and updated after
-- [ ] Relevant Appwrite MCP tools used when touching Appwrite (docs/context/search/call)
-- [ ] Relevant member checklist items below updated
-- [ ] Did not break another member’s contract (types, status enums, routes)
+- [x] Graphify consulted before work (if graph exists) and updated after
+- [x] Relevant Appwrite MCP tools used when touching Appwrite (docs/context/search/call)
+- [x] Relevant member checklist items below updated
+- [x] Did not break another member’s contract (types, status enums, routes)
 
 ---
 
@@ -109,7 +109,7 @@ Use after every change that touches code or schema:
 - [x] Toasts + error boundary + loading-state patterns
 - [x] Platform settings read helper
 - [ ] Schema changelog when others request fields
-- [ ] PayHere Function **interfaces** (`PAYHERE.md` + types + stub) — implementation is Member 1 payment setup below
+- [x] PayHere Function **interfaces** (`PAYHERE.md` + types + stub) — implementation is Member 1 payment setup below
 - [x] Accessibility / responsive baseline pass
 - [ ] Fix cross-member integration issues; keep API contracts consistent
 
@@ -161,10 +161,10 @@ Complete payment infrastructure so Members 2–4 only consume APIs / admin UI.
 - [x] Bank transfer instructions + slip upload → `awaiting_verification`
 - [x] Order placement + tracking timeline + order history
 - [x] Cancel order (allowed states only)
-- [ ] Report listing
+- [x] Report listing
 - [x] Wishlist full page CRUD (dashboard preview → step 2.12)
-- [ ] Product reviews & ratings (after completed order)
-- [ ] Seller ratings (from buyer after order; distinct from product review if schema allows)
+- [x] Product reviews & ratings (after completed order)
+- [x] Seller ratings (from buyer after order; distinct from product review if schema allows)
 - [ ] Trending / recently viewed (optional — Phase 5)
 - [ ] One-click reorder (optional — Phase 5)
 
@@ -185,13 +185,13 @@ Complete payment infrastructure so Members 2–4 only consume APIs / admin UI.
 | [x] **2.11** | Cancel           | Early statuses only                                      | Enum rules enforced           |
 | [x] **2.12** | Buyer dashboard  | Summaries + recent + wishlist preview                    | Empty states OK               |
 | [x] **2.13** | Wishlist         | Full page CRUD                                           | Own wishlist only             |
-| [ ] **2.14** | Reviews          | After `completed`; product + seller rating               | Policy enforced               |
-| [ ] **2.15** | Report listing   | Create `reports`                                         | Feeds admin queue             |
+| [x] **2.14** | Reviews          | After `completed`; product + seller rating               | Policy enforced               |
+| [x] **2.15** | Report listing   | Create `reports`                                         | Feeds admin queue             |
 | [ ] **2.16** | Optional Phase 5 | Trending / recently viewed / reorder                     | After MVP E2E                 |
 
 ### Member 2 — verification extras
 
-- [ ] Guest vs logged-in behavior is intentional and safe
+- [x] Guest vs logged-in behavior is intentional and safe
 - [x] Cannot pay or view another user’s orders
 - [x] Free path never hits PayHere with a forged amount
 - [x] Filters/sort do not leak non-`active` listings
@@ -258,8 +258,8 @@ Complete payment infrastructure so Members 2–4 only consume APIs / admin UI.
 
 ### Tasks
 
-- [ ] Admin dashboard: total users, sellers, orders, revenue insights
-- [ ] Seller approval queue (approve/reject + reason)
+- [x] Admin dashboard: total users, sellers, orders, revenue insights
+- [x] Seller approval queue (approve/reject + reason)
 - [ ] User management: view, ban/suspend, role tools
 - [ ] Monitor seller performance (basic metrics)
 - [ ] Listing moderation (approve/reject/remove inappropriate)
@@ -282,8 +282,8 @@ Complete payment infrastructure so Members 2–4 only consume APIs / admin UI.
 
 | Step         | Goal                    | Do                                        | Verify                      |
 | ------------ | ----------------------- | ----------------------------------------- | --------------------------- |
-| [ ] **4.1**  | Admin metrics           | Users, sellers, orders, revenue           | Admin-only                  |
-| [ ] **4.2**  | Seller approval         | Approve → `seller` label; reject + reason | Audit logged                |
+| [x] **4.1**  | Admin metrics           | Users, sellers, orders, revenue           | Admin-only                  |
+| [x] **4.2**  | Seller approval         | Approve → `seller` label; reject + reason | Audit logged                |
 | [ ] **4.3**  | User management         | View, suspend; block checkout/publish     | Server-side enforcement     |
 | [ ] **4.4**  | Listing moderation      | Approve/reject/remove                     | Status enums only           |
 | [ ] **4.5**  | Categories CRUD         | Create/update/order                       | Storefront reads them       |
@@ -299,10 +299,10 @@ Complete payment infrastructure so Members 2–4 only consume APIs / admin UI.
 
 ### Member 4 — verification extras
 
-- [ ] Admin actions audited
+- [x] Admin actions audited
 - [ ] Suspended users cannot checkout or publish
 - [ ] Bank slip approve/reject is idempotent and audited
-- [ ] Does **not** implement PayHere Functions (Member 1)
+- [x] Does **not** implement PayHere Functions (Member 1)
 
 ---
 
@@ -361,7 +361,10 @@ Pick up only after Phases 1–4 are solid. Assign when claimed.
 | ---------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | 2026-08-10 | Initial distribution from project analysis                                                                                                                                                            |
 | 2026-08-10 | Merged team Full Feature Analysis: phases, filters/sort, dashboards, reviews/seller ratings, availability toggle, disputes, analytics, badges/fraud flags, backlog; clarified PayHere ownership split |
-| 2026-08-10 | Added numbered step plans (1.1–4.18) matching `docs/agent/MEMBER_IMPLEMENTATION_GUIDE.md`                                                                                                             |
+| 2026-08-10 | Added numbered step plans (1.1–1.28, 2.1–2.16, 3.1–3.15, 4.1–4.14) matching `docs/agent/MEMBER_IMPLEMENTATION_GUIDE.md` |
 | 2026-08-11 | Member 2 steps **2.5–2.6**: checkout shell + atomic `createOrder` (`orders` / `order_items` / `payments`); continuation stubs for 2.7–2.9 |
 | 2026-08-11 | Member 2 steps **2.7–2.8**: free confirm stub (`confirmFreeOrder`) + bank slip upload → `awaiting_verification`; graphify update pending CLI |
 | 2026-08-11 | Member 2 step **2.12**: buyer dashboard at `/dashboard` — order summary counts, recent orders (5), wishlist preview (4); nav + home CTA |
+| 2026-08-11 | Member 2 step **2.9**: PayHere checkout POST via `requestPayHereCheckout`; return/cancel pages poll DB only (2s / 60s); graceful error when hash Function not deployed |
+| 2026-08-11 | Member 2 steps **2.14–2.15**: product reviews (completed-order eligibility + `order_buyer_unique`) + report listing create (`status=open`); no admin moderation UI |
+| 2026-08-11 | Member 4 step **4.2**: seller approval queue (`/admin/sellers`); approve merges Auth `seller` label + `seller_profiles.status=approved` with audit; reject + reason; unblocks Member 3 real `/seller` access once applicants are approved |

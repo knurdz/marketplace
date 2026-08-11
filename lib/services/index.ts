@@ -1,3 +1,5 @@
+export { getAdminMetrics } from "./admin-metrics";
+export type { AdminMetrics } from "./admin-metrics";
 export {
   asCategory,
   getCategoryBySlug,
@@ -48,6 +50,38 @@ export {
   removeFromWishlist,
   toggleWishlistProduct,
 } from "./wishlist-actions";
+export {
+  asSellerProfile,
+  listPendingSellerApplications,
+  maskBankAccountNumber,
+} from "./seller-approvals";
+export type {
+  AdminSellerApplication,
+  SellerApprovalResult,
+} from "./seller-approvals";
+export { listUsers } from "./user-management";
+export type {
+  AdminUserView,
+  UserListResult,
+  UserManagementResult,
+} from "./user-management";
+export {
+  asReview,
+  canReviewProduct,
+  listProductReviews,
+} from "./reviews";
+export {
+  REVIEW_ERROR_CODES,
+  type ReviewActionState,
+  type ReviewErrorCode,
+} from "./review-errors";
+export { createProductReview } from "./review-actions";
+export { createProductReport } from "./report-actions";
+export {
+  REPORT_ERROR_CODES,
+  type ReportActionState,
+  type ReportErrorCode,
+} from "./report-errors";
 export {
   getPublicSellerByUserId,
   getSellerBankDetailsForCheckout,
