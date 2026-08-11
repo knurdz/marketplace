@@ -32,7 +32,7 @@ Use after every change that touches code or schema:
 - [x] AuthZ checked (roles/labels + Appwrite permissions; not UI-only)
 - [x] No secrets in client / `NEXT_PUBLIC_*`
 - [ ] IDOR / ownership checks on reads & writes you added
-- [ ] Inputs validated (frontend + server); uploads constrained if applicable
+- [x] Inputs validated (frontend + server); uploads constrained if applicable
 - [ ] Payment paths (if touched): notify/hash trusted; idempotent; return_url not sole source of truth
 - [ ] Graphify consulted before work (if graph exists) and updated after
 - [x] Relevant Appwrite MCP tools used when touching Appwrite (docs/context/search/call)
@@ -259,7 +259,7 @@ Complete payment infrastructure so Members 2–4 only consume APIs / admin UI.
 ### Tasks
 
 - [x] Admin dashboard: total users, sellers, orders, revenue insights
-- [ ] Seller approval queue (approve/reject + reason)
+- [x] Seller approval queue (approve/reject + reason)
 - [ ] User management: view, ban/suspend, role tools
 - [ ] Monitor seller performance (basic metrics)
 - [ ] Listing moderation (approve/reject/remove inappropriate)
@@ -283,7 +283,7 @@ Complete payment infrastructure so Members 2–4 only consume APIs / admin UI.
 | Step         | Goal                    | Do                                        | Verify                      |
 | ------------ | ----------------------- | ----------------------------------------- | --------------------------- |
 | [x] **4.1**  | Admin metrics           | Users, sellers, orders, revenue           | Admin-only                  |
-| [ ] **4.2**  | Seller approval         | Approve → `seller` label; reject + reason | Audit logged                |
+| [x] **4.2**  | Seller approval         | Approve → `seller` label; reject + reason | Audit logged                |
 | [ ] **4.3**  | User management         | View, suspend; block checkout/publish     | Server-side enforcement     |
 | [ ] **4.4**  | Listing moderation      | Approve/reject/remove                     | Status enums only           |
 | [ ] **4.5**  | Categories CRUD         | Create/update/order                       | Storefront reads them       |
@@ -299,10 +299,10 @@ Complete payment infrastructure so Members 2–4 only consume APIs / admin UI.
 
 ### Member 4 — verification extras
 
-- [ ] Admin actions audited
+- [x] Admin actions audited
 - [ ] Suspended users cannot checkout or publish
 - [ ] Bank slip approve/reject is idempotent and audited
-- [ ] Does **not** implement PayHere Functions (Member 1)
+- [x] Does **not** implement PayHere Functions (Member 1)
 
 ---
 
@@ -365,3 +365,4 @@ Pick up only after Phases 1–4 are solid. Assign when claimed.
 | 2026-08-11 | Member 2 steps **2.5–2.6**: checkout shell + atomic `createOrder` (`orders` / `order_items` / `payments`); continuation stubs for 2.7–2.9 |
 | 2026-08-11 | Member 2 steps **2.7–2.8**: free confirm stub (`confirmFreeOrder`) + bank slip upload → `awaiting_verification`; graphify update pending CLI |
 | 2026-08-11 | Member 2 step **2.9**: PayHere checkout POST via `requestPayHereCheckout`; return/cancel pages poll DB only (2s / 60s); graceful error when hash Function not deployed |
+| 2026-08-11 | Member 4 step **4.2**: seller approval queue (`/admin/sellers`); approve merges Auth `seller` label + `seller_profiles.status=approved` with audit; reject + reason; unblocks Member 3 real `/seller` access once applicants are approved |
