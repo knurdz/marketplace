@@ -3,8 +3,36 @@
 import { cookies } from "next/headers";
 import { redirect, unstable_rethrow } from "next/navigation";
 import { AppwriteException, ID } from "node-appwrite";
-import { SESSION_COOKIE } from "./config";
+import { DATABASE_ID, SESSION_COOKIE, TABLE_PROFILES } from "./config";
+import { createProfileForUser } from "./profiles";
+import { ROLE_LABELS } from "./roles";
 import { createAdminClient, createSessionClient } from "./server";
+
+async function rollbackSignup(userId: string) {
+  try {
+    const { users, tables } = await createAdminClient();
+    try {
+      await tables.deleteRow({
+        databaseId: DATABASE_ID,
+        tableId: TABLE_PROFILES,
+        rowId: userId,
+      });
+    } catch {
+      // Profile may not exist yet.
+    }
+    await users.delete({ userId });
+  } catch {
+    // Best-effort cleanup.
+  }
+}
+
+/** Only allow same-origin relative paths (blocks open redirects). */
+function safeNextPath(raw: string): string | null {
+  if (!raw.startsWith("/") || raw.startsWith("//") || raw.includes("://")) {
+    return null;
+  }
+  return raw;
+}
 
 export type AuthActionState = {
   error?: string;
@@ -76,14 +104,36 @@ export async function signUpWithEmail(
     return { error: "Password must be at least 8 characters." };
   }
 
+  let createdUserId: string | null = null;
+
   try {
-    const { account } = await createAdminClient();
-    await account.create({
+    const { account, users } = await createAdminClient();
+    const user = await account.create({
       userId: ID.unique(),
       email,
       password,
       name: name || undefined,
     });
+    createdUserId = user.$id;
+
+    // updateLabels replaces the full label list — set buyer only at register.
+    await users.updateLabels({
+      userId: user.$id,
+      labels: [ROLE_LABELS.buyer],
+    });
+
+    try {
+      await createProfileForUser({
+        userId: user.$id,
+        email,
+        name: name || undefined,
+      });
+    } catch (profileError) {
+      await rollbackSignup(user.$id);
+      createdUserId = null;
+      throw profileError;
+    }
+
     const session = await account.createEmailPasswordSession({
       email,
       password,
@@ -91,6 +141,9 @@ export async function signUpWithEmail(
     await setSessionCookie(session.secret, session.expire);
   } catch (error) {
     unstable_rethrow(error);
+    if (createdUserId) {
+      await rollbackSignup(createdUserId);
+    }
     return { error: mapAuthError(error) };
   }
 
@@ -103,6 +156,7 @@ export async function signInWithEmail(
 ): Promise<AuthActionState> {
   const email = readString(formData, "email");
   const password = readString(formData, "password");
+  const next = safeNextPath(readString(formData, "next")) ?? "/account";
 
   if (!email || !password) {
     return { error: "Email and password are required." };
@@ -120,7 +174,7 @@ export async function signInWithEmail(
     return { error: mapAuthError(error) };
   }
 
-  redirect("/account");
+  redirect(next);
 }
 
 export async function signOut() {

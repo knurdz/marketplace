@@ -1,7 +1,7 @@
 "use server";
 
 import { cookies } from "next/headers";
-import { Account, Client } from "node-appwrite";
+import { Account, Client, TablesDB, Users } from "node-appwrite";
 import {
   getAppwriteEndpoint,
   getAppwriteProjectId,
@@ -46,12 +46,15 @@ export async function createSessionClient() {
     get account() {
       return new Account(client);
     },
+    get tables() {
+      return new TablesDB(client);
+    },
   };
 }
 
 /**
  * Admin server client (API key). Server-only — never import into Client Components.
- * Requires APPWRITE_API_KEY with at least sessions.write for auth flows (step 1.3+).
+ * Requires APPWRITE_API_KEY with sessions.write (+ databases/users scopes as features grow).
  */
 export async function createAdminClient() {
   const apiKey = process.env.APPWRITE_API_KEY?.trim();
@@ -69,6 +72,12 @@ export async function createAdminClient() {
   return {
     get account() {
       return new Account(client);
+    },
+    get tables() {
+      return new TablesDB(client);
+    },
+    get users() {
+      return new Users(client);
     },
   };
 }

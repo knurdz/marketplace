@@ -1,7 +1,9 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import { ProfileForm } from "@/components/auth/profile-form";
 import { ResendVerificationForm } from "@/components/auth/resend-verification-form";
 import { signOut } from "@/lib/appwrite/auth";
+import { getOwnProfile } from "@/lib/appwrite/profiles";
 import { getLoggedInUser } from "@/lib/appwrite/session";
 
 export default async function AccountPage() {
@@ -9,6 +11,12 @@ export default async function AccountPage() {
   if (!user) {
     redirect("/login");
   }
+
+  const profile = await getOwnProfile();
+  const labels =
+    Array.isArray(user.labels) && user.labels.length > 0
+      ? user.labels.join(", ")
+      : "(none)";
 
   return (
     <div>
@@ -27,11 +35,22 @@ export default async function AccountPage() {
           <span className="text-muted">id:</span> {user.$id}
         </li>
         <li>
+          <span className="text-muted">labels:</span> {labels}
+        </li>
+        <li>
           <span className="text-muted">emailVerified:</span>{" "}
           {user.emailVerification ? (
             <span className="text-accent">true</span>
           ) : (
             <span className="text-accent-bright">false</span>
+          )}
+        </li>
+        <li>
+          <span className="text-muted">profile:</span>{" "}
+          {profile ? (
+            <span className="text-accent">linked ({profile.displayName})</span>
+          ) : (
+            <span className="text-accent-bright">missing</span>
           )}
         </li>
       </ul>
@@ -44,6 +63,8 @@ export default async function AccountPage() {
           <ResendVerificationForm />
         </div>
       ) : null}
+
+      {profile ? <ProfileForm profile={profile} /> : null}
 
       <div className="mt-8 flex flex-wrap gap-4">
         <Link

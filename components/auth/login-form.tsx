@@ -6,7 +6,7 @@ import { signInWithEmail, type AuthActionState } from "@/lib/appwrite/auth";
 
 const initialState: AuthActionState = {};
 
-export function LoginForm() {
+export function LoginForm({ nextPath }: { nextPath?: string }) {
   const [state, formAction, pending] = useActionState(
     signInWithEmail,
     initialState,
@@ -14,6 +14,8 @@ export function LoginForm() {
 
   return (
     <form action={formAction} className="space-y-5">
+      {nextPath ? <input type="hidden" name="next" value={nextPath} /> : null}
+
       {state?.error ? (
         <p
           role="alert"

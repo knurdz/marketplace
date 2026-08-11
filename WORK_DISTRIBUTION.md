@@ -63,8 +63,8 @@ Use after every change that touches code or schema:
 - [x] Appwrite project wiring (browser + server clients)
 - [x] Auth: register, login, logout, session, password reset, email verify
 - [ ] Optional phone field on profile / registration (not required for MVP login)
-- [ ] Role model (labels/teams) + middleware guards for `/seller`, `/admin`
-- [ ] Database collections + indexes + permissions documented (`docs/agent/SCHEMA.md` when created) — include at least: profiles/users, products, orders, order_items, payments, reviews (+ seller_profiles, categories, notifications, audit as needed)
+- [x] Role model (labels/teams) + middleware guards for `/seller`, `/admin`
+- [x] Database collections + indexes + permissions documented (`docs/agent/SCHEMA.md` when created) — include at least: profiles/users, products, orders, order_items, payments, reviews (+ seller_profiles, categories, notifications, audit as needed)
 - [ ] Storage buckets + shared upload helper
 - [ ] UI kit / layout shells (store, seller, admin empty shells) + navbar/routing
 - [ ] Shared order/payment status enums & types + thin service layer / API contracts for other members
@@ -79,9 +79,9 @@ Use after every change that touches code or schema:
 | [x] **1.2**  | Appwrite clients              | Browser + server clients in `lib/appwrite`; env documented           | Session null-safe / project reachable             |
 | [x] **1.3**  | Auth pages                    | Register, login, logout, session display                             | Round-trip auth                                   |
 | [x] **1.4**  | Password reset + email verify | Recovery + verify flows                                              | Links work in dev                                 |
-| [ ] **1.5**  | Profiles                      | `profiles` linked to `userId`; create on register                    | Profile after signup; own-only update             |
-| [ ] **1.6**  | Roles & guards                | Labels/teams; middleware for `/seller`, `/admin`                     | Buyer blocked from admin                          |
-| [ ] **1.7**  | Schema + collections          | All MVP collections + indexes + permissions → `docs/agent/SCHEMA.md` | Doc matches console                               |
+| [x] **1.5**  | Profiles                      | `profiles` linked to `userId`; create on register                    | Profile after signup; own-only update             |
+| [x] **1.6**  | Roles & guards                | Labels/teams; middleware for `/seller`, `/admin`                     | Buyer blocked from admin                          |
+| [x] **1.7**  | Schema + collections          | All MVP collections + indexes + permissions → `docs/agent/SCHEMA.md` | Doc matches console                               |
 | [ ] **1.8**  | Storage                       | Buckets + upload helper (private bank slips)                         | Avatar upload works                               |
 | [ ] **1.9**  | UI kit + shells               | Store/seller/admin layouts + navbar                                  | Empty dashboards render                           |
 | [ ] **1.10** | Shared types/enums            | Product/order/payment statuses exported                              | Single source of truth                            |
