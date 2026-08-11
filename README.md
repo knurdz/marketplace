@@ -62,18 +62,22 @@ Fill `.env.local` with Appwrite values (see below). Do not commit secrets; only 
    - `NEXT_PUBLIC_APPWRITE_PROJECT_ID=` project id from **Settings**
    - `APPWRITE_API_KEY=` a server API key with at least **`sessions.write`** (needed for SSR auth in step 1.3; never `NEXT_PUBLIC_*`)
    - `NEXT_PUBLIC_APP_URL=http://localhost:3000` for local dev
-4. Under **Add a platform**, add a **Web** app with hostname `localhost` (required for browser SDK CORS).
+4. Under **Add a platform**, add a **Web** app with hostname `localhost` (required for browser SDK CORS and recovery/verify redirect URLs).
+5. Set `NEXT_PUBLIC_APP_URL` to the same origin you open in the browser (e.g. `http://localhost:3000`) so password-reset and email-verify links redirect correctly.
 
 Clients live in [`lib/appwrite/`](./lib/appwrite/): browser (`appwrite`) + server session/admin (`node-appwrite`). Session cookie name: `knurdz_session`.
 
 ### Auth routes
 
-| Path        | Purpose                    |
-| ----------- | -------------------------- |
-| `/login`    | Email/password sign in     |
-| `/register` | Create account             |
-| `/account`  | Session display + sign out |
+| Path               | Purpose                                     |
+| ------------------ | ------------------------------------------- |
+| `/login`           | Email/password sign in                      |
+| `/register`        | Create account                              |
+| `/account`         | Session display, verify resend, sign out    |
+| `/forgot-password` | Request password recovery email             |
+| `/reset-password`  | Set new password from recovery link         |
+| `/verify-email`    | Complete email verification from email link |
 
 ## Status
 
-Steps **1.1–1.3** (bootstrap, Appwrite clients, auth pages) are in place. Password reset / email verify and remaining Phase 0 work continue in steps 1.4–1.13.
+Steps **1.1–1.4** (bootstrap through password reset / email verify) are in place. Profiles, roles, and remaining Phase 0 work continue in steps 1.5–1.13.

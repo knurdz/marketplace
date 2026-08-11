@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import { ResendVerificationForm } from "@/components/auth/resend-verification-form";
 import { signOut } from "@/lib/appwrite/auth";
 import { getLoggedInUser } from "@/lib/appwrite/session";
 
@@ -25,7 +26,24 @@ export default async function AccountPage() {
         <li>
           <span className="text-muted">id:</span> {user.$id}
         </li>
+        <li>
+          <span className="text-muted">emailVerified:</span>{" "}
+          {user.emailVerification ? (
+            <span className="text-accent">true</span>
+          ) : (
+            <span className="text-accent-bright">false</span>
+          )}
+        </li>
       </ul>
+
+      {!user.emailVerification ? (
+        <div className="mt-6 space-y-2">
+          <p className="text-sm text-muted">
+            Your email is not verified yet. Resend a verification link:
+          </p>
+          <ResendVerificationForm />
+        </div>
+      ) : null}
 
       <div className="mt-8 flex flex-wrap gap-4">
         <Link

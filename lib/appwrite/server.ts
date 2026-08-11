@@ -9,6 +9,23 @@ import {
 } from "./config";
 
 /**
+ * Guest/public server client (endpoint + project only).
+ * Use for password recovery request/complete and email verify complete.
+ * Never share across requests.
+ */
+export async function createPublicClient() {
+  const client = new Client()
+    .setEndpoint(getAppwriteEndpoint())
+    .setProject(getAppwriteProjectId());
+
+  return {
+    get account() {
+      return new Account(client);
+    },
+  };
+}
+
+/**
  * Session-scoped server client (end-user cookie).
  * Always create a new Client per call — never share across requests.
  */

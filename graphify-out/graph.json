@@ -12,7 +12,7 @@
         "mcp_kind": "mcp_config_file"
       },
       "_origin": "ast",
-      "community": 8,
+      "community": 10,
       "norm_label": "mcp.json",
       "id": "cursor_mcp"
     },
@@ -25,7 +25,7 @@
         "mcp_kind": "mcp_server"
       },
       "_origin": "ast",
-      "community": 8,
+      "community": 10,
       "norm_label": "shadcn",
       "id": "cursor_mcp_mcp_server_shadcn"
     },
@@ -38,7 +38,7 @@
         "mcp_kind": "mcp_command"
       },
       "_origin": "ast",
-      "community": 8,
+      "community": 10,
       "norm_label": "npx",
       "id": "mcp_command_npx"
     },
@@ -48,7 +48,7 @@
       "source_file": "app/layout.tsx",
       "source_location": "L1",
       "_origin": "ast",
-      "community": 7,
+      "community": 9,
       "norm_label": "layout.tsx",
       "id": "app_layout"
     },
@@ -58,7 +58,7 @@
       "source_file": "app/layout.tsx",
       "source_location": "L6",
       "_origin": "ast",
-      "community": 7,
+      "community": 9,
       "norm_label": "spacegrotesk",
       "id": "app_layout_spacegrotesk"
     },
@@ -68,7 +68,7 @@
       "source_file": "app/layout.tsx",
       "source_location": "L12",
       "_origin": "ast",
-      "community": 7,
+      "community": 9,
       "norm_label": "jetbrainsmono",
       "id": "app_layout_jetbrainsmono"
     },
@@ -78,7 +78,7 @@
       "source_file": "app/layout.tsx",
       "source_location": "L18",
       "_origin": "ast",
-      "community": 7,
+      "community": 9,
       "norm_label": "metadata",
       "id": "app_layout_metadata"
     },
@@ -88,7 +88,7 @@
       "source_file": "app/layout.tsx",
       "source_location": "L24",
       "_origin": "ast",
-      "community": 7,
+      "community": 9,
       "norm_label": "rootlayout()",
       "id": "app_layout_rootlayout"
     },
@@ -98,7 +98,7 @@
       "source_file": "eslint.config.mjs",
       "source_location": "L1",
       "_origin": "ast",
-      "community": 10,
+      "community": 12,
       "norm_label": "eslint.config.mjs",
       "id": "eslint_config"
     },
@@ -108,7 +108,7 @@
       "source_file": "eslint.config.mjs",
       "source_location": "L6",
       "_origin": "ast",
-      "community": 10,
+      "community": 12,
       "norm_label": "eslintconfig",
       "id": "eslint_config_eslintconfig"
     },
@@ -118,7 +118,7 @@
       "source_file": "next.config.ts",
       "source_location": "L1",
       "_origin": "ast",
-      "community": 11,
+      "community": 13,
       "norm_label": "next.config.ts",
       "id": "next_config"
     },
@@ -128,7 +128,7 @@
       "source_file": "next.config.ts",
       "source_location": "L3",
       "_origin": "ast",
-      "community": 11,
+      "community": 13,
       "norm_label": "nextconfig",
       "id": "next_config_nextconfig"
     },
@@ -138,7 +138,7 @@
       "source_file": "postcss.config.mjs",
       "source_location": "L1",
       "_origin": "ast",
-      "community": 12,
+      "community": 14,
       "norm_label": "postcss.config.mjs",
       "id": "postcss_config"
     },
@@ -148,7 +148,7 @@
       "source_file": "postcss.config.mjs",
       "source_location": "L1",
       "_origin": "ast",
-      "community": 12,
+      "community": 14,
       "norm_label": "config",
       "id": "postcss_config_config"
     },
@@ -158,7 +158,7 @@
       "source_file": "tsconfig.json",
       "source_location": "L1",
       "_origin": "ast",
-      "community": 6,
+      "community": 7,
       "norm_label": "tsconfig.json",
       "id": "tsconfig"
     },
@@ -378,7 +378,7 @@
       "source_file": "tsconfig.json",
       "source_location": "L25",
       "_origin": "ast",
-      "community": 6,
+      "community": 7,
       "norm_label": "include",
       "id": "tsconfig_include"
     },
@@ -388,7 +388,7 @@
       "source_file": "tsconfig.json",
       "source_location": "L25",
       "_origin": "ast",
-      "community": 6,
+      "community": 7,
       "norm_label": "next-env.d.ts",
       "id": "ref_next_env_d_ts"
     },
@@ -398,7 +398,7 @@
       "source_file": "tsconfig.json",
       "source_location": "L25",
       "_origin": "ast",
-      "community": 6,
+      "community": 7,
       "norm_label": "**/*.ts",
       "id": "ref_ts"
     },
@@ -408,7 +408,7 @@
       "source_file": "tsconfig.json",
       "source_location": "L25",
       "_origin": "ast",
-      "community": 6,
+      "community": 7,
       "norm_label": "**/*.tsx",
       "id": "ref_tsx"
     },
@@ -418,7 +418,7 @@
       "source_file": "tsconfig.json",
       "source_location": "L25",
       "_origin": "ast",
-      "community": 6,
+      "community": 7,
       "norm_label": ".next/types/**/*.ts",
       "id": "ref_next_types_ts"
     },
@@ -428,7 +428,7 @@
       "source_file": "tsconfig.json",
       "source_location": "L25",
       "_origin": "ast",
-      "community": 6,
+      "community": 7,
       "norm_label": ".next/dev/types/**/*.ts",
       "id": "ref_next_dev_types_ts"
     },
@@ -438,7 +438,7 @@
       "source_file": "tsconfig.json",
       "source_location": "L25",
       "_origin": "ast",
-      "community": 6,
+      "community": 7,
       "norm_label": "**/*.mts",
       "id": "ref_mts"
     },
@@ -448,7 +448,7 @@
       "source_file": "tsconfig.json",
       "source_location": "L33",
       "_origin": "ast",
-      "community": 6,
+      "community": 7,
       "norm_label": "exclude",
       "id": "tsconfig_exclude"
     },
@@ -458,7 +458,7 @@
       "source_file": "tsconfig.json",
       "source_location": "L33",
       "_origin": "ast",
-      "community": 6,
+      "community": 7,
       "norm_label": "node_modules",
       "id": "ref_node_modules"
     },
@@ -468,7 +468,7 @@
       "source_file": "lib/appwrite/browser.ts",
       "source_location": "L1",
       "_origin": "ast",
-      "community": 3,
+      "community": 4,
       "norm_label": "browser.ts",
       "id": "lib_appwrite_browser"
     },
@@ -478,7 +478,7 @@
       "source_file": "lib/appwrite/browser.ts",
       "source_location": "L11",
       "_origin": "ast",
-      "community": 3,
+      "community": 4,
       "norm_label": "getbrowserclient()",
       "id": "lib_appwrite_browser_getbrowserclient"
     },
@@ -488,89 +488,9 @@
       "source_file": "lib/appwrite/browser.ts",
       "source_location": "L20",
       "_origin": "ast",
-      "community": 3,
+      "community": 4,
       "norm_label": "getbrowseraccount()",
       "id": "lib_appwrite_browser_getbrowseraccount"
-    },
-    {
-      "label": "config.ts",
-      "file_type": "code",
-      "source_file": "lib/appwrite/config.ts",
-      "source_location": "L1",
-      "_origin": "ast",
-      "community": 3,
-      "norm_label": "config.ts",
-      "id": "lib_appwrite_config"
-    },
-    {
-      "label": "getAppwriteEndpoint()",
-      "file_type": "code",
-      "source_file": "lib/appwrite/config.ts",
-      "source_location": "L8",
-      "_origin": "ast",
-      "community": 3,
-      "norm_label": "getappwriteendpoint()",
-      "id": "lib_appwrite_config_getappwriteendpoint"
-    },
-    {
-      "label": "getAppwriteProjectId()",
-      "file_type": "code",
-      "source_file": "lib/appwrite/config.ts",
-      "source_location": "L18",
-      "_origin": "ast",
-      "community": 3,
-      "norm_label": "getappwriteprojectid()",
-      "id": "lib_appwrite_config_getappwriteprojectid"
-    },
-    {
-      "label": "hasAppwritePublicConfig()",
-      "file_type": "code",
-      "source_file": "lib/appwrite/config.ts",
-      "source_location": "L29",
-      "_origin": "ast",
-      "community": 3,
-      "norm_label": "hasappwritepublicconfig()",
-      "id": "lib_appwrite_config_hasappwritepublicconfig"
-    },
-    {
-      "label": "index.ts",
-      "file_type": "code",
-      "source_file": "lib/appwrite/index.ts",
-      "source_location": "L1",
-      "_origin": "ast",
-      "community": 3,
-      "norm_label": "index.ts",
-      "id": "lib_appwrite_index"
-    },
-    {
-      "label": "server.ts",
-      "file_type": "code",
-      "source_file": "lib/appwrite/server.ts",
-      "source_location": "L1",
-      "_origin": "ast",
-      "community": 3,
-      "norm_label": "server.ts",
-      "id": "lib_appwrite_server"
-    },
-    {
-      "label": "createSessionClient()",
-      "file_type": "code",
-      "source_file": "lib/appwrite/server.ts",
-      "source_location": "L15",
-      "_origin": "ast",
-      "community": 3,
-      "norm_label": "createsessionclient()",
-      "id": "lib_appwrite_server_createsessionclient"
-    },
-    {
-      "label": "createAdminClient()",
-      "file_type": "code",
-      "source_file": "lib/appwrite/server.ts",
-      "source_location": "L39",
-      "_origin": "ast",
-      "community": 3,
-      "norm_label": "createadminclient()",
-      "id": "lib_appwrite_server_createadminclient"
     },
     {
       "label": "session.ts",
@@ -578,7 +498,7 @@
       "source_file": "lib/appwrite/session.ts",
       "source_location": "L1",
       "_origin": "ast",
-      "community": 3,
+      "community": 4,
       "norm_label": "session.ts",
       "id": "lib_appwrite_session"
     },
@@ -588,7 +508,7 @@
       "source_file": "lib/appwrite/session.ts",
       "source_location": "L9",
       "_origin": "ast",
-      "community": 3,
+      "community": 4,
       "norm_label": "getloggedinuser()",
       "id": "lib_appwrite_session_getloggedinuser"
     },
@@ -598,7 +518,7 @@
       "source_file": "package.json",
       "source_location": "L1",
       "_origin": "ast",
-      "community": 5,
+      "community": 6,
       "norm_label": "package.json",
       "id": "package"
     },
@@ -608,7 +528,7 @@
       "source_file": "package.json",
       "source_location": "L2",
       "_origin": "ast",
-      "community": 5,
+      "community": 6,
       "norm_label": "name",
       "id": "package_name"
     },
@@ -618,7 +538,7 @@
       "source_file": "package.json",
       "source_location": "L3",
       "_origin": "ast",
-      "community": 5,
+      "community": 6,
       "norm_label": "version",
       "id": "package_version"
     },
@@ -628,7 +548,7 @@
       "source_file": "package.json",
       "source_location": "L4",
       "_origin": "ast",
-      "community": 5,
+      "community": 6,
       "norm_label": "private",
       "id": "package_private"
     },
@@ -638,7 +558,7 @@
       "source_file": "package.json",
       "source_location": "L5",
       "_origin": "ast",
-      "community": 5,
+      "community": 6,
       "norm_label": "scripts",
       "id": "package_scripts"
     },
@@ -648,7 +568,7 @@
       "source_file": "package.json",
       "source_location": "L6",
       "_origin": "ast",
-      "community": 5,
+      "community": 6,
       "norm_label": "dev",
       "id": "package_scripts_dev"
     },
@@ -658,7 +578,7 @@
       "source_file": "package.json",
       "source_location": "L7",
       "_origin": "ast",
-      "community": 5,
+      "community": 6,
       "norm_label": "build",
       "id": "package_scripts_build"
     },
@@ -668,7 +588,7 @@
       "source_file": "package.json",
       "source_location": "L8",
       "_origin": "ast",
-      "community": 5,
+      "community": 6,
       "norm_label": "start",
       "id": "package_scripts_start"
     },
@@ -678,7 +598,7 @@
       "source_file": "package.json",
       "source_location": "L9",
       "_origin": "ast",
-      "community": 5,
+      "community": 6,
       "norm_label": "lint",
       "id": "package_scripts_lint"
     },
@@ -688,7 +608,7 @@
       "source_file": "package.json",
       "source_location": "L10",
       "_origin": "ast",
-      "community": 5,
+      "community": 6,
       "norm_label": "format",
       "id": "package_scripts_format"
     },
@@ -698,7 +618,7 @@
       "source_file": "package.json",
       "source_location": "L11",
       "_origin": "ast",
-      "community": 5,
+      "community": 6,
       "norm_label": "format:check",
       "id": "package_scripts_format_check"
     },
@@ -708,7 +628,7 @@
       "source_file": "package.json",
       "source_location": "L13",
       "_origin": "ast",
-      "community": 4,
+      "community": 5,
       "norm_label": "dependencies",
       "id": "package_dependencies"
     },
@@ -718,7 +638,7 @@
       "source_file": "package.json",
       "source_location": "L14",
       "_origin": "ast",
-      "community": 4,
+      "community": 5,
       "norm_label": "appwrite",
       "id": "package_dependencies_appwrite"
     },
@@ -728,7 +648,7 @@
       "source_file": "package.json",
       "source_location": "L14",
       "_origin": "ast",
-      "community": 4,
+      "community": 5,
       "norm_label": "appwrite",
       "id": "appwrite"
     },
@@ -738,7 +658,7 @@
       "source_file": "package.json",
       "source_location": "L15",
       "_origin": "ast",
-      "community": 4,
+      "community": 5,
       "norm_label": "next",
       "id": "package_dependencies_next"
     },
@@ -748,7 +668,7 @@
       "source_file": "package.json",
       "source_location": "L15",
       "_origin": "ast",
-      "community": 4,
+      "community": 5,
       "norm_label": "next",
       "id": "next"
     },
@@ -758,7 +678,7 @@
       "source_file": "package.json",
       "source_location": "L16",
       "_origin": "ast",
-      "community": 4,
+      "community": 5,
       "norm_label": "node-appwrite",
       "id": "package_dependencies_node_appwrite"
     },
@@ -768,7 +688,7 @@
       "source_file": "package.json",
       "source_location": "L16",
       "_origin": "ast",
-      "community": 4,
+      "community": 5,
       "norm_label": "node-appwrite",
       "id": "node_appwrite"
     },
@@ -778,7 +698,7 @@
       "source_file": "package.json",
       "source_location": "L17",
       "_origin": "ast",
-      "community": 4,
+      "community": 5,
       "norm_label": "react",
       "id": "package_dependencies_react"
     },
@@ -788,7 +708,7 @@
       "source_file": "package.json",
       "source_location": "L17",
       "_origin": "ast",
-      "community": 4,
+      "community": 5,
       "norm_label": "react",
       "id": "react"
     },
@@ -798,7 +718,7 @@
       "source_file": "package.json",
       "source_location": "L18",
       "_origin": "ast",
-      "community": 4,
+      "community": 5,
       "norm_label": "react-dom",
       "id": "package_dependencies_react_dom"
     },
@@ -808,7 +728,7 @@
       "source_file": "package.json",
       "source_location": "L18",
       "_origin": "ast",
-      "community": 4,
+      "community": 5,
       "norm_label": "react-dom",
       "id": "react_dom"
     },
@@ -1023,32 +943,12 @@
       "id": "typescript"
     },
     {
-      "label": "page.tsx",
-      "file_type": "code",
-      "source_file": "app/(auth)/account/page.tsx",
-      "source_location": "L1",
-      "_origin": "ast",
-      "community": 0,
-      "norm_label": "page.tsx",
-      "id": "app_auth_account_page"
-    },
-    {
-      "label": "AccountPage()",
-      "file_type": "code",
-      "source_file": "app/(auth)/account/page.tsx",
-      "source_location": "L6",
-      "_origin": "ast",
-      "community": 0,
-      "norm_label": "accountpage()",
-      "id": "app_auth_account_page_accountpage"
-    },
-    {
       "label": "layout.tsx",
       "file_type": "code",
       "source_file": "app/(auth)/layout.tsx",
       "source_location": "L1",
       "_origin": "ast",
-      "community": 9,
+      "community": 11,
       "norm_label": "layout.tsx",
       "id": "app_auth_layout"
     },
@@ -1058,7 +958,7 @@
       "source_file": "app/(auth)/layout.tsx",
       "source_location": "L4",
       "_origin": "ast",
-      "community": 9,
+      "community": 11,
       "norm_label": "authlayout()",
       "id": "app_auth_layout_authlayout"
     },
@@ -1068,7 +968,7 @@
       "source_file": "app/(auth)/login/page.tsx",
       "source_location": "L1",
       "_origin": "ast",
-      "community": 0,
+      "community": 8,
       "norm_label": "page.tsx",
       "id": "app_auth_login_page"
     },
@@ -1078,7 +978,7 @@
       "source_file": "app/(auth)/login/page.tsx",
       "source_location": "L5",
       "_origin": "ast",
-      "community": 0,
+      "community": 8,
       "norm_label": "loginpage()",
       "id": "app_auth_login_page_loginpage"
     },
@@ -1088,7 +988,7 @@
       "source_file": "app/(auth)/register/page.tsx",
       "source_location": "L1",
       "_origin": "ast",
-      "community": 0,
+      "community": 3,
       "norm_label": "page.tsx",
       "id": "app_auth_register_page"
     },
@@ -1098,7 +998,7 @@
       "source_file": "app/(auth)/register/page.tsx",
       "source_location": "L5",
       "_origin": "ast",
-      "community": 0,
+      "community": 3,
       "norm_label": "registerpage()",
       "id": "app_auth_register_page_registerpage"
     },
@@ -1108,7 +1008,7 @@
       "source_file": "app/page.tsx",
       "source_location": "L1",
       "_origin": "ast",
-      "community": 0,
+      "community": 3,
       "norm_label": "page.tsx",
       "id": "app_page"
     },
@@ -1118,39 +1018,9 @@
       "source_file": "app/page.tsx",
       "source_location": "L5",
       "_origin": "ast",
-      "community": 0,
+      "community": 3,
       "norm_label": "home()",
       "id": "app_page_home"
-    },
-    {
-      "label": "login-form.tsx",
-      "file_type": "code",
-      "source_file": "components/auth/login-form.tsx",
-      "source_location": "L1",
-      "_origin": "ast",
-      "community": 0,
-      "norm_label": "login-form.tsx",
-      "id": "components_auth_login_form"
-    },
-    {
-      "label": "initialState",
-      "file_type": "code",
-      "source_file": "components/auth/login-form.tsx",
-      "source_location": "L7",
-      "_origin": "ast",
-      "community": 0,
-      "norm_label": "initialstate",
-      "id": "components_auth_login_form_initialstate"
-    },
-    {
-      "label": "LoginForm()",
-      "file_type": "code",
-      "source_file": "components/auth/login-form.tsx",
-      "source_location": "L9",
-      "_origin": "ast",
-      "community": 0,
-      "norm_label": "loginform()",
-      "id": "components_auth_login_form_loginform"
     },
     {
       "label": "register-form.tsx",
@@ -1158,7 +1028,7 @@
       "source_file": "components/auth/register-form.tsx",
       "source_location": "L1",
       "_origin": "ast",
-      "community": 0,
+      "community": 3,
       "norm_label": "register-form.tsx",
       "id": "components_auth_register_form"
     },
@@ -1168,7 +1038,7 @@
       "source_file": "components/auth/register-form.tsx",
       "source_location": "L7",
       "_origin": "ast",
-      "community": 0,
+      "community": 3,
       "norm_label": "initialstate",
       "id": "components_auth_register_form_initialstate"
     },
@@ -1178,7 +1048,7 @@
       "source_file": "components/auth/register-form.tsx",
       "source_location": "L9",
       "_origin": "ast",
-      "community": 0,
+      "community": 3,
       "norm_label": "registerform()",
       "id": "components_auth_register_form_registerform"
     },
@@ -1188,9 +1058,9 @@
       "source_file": "lib/appwrite/auth.ts",
       "source_location": "L1",
       "_origin": "ast",
-      "id": "lib_appwrite_auth",
-      "community": 0,
-      "norm_label": "auth.ts"
+      "community": 3,
+      "norm_label": "auth.ts",
+      "id": "lib_appwrite_auth"
     },
     {
       "label": "AuthActionState",
@@ -1198,9 +1068,9 @@
       "source_file": "lib/appwrite/auth.ts",
       "source_location": "L9",
       "_origin": "ast",
-      "id": "lib_appwrite_auth_authactionstate",
-      "community": 0,
-      "norm_label": "authactionstate"
+      "community": 3,
+      "norm_label": "authactionstate",
+      "id": "lib_appwrite_auth_authactionstate"
     },
     {
       "label": "readString()",
@@ -1208,9 +1078,9 @@
       "source_file": "lib/appwrite/auth.ts",
       "source_location": "L13",
       "_origin": "ast",
-      "id": "lib_appwrite_auth_readstring",
-      "community": 0,
-      "norm_label": "readstring()"
+      "community": 3,
+      "norm_label": "readstring()",
+      "id": "lib_appwrite_auth_readstring"
     },
     {
       "label": "mapAuthError()",
@@ -1218,9 +1088,9 @@
       "source_file": "lib/appwrite/auth.ts",
       "source_location": "L18",
       "_origin": "ast",
-      "id": "lib_appwrite_auth_mapautherror",
-      "community": 0,
-      "norm_label": "mapautherror()"
+      "community": 3,
+      "norm_label": "mapautherror()",
+      "id": "lib_appwrite_auth_mapautherror"
     },
     {
       "label": "setSessionCookie()",
@@ -1228,9 +1098,9 @@
       "source_file": "lib/appwrite/auth.ts",
       "source_location": "L53",
       "_origin": "ast",
-      "id": "lib_appwrite_auth_setsessioncookie",
-      "community": 0,
-      "norm_label": "setsessioncookie()"
+      "community": 3,
+      "norm_label": "setsessioncookie()",
+      "id": "lib_appwrite_auth_setsessioncookie"
     },
     {
       "label": "signUpWithEmail()",
@@ -1238,9 +1108,9 @@
       "source_file": "lib/appwrite/auth.ts",
       "source_location": "L64",
       "_origin": "ast",
-      "id": "lib_appwrite_auth_signupwithemail",
-      "community": 0,
-      "norm_label": "signupwithemail()"
+      "community": 3,
+      "norm_label": "signupwithemail()",
+      "id": "lib_appwrite_auth_signupwithemail"
     },
     {
       "label": "signInWithEmail()",
@@ -1248,9 +1118,9 @@
       "source_file": "lib/appwrite/auth.ts",
       "source_location": "L100",
       "_origin": "ast",
-      "id": "lib_appwrite_auth_signinwithemail",
-      "community": 0,
-      "norm_label": "signinwithemail()"
+      "community": 3,
+      "norm_label": "signinwithemail()",
+      "id": "lib_appwrite_auth_signinwithemail"
     },
     {
       "label": "signOut()",
@@ -1258,9 +1128,409 @@
       "source_file": "lib/appwrite/auth.ts",
       "source_location": "L126",
       "_origin": "ast",
-      "id": "lib_appwrite_auth_signout",
+      "community": 3,
+      "norm_label": "signout()",
+      "id": "lib_appwrite_auth_signout"
+    },
+    {
+      "label": "page.tsx",
+      "file_type": "code",
+      "source_file": "app/(auth)/account/page.tsx",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "app_auth_account_page",
       "community": 0,
-      "norm_label": "signout()"
+      "norm_label": "page.tsx"
+    },
+    {
+      "label": "AccountPage()",
+      "file_type": "code",
+      "source_file": "app/(auth)/account/page.tsx",
+      "source_location": "L7",
+      "_origin": "ast",
+      "id": "app_auth_account_page_accountpage",
+      "community": 0,
+      "norm_label": "accountpage()"
+    },
+    {
+      "label": "page.tsx",
+      "file_type": "code",
+      "source_file": "app/(auth)/forgot-password/page.tsx",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "app_auth_forgot_password_page",
+      "community": 0,
+      "norm_label": "page.tsx"
+    },
+    {
+      "label": "ForgotPasswordPage()",
+      "file_type": "code",
+      "source_file": "app/(auth)/forgot-password/page.tsx",
+      "source_location": "L3",
+      "_origin": "ast",
+      "id": "app_auth_forgot_password_page_forgotpasswordpage",
+      "community": 0,
+      "norm_label": "forgotpasswordpage()"
+    },
+    {
+      "label": "page.tsx",
+      "file_type": "code",
+      "source_file": "app/(auth)/reset-password/page.tsx",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "app_auth_reset_password_page",
+      "community": 0,
+      "norm_label": "page.tsx"
+    },
+    {
+      "label": "SearchParams",
+      "file_type": "code",
+      "source_file": "app/(auth)/reset-password/page.tsx",
+      "source_location": "L4",
+      "_origin": "ast",
+      "id": "app_auth_reset_password_page_searchparams",
+      "community": 0,
+      "norm_label": "searchparams"
+    },
+    {
+      "label": "ResetPasswordPage()",
+      "file_type": "code",
+      "source_file": "app/(auth)/reset-password/page.tsx",
+      "source_location": "L6",
+      "_origin": "ast",
+      "id": "app_auth_reset_password_page_resetpasswordpage",
+      "community": 0,
+      "norm_label": "resetpasswordpage()"
+    },
+    {
+      "label": "page.tsx",
+      "file_type": "code",
+      "source_file": "app/(auth)/verify-email/page.tsx",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "app_auth_verify_email_page",
+      "community": 0,
+      "norm_label": "page.tsx"
+    },
+    {
+      "label": "SearchParams",
+      "file_type": "code",
+      "source_file": "app/(auth)/verify-email/page.tsx",
+      "source_location": "L4",
+      "_origin": "ast",
+      "id": "app_auth_verify_email_page_searchparams",
+      "community": 0,
+      "norm_label": "searchparams"
+    },
+    {
+      "label": "VerifyEmailPage()",
+      "file_type": "code",
+      "source_file": "app/(auth)/verify-email/page.tsx",
+      "source_location": "L6",
+      "_origin": "ast",
+      "id": "app_auth_verify_email_page_verifyemailpage",
+      "community": 0,
+      "norm_label": "verifyemailpage()"
+    },
+    {
+      "label": "forgot-password-form.tsx",
+      "file_type": "code",
+      "source_file": "components/auth/forgot-password-form.tsx",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "components_auth_forgot_password_form",
+      "community": 0,
+      "norm_label": "forgot-password-form.tsx"
+    },
+    {
+      "label": "initialState",
+      "file_type": "code",
+      "source_file": "components/auth/forgot-password-form.tsx",
+      "source_location": "L10",
+      "_origin": "ast",
+      "id": "components_auth_forgot_password_form_initialstate",
+      "community": 0,
+      "norm_label": "initialstate"
+    },
+    {
+      "label": "ForgotPasswordForm()",
+      "file_type": "code",
+      "source_file": "components/auth/forgot-password-form.tsx",
+      "source_location": "L12",
+      "_origin": "ast",
+      "id": "components_auth_forgot_password_form_forgotpasswordform",
+      "community": 0,
+      "norm_label": "forgotpasswordform()"
+    },
+    {
+      "label": "login-form.tsx",
+      "file_type": "code",
+      "source_file": "components/auth/login-form.tsx",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "components_auth_login_form",
+      "community": 8,
+      "norm_label": "login-form.tsx"
+    },
+    {
+      "label": "initialState",
+      "file_type": "code",
+      "source_file": "components/auth/login-form.tsx",
+      "source_location": "L7",
+      "_origin": "ast",
+      "id": "components_auth_login_form_initialstate",
+      "community": 8,
+      "norm_label": "initialstate"
+    },
+    {
+      "label": "LoginForm()",
+      "file_type": "code",
+      "source_file": "components/auth/login-form.tsx",
+      "source_location": "L9",
+      "_origin": "ast",
+      "id": "components_auth_login_form_loginform",
+      "community": 8,
+      "norm_label": "loginform()"
+    },
+    {
+      "label": "resend-verification-form.tsx",
+      "file_type": "code",
+      "source_file": "components/auth/resend-verification-form.tsx",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "components_auth_resend_verification_form",
+      "community": 0,
+      "norm_label": "resend-verification-form.tsx"
+    },
+    {
+      "label": "initialState",
+      "file_type": "code",
+      "source_file": "components/auth/resend-verification-form.tsx",
+      "source_location": "L9",
+      "_origin": "ast",
+      "id": "components_auth_resend_verification_form_initialstate",
+      "community": 0,
+      "norm_label": "initialstate"
+    },
+    {
+      "label": "ResendVerificationForm()",
+      "file_type": "code",
+      "source_file": "components/auth/resend-verification-form.tsx",
+      "source_location": "L11",
+      "_origin": "ast",
+      "id": "components_auth_resend_verification_form_resendverificationform",
+      "community": 0,
+      "norm_label": "resendverificationform()"
+    },
+    {
+      "label": "reset-password-form.tsx",
+      "file_type": "code",
+      "source_file": "components/auth/reset-password-form.tsx",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "components_auth_reset_password_form",
+      "community": 0,
+      "norm_label": "reset-password-form.tsx"
+    },
+    {
+      "label": "initialState",
+      "file_type": "code",
+      "source_file": "components/auth/reset-password-form.tsx",
+      "source_location": "L10",
+      "_origin": "ast",
+      "id": "components_auth_reset_password_form_initialstate",
+      "community": 0,
+      "norm_label": "initialstate"
+    },
+    {
+      "label": "ResetPasswordForm()",
+      "file_type": "code",
+      "source_file": "components/auth/reset-password-form.tsx",
+      "source_location": "L12",
+      "_origin": "ast",
+      "id": "components_auth_reset_password_form_resetpasswordform",
+      "community": 0,
+      "norm_label": "resetpasswordform()"
+    },
+    {
+      "label": "config.ts",
+      "file_type": "code",
+      "source_file": "lib/appwrite/config.ts",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "lib_appwrite_config",
+      "community": 4,
+      "norm_label": "config.ts"
+    },
+    {
+      "label": "getAppwriteEndpoint()",
+      "file_type": "code",
+      "source_file": "lib/appwrite/config.ts",
+      "source_location": "L8",
+      "_origin": "ast",
+      "id": "lib_appwrite_config_getappwriteendpoint",
+      "community": 4,
+      "norm_label": "getappwriteendpoint()"
+    },
+    {
+      "label": "getAppwriteProjectId()",
+      "file_type": "code",
+      "source_file": "lib/appwrite/config.ts",
+      "source_location": "L18",
+      "_origin": "ast",
+      "id": "lib_appwrite_config_getappwriteprojectid",
+      "community": 4,
+      "norm_label": "getappwriteprojectid()"
+    },
+    {
+      "label": "getAppUrl()",
+      "file_type": "code",
+      "source_file": "lib/appwrite/config.ts",
+      "source_location": "L29",
+      "_origin": "ast",
+      "id": "lib_appwrite_config_getappurl",
+      "community": 0,
+      "norm_label": "getappurl()"
+    },
+    {
+      "label": "hasAppwritePublicConfig()",
+      "file_type": "code",
+      "source_file": "lib/appwrite/config.ts",
+      "source_location": "L40",
+      "_origin": "ast",
+      "id": "lib_appwrite_config_hasappwritepublicconfig",
+      "community": 4,
+      "norm_label": "hasappwritepublicconfig()"
+    },
+    {
+      "label": "index.ts",
+      "file_type": "code",
+      "source_file": "lib/appwrite/index.ts",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "lib_appwrite_index",
+      "community": 4,
+      "norm_label": "index.ts"
+    },
+    {
+      "label": "recovery.ts",
+      "file_type": "code",
+      "source_file": "lib/appwrite/recovery.ts",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "lib_appwrite_recovery",
+      "community": 0,
+      "norm_label": "recovery.ts"
+    },
+    {
+      "label": "RecoveryActionState",
+      "file_type": "code",
+      "source_file": "lib/appwrite/recovery.ts",
+      "source_location": "L8",
+      "_origin": "ast",
+      "id": "lib_appwrite_recovery_recoveryactionstate",
+      "community": 0,
+      "norm_label": "recoveryactionstate"
+    },
+    {
+      "label": "readString()",
+      "file_type": "code",
+      "source_file": "lib/appwrite/recovery.ts",
+      "source_location": "L13",
+      "_origin": "ast",
+      "id": "lib_appwrite_recovery_readstring",
+      "community": 0,
+      "norm_label": "readstring()"
+    },
+    {
+      "label": "mapRecoveryError()",
+      "file_type": "code",
+      "source_file": "lib/appwrite/recovery.ts",
+      "source_location": "L18",
+      "_origin": "ast",
+      "id": "lib_appwrite_recovery_maprecoveryerror",
+      "community": 0,
+      "norm_label": "maprecoveryerror()"
+    },
+    {
+      "label": "requestPasswordRecovery()",
+      "file_type": "code",
+      "source_file": "lib/appwrite/recovery.ts",
+      "source_location": "L39",
+      "_origin": "ast",
+      "id": "lib_appwrite_recovery_requestpasswordrecovery",
+      "community": 0,
+      "norm_label": "requestpasswordrecovery()"
+    },
+    {
+      "label": "completePasswordRecovery()",
+      "file_type": "code",
+      "source_file": "lib/appwrite/recovery.ts",
+      "source_location": "L71",
+      "_origin": "ast",
+      "id": "lib_appwrite_recovery_completepasswordrecovery",
+      "community": 0,
+      "norm_label": "completepasswordrecovery()"
+    },
+    {
+      "label": "requestEmailVerification()",
+      "file_type": "code",
+      "source_file": "lib/appwrite/recovery.ts",
+      "source_location": "L108",
+      "_origin": "ast",
+      "id": "lib_appwrite_recovery_requestemailverification",
+      "community": 0,
+      "norm_label": "requestemailverification()"
+    },
+    {
+      "label": "completeEmailVerification()",
+      "file_type": "code",
+      "source_file": "lib/appwrite/recovery.ts",
+      "source_location": "L129",
+      "_origin": "ast",
+      "id": "lib_appwrite_recovery_completeemailverification",
+      "community": 0,
+      "norm_label": "completeemailverification()"
+    },
+    {
+      "label": "server.ts",
+      "file_type": "code",
+      "source_file": "lib/appwrite/server.ts",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "lib_appwrite_server",
+      "community": 4,
+      "norm_label": "server.ts"
+    },
+    {
+      "label": "createPublicClient()",
+      "file_type": "code",
+      "source_file": "lib/appwrite/server.ts",
+      "source_location": "L16",
+      "_origin": "ast",
+      "id": "lib_appwrite_server_createpublicclient",
+      "community": 0,
+      "norm_label": "createpublicclient()"
+    },
+    {
+      "label": "createSessionClient()",
+      "file_type": "code",
+      "source_file": "lib/appwrite/server.ts",
+      "source_location": "L32",
+      "_origin": "ast",
+      "id": "lib_appwrite_server_createsessionclient",
+      "community": 4,
+      "norm_label": "createsessionclient()"
+    },
+    {
+      "label": "createAdminClient()",
+      "file_type": "code",
+      "source_file": "lib/appwrite/server.ts",
+      "source_location": "L56",
+      "_origin": "ast",
+      "id": "lib_appwrite_server_createadminclient",
+      "community": 4,
+      "norm_label": "createadminclient()"
     }
   ],
   "links": [
@@ -1720,17 +1990,6 @@
       "target": "lib_appwrite_config_getappwriteprojectid"
     },
     {
-      "relation": "re_exports",
-      "context": "export",
-      "confidence": "EXTRACTED",
-      "source_file": "lib/appwrite/index.ts",
-      "source_location": "L7",
-      "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "lib_appwrite_index",
-      "target": "lib_appwrite_browser"
-    },
-    {
       "relation": "calls",
       "context": "call",
       "confidence": "EXTRACTED",
@@ -1764,80 +2023,6 @@
       "target": "lib_appwrite_config_getappwriteprojectid"
     },
     {
-      "relation": "re_exports",
-      "context": "re-export",
-      "confidence": "EXTRACTED",
-      "source_file": "lib/appwrite/index.ts",
-      "source_location": "L7",
-      "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "lib_appwrite_index",
-      "target": "lib_appwrite_browser_getbrowserclient"
-    },
-    {
-      "relation": "re_exports",
-      "context": "re-export",
-      "confidence": "EXTRACTED",
-      "source_file": "lib/appwrite/index.ts",
-      "source_location": "L7",
-      "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "lib_appwrite_index",
-      "target": "lib_appwrite_browser_getbrowseraccount"
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "lib/appwrite/config.ts",
-      "source_location": "L8",
-      "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "lib_appwrite_config",
-      "target": "lib_appwrite_config_getappwriteendpoint"
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "lib/appwrite/config.ts",
-      "source_location": "L18",
-      "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "lib_appwrite_config",
-      "target": "lib_appwrite_config_getappwriteprojectid"
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "lib/appwrite/config.ts",
-      "source_location": "L29",
-      "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "lib_appwrite_config",
-      "target": "lib_appwrite_config_hasappwritepublicconfig"
-    },
-    {
-      "relation": "re_exports",
-      "context": "export",
-      "confidence": "EXTRACTED",
-      "source_file": "lib/appwrite/index.ts",
-      "source_location": "L1",
-      "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "lib_appwrite_index",
-      "target": "lib_appwrite_config"
-    },
-    {
-      "relation": "imports_from",
-      "context": "import",
-      "confidence": "EXTRACTED",
-      "source_file": "lib/appwrite/server.ts",
-      "source_location": "L5",
-      "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "lib_appwrite_server",
-      "target": "lib_appwrite_config"
-    },
-    {
       "relation": "imports_from",
       "context": "import",
       "confidence": "EXTRACTED",
@@ -1849,105 +2034,6 @@
       "target": "lib_appwrite_config"
     },
     {
-      "relation": "re_exports",
-      "context": "re-export",
-      "confidence": "EXTRACTED",
-      "source_file": "lib/appwrite/index.ts",
-      "source_location": "L1",
-      "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "lib_appwrite_index",
-      "target": "lib_appwrite_config_getappwriteendpoint"
-    },
-    {
-      "relation": "imports",
-      "context": "import",
-      "confidence": "EXTRACTED",
-      "source_file": "lib/appwrite/server.ts",
-      "source_location": "L5",
-      "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "lib_appwrite_server",
-      "target": "lib_appwrite_config_getappwriteendpoint"
-    },
-    {
-      "relation": "calls",
-      "context": "call",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "lib/appwrite/server.ts",
-      "source_location": "L48",
-      "weight": 1.0,
-      "source": "lib_appwrite_server_createadminclient",
-      "target": "lib_appwrite_config_getappwriteendpoint"
-    },
-    {
-      "relation": "calls",
-      "context": "call",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "lib/appwrite/server.ts",
-      "source_location": "L17",
-      "weight": 1.0,
-      "source": "lib_appwrite_server_createsessionclient",
-      "target": "lib_appwrite_config_getappwriteendpoint"
-    },
-    {
-      "relation": "re_exports",
-      "context": "re-export",
-      "confidence": "EXTRACTED",
-      "source_file": "lib/appwrite/index.ts",
-      "source_location": "L1",
-      "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "lib_appwrite_index",
-      "target": "lib_appwrite_config_getappwriteprojectid"
-    },
-    {
-      "relation": "imports",
-      "context": "import",
-      "confidence": "EXTRACTED",
-      "source_file": "lib/appwrite/server.ts",
-      "source_location": "L5",
-      "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "lib_appwrite_server",
-      "target": "lib_appwrite_config_getappwriteprojectid"
-    },
-    {
-      "relation": "calls",
-      "context": "call",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "lib/appwrite/server.ts",
-      "source_location": "L49",
-      "weight": 1.0,
-      "source": "lib_appwrite_server_createadminclient",
-      "target": "lib_appwrite_config_getappwriteprojectid"
-    },
-    {
-      "relation": "calls",
-      "context": "call",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "lib/appwrite/server.ts",
-      "source_location": "L18",
-      "weight": 1.0,
-      "source": "lib_appwrite_server_createsessionclient",
-      "target": "lib_appwrite_config_getappwriteprojectid"
-    },
-    {
-      "relation": "re_exports",
-      "context": "re-export",
-      "confidence": "EXTRACTED",
-      "source_file": "lib/appwrite/index.ts",
-      "source_location": "L1",
-      "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "lib_appwrite_index",
-      "target": "lib_appwrite_config_hasappwritepublicconfig"
-    },
-    {
       "relation": "imports",
       "context": "import",
       "confidence": "EXTRACTED",
@@ -1957,6 +2043,38 @@
       "confidence_score": 1.0,
       "source": "lib_appwrite_session",
       "target": "lib_appwrite_config_hasappwritepublicconfig"
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "lib/appwrite/session.ts",
+      "source_location": "L3",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "lib_appwrite_session",
+      "target": "lib_appwrite_server"
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "lib/appwrite/session.ts",
+      "source_location": "L3",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "lib_appwrite_session",
+      "target": "lib_appwrite_server_createsessionclient"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "lib/appwrite/session.ts",
+      "source_location": "L9",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "lib_appwrite_session",
+      "target": "lib_appwrite_session_getloggedinuser"
     },
     {
       "relation": "calls",
@@ -1970,103 +2088,6 @@
       "target": "lib_appwrite_config_hasappwritepublicconfig"
     },
     {
-      "relation": "re_exports",
-      "context": "export",
-      "confidence": "EXTRACTED",
-      "source_file": "lib/appwrite/index.ts",
-      "source_location": "L8",
-      "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "lib_appwrite_index",
-      "target": "lib_appwrite_server"
-    },
-    {
-      "relation": "re_exports",
-      "context": "re-export",
-      "confidence": "EXTRACTED",
-      "source_file": "lib/appwrite/index.ts",
-      "source_location": "L8",
-      "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "lib_appwrite_index",
-      "target": "lib_appwrite_server_createadminclient"
-    },
-    {
-      "relation": "re_exports",
-      "context": "re-export",
-      "confidence": "EXTRACTED",
-      "source_file": "lib/appwrite/index.ts",
-      "source_location": "L8",
-      "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "lib_appwrite_index",
-      "target": "lib_appwrite_server_createsessionclient"
-    },
-    {
-      "relation": "re_exports",
-      "context": "export",
-      "confidence": "EXTRACTED",
-      "source_file": "lib/appwrite/index.ts",
-      "source_location": "L9",
-      "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "lib_appwrite_index",
-      "target": "lib_appwrite_session"
-    },
-    {
-      "relation": "re_exports",
-      "context": "re-export",
-      "confidence": "EXTRACTED",
-      "source_file": "lib/appwrite/index.ts",
-      "source_location": "L9",
-      "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "lib_appwrite_index",
-      "target": "lib_appwrite_session_getloggedinuser"
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "lib/appwrite/server.ts",
-      "source_location": "L39",
-      "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "lib_appwrite_server",
-      "target": "lib_appwrite_server_createadminclient"
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "lib/appwrite/server.ts",
-      "source_location": "L15",
-      "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "lib_appwrite_server",
-      "target": "lib_appwrite_server_createsessionclient"
-    },
-    {
-      "relation": "imports_from",
-      "context": "import",
-      "confidence": "EXTRACTED",
-      "source_file": "lib/appwrite/session.ts",
-      "source_location": "L3",
-      "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "lib_appwrite_session",
-      "target": "lib_appwrite_server"
-    },
-    {
-      "relation": "imports",
-      "context": "import",
-      "confidence": "EXTRACTED",
-      "source_file": "lib/appwrite/session.ts",
-      "source_location": "L3",
-      "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "lib_appwrite_session",
-      "target": "lib_appwrite_server_createsessionclient"
-    },
-    {
       "relation": "calls",
       "context": "call",
       "confidence": "EXTRACTED",
@@ -2076,16 +2097,6 @@
       "weight": 1.0,
       "source": "lib_appwrite_session_getloggedinuser",
       "target": "lib_appwrite_server_createsessionclient"
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "lib/appwrite/session.ts",
-      "source_location": "L9",
-      "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "lib_appwrite_session",
-      "target": "lib_appwrite_session_getloggedinuser"
     },
     {
       "relation": "contains",
@@ -2525,38 +2536,6 @@
     {
       "relation": "contains",
       "confidence": "EXTRACTED",
-      "source_file": "app/(auth)/account/page.tsx",
-      "source_location": "L6",
-      "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "app_auth_account_page",
-      "target": "app_auth_account_page_accountpage"
-    },
-    {
-      "relation": "imports_from",
-      "context": "import",
-      "confidence": "EXTRACTED",
-      "source_file": "app/(auth)/account/page.tsx",
-      "source_location": "L3",
-      "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "app_auth_account_page",
-      "target": "lib_appwrite_auth"
-    },
-    {
-      "relation": "imports",
-      "context": "import",
-      "confidence": "EXTRACTED",
-      "source_file": "app/(auth)/account/page.tsx",
-      "source_location": "L3",
-      "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "app_auth_account_page",
-      "target": "lib_appwrite_auth_signout"
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
       "source_file": "app/(auth)/layout.tsx",
       "source_location": "L4",
       "weight": 1.0,
@@ -2663,70 +2642,6 @@
     {
       "relation": "contains",
       "confidence": "EXTRACTED",
-      "source_file": "components/auth/login-form.tsx",
-      "source_location": "L7",
-      "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "components_auth_login_form",
-      "target": "components_auth_login_form_initialstate"
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "components/auth/login-form.tsx",
-      "source_location": "L9",
-      "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "components_auth_login_form",
-      "target": "components_auth_login_form_loginform"
-    },
-    {
-      "relation": "imports_from",
-      "context": "import",
-      "confidence": "EXTRACTED",
-      "source_file": "components/auth/login-form.tsx",
-      "source_location": "L5",
-      "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "components_auth_login_form",
-      "target": "lib_appwrite_auth"
-    },
-    {
-      "relation": "imports",
-      "context": "import",
-      "confidence": "EXTRACTED",
-      "source_file": "components/auth/login-form.tsx",
-      "source_location": "L5",
-      "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "components_auth_login_form",
-      "target": "lib_appwrite_auth_authactionstate"
-    },
-    {
-      "relation": "imports",
-      "context": "import",
-      "confidence": "EXTRACTED",
-      "source_file": "components/auth/login-form.tsx",
-      "source_location": "L5",
-      "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "components_auth_login_form",
-      "target": "lib_appwrite_auth_signinwithemail"
-    },
-    {
-      "relation": "indirect_call",
-      "context": "argument",
-      "confidence": "INFERRED",
-      "confidence_score": 0.8,
-      "source_file": "components/auth/login-form.tsx",
-      "source_location": "L11",
-      "weight": 1.0,
-      "source": "components_auth_login_form_loginform",
-      "target": "lib_appwrite_auth_signinwithemail"
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
       "source_file": "components/auth/register-form.tsx",
       "source_location": "L7",
       "weight": 1.0,
@@ -2794,9 +2709,9 @@
       "source_file": "lib/appwrite/auth.ts",
       "source_location": "L9",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "lib_appwrite_auth",
-      "target": "lib_appwrite_auth_authactionstate",
-      "confidence_score": 1.0
+      "target": "lib_appwrite_auth_authactionstate"
     },
     {
       "relation": "contains",
@@ -2804,9 +2719,9 @@
       "source_file": "lib/appwrite/auth.ts",
       "source_location": "L18",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "lib_appwrite_auth",
-      "target": "lib_appwrite_auth_mapautherror",
-      "confidence_score": 1.0
+      "target": "lib_appwrite_auth_mapautherror"
     },
     {
       "relation": "contains",
@@ -2814,9 +2729,9 @@
       "source_file": "lib/appwrite/auth.ts",
       "source_location": "L13",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "lib_appwrite_auth",
-      "target": "lib_appwrite_auth_readstring",
-      "confidence_score": 1.0
+      "target": "lib_appwrite_auth_readstring"
     },
     {
       "relation": "contains",
@@ -2824,9 +2739,9 @@
       "source_file": "lib/appwrite/auth.ts",
       "source_location": "L53",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "lib_appwrite_auth",
-      "target": "lib_appwrite_auth_setsessioncookie",
-      "confidence_score": 1.0
+      "target": "lib_appwrite_auth_setsessioncookie"
     },
     {
       "relation": "contains",
@@ -2834,9 +2749,9 @@
       "source_file": "lib/appwrite/auth.ts",
       "source_location": "L100",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "lib_appwrite_auth",
-      "target": "lib_appwrite_auth_signinwithemail",
-      "confidence_score": 1.0
+      "target": "lib_appwrite_auth_signinwithemail"
     },
     {
       "relation": "contains",
@@ -2844,9 +2759,9 @@
       "source_file": "lib/appwrite/auth.ts",
       "source_location": "L126",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "lib_appwrite_auth",
-      "target": "lib_appwrite_auth_signout",
-      "confidence_score": 1.0
+      "target": "lib_appwrite_auth_signout"
     },
     {
       "relation": "contains",
@@ -2854,9 +2769,9 @@
       "source_file": "lib/appwrite/auth.ts",
       "source_location": "L64",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "lib_appwrite_auth",
-      "target": "lib_appwrite_auth_signupwithemail",
-      "confidence_score": 1.0
+      "target": "lib_appwrite_auth_signupwithemail"
     },
     {
       "relation": "calls",
@@ -2865,9 +2780,9 @@
       "source_file": "lib/appwrite/auth.ts",
       "source_location": "L104",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "lib_appwrite_auth_signinwithemail",
-      "target": "lib_appwrite_auth_readstring",
-      "confidence_score": 1.0
+      "target": "lib_appwrite_auth_readstring"
     },
     {
       "relation": "calls",
@@ -2876,9 +2791,9 @@
       "source_file": "lib/appwrite/auth.ts",
       "source_location": "L68",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "lib_appwrite_auth_signupwithemail",
-      "target": "lib_appwrite_auth_readstring",
-      "confidence_score": 1.0
+      "target": "lib_appwrite_auth_readstring"
     },
     {
       "relation": "calls",
@@ -2887,9 +2802,9 @@
       "source_file": "lib/appwrite/auth.ts",
       "source_location": "L120",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "lib_appwrite_auth_signinwithemail",
-      "target": "lib_appwrite_auth_mapautherror",
-      "confidence_score": 1.0
+      "target": "lib_appwrite_auth_mapautherror"
     },
     {
       "relation": "calls",
@@ -2898,9 +2813,9 @@
       "source_file": "lib/appwrite/auth.ts",
       "source_location": "L94",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "lib_appwrite_auth_signupwithemail",
-      "target": "lib_appwrite_auth_mapautherror",
-      "confidence_score": 1.0
+      "target": "lib_appwrite_auth_mapautherror"
     },
     {
       "relation": "calls",
@@ -2909,9 +2824,9 @@
       "source_file": "lib/appwrite/auth.ts",
       "source_location": "L117",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "lib_appwrite_auth_signinwithemail",
-      "target": "lib_appwrite_auth_setsessioncookie",
-      "confidence_score": 1.0
+      "target": "lib_appwrite_auth_setsessioncookie"
     },
     {
       "relation": "calls",
@@ -2920,11 +2835,907 @@
       "source_file": "lib/appwrite/auth.ts",
       "source_location": "L91",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "lib_appwrite_auth_signupwithemail",
-      "target": "lib_appwrite_auth_setsessioncookie",
+      "target": "lib_appwrite_auth_setsessioncookie"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "app/(auth)/account/page.tsx",
+      "source_location": "L7",
+      "weight": 1.0,
+      "source": "app_auth_account_page",
+      "target": "app_auth_account_page_accountpage",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "app/(auth)/account/page.tsx",
+      "source_location": "L3",
+      "weight": 1.0,
+      "source": "app_auth_account_page",
+      "target": "components_auth_resend_verification_form",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "app/(auth)/account/page.tsx",
+      "source_location": "L3",
+      "weight": 1.0,
+      "source": "app_auth_account_page",
+      "target": "components_auth_resend_verification_form_resendverificationform",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "app/(auth)/forgot-password/page.tsx",
+      "source_location": "L3",
+      "weight": 1.0,
+      "source": "app_auth_forgot_password_page",
+      "target": "app_auth_forgot_password_page_forgotpasswordpage",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "app/(auth)/forgot-password/page.tsx",
+      "source_location": "L1",
+      "weight": 1.0,
+      "source": "app_auth_forgot_password_page",
+      "target": "components_auth_forgot_password_form",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "app/(auth)/forgot-password/page.tsx",
+      "source_location": "L1",
+      "weight": 1.0,
+      "source": "app_auth_forgot_password_page",
+      "target": "components_auth_forgot_password_form_forgotpasswordform",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "app/(auth)/reset-password/page.tsx",
+      "source_location": "L6",
+      "weight": 1.0,
+      "source": "app_auth_reset_password_page",
+      "target": "app_auth_reset_password_page_resetpasswordpage",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "app/(auth)/reset-password/page.tsx",
+      "source_location": "L4",
+      "weight": 1.0,
+      "source": "app_auth_reset_password_page",
+      "target": "app_auth_reset_password_page_searchparams",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "app/(auth)/reset-password/page.tsx",
+      "source_location": "L2",
+      "weight": 1.0,
+      "source": "app_auth_reset_password_page",
+      "target": "components_auth_reset_password_form",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "app/(auth)/reset-password/page.tsx",
+      "source_location": "L2",
+      "weight": 1.0,
+      "source": "app_auth_reset_password_page",
+      "target": "components_auth_reset_password_form_resetpasswordform",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "app/(auth)/verify-email/page.tsx",
+      "source_location": "L4",
+      "weight": 1.0,
+      "source": "app_auth_verify_email_page",
+      "target": "app_auth_verify_email_page_searchparams",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "app/(auth)/verify-email/page.tsx",
+      "source_location": "L6",
+      "weight": 1.0,
+      "source": "app_auth_verify_email_page",
+      "target": "app_auth_verify_email_page_verifyemailpage",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "app/(auth)/verify-email/page.tsx",
+      "source_location": "L2",
+      "weight": 1.0,
+      "source": "app_auth_verify_email_page",
+      "target": "lib_appwrite_recovery",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "app/(auth)/verify-email/page.tsx",
+      "source_location": "L2",
+      "weight": 1.0,
+      "source": "app_auth_verify_email_page",
+      "target": "lib_appwrite_recovery_completeemailverification",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "app/(auth)/verify-email/page.tsx",
+      "source_location": "L17",
+      "weight": 1.0,
+      "source": "app_auth_verify_email_page_verifyemailpage",
+      "target": "lib_appwrite_recovery_completeemailverification"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "components/auth/forgot-password-form.tsx",
+      "source_location": "L12",
+      "weight": 1.0,
+      "source": "components_auth_forgot_password_form",
+      "target": "components_auth_forgot_password_form_forgotpasswordform",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "components/auth/forgot-password-form.tsx",
+      "source_location": "L10",
+      "weight": 1.0,
+      "source": "components_auth_forgot_password_form",
+      "target": "components_auth_forgot_password_form_initialstate",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "components/auth/forgot-password-form.tsx",
+      "source_location": "L5",
+      "weight": 1.0,
+      "source": "components_auth_forgot_password_form",
+      "target": "lib_appwrite_recovery",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "components/auth/forgot-password-form.tsx",
+      "source_location": "L5",
+      "weight": 1.0,
+      "source": "components_auth_forgot_password_form",
+      "target": "lib_appwrite_recovery_recoveryactionstate",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "components/auth/forgot-password-form.tsx",
+      "source_location": "L5",
+      "weight": 1.0,
+      "source": "components_auth_forgot_password_form",
+      "target": "lib_appwrite_recovery_requestpasswordrecovery",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "indirect_call",
+      "context": "argument",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "components/auth/forgot-password-form.tsx",
+      "source_location": "L14",
+      "weight": 1.0,
+      "source": "components_auth_forgot_password_form_forgotpasswordform",
+      "target": "lib_appwrite_recovery_requestpasswordrecovery"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "components/auth/login-form.tsx",
+      "source_location": "L7",
+      "weight": 1.0,
+      "source": "components_auth_login_form",
+      "target": "components_auth_login_form_initialstate",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "components/auth/login-form.tsx",
+      "source_location": "L9",
+      "weight": 1.0,
+      "source": "components_auth_login_form",
+      "target": "components_auth_login_form_loginform",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "components/auth/resend-verification-form.tsx",
+      "source_location": "L9",
+      "weight": 1.0,
+      "source": "components_auth_resend_verification_form",
+      "target": "components_auth_resend_verification_form_initialstate",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "components/auth/resend-verification-form.tsx",
+      "source_location": "L11",
+      "weight": 1.0,
+      "source": "components_auth_resend_verification_form",
+      "target": "components_auth_resend_verification_form_resendverificationform",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "components/auth/resend-verification-form.tsx",
+      "source_location": "L4",
+      "weight": 1.0,
+      "source": "components_auth_resend_verification_form",
+      "target": "lib_appwrite_recovery",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "components/auth/resend-verification-form.tsx",
+      "source_location": "L4",
+      "weight": 1.0,
+      "source": "components_auth_resend_verification_form",
+      "target": "lib_appwrite_recovery_recoveryactionstate",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "components/auth/resend-verification-form.tsx",
+      "source_location": "L4",
+      "weight": 1.0,
+      "source": "components_auth_resend_verification_form",
+      "target": "lib_appwrite_recovery_requestemailverification",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "indirect_call",
+      "context": "argument",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "components/auth/resend-verification-form.tsx",
+      "source_location": "L13",
+      "weight": 1.0,
+      "source": "components_auth_resend_verification_form_resendverificationform",
+      "target": "lib_appwrite_recovery_requestemailverification"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "components/auth/reset-password-form.tsx",
+      "source_location": "L10",
+      "weight": 1.0,
+      "source": "components_auth_reset_password_form",
+      "target": "components_auth_reset_password_form_initialstate",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "components/auth/reset-password-form.tsx",
+      "source_location": "L12",
+      "weight": 1.0,
+      "source": "components_auth_reset_password_form",
+      "target": "components_auth_reset_password_form_resetpasswordform",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "components/auth/reset-password-form.tsx",
+      "source_location": "L5",
+      "weight": 1.0,
+      "source": "components_auth_reset_password_form",
+      "target": "lib_appwrite_recovery",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "components/auth/reset-password-form.tsx",
+      "source_location": "L5",
+      "weight": 1.0,
+      "source": "components_auth_reset_password_form",
+      "target": "lib_appwrite_recovery_completepasswordrecovery",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "components/auth/reset-password-form.tsx",
+      "source_location": "L5",
+      "weight": 1.0,
+      "source": "components_auth_reset_password_form",
+      "target": "lib_appwrite_recovery_recoveryactionstate",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "indirect_call",
+      "context": "argument",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "components/auth/reset-password-form.tsx",
+      "source_location": "L20",
+      "weight": 1.0,
+      "source": "components_auth_reset_password_form_resetpasswordform",
+      "target": "lib_appwrite_recovery_completepasswordrecovery"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "lib/appwrite/config.ts",
+      "source_location": "L29",
+      "weight": 1.0,
+      "source": "lib_appwrite_config",
+      "target": "lib_appwrite_config_getappurl",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "lib/appwrite/config.ts",
+      "source_location": "L8",
+      "weight": 1.0,
+      "source": "lib_appwrite_config",
+      "target": "lib_appwrite_config_getappwriteendpoint",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "lib/appwrite/config.ts",
+      "source_location": "L18",
+      "weight": 1.0,
+      "source": "lib_appwrite_config",
+      "target": "lib_appwrite_config_getappwriteprojectid",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "lib/appwrite/config.ts",
+      "source_location": "L40",
+      "weight": 1.0,
+      "source": "lib_appwrite_config",
+      "target": "lib_appwrite_config_hasappwritepublicconfig",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "re_exports",
+      "context": "export",
+      "confidence": "EXTRACTED",
+      "source_file": "lib/appwrite/index.ts",
+      "source_location": "L1",
+      "weight": 1.0,
+      "source": "lib_appwrite_index",
+      "target": "lib_appwrite_config",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "lib/appwrite/recovery.ts",
+      "source_location": "L5",
+      "weight": 1.0,
+      "source": "lib_appwrite_recovery",
+      "target": "lib_appwrite_config",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "lib/appwrite/server.ts",
+      "source_location": "L5",
+      "weight": 1.0,
+      "source": "lib_appwrite_server",
+      "target": "lib_appwrite_config",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "re_exports",
+      "context": "re-export",
+      "confidence": "EXTRACTED",
+      "source_file": "lib/appwrite/index.ts",
+      "source_location": "L1",
+      "weight": 1.0,
+      "source": "lib_appwrite_index",
+      "target": "lib_appwrite_config_getappwriteendpoint",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "lib/appwrite/server.ts",
+      "source_location": "L5",
+      "weight": 1.0,
+      "source": "lib_appwrite_server",
+      "target": "lib_appwrite_config_getappwriteendpoint",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "lib/appwrite/server.ts",
+      "source_location": "L65",
+      "weight": 1.0,
+      "source": "lib_appwrite_server_createadminclient",
+      "target": "lib_appwrite_config_getappwriteendpoint"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "lib/appwrite/server.ts",
+      "source_location": "L18",
+      "weight": 1.0,
+      "source": "lib_appwrite_server_createpublicclient",
+      "target": "lib_appwrite_config_getappwriteendpoint"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "lib/appwrite/server.ts",
+      "source_location": "L34",
+      "weight": 1.0,
+      "source": "lib_appwrite_server_createsessionclient",
+      "target": "lib_appwrite_config_getappwriteendpoint"
+    },
+    {
+      "relation": "re_exports",
+      "context": "re-export",
+      "confidence": "EXTRACTED",
+      "source_file": "lib/appwrite/index.ts",
+      "source_location": "L1",
+      "weight": 1.0,
+      "source": "lib_appwrite_index",
+      "target": "lib_appwrite_config_getappwriteprojectid",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "lib/appwrite/server.ts",
+      "source_location": "L5",
+      "weight": 1.0,
+      "source": "lib_appwrite_server",
+      "target": "lib_appwrite_config_getappwriteprojectid",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "lib/appwrite/server.ts",
+      "source_location": "L66",
+      "weight": 1.0,
+      "source": "lib_appwrite_server_createadminclient",
+      "target": "lib_appwrite_config_getappwriteprojectid"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "lib/appwrite/server.ts",
+      "source_location": "L19",
+      "weight": 1.0,
+      "source": "lib_appwrite_server_createpublicclient",
+      "target": "lib_appwrite_config_getappwriteprojectid"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "lib/appwrite/server.ts",
+      "source_location": "L35",
+      "weight": 1.0,
+      "source": "lib_appwrite_server_createsessionclient",
+      "target": "lib_appwrite_config_getappwriteprojectid"
+    },
+    {
+      "relation": "re_exports",
+      "context": "re-export",
+      "confidence": "EXTRACTED",
+      "source_file": "lib/appwrite/index.ts",
+      "source_location": "L1",
+      "weight": 1.0,
+      "source": "lib_appwrite_index",
+      "target": "lib_appwrite_config_getappurl",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "lib/appwrite/recovery.ts",
+      "source_location": "L5",
+      "weight": 1.0,
+      "source": "lib_appwrite_recovery",
+      "target": "lib_appwrite_config_getappurl",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "lib/appwrite/recovery.ts",
+      "source_location": "L114",
+      "weight": 1.0,
+      "source": "lib_appwrite_recovery_requestemailverification",
+      "target": "lib_appwrite_config_getappurl"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "lib/appwrite/recovery.ts",
+      "source_location": "L52",
+      "weight": 1.0,
+      "source": "lib_appwrite_recovery_requestpasswordrecovery",
+      "target": "lib_appwrite_config_getappurl"
+    },
+    {
+      "relation": "re_exports",
+      "context": "re-export",
+      "confidence": "EXTRACTED",
+      "source_file": "lib/appwrite/index.ts",
+      "source_location": "L1",
+      "weight": 1.0,
+      "source": "lib_appwrite_index",
+      "target": "lib_appwrite_config_hasappwritepublicconfig",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "re_exports",
+      "context": "export",
+      "confidence": "EXTRACTED",
+      "source_file": "lib/appwrite/index.ts",
+      "source_location": "L9",
+      "weight": 1.0,
+      "source": "lib_appwrite_index",
+      "target": "lib_appwrite_server",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "re_exports",
+      "context": "re-export",
+      "confidence": "EXTRACTED",
+      "source_file": "lib/appwrite/index.ts",
+      "source_location": "L9",
+      "weight": 1.0,
+      "source": "lib_appwrite_index",
+      "target": "lib_appwrite_server_createadminclient",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "re_exports",
+      "context": "re-export",
+      "confidence": "EXTRACTED",
+      "source_file": "lib/appwrite/index.ts",
+      "source_location": "L9",
+      "weight": 1.0,
+      "source": "lib_appwrite_index",
+      "target": "lib_appwrite_server_createpublicclient",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "re_exports",
+      "context": "re-export",
+      "confidence": "EXTRACTED",
+      "source_file": "lib/appwrite/index.ts",
+      "source_location": "L9",
+      "weight": 1.0,
+      "source": "lib_appwrite_index",
+      "target": "lib_appwrite_server_createsessionclient",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "lib/appwrite/recovery.ts",
+      "source_location": "L129",
+      "weight": 1.0,
+      "source": "lib_appwrite_recovery",
+      "target": "lib_appwrite_recovery_completeemailverification",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "lib/appwrite/recovery.ts",
+      "source_location": "L71",
+      "weight": 1.0,
+      "source": "lib_appwrite_recovery",
+      "target": "lib_appwrite_recovery_completepasswordrecovery",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "lib/appwrite/recovery.ts",
+      "source_location": "L18",
+      "weight": 1.0,
+      "source": "lib_appwrite_recovery",
+      "target": "lib_appwrite_recovery_maprecoveryerror",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "lib/appwrite/recovery.ts",
+      "source_location": "L13",
+      "weight": 1.0,
+      "source": "lib_appwrite_recovery",
+      "target": "lib_appwrite_recovery_readstring",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "lib/appwrite/recovery.ts",
+      "source_location": "L8",
+      "weight": 1.0,
+      "source": "lib_appwrite_recovery",
+      "target": "lib_appwrite_recovery_recoveryactionstate",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "lib/appwrite/recovery.ts",
+      "source_location": "L108",
+      "weight": 1.0,
+      "source": "lib_appwrite_recovery",
+      "target": "lib_appwrite_recovery_requestemailverification",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "lib/appwrite/recovery.ts",
+      "source_location": "L39",
+      "weight": 1.0,
+      "source": "lib_appwrite_recovery",
+      "target": "lib_appwrite_recovery_requestpasswordrecovery",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "lib/appwrite/recovery.ts",
+      "source_location": "L6",
+      "weight": 1.0,
+      "source": "lib_appwrite_recovery",
+      "target": "lib_appwrite_server",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "lib/appwrite/recovery.ts",
+      "source_location": "L6",
+      "weight": 1.0,
+      "source": "lib_appwrite_recovery",
+      "target": "lib_appwrite_server_createpublicclient",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "lib/appwrite/recovery.ts",
+      "source_location": "L6",
+      "weight": 1.0,
+      "source": "lib_appwrite_recovery",
+      "target": "lib_appwrite_server_createsessionclient",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "lib/appwrite/recovery.ts",
+      "source_location": "L75",
+      "weight": 1.0,
+      "source": "lib_appwrite_recovery_completepasswordrecovery",
+      "target": "lib_appwrite_recovery_readstring",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "lib/appwrite/recovery.ts",
+      "source_location": "L43",
+      "weight": 1.0,
+      "source": "lib_appwrite_recovery_requestpasswordrecovery",
+      "target": "lib_appwrite_recovery_readstring",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "lib/appwrite/recovery.ts",
+      "source_location": "L151",
+      "weight": 1.0,
+      "source": "lib_appwrite_recovery_completeemailverification",
+      "target": "lib_appwrite_recovery_maprecoveryerror",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "lib/appwrite/recovery.ts",
+      "source_location": "L102",
+      "weight": 1.0,
+      "source": "lib_appwrite_recovery_completepasswordrecovery",
+      "target": "lib_appwrite_recovery_maprecoveryerror",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "lib/appwrite/recovery.ts",
+      "source_location": "L121",
+      "weight": 1.0,
+      "source": "lib_appwrite_recovery_requestemailverification",
+      "target": "lib_appwrite_recovery_maprecoveryerror",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "lib/appwrite/recovery.ts",
+      "source_location": "L61",
+      "weight": 1.0,
+      "source": "lib_appwrite_recovery_requestpasswordrecovery",
+      "target": "lib_appwrite_recovery_maprecoveryerror",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "lib/appwrite/recovery.ts",
+      "source_location": "L49",
+      "weight": 1.0,
+      "source": "lib_appwrite_recovery_requestpasswordrecovery",
+      "target": "lib_appwrite_server_createpublicclient"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "lib/appwrite/recovery.ts",
+      "source_location": "L94",
+      "weight": 1.0,
+      "source": "lib_appwrite_recovery_completepasswordrecovery",
+      "target": "lib_appwrite_server_createpublicclient"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "lib/appwrite/recovery.ts",
+      "source_location": "L112",
+      "weight": 1.0,
+      "source": "lib_appwrite_recovery_requestemailverification",
+      "target": "lib_appwrite_server_createsessionclient"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "lib/appwrite/recovery.ts",
+      "source_location": "L141",
+      "weight": 1.0,
+      "source": "lib_appwrite_recovery_completeemailverification",
+      "target": "lib_appwrite_server_createpublicclient"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "lib/appwrite/server.ts",
+      "source_location": "L56",
+      "weight": 1.0,
+      "source": "lib_appwrite_server",
+      "target": "lib_appwrite_server_createadminclient",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "lib/appwrite/server.ts",
+      "source_location": "L16",
+      "weight": 1.0,
+      "source": "lib_appwrite_server",
+      "target": "lib_appwrite_server_createpublicclient",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "lib/appwrite/server.ts",
+      "source_location": "L32",
+      "weight": 1.0,
+      "source": "lib_appwrite_server",
+      "target": "lib_appwrite_server_createsessionclient",
       "confidence_score": 1.0
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "21ab94931e11952a33a57c194c82820e39fdc6da"
+  "built_at_commit": "51ac2b30d9cb5e348ba3883f319ad83f9abdcd22"
 }
