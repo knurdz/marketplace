@@ -12,7 +12,7 @@
         "mcp_kind": "mcp_config_file"
       },
       "_origin": "ast",
-      "community": 7,
+      "community": 8,
       "norm_label": "mcp.json",
       "id": "cursor_mcp"
     },
@@ -25,7 +25,7 @@
         "mcp_kind": "mcp_server"
       },
       "_origin": "ast",
-      "community": 7,
+      "community": 8,
       "norm_label": "shadcn",
       "id": "cursor_mcp_mcp_server_shadcn"
     },
@@ -38,7 +38,7 @@
         "mcp_kind": "mcp_command"
       },
       "_origin": "ast",
-      "community": 7,
+      "community": 8,
       "norm_label": "npx",
       "id": "mcp_command_npx"
     },
@@ -48,7 +48,7 @@
       "source_file": "app/layout.tsx",
       "source_location": "L1",
       "_origin": "ast",
-      "community": 6,
+      "community": 7,
       "norm_label": "layout.tsx",
       "id": "app_layout"
     },
@@ -58,7 +58,7 @@
       "source_file": "app/layout.tsx",
       "source_location": "L6",
       "_origin": "ast",
-      "community": 6,
+      "community": 7,
       "norm_label": "spacegrotesk",
       "id": "app_layout_spacegrotesk"
     },
@@ -68,7 +68,7 @@
       "source_file": "app/layout.tsx",
       "source_location": "L12",
       "_origin": "ast",
-      "community": 6,
+      "community": 7,
       "norm_label": "jetbrainsmono",
       "id": "app_layout_jetbrainsmono"
     },
@@ -78,7 +78,7 @@
       "source_file": "app/layout.tsx",
       "source_location": "L18",
       "_origin": "ast",
-      "community": 6,
+      "community": 7,
       "norm_label": "metadata",
       "id": "app_layout_metadata"
     },
@@ -88,7 +88,7 @@
       "source_file": "app/layout.tsx",
       "source_location": "L24",
       "_origin": "ast",
-      "community": 6,
+      "community": 7,
       "norm_label": "rootlayout()",
       "id": "app_layout_rootlayout"
     },
@@ -98,7 +98,7 @@
       "source_file": "eslint.config.mjs",
       "source_location": "L1",
       "_origin": "ast",
-      "community": 8,
+      "community": 10,
       "norm_label": "eslint.config.mjs",
       "id": "eslint_config"
     },
@@ -108,7 +108,7 @@
       "source_file": "eslint.config.mjs",
       "source_location": "L6",
       "_origin": "ast",
-      "community": 8,
+      "community": 10,
       "norm_label": "eslintconfig",
       "id": "eslint_config_eslintconfig"
     },
@@ -118,7 +118,7 @@
       "source_file": "next.config.ts",
       "source_location": "L1",
       "_origin": "ast",
-      "community": 9,
+      "community": 11,
       "norm_label": "next.config.ts",
       "id": "next_config"
     },
@@ -128,7 +128,7 @@
       "source_file": "next.config.ts",
       "source_location": "L3",
       "_origin": "ast",
-      "community": 9,
+      "community": 11,
       "norm_label": "nextconfig",
       "id": "next_config_nextconfig"
     },
@@ -138,7 +138,7 @@
       "source_file": "postcss.config.mjs",
       "source_location": "L1",
       "_origin": "ast",
-      "community": 10,
+      "community": 12,
       "norm_label": "postcss.config.mjs",
       "id": "postcss_config"
     },
@@ -148,7 +148,7 @@
       "source_file": "postcss.config.mjs",
       "source_location": "L1",
       "_origin": "ast",
-      "community": 10,
+      "community": 12,
       "norm_label": "config",
       "id": "postcss_config_config"
     },
@@ -158,7 +158,7 @@
       "source_file": "tsconfig.json",
       "source_location": "L1",
       "_origin": "ast",
-      "community": 5,
+      "community": 6,
       "norm_label": "tsconfig.json",
       "id": "tsconfig"
     },
@@ -168,7 +168,7 @@
       "source_file": "tsconfig.json",
       "source_location": "L2",
       "_origin": "ast",
-      "community": 1,
+      "community": 2,
       "norm_label": "compileroptions",
       "id": "tsconfig_compileroptions"
     },
@@ -178,7 +178,7 @@
       "source_file": "tsconfig.json",
       "source_location": "L3",
       "_origin": "ast",
-      "community": 1,
+      "community": 2,
       "norm_label": "target",
       "id": "tsconfig_compileroptions_target"
     },
@@ -188,7 +188,7 @@
       "source_file": "tsconfig.json",
       "source_location": "L4",
       "_origin": "ast",
-      "community": 1,
+      "community": 2,
       "norm_label": "lib",
       "id": "tsconfig_compileroptions_lib"
     },
@@ -198,7 +198,7 @@
       "source_file": "tsconfig.json",
       "source_location": "L4",
       "_origin": "ast",
-      "community": 1,
+      "community": 2,
       "norm_label": "dom",
       "id": "ref_dom"
     },
@@ -208,7 +208,7 @@
       "source_file": "tsconfig.json",
       "source_location": "L4",
       "_origin": "ast",
-      "community": 1,
+      "community": 2,
       "norm_label": "dom.iterable",
       "id": "ref_dom_iterable"
     },
@@ -218,7 +218,7 @@
       "source_file": "tsconfig.json",
       "source_location": "L4",
       "_origin": "ast",
-      "community": 1,
+      "community": 2,
       "norm_label": "esnext",
       "id": "ref_esnext"
     },
@@ -228,7 +228,7 @@
       "source_file": "tsconfig.json",
       "source_location": "L5",
       "_origin": "ast",
-      "community": 1,
+      "community": 2,
       "norm_label": "allowjs",
       "id": "tsconfig_compileroptions_allowjs"
     },
@@ -238,7 +238,7 @@
       "source_file": "tsconfig.json",
       "source_location": "L6",
       "_origin": "ast",
-      "community": 1,
+      "community": 2,
       "norm_label": "skiplibcheck",
       "id": "tsconfig_compileroptions_skiplibcheck"
     },
@@ -248,7 +248,7 @@
       "source_file": "tsconfig.json",
       "source_location": "L7",
       "_origin": "ast",
-      "community": 1,
+      "community": 2,
       "norm_label": "strict",
       "id": "tsconfig_compileroptions_strict"
     },
@@ -258,7 +258,7 @@
       "source_file": "tsconfig.json",
       "source_location": "L8",
       "_origin": "ast",
-      "community": 1,
+      "community": 2,
       "norm_label": "noemit",
       "id": "tsconfig_compileroptions_noemit"
     },
@@ -268,7 +268,7 @@
       "source_file": "tsconfig.json",
       "source_location": "L9",
       "_origin": "ast",
-      "community": 1,
+      "community": 2,
       "norm_label": "esmoduleinterop",
       "id": "tsconfig_compileroptions_esmoduleinterop"
     },
@@ -278,7 +278,7 @@
       "source_file": "tsconfig.json",
       "source_location": "L10",
       "_origin": "ast",
-      "community": 1,
+      "community": 2,
       "norm_label": "module",
       "id": "tsconfig_compileroptions_module"
     },
@@ -288,7 +288,7 @@
       "source_file": "tsconfig.json",
       "source_location": "L11",
       "_origin": "ast",
-      "community": 1,
+      "community": 2,
       "norm_label": "moduleresolution",
       "id": "tsconfig_compileroptions_moduleresolution"
     },
@@ -298,7 +298,7 @@
       "source_file": "tsconfig.json",
       "source_location": "L12",
       "_origin": "ast",
-      "community": 1,
+      "community": 2,
       "norm_label": "resolvejsonmodule",
       "id": "tsconfig_compileroptions_resolvejsonmodule"
     },
@@ -308,7 +308,7 @@
       "source_file": "tsconfig.json",
       "source_location": "L13",
       "_origin": "ast",
-      "community": 1,
+      "community": 2,
       "norm_label": "isolatedmodules",
       "id": "tsconfig_compileroptions_isolatedmodules"
     },
@@ -318,7 +318,7 @@
       "source_file": "tsconfig.json",
       "source_location": "L14",
       "_origin": "ast",
-      "community": 1,
+      "community": 2,
       "norm_label": "jsx",
       "id": "tsconfig_compileroptions_jsx"
     },
@@ -328,7 +328,7 @@
       "source_file": "tsconfig.json",
       "source_location": "L15",
       "_origin": "ast",
-      "community": 1,
+      "community": 2,
       "norm_label": "incremental",
       "id": "tsconfig_compileroptions_incremental"
     },
@@ -338,7 +338,7 @@
       "source_file": "tsconfig.json",
       "source_location": "L16",
       "_origin": "ast",
-      "community": 1,
+      "community": 2,
       "norm_label": "plugins",
       "id": "tsconfig_compileroptions_plugins"
     },
@@ -348,7 +348,7 @@
       "source_file": "tsconfig.json",
       "source_location": "L21",
       "_origin": "ast",
-      "community": 1,
+      "community": 2,
       "norm_label": "paths",
       "id": "tsconfig_compileroptions_paths"
     },
@@ -358,7 +358,7 @@
       "source_file": "tsconfig.json",
       "source_location": "L22",
       "_origin": "ast",
-      "community": 1,
+      "community": 2,
       "norm_label": "@/*",
       "id": "tsconfig_paths"
     },
@@ -368,7 +368,7 @@
       "source_file": "tsconfig.json",
       "source_location": "L22",
       "_origin": "ast",
-      "community": 1,
+      "community": 2,
       "norm_label": "./*",
       "id": "ref"
     },
@@ -378,7 +378,7 @@
       "source_file": "tsconfig.json",
       "source_location": "L25",
       "_origin": "ast",
-      "community": 5,
+      "community": 6,
       "norm_label": "include",
       "id": "tsconfig_include"
     },
@@ -388,7 +388,7 @@
       "source_file": "tsconfig.json",
       "source_location": "L25",
       "_origin": "ast",
-      "community": 5,
+      "community": 6,
       "norm_label": "next-env.d.ts",
       "id": "ref_next_env_d_ts"
     },
@@ -398,7 +398,7 @@
       "source_file": "tsconfig.json",
       "source_location": "L25",
       "_origin": "ast",
-      "community": 5,
+      "community": 6,
       "norm_label": "**/*.ts",
       "id": "ref_ts"
     },
@@ -408,7 +408,7 @@
       "source_file": "tsconfig.json",
       "source_location": "L25",
       "_origin": "ast",
-      "community": 5,
+      "community": 6,
       "norm_label": "**/*.tsx",
       "id": "ref_tsx"
     },
@@ -418,7 +418,7 @@
       "source_file": "tsconfig.json",
       "source_location": "L25",
       "_origin": "ast",
-      "community": 5,
+      "community": 6,
       "norm_label": ".next/types/**/*.ts",
       "id": "ref_next_types_ts"
     },
@@ -428,7 +428,7 @@
       "source_file": "tsconfig.json",
       "source_location": "L25",
       "_origin": "ast",
-      "community": 5,
+      "community": 6,
       "norm_label": ".next/dev/types/**/*.ts",
       "id": "ref_next_dev_types_ts"
     },
@@ -438,7 +438,7 @@
       "source_file": "tsconfig.json",
       "source_location": "L25",
       "_origin": "ast",
-      "community": 5,
+      "community": 6,
       "norm_label": "**/*.mts",
       "id": "ref_mts"
     },
@@ -448,7 +448,7 @@
       "source_file": "tsconfig.json",
       "source_location": "L33",
       "_origin": "ast",
-      "community": 5,
+      "community": 6,
       "norm_label": "exclude",
       "id": "tsconfig_exclude"
     },
@@ -458,29 +458,9 @@
       "source_file": "tsconfig.json",
       "source_location": "L33",
       "_origin": "ast",
-      "community": 5,
+      "community": 6,
       "norm_label": "node_modules",
       "id": "ref_node_modules"
-    },
-    {
-      "label": "page.tsx",
-      "file_type": "code",
-      "source_file": "app/page.tsx",
-      "source_location": "L1",
-      "_origin": "ast",
-      "id": "app_page",
-      "community": 2,
-      "norm_label": "page.tsx"
-    },
-    {
-      "label": "Home()",
-      "file_type": "code",
-      "source_file": "app/page.tsx",
-      "source_location": "L3",
-      "_origin": "ast",
-      "id": "app_page_home",
-      "community": 2,
-      "norm_label": "home()"
     },
     {
       "label": "browser.ts",
@@ -488,9 +468,9 @@
       "source_file": "lib/appwrite/browser.ts",
       "source_location": "L1",
       "_origin": "ast",
-      "id": "lib_appwrite_browser",
-      "community": 2,
-      "norm_label": "browser.ts"
+      "community": 3,
+      "norm_label": "browser.ts",
+      "id": "lib_appwrite_browser"
     },
     {
       "label": "getBrowserClient()",
@@ -498,9 +478,9 @@
       "source_file": "lib/appwrite/browser.ts",
       "source_location": "L11",
       "_origin": "ast",
-      "id": "lib_appwrite_browser_getbrowserclient",
-      "community": 2,
-      "norm_label": "getbrowserclient()"
+      "community": 3,
+      "norm_label": "getbrowserclient()",
+      "id": "lib_appwrite_browser_getbrowserclient"
     },
     {
       "label": "getBrowserAccount()",
@@ -508,9 +488,9 @@
       "source_file": "lib/appwrite/browser.ts",
       "source_location": "L20",
       "_origin": "ast",
-      "id": "lib_appwrite_browser_getbrowseraccount",
-      "community": 2,
-      "norm_label": "getbrowseraccount()"
+      "community": 3,
+      "norm_label": "getbrowseraccount()",
+      "id": "lib_appwrite_browser_getbrowseraccount"
     },
     {
       "label": "config.ts",
@@ -518,9 +498,9 @@
       "source_file": "lib/appwrite/config.ts",
       "source_location": "L1",
       "_origin": "ast",
-      "id": "lib_appwrite_config",
-      "community": 2,
-      "norm_label": "config.ts"
+      "community": 3,
+      "norm_label": "config.ts",
+      "id": "lib_appwrite_config"
     },
     {
       "label": "getAppwriteEndpoint()",
@@ -528,9 +508,9 @@
       "source_file": "lib/appwrite/config.ts",
       "source_location": "L8",
       "_origin": "ast",
-      "id": "lib_appwrite_config_getappwriteendpoint",
-      "community": 2,
-      "norm_label": "getappwriteendpoint()"
+      "community": 3,
+      "norm_label": "getappwriteendpoint()",
+      "id": "lib_appwrite_config_getappwriteendpoint"
     },
     {
       "label": "getAppwriteProjectId()",
@@ -538,9 +518,9 @@
       "source_file": "lib/appwrite/config.ts",
       "source_location": "L18",
       "_origin": "ast",
-      "id": "lib_appwrite_config_getappwriteprojectid",
-      "community": 2,
-      "norm_label": "getappwriteprojectid()"
+      "community": 3,
+      "norm_label": "getappwriteprojectid()",
+      "id": "lib_appwrite_config_getappwriteprojectid"
     },
     {
       "label": "hasAppwritePublicConfig()",
@@ -548,9 +528,9 @@
       "source_file": "lib/appwrite/config.ts",
       "source_location": "L29",
       "_origin": "ast",
-      "id": "lib_appwrite_config_hasappwritepublicconfig",
-      "community": 2,
-      "norm_label": "hasappwritepublicconfig()"
+      "community": 3,
+      "norm_label": "hasappwritepublicconfig()",
+      "id": "lib_appwrite_config_hasappwritepublicconfig"
     },
     {
       "label": "index.ts",
@@ -558,9 +538,9 @@
       "source_file": "lib/appwrite/index.ts",
       "source_location": "L1",
       "_origin": "ast",
-      "id": "lib_appwrite_index",
-      "community": 2,
-      "norm_label": "index.ts"
+      "community": 3,
+      "norm_label": "index.ts",
+      "id": "lib_appwrite_index"
     },
     {
       "label": "server.ts",
@@ -568,9 +548,9 @@
       "source_file": "lib/appwrite/server.ts",
       "source_location": "L1",
       "_origin": "ast",
-      "id": "lib_appwrite_server",
-      "community": 2,
-      "norm_label": "server.ts"
+      "community": 3,
+      "norm_label": "server.ts",
+      "id": "lib_appwrite_server"
     },
     {
       "label": "createSessionClient()",
@@ -578,9 +558,9 @@
       "source_file": "lib/appwrite/server.ts",
       "source_location": "L15",
       "_origin": "ast",
-      "id": "lib_appwrite_server_createsessionclient",
-      "community": 2,
-      "norm_label": "createsessionclient()"
+      "community": 3,
+      "norm_label": "createsessionclient()",
+      "id": "lib_appwrite_server_createsessionclient"
     },
     {
       "label": "createAdminClient()",
@@ -588,9 +568,9 @@
       "source_file": "lib/appwrite/server.ts",
       "source_location": "L39",
       "_origin": "ast",
-      "id": "lib_appwrite_server_createadminclient",
-      "community": 2,
-      "norm_label": "createadminclient()"
+      "community": 3,
+      "norm_label": "createadminclient()",
+      "id": "lib_appwrite_server_createadminclient"
     },
     {
       "label": "session.ts",
@@ -598,9 +578,9 @@
       "source_file": "lib/appwrite/session.ts",
       "source_location": "L1",
       "_origin": "ast",
-      "id": "lib_appwrite_session",
-      "community": 2,
-      "norm_label": "session.ts"
+      "community": 3,
+      "norm_label": "session.ts",
+      "id": "lib_appwrite_session"
     },
     {
       "label": "getLoggedInUser()",
@@ -608,9 +588,9 @@
       "source_file": "lib/appwrite/session.ts",
       "source_location": "L9",
       "_origin": "ast",
-      "id": "lib_appwrite_session_getloggedinuser",
-      "community": 2,
-      "norm_label": "getloggedinuser()"
+      "community": 3,
+      "norm_label": "getloggedinuser()",
+      "id": "lib_appwrite_session_getloggedinuser"
     },
     {
       "label": "package.json",
@@ -618,9 +598,9 @@
       "source_file": "package.json",
       "source_location": "L1",
       "_origin": "ast",
-      "id": "package",
-      "community": 4,
-      "norm_label": "package.json"
+      "community": 5,
+      "norm_label": "package.json",
+      "id": "package"
     },
     {
       "label": "name",
@@ -628,9 +608,9 @@
       "source_file": "package.json",
       "source_location": "L2",
       "_origin": "ast",
-      "id": "package_name",
-      "community": 4,
-      "norm_label": "name"
+      "community": 5,
+      "norm_label": "name",
+      "id": "package_name"
     },
     {
       "label": "version",
@@ -638,9 +618,9 @@
       "source_file": "package.json",
       "source_location": "L3",
       "_origin": "ast",
-      "id": "package_version",
-      "community": 4,
-      "norm_label": "version"
+      "community": 5,
+      "norm_label": "version",
+      "id": "package_version"
     },
     {
       "label": "private",
@@ -648,9 +628,9 @@
       "source_file": "package.json",
       "source_location": "L4",
       "_origin": "ast",
-      "id": "package_private",
-      "community": 4,
-      "norm_label": "private"
+      "community": 5,
+      "norm_label": "private",
+      "id": "package_private"
     },
     {
       "label": "scripts",
@@ -658,9 +638,9 @@
       "source_file": "package.json",
       "source_location": "L5",
       "_origin": "ast",
-      "id": "package_scripts",
-      "community": 4,
-      "norm_label": "scripts"
+      "community": 5,
+      "norm_label": "scripts",
+      "id": "package_scripts"
     },
     {
       "label": "dev",
@@ -668,9 +648,9 @@
       "source_file": "package.json",
       "source_location": "L6",
       "_origin": "ast",
-      "id": "package_scripts_dev",
-      "community": 4,
-      "norm_label": "dev"
+      "community": 5,
+      "norm_label": "dev",
+      "id": "package_scripts_dev"
     },
     {
       "label": "build",
@@ -678,9 +658,9 @@
       "source_file": "package.json",
       "source_location": "L7",
       "_origin": "ast",
-      "id": "package_scripts_build",
-      "community": 4,
-      "norm_label": "build"
+      "community": 5,
+      "norm_label": "build",
+      "id": "package_scripts_build"
     },
     {
       "label": "start",
@@ -688,9 +668,9 @@
       "source_file": "package.json",
       "source_location": "L8",
       "_origin": "ast",
-      "id": "package_scripts_start",
-      "community": 4,
-      "norm_label": "start"
+      "community": 5,
+      "norm_label": "start",
+      "id": "package_scripts_start"
     },
     {
       "label": "lint",
@@ -698,9 +678,9 @@
       "source_file": "package.json",
       "source_location": "L9",
       "_origin": "ast",
-      "id": "package_scripts_lint",
-      "community": 4,
-      "norm_label": "lint"
+      "community": 5,
+      "norm_label": "lint",
+      "id": "package_scripts_lint"
     },
     {
       "label": "format",
@@ -708,9 +688,9 @@
       "source_file": "package.json",
       "source_location": "L10",
       "_origin": "ast",
-      "id": "package_scripts_format",
-      "community": 4,
-      "norm_label": "format"
+      "community": 5,
+      "norm_label": "format",
+      "id": "package_scripts_format"
     },
     {
       "label": "format:check",
@@ -718,9 +698,9 @@
       "source_file": "package.json",
       "source_location": "L11",
       "_origin": "ast",
-      "id": "package_scripts_format_check",
-      "community": 4,
-      "norm_label": "format:check"
+      "community": 5,
+      "norm_label": "format:check",
+      "id": "package_scripts_format_check"
     },
     {
       "label": "dependencies",
@@ -728,9 +708,9 @@
       "source_file": "package.json",
       "source_location": "L13",
       "_origin": "ast",
-      "id": "package_dependencies",
-      "community": 3,
-      "norm_label": "dependencies"
+      "community": 4,
+      "norm_label": "dependencies",
+      "id": "package_dependencies"
     },
     {
       "label": "appwrite",
@@ -738,9 +718,9 @@
       "source_file": "package.json",
       "source_location": "L14",
       "_origin": "ast",
-      "id": "package_dependencies_appwrite",
-      "community": 3,
-      "norm_label": "appwrite"
+      "community": 4,
+      "norm_label": "appwrite",
+      "id": "package_dependencies_appwrite"
     },
     {
       "label": "appwrite",
@@ -748,9 +728,9 @@
       "source_file": "package.json",
       "source_location": "L14",
       "_origin": "ast",
-      "id": "appwrite",
-      "community": 3,
-      "norm_label": "appwrite"
+      "community": 4,
+      "norm_label": "appwrite",
+      "id": "appwrite"
     },
     {
       "label": "next",
@@ -758,9 +738,9 @@
       "source_file": "package.json",
       "source_location": "L15",
       "_origin": "ast",
-      "id": "package_dependencies_next",
-      "community": 3,
-      "norm_label": "next"
+      "community": 4,
+      "norm_label": "next",
+      "id": "package_dependencies_next"
     },
     {
       "label": "next",
@@ -768,9 +748,9 @@
       "source_file": "package.json",
       "source_location": "L15",
       "_origin": "ast",
-      "id": "next",
-      "community": 3,
-      "norm_label": "next"
+      "community": 4,
+      "norm_label": "next",
+      "id": "next"
     },
     {
       "label": "node-appwrite",
@@ -778,9 +758,9 @@
       "source_file": "package.json",
       "source_location": "L16",
       "_origin": "ast",
-      "id": "package_dependencies_node_appwrite",
-      "community": 3,
-      "norm_label": "node-appwrite"
+      "community": 4,
+      "norm_label": "node-appwrite",
+      "id": "package_dependencies_node_appwrite"
     },
     {
       "label": "node-appwrite",
@@ -788,9 +768,9 @@
       "source_file": "package.json",
       "source_location": "L16",
       "_origin": "ast",
-      "id": "node_appwrite",
-      "community": 3,
-      "norm_label": "node-appwrite"
+      "community": 4,
+      "norm_label": "node-appwrite",
+      "id": "node_appwrite"
     },
     {
       "label": "react",
@@ -798,9 +778,9 @@
       "source_file": "package.json",
       "source_location": "L17",
       "_origin": "ast",
-      "id": "package_dependencies_react",
-      "community": 3,
-      "norm_label": "react"
+      "community": 4,
+      "norm_label": "react",
+      "id": "package_dependencies_react"
     },
     {
       "label": "react",
@@ -808,9 +788,9 @@
       "source_file": "package.json",
       "source_location": "L17",
       "_origin": "ast",
-      "id": "react",
-      "community": 3,
-      "norm_label": "react"
+      "community": 4,
+      "norm_label": "react",
+      "id": "react"
     },
     {
       "label": "react-dom",
@@ -818,9 +798,9 @@
       "source_file": "package.json",
       "source_location": "L18",
       "_origin": "ast",
-      "id": "package_dependencies_react_dom",
-      "community": 3,
-      "norm_label": "react-dom"
+      "community": 4,
+      "norm_label": "react-dom",
+      "id": "package_dependencies_react_dom"
     },
     {
       "label": "react-dom",
@@ -828,9 +808,9 @@
       "source_file": "package.json",
       "source_location": "L18",
       "_origin": "ast",
-      "id": "react_dom",
-      "community": 3,
-      "norm_label": "react-dom"
+      "community": 4,
+      "norm_label": "react-dom",
+      "id": "react_dom"
     },
     {
       "label": "devDependencies",
@@ -838,9 +818,9 @@
       "source_file": "package.json",
       "source_location": "L20",
       "_origin": "ast",
-      "id": "package_devdependencies",
-      "community": 0,
-      "norm_label": "devdependencies"
+      "community": 1,
+      "norm_label": "devdependencies",
+      "id": "package_devdependencies"
     },
     {
       "label": "@tailwindcss/postcss",
@@ -848,9 +828,9 @@
       "source_file": "package.json",
       "source_location": "L21",
       "_origin": "ast",
-      "id": "package_devdependencies_tailwindcss_postcss",
-      "community": 0,
-      "norm_label": "@tailwindcss/postcss"
+      "community": 1,
+      "norm_label": "@tailwindcss/postcss",
+      "id": "package_devdependencies_tailwindcss_postcss"
     },
     {
       "label": "@tailwindcss/postcss",
@@ -858,9 +838,9 @@
       "source_file": "package.json",
       "source_location": "L21",
       "_origin": "ast",
-      "id": "tailwindcss_postcss",
-      "community": 0,
-      "norm_label": "@tailwindcss/postcss"
+      "community": 1,
+      "norm_label": "@tailwindcss/postcss",
+      "id": "tailwindcss_postcss"
     },
     {
       "label": "@types/node",
@@ -868,9 +848,9 @@
       "source_file": "package.json",
       "source_location": "L22",
       "_origin": "ast",
-      "id": "package_devdependencies_types_node",
-      "community": 0,
-      "norm_label": "@types/node"
+      "community": 1,
+      "norm_label": "@types/node",
+      "id": "package_devdependencies_types_node"
     },
     {
       "label": "@types/node",
@@ -878,9 +858,9 @@
       "source_file": "package.json",
       "source_location": "L22",
       "_origin": "ast",
-      "id": "types_node",
-      "community": 0,
-      "norm_label": "@types/node"
+      "community": 1,
+      "norm_label": "@types/node",
+      "id": "types_node"
     },
     {
       "label": "@types/react",
@@ -888,9 +868,9 @@
       "source_file": "package.json",
       "source_location": "L23",
       "_origin": "ast",
-      "id": "package_devdependencies_types_react",
-      "community": 0,
-      "norm_label": "@types/react"
+      "community": 1,
+      "norm_label": "@types/react",
+      "id": "package_devdependencies_types_react"
     },
     {
       "label": "@types/react",
@@ -898,9 +878,9 @@
       "source_file": "package.json",
       "source_location": "L23",
       "_origin": "ast",
-      "id": "types_react",
-      "community": 0,
-      "norm_label": "@types/react"
+      "community": 1,
+      "norm_label": "@types/react",
+      "id": "types_react"
     },
     {
       "label": "@types/react-dom",
@@ -908,9 +888,9 @@
       "source_file": "package.json",
       "source_location": "L24",
       "_origin": "ast",
-      "id": "package_devdependencies_types_react_dom",
-      "community": 0,
-      "norm_label": "@types/react-dom"
+      "community": 1,
+      "norm_label": "@types/react-dom",
+      "id": "package_devdependencies_types_react_dom"
     },
     {
       "label": "@types/react-dom",
@@ -918,9 +898,9 @@
       "source_file": "package.json",
       "source_location": "L24",
       "_origin": "ast",
-      "id": "types_react_dom",
-      "community": 0,
-      "norm_label": "@types/react-dom"
+      "community": 1,
+      "norm_label": "@types/react-dom",
+      "id": "types_react_dom"
     },
     {
       "label": "eslint",
@@ -928,9 +908,9 @@
       "source_file": "package.json",
       "source_location": "L25",
       "_origin": "ast",
-      "id": "package_devdependencies_eslint",
-      "community": 0,
-      "norm_label": "eslint"
+      "community": 1,
+      "norm_label": "eslint",
+      "id": "package_devdependencies_eslint"
     },
     {
       "label": "eslint",
@@ -938,9 +918,9 @@
       "source_file": "package.json",
       "source_location": "L25",
       "_origin": "ast",
-      "id": "eslint",
-      "community": 0,
-      "norm_label": "eslint"
+      "community": 1,
+      "norm_label": "eslint",
+      "id": "eslint"
     },
     {
       "label": "eslint-config-next",
@@ -948,9 +928,9 @@
       "source_file": "package.json",
       "source_location": "L26",
       "_origin": "ast",
-      "id": "package_devdependencies_eslint_config_next",
-      "community": 0,
-      "norm_label": "eslint-config-next"
+      "community": 1,
+      "norm_label": "eslint-config-next",
+      "id": "package_devdependencies_eslint_config_next"
     },
     {
       "label": "eslint-config-next",
@@ -958,9 +938,9 @@
       "source_file": "package.json",
       "source_location": "L26",
       "_origin": "ast",
-      "id": "eslint_config_next",
-      "community": 0,
-      "norm_label": "eslint-config-next"
+      "community": 1,
+      "norm_label": "eslint-config-next",
+      "id": "eslint_config_next"
     },
     {
       "label": "eslint-config-prettier",
@@ -968,9 +948,9 @@
       "source_file": "package.json",
       "source_location": "L27",
       "_origin": "ast",
-      "id": "package_devdependencies_eslint_config_prettier",
-      "community": 0,
-      "norm_label": "eslint-config-prettier"
+      "community": 1,
+      "norm_label": "eslint-config-prettier",
+      "id": "package_devdependencies_eslint_config_prettier"
     },
     {
       "label": "eslint-config-prettier",
@@ -978,9 +958,9 @@
       "source_file": "package.json",
       "source_location": "L27",
       "_origin": "ast",
-      "id": "eslint_config_prettier",
-      "community": 0,
-      "norm_label": "eslint-config-prettier"
+      "community": 1,
+      "norm_label": "eslint-config-prettier",
+      "id": "eslint_config_prettier"
     },
     {
       "label": "prettier",
@@ -988,9 +968,9 @@
       "source_file": "package.json",
       "source_location": "L28",
       "_origin": "ast",
-      "id": "package_devdependencies_prettier",
-      "community": 0,
-      "norm_label": "prettier"
+      "community": 1,
+      "norm_label": "prettier",
+      "id": "package_devdependencies_prettier"
     },
     {
       "label": "prettier",
@@ -998,9 +978,9 @@
       "source_file": "package.json",
       "source_location": "L28",
       "_origin": "ast",
-      "id": "prettier",
-      "community": 0,
-      "norm_label": "prettier"
+      "community": 1,
+      "norm_label": "prettier",
+      "id": "prettier"
     },
     {
       "label": "tailwindcss",
@@ -1008,9 +988,9 @@
       "source_file": "package.json",
       "source_location": "L29",
       "_origin": "ast",
-      "id": "package_devdependencies_tailwindcss",
-      "community": 0,
-      "norm_label": "tailwindcss"
+      "community": 1,
+      "norm_label": "tailwindcss",
+      "id": "package_devdependencies_tailwindcss"
     },
     {
       "label": "tailwindcss",
@@ -1018,9 +998,9 @@
       "source_file": "package.json",
       "source_location": "L29",
       "_origin": "ast",
-      "id": "tailwindcss",
-      "community": 0,
-      "norm_label": "tailwindcss"
+      "community": 1,
+      "norm_label": "tailwindcss",
+      "id": "tailwindcss"
     },
     {
       "label": "typescript",
@@ -1028,9 +1008,9 @@
       "source_file": "package.json",
       "source_location": "L30",
       "_origin": "ast",
-      "id": "package_devdependencies_typescript",
-      "community": 0,
-      "norm_label": "typescript"
+      "community": 1,
+      "norm_label": "typescript",
+      "id": "package_devdependencies_typescript"
     },
     {
       "label": "typescript",
@@ -1038,9 +1018,249 @@
       "source_file": "package.json",
       "source_location": "L30",
       "_origin": "ast",
-      "id": "typescript",
+      "community": 1,
+      "norm_label": "typescript",
+      "id": "typescript"
+    },
+    {
+      "label": "page.tsx",
+      "file_type": "code",
+      "source_file": "app/(auth)/account/page.tsx",
+      "source_location": "L1",
+      "_origin": "ast",
       "community": 0,
-      "norm_label": "typescript"
+      "norm_label": "page.tsx",
+      "id": "app_auth_account_page"
+    },
+    {
+      "label": "AccountPage()",
+      "file_type": "code",
+      "source_file": "app/(auth)/account/page.tsx",
+      "source_location": "L6",
+      "_origin": "ast",
+      "community": 0,
+      "norm_label": "accountpage()",
+      "id": "app_auth_account_page_accountpage"
+    },
+    {
+      "label": "layout.tsx",
+      "file_type": "code",
+      "source_file": "app/(auth)/layout.tsx",
+      "source_location": "L1",
+      "_origin": "ast",
+      "community": 9,
+      "norm_label": "layout.tsx",
+      "id": "app_auth_layout"
+    },
+    {
+      "label": "AuthLayout()",
+      "file_type": "code",
+      "source_file": "app/(auth)/layout.tsx",
+      "source_location": "L4",
+      "_origin": "ast",
+      "community": 9,
+      "norm_label": "authlayout()",
+      "id": "app_auth_layout_authlayout"
+    },
+    {
+      "label": "page.tsx",
+      "file_type": "code",
+      "source_file": "app/(auth)/login/page.tsx",
+      "source_location": "L1",
+      "_origin": "ast",
+      "community": 0,
+      "norm_label": "page.tsx",
+      "id": "app_auth_login_page"
+    },
+    {
+      "label": "LoginPage()",
+      "file_type": "code",
+      "source_file": "app/(auth)/login/page.tsx",
+      "source_location": "L5",
+      "_origin": "ast",
+      "community": 0,
+      "norm_label": "loginpage()",
+      "id": "app_auth_login_page_loginpage"
+    },
+    {
+      "label": "page.tsx",
+      "file_type": "code",
+      "source_file": "app/(auth)/register/page.tsx",
+      "source_location": "L1",
+      "_origin": "ast",
+      "community": 0,
+      "norm_label": "page.tsx",
+      "id": "app_auth_register_page"
+    },
+    {
+      "label": "RegisterPage()",
+      "file_type": "code",
+      "source_file": "app/(auth)/register/page.tsx",
+      "source_location": "L5",
+      "_origin": "ast",
+      "community": 0,
+      "norm_label": "registerpage()",
+      "id": "app_auth_register_page_registerpage"
+    },
+    {
+      "label": "page.tsx",
+      "file_type": "code",
+      "source_file": "app/page.tsx",
+      "source_location": "L1",
+      "_origin": "ast",
+      "community": 0,
+      "norm_label": "page.tsx",
+      "id": "app_page"
+    },
+    {
+      "label": "Home()",
+      "file_type": "code",
+      "source_file": "app/page.tsx",
+      "source_location": "L5",
+      "_origin": "ast",
+      "community": 0,
+      "norm_label": "home()",
+      "id": "app_page_home"
+    },
+    {
+      "label": "login-form.tsx",
+      "file_type": "code",
+      "source_file": "components/auth/login-form.tsx",
+      "source_location": "L1",
+      "_origin": "ast",
+      "community": 0,
+      "norm_label": "login-form.tsx",
+      "id": "components_auth_login_form"
+    },
+    {
+      "label": "initialState",
+      "file_type": "code",
+      "source_file": "components/auth/login-form.tsx",
+      "source_location": "L7",
+      "_origin": "ast",
+      "community": 0,
+      "norm_label": "initialstate",
+      "id": "components_auth_login_form_initialstate"
+    },
+    {
+      "label": "LoginForm()",
+      "file_type": "code",
+      "source_file": "components/auth/login-form.tsx",
+      "source_location": "L9",
+      "_origin": "ast",
+      "community": 0,
+      "norm_label": "loginform()",
+      "id": "components_auth_login_form_loginform"
+    },
+    {
+      "label": "register-form.tsx",
+      "file_type": "code",
+      "source_file": "components/auth/register-form.tsx",
+      "source_location": "L1",
+      "_origin": "ast",
+      "community": 0,
+      "norm_label": "register-form.tsx",
+      "id": "components_auth_register_form"
+    },
+    {
+      "label": "initialState",
+      "file_type": "code",
+      "source_file": "components/auth/register-form.tsx",
+      "source_location": "L7",
+      "_origin": "ast",
+      "community": 0,
+      "norm_label": "initialstate",
+      "id": "components_auth_register_form_initialstate"
+    },
+    {
+      "label": "RegisterForm()",
+      "file_type": "code",
+      "source_file": "components/auth/register-form.tsx",
+      "source_location": "L9",
+      "_origin": "ast",
+      "community": 0,
+      "norm_label": "registerform()",
+      "id": "components_auth_register_form_registerform"
+    },
+    {
+      "label": "auth.ts",
+      "file_type": "code",
+      "source_file": "lib/appwrite/auth.ts",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "lib_appwrite_auth",
+      "community": 0,
+      "norm_label": "auth.ts"
+    },
+    {
+      "label": "AuthActionState",
+      "file_type": "code",
+      "source_file": "lib/appwrite/auth.ts",
+      "source_location": "L9",
+      "_origin": "ast",
+      "id": "lib_appwrite_auth_authactionstate",
+      "community": 0,
+      "norm_label": "authactionstate"
+    },
+    {
+      "label": "readString()",
+      "file_type": "code",
+      "source_file": "lib/appwrite/auth.ts",
+      "source_location": "L13",
+      "_origin": "ast",
+      "id": "lib_appwrite_auth_readstring",
+      "community": 0,
+      "norm_label": "readstring()"
+    },
+    {
+      "label": "mapAuthError()",
+      "file_type": "code",
+      "source_file": "lib/appwrite/auth.ts",
+      "source_location": "L18",
+      "_origin": "ast",
+      "id": "lib_appwrite_auth_mapautherror",
+      "community": 0,
+      "norm_label": "mapautherror()"
+    },
+    {
+      "label": "setSessionCookie()",
+      "file_type": "code",
+      "source_file": "lib/appwrite/auth.ts",
+      "source_location": "L53",
+      "_origin": "ast",
+      "id": "lib_appwrite_auth_setsessioncookie",
+      "community": 0,
+      "norm_label": "setsessioncookie()"
+    },
+    {
+      "label": "signUpWithEmail()",
+      "file_type": "code",
+      "source_file": "lib/appwrite/auth.ts",
+      "source_location": "L64",
+      "_origin": "ast",
+      "id": "lib_appwrite_auth_signupwithemail",
+      "community": 0,
+      "norm_label": "signupwithemail()"
+    },
+    {
+      "label": "signInWithEmail()",
+      "file_type": "code",
+      "source_file": "lib/appwrite/auth.ts",
+      "source_location": "L100",
+      "_origin": "ast",
+      "id": "lib_appwrite_auth_signinwithemail",
+      "community": 0,
+      "norm_label": "signinwithemail()"
+    },
+    {
+      "label": "signOut()",
+      "file_type": "code",
+      "source_file": "lib/appwrite/auth.ts",
+      "source_location": "L126",
+      "_origin": "ast",
+      "id": "lib_appwrite_auth_signout",
+      "community": 0,
+      "norm_label": "signout()"
     }
   ],
   "links": [
@@ -1449,55 +1669,12 @@
     {
       "relation": "contains",
       "confidence": "EXTRACTED",
-      "source_file": "app/page.tsx",
-      "source_location": "L3",
-      "weight": 1.0,
-      "source": "app_page",
-      "target": "app_page_home",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "imports_from",
-      "context": "import",
-      "confidence": "EXTRACTED",
-      "source_file": "app/page.tsx",
-      "source_location": "L1",
-      "weight": 1.0,
-      "source": "app_page",
-      "target": "lib_appwrite_session",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "imports",
-      "context": "import",
-      "confidence": "EXTRACTED",
-      "source_file": "app/page.tsx",
-      "source_location": "L1",
-      "weight": 1.0,
-      "source": "app_page",
-      "target": "lib_appwrite_session_getloggedinuser",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "calls",
-      "context": "call",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "app/page.tsx",
-      "source_location": "L4",
-      "weight": 1.0,
-      "source": "app_page_home",
-      "target": "lib_appwrite_session_getloggedinuser"
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
       "source_file": "lib/appwrite/browser.ts",
       "source_location": "L20",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "lib_appwrite_browser",
-      "target": "lib_appwrite_browser_getbrowseraccount",
-      "confidence_score": 1.0
+      "target": "lib_appwrite_browser_getbrowseraccount"
     },
     {
       "relation": "contains",
@@ -1505,9 +1682,9 @@
       "source_file": "lib/appwrite/browser.ts",
       "source_location": "L11",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "lib_appwrite_browser",
-      "target": "lib_appwrite_browser_getbrowserclient",
-      "confidence_score": 1.0
+      "target": "lib_appwrite_browser_getbrowserclient"
     },
     {
       "relation": "imports_from",
@@ -1516,9 +1693,9 @@
       "source_file": "lib/appwrite/browser.ts",
       "source_location": "L2",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "lib_appwrite_browser",
-      "target": "lib_appwrite_config",
-      "confidence_score": 1.0
+      "target": "lib_appwrite_config"
     },
     {
       "relation": "imports",
@@ -1527,9 +1704,9 @@
       "source_file": "lib/appwrite/browser.ts",
       "source_location": "L2",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "lib_appwrite_browser",
-      "target": "lib_appwrite_config_getappwriteendpoint",
-      "confidence_score": 1.0
+      "target": "lib_appwrite_config_getappwriteendpoint"
     },
     {
       "relation": "imports",
@@ -1538,9 +1715,9 @@
       "source_file": "lib/appwrite/browser.ts",
       "source_location": "L2",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "lib_appwrite_browser",
-      "target": "lib_appwrite_config_getappwriteprojectid",
-      "confidence_score": 1.0
+      "target": "lib_appwrite_config_getappwriteprojectid"
     },
     {
       "relation": "re_exports",
@@ -1549,9 +1726,9 @@
       "source_file": "lib/appwrite/index.ts",
       "source_location": "L7",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "lib_appwrite_index",
-      "target": "lib_appwrite_browser",
-      "confidence_score": 1.0
+      "target": "lib_appwrite_browser"
     },
     {
       "relation": "calls",
@@ -1560,9 +1737,9 @@
       "source_file": "lib/appwrite/browser.ts",
       "source_location": "L21",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "lib_appwrite_browser_getbrowseraccount",
-      "target": "lib_appwrite_browser_getbrowserclient",
-      "confidence_score": 1.0
+      "target": "lib_appwrite_browser_getbrowserclient"
     },
     {
       "relation": "calls",
@@ -1593,9 +1770,9 @@
       "source_file": "lib/appwrite/index.ts",
       "source_location": "L7",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "lib_appwrite_index",
-      "target": "lib_appwrite_browser_getbrowserclient",
-      "confidence_score": 1.0
+      "target": "lib_appwrite_browser_getbrowserclient"
     },
     {
       "relation": "re_exports",
@@ -1604,9 +1781,9 @@
       "source_file": "lib/appwrite/index.ts",
       "source_location": "L7",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "lib_appwrite_index",
-      "target": "lib_appwrite_browser_getbrowseraccount",
-      "confidence_score": 1.0
+      "target": "lib_appwrite_browser_getbrowseraccount"
     },
     {
       "relation": "contains",
@@ -1614,9 +1791,9 @@
       "source_file": "lib/appwrite/config.ts",
       "source_location": "L8",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "lib_appwrite_config",
-      "target": "lib_appwrite_config_getappwriteendpoint",
-      "confidence_score": 1.0
+      "target": "lib_appwrite_config_getappwriteendpoint"
     },
     {
       "relation": "contains",
@@ -1624,9 +1801,9 @@
       "source_file": "lib/appwrite/config.ts",
       "source_location": "L18",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "lib_appwrite_config",
-      "target": "lib_appwrite_config_getappwriteprojectid",
-      "confidence_score": 1.0
+      "target": "lib_appwrite_config_getappwriteprojectid"
     },
     {
       "relation": "contains",
@@ -1634,9 +1811,9 @@
       "source_file": "lib/appwrite/config.ts",
       "source_location": "L29",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "lib_appwrite_config",
-      "target": "lib_appwrite_config_hasappwritepublicconfig",
-      "confidence_score": 1.0
+      "target": "lib_appwrite_config_hasappwritepublicconfig"
     },
     {
       "relation": "re_exports",
@@ -1645,9 +1822,9 @@
       "source_file": "lib/appwrite/index.ts",
       "source_location": "L1",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "lib_appwrite_index",
-      "target": "lib_appwrite_config",
-      "confidence_score": 1.0
+      "target": "lib_appwrite_config"
     },
     {
       "relation": "imports_from",
@@ -1656,9 +1833,9 @@
       "source_file": "lib/appwrite/server.ts",
       "source_location": "L5",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "lib_appwrite_server",
-      "target": "lib_appwrite_config",
-      "confidence_score": 1.0
+      "target": "lib_appwrite_config"
     },
     {
       "relation": "imports_from",
@@ -1667,9 +1844,9 @@
       "source_file": "lib/appwrite/session.ts",
       "source_location": "L2",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "lib_appwrite_session",
-      "target": "lib_appwrite_config",
-      "confidence_score": 1.0
+      "target": "lib_appwrite_config"
     },
     {
       "relation": "re_exports",
@@ -1678,9 +1855,9 @@
       "source_file": "lib/appwrite/index.ts",
       "source_location": "L1",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "lib_appwrite_index",
-      "target": "lib_appwrite_config_getappwriteendpoint",
-      "confidence_score": 1.0
+      "target": "lib_appwrite_config_getappwriteendpoint"
     },
     {
       "relation": "imports",
@@ -1689,9 +1866,9 @@
       "source_file": "lib/appwrite/server.ts",
       "source_location": "L5",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "lib_appwrite_server",
-      "target": "lib_appwrite_config_getappwriteendpoint",
-      "confidence_score": 1.0
+      "target": "lib_appwrite_config_getappwriteendpoint"
     },
     {
       "relation": "calls",
@@ -1722,9 +1899,9 @@
       "source_file": "lib/appwrite/index.ts",
       "source_location": "L1",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "lib_appwrite_index",
-      "target": "lib_appwrite_config_getappwriteprojectid",
-      "confidence_score": 1.0
+      "target": "lib_appwrite_config_getappwriteprojectid"
     },
     {
       "relation": "imports",
@@ -1733,9 +1910,9 @@
       "source_file": "lib/appwrite/server.ts",
       "source_location": "L5",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "lib_appwrite_server",
-      "target": "lib_appwrite_config_getappwriteprojectid",
-      "confidence_score": 1.0
+      "target": "lib_appwrite_config_getappwriteprojectid"
     },
     {
       "relation": "calls",
@@ -1766,9 +1943,9 @@
       "source_file": "lib/appwrite/index.ts",
       "source_location": "L1",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "lib_appwrite_index",
-      "target": "lib_appwrite_config_hasappwritepublicconfig",
-      "confidence_score": 1.0
+      "target": "lib_appwrite_config_hasappwritepublicconfig"
     },
     {
       "relation": "imports",
@@ -1777,9 +1954,9 @@
       "source_file": "lib/appwrite/session.ts",
       "source_location": "L2",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "lib_appwrite_session",
-      "target": "lib_appwrite_config_hasappwritepublicconfig",
-      "confidence_score": 1.0
+      "target": "lib_appwrite_config_hasappwritepublicconfig"
     },
     {
       "relation": "calls",
@@ -1799,9 +1976,9 @@
       "source_file": "lib/appwrite/index.ts",
       "source_location": "L8",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "lib_appwrite_index",
-      "target": "lib_appwrite_server",
-      "confidence_score": 1.0
+      "target": "lib_appwrite_server"
     },
     {
       "relation": "re_exports",
@@ -1810,9 +1987,9 @@
       "source_file": "lib/appwrite/index.ts",
       "source_location": "L8",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "lib_appwrite_index",
-      "target": "lib_appwrite_server_createadminclient",
-      "confidence_score": 1.0
+      "target": "lib_appwrite_server_createadminclient"
     },
     {
       "relation": "re_exports",
@@ -1821,9 +1998,9 @@
       "source_file": "lib/appwrite/index.ts",
       "source_location": "L8",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "lib_appwrite_index",
-      "target": "lib_appwrite_server_createsessionclient",
-      "confidence_score": 1.0
+      "target": "lib_appwrite_server_createsessionclient"
     },
     {
       "relation": "re_exports",
@@ -1832,9 +2009,9 @@
       "source_file": "lib/appwrite/index.ts",
       "source_location": "L9",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "lib_appwrite_index",
-      "target": "lib_appwrite_session",
-      "confidence_score": 1.0
+      "target": "lib_appwrite_session"
     },
     {
       "relation": "re_exports",
@@ -1843,9 +2020,9 @@
       "source_file": "lib/appwrite/index.ts",
       "source_location": "L9",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "lib_appwrite_index",
-      "target": "lib_appwrite_session_getloggedinuser",
-      "confidence_score": 1.0
+      "target": "lib_appwrite_session_getloggedinuser"
     },
     {
       "relation": "contains",
@@ -1853,9 +2030,9 @@
       "source_file": "lib/appwrite/server.ts",
       "source_location": "L39",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "lib_appwrite_server",
-      "target": "lib_appwrite_server_createadminclient",
-      "confidence_score": 1.0
+      "target": "lib_appwrite_server_createadminclient"
     },
     {
       "relation": "contains",
@@ -1863,9 +2040,9 @@
       "source_file": "lib/appwrite/server.ts",
       "source_location": "L15",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "lib_appwrite_server",
-      "target": "lib_appwrite_server_createsessionclient",
-      "confidence_score": 1.0
+      "target": "lib_appwrite_server_createsessionclient"
     },
     {
       "relation": "imports_from",
@@ -1874,9 +2051,9 @@
       "source_file": "lib/appwrite/session.ts",
       "source_location": "L3",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "lib_appwrite_session",
-      "target": "lib_appwrite_server",
-      "confidence_score": 1.0
+      "target": "lib_appwrite_server"
     },
     {
       "relation": "imports",
@@ -1885,9 +2062,9 @@
       "source_file": "lib/appwrite/session.ts",
       "source_location": "L3",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "lib_appwrite_session",
-      "target": "lib_appwrite_server_createsessionclient",
-      "confidence_score": 1.0
+      "target": "lib_appwrite_server_createsessionclient"
     },
     {
       "relation": "calls",
@@ -1906,9 +2083,9 @@
       "source_file": "lib/appwrite/session.ts",
       "source_location": "L9",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "lib_appwrite_session",
-      "target": "lib_appwrite_session_getloggedinuser",
-      "confidence_score": 1.0
+      "target": "lib_appwrite_session_getloggedinuser"
     },
     {
       "relation": "contains",
@@ -1916,9 +2093,9 @@
       "source_file": "package.json",
       "source_location": "L13",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "package",
-      "target": "package_dependencies",
-      "confidence_score": 1.0
+      "target": "package_dependencies"
     },
     {
       "relation": "contains",
@@ -1926,9 +2103,9 @@
       "source_file": "package.json",
       "source_location": "L20",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "package",
-      "target": "package_devdependencies",
-      "confidence_score": 1.0
+      "target": "package_devdependencies"
     },
     {
       "relation": "contains",
@@ -1936,9 +2113,9 @@
       "source_file": "package.json",
       "source_location": "L2",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "package",
-      "target": "package_name",
-      "confidence_score": 1.0
+      "target": "package_name"
     },
     {
       "relation": "contains",
@@ -1946,9 +2123,9 @@
       "source_file": "package.json",
       "source_location": "L4",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "package",
-      "target": "package_private",
-      "confidence_score": 1.0
+      "target": "package_private"
     },
     {
       "relation": "contains",
@@ -1956,9 +2133,9 @@
       "source_file": "package.json",
       "source_location": "L5",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "package",
-      "target": "package_scripts",
-      "confidence_score": 1.0
+      "target": "package_scripts"
     },
     {
       "relation": "contains",
@@ -1966,9 +2143,9 @@
       "source_file": "package.json",
       "source_location": "L3",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "package",
-      "target": "package_version",
-      "confidence_score": 1.0
+      "target": "package_version"
     },
     {
       "relation": "contains",
@@ -1976,9 +2153,9 @@
       "source_file": "package.json",
       "source_location": "L7",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "package_scripts",
-      "target": "package_scripts_build",
-      "confidence_score": 1.0
+      "target": "package_scripts_build"
     },
     {
       "relation": "contains",
@@ -1986,9 +2163,9 @@
       "source_file": "package.json",
       "source_location": "L6",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "package_scripts",
-      "target": "package_scripts_dev",
-      "confidence_score": 1.0
+      "target": "package_scripts_dev"
     },
     {
       "relation": "contains",
@@ -1996,9 +2173,9 @@
       "source_file": "package.json",
       "source_location": "L10",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "package_scripts",
-      "target": "package_scripts_format",
-      "confidence_score": 1.0
+      "target": "package_scripts_format"
     },
     {
       "relation": "contains",
@@ -2006,9 +2183,9 @@
       "source_file": "package.json",
       "source_location": "L11",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "package_scripts",
-      "target": "package_scripts_format_check",
-      "confidence_score": 1.0
+      "target": "package_scripts_format_check"
     },
     {
       "relation": "contains",
@@ -2016,9 +2193,9 @@
       "source_file": "package.json",
       "source_location": "L9",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "package_scripts",
-      "target": "package_scripts_lint",
-      "confidence_score": 1.0
+      "target": "package_scripts_lint"
     },
     {
       "relation": "contains",
@@ -2026,9 +2203,9 @@
       "source_file": "package.json",
       "source_location": "L8",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "package_scripts",
-      "target": "package_scripts_start",
-      "confidence_score": 1.0
+      "target": "package_scripts_start"
     },
     {
       "relation": "contains",
@@ -2036,9 +2213,9 @@
       "source_file": "package.json",
       "source_location": "L14",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "package_dependencies",
-      "target": "package_dependencies_appwrite",
-      "confidence_score": 1.0
+      "target": "package_dependencies_appwrite"
     },
     {
       "relation": "contains",
@@ -2046,9 +2223,9 @@
       "source_file": "package.json",
       "source_location": "L15",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "package_dependencies",
-      "target": "package_dependencies_next",
-      "confidence_score": 1.0
+      "target": "package_dependencies_next"
     },
     {
       "relation": "contains",
@@ -2056,9 +2233,9 @@
       "source_file": "package.json",
       "source_location": "L16",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "package_dependencies",
-      "target": "package_dependencies_node_appwrite",
-      "confidence_score": 1.0
+      "target": "package_dependencies_node_appwrite"
     },
     {
       "relation": "contains",
@@ -2066,9 +2243,9 @@
       "source_file": "package.json",
       "source_location": "L17",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "package_dependencies",
-      "target": "package_dependencies_react",
-      "confidence_score": 1.0
+      "target": "package_dependencies_react"
     },
     {
       "relation": "contains",
@@ -2076,9 +2253,9 @@
       "source_file": "package.json",
       "source_location": "L18",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "package_dependencies",
-      "target": "package_dependencies_react_dom",
-      "confidence_score": 1.0
+      "target": "package_dependencies_react_dom"
     },
     {
       "relation": "imports",
@@ -2087,9 +2264,9 @@
       "source_location": "L14",
       "weight": 1.0,
       "context": "import",
+      "confidence_score": 1.0,
       "source": "package_dependencies_appwrite",
-      "target": "appwrite",
-      "confidence_score": 1.0
+      "target": "appwrite"
     },
     {
       "relation": "imports",
@@ -2098,9 +2275,9 @@
       "source_location": "L15",
       "weight": 1.0,
       "context": "import",
+      "confidence_score": 1.0,
       "source": "package_dependencies_next",
-      "target": "next",
-      "confidence_score": 1.0
+      "target": "next"
     },
     {
       "relation": "imports",
@@ -2109,9 +2286,9 @@
       "source_location": "L16",
       "weight": 1.0,
       "context": "import",
+      "confidence_score": 1.0,
       "source": "package_dependencies_node_appwrite",
-      "target": "node_appwrite",
-      "confidence_score": 1.0
+      "target": "node_appwrite"
     },
     {
       "relation": "imports",
@@ -2120,9 +2297,9 @@
       "source_location": "L17",
       "weight": 1.0,
       "context": "import",
+      "confidence_score": 1.0,
       "source": "package_dependencies_react",
-      "target": "react",
-      "confidence_score": 1.0
+      "target": "react"
     },
     {
       "relation": "imports",
@@ -2131,9 +2308,9 @@
       "source_location": "L18",
       "weight": 1.0,
       "context": "import",
+      "confidence_score": 1.0,
       "source": "package_dependencies_react_dom",
-      "target": "react_dom",
-      "confidence_score": 1.0
+      "target": "react_dom"
     },
     {
       "relation": "contains",
@@ -2141,9 +2318,9 @@
       "source_file": "package.json",
       "source_location": "L25",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "package_devdependencies",
-      "target": "package_devdependencies_eslint",
-      "confidence_score": 1.0
+      "target": "package_devdependencies_eslint"
     },
     {
       "relation": "contains",
@@ -2151,9 +2328,9 @@
       "source_file": "package.json",
       "source_location": "L26",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "package_devdependencies",
-      "target": "package_devdependencies_eslint_config_next",
-      "confidence_score": 1.0
+      "target": "package_devdependencies_eslint_config_next"
     },
     {
       "relation": "contains",
@@ -2161,9 +2338,9 @@
       "source_file": "package.json",
       "source_location": "L27",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "package_devdependencies",
-      "target": "package_devdependencies_eslint_config_prettier",
-      "confidence_score": 1.0
+      "target": "package_devdependencies_eslint_config_prettier"
     },
     {
       "relation": "contains",
@@ -2171,9 +2348,9 @@
       "source_file": "package.json",
       "source_location": "L28",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "package_devdependencies",
-      "target": "package_devdependencies_prettier",
-      "confidence_score": 1.0
+      "target": "package_devdependencies_prettier"
     },
     {
       "relation": "contains",
@@ -2181,9 +2358,9 @@
       "source_file": "package.json",
       "source_location": "L29",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "package_devdependencies",
-      "target": "package_devdependencies_tailwindcss",
-      "confidence_score": 1.0
+      "target": "package_devdependencies_tailwindcss"
     },
     {
       "relation": "contains",
@@ -2191,9 +2368,9 @@
       "source_file": "package.json",
       "source_location": "L21",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "package_devdependencies",
-      "target": "package_devdependencies_tailwindcss_postcss",
-      "confidence_score": 1.0
+      "target": "package_devdependencies_tailwindcss_postcss"
     },
     {
       "relation": "contains",
@@ -2201,9 +2378,9 @@
       "source_file": "package.json",
       "source_location": "L22",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "package_devdependencies",
-      "target": "package_devdependencies_types_node",
-      "confidence_score": 1.0
+      "target": "package_devdependencies_types_node"
     },
     {
       "relation": "contains",
@@ -2211,9 +2388,9 @@
       "source_file": "package.json",
       "source_location": "L23",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "package_devdependencies",
-      "target": "package_devdependencies_types_react",
-      "confidence_score": 1.0
+      "target": "package_devdependencies_types_react"
     },
     {
       "relation": "contains",
@@ -2221,9 +2398,9 @@
       "source_file": "package.json",
       "source_location": "L24",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "package_devdependencies",
-      "target": "package_devdependencies_types_react_dom",
-      "confidence_score": 1.0
+      "target": "package_devdependencies_types_react_dom"
     },
     {
       "relation": "contains",
@@ -2231,9 +2408,9 @@
       "source_file": "package.json",
       "source_location": "L30",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "package_devdependencies",
-      "target": "package_devdependencies_typescript",
-      "confidence_score": 1.0
+      "target": "package_devdependencies_typescript"
     },
     {
       "relation": "imports",
@@ -2242,9 +2419,9 @@
       "source_location": "L21",
       "weight": 1.0,
       "context": "import",
+      "confidence_score": 1.0,
       "source": "package_devdependencies_tailwindcss_postcss",
-      "target": "tailwindcss_postcss",
-      "confidence_score": 1.0
+      "target": "tailwindcss_postcss"
     },
     {
       "relation": "imports",
@@ -2253,9 +2430,9 @@
       "source_location": "L22",
       "weight": 1.0,
       "context": "import",
+      "confidence_score": 1.0,
       "source": "package_devdependencies_types_node",
-      "target": "types_node",
-      "confidence_score": 1.0
+      "target": "types_node"
     },
     {
       "relation": "imports",
@@ -2264,9 +2441,9 @@
       "source_location": "L23",
       "weight": 1.0,
       "context": "import",
+      "confidence_score": 1.0,
       "source": "package_devdependencies_types_react",
-      "target": "types_react",
-      "confidence_score": 1.0
+      "target": "types_react"
     },
     {
       "relation": "imports",
@@ -2275,9 +2452,9 @@
       "source_location": "L24",
       "weight": 1.0,
       "context": "import",
+      "confidence_score": 1.0,
       "source": "package_devdependencies_types_react_dom",
-      "target": "types_react_dom",
-      "confidence_score": 1.0
+      "target": "types_react_dom"
     },
     {
       "relation": "imports",
@@ -2286,9 +2463,9 @@
       "source_location": "L25",
       "weight": 1.0,
       "context": "import",
+      "confidence_score": 1.0,
       "source": "package_devdependencies_eslint",
-      "target": "eslint",
-      "confidence_score": 1.0
+      "target": "eslint"
     },
     {
       "relation": "imports",
@@ -2297,9 +2474,9 @@
       "source_location": "L26",
       "weight": 1.0,
       "context": "import",
+      "confidence_score": 1.0,
       "source": "package_devdependencies_eslint_config_next",
-      "target": "eslint_config_next",
-      "confidence_score": 1.0
+      "target": "eslint_config_next"
     },
     {
       "relation": "imports",
@@ -2308,9 +2485,9 @@
       "source_location": "L27",
       "weight": 1.0,
       "context": "import",
+      "confidence_score": 1.0,
       "source": "package_devdependencies_eslint_config_prettier",
-      "target": "eslint_config_prettier",
-      "confidence_score": 1.0
+      "target": "eslint_config_prettier"
     },
     {
       "relation": "imports",
@@ -2319,9 +2496,9 @@
       "source_location": "L28",
       "weight": 1.0,
       "context": "import",
+      "confidence_score": 1.0,
       "source": "package_devdependencies_prettier",
-      "target": "prettier",
-      "confidence_score": 1.0
+      "target": "prettier"
     },
     {
       "relation": "imports",
@@ -2330,9 +2507,9 @@
       "source_location": "L29",
       "weight": 1.0,
       "context": "import",
+      "confidence_score": 1.0,
       "source": "package_devdependencies_tailwindcss",
-      "target": "tailwindcss",
-      "confidence_score": 1.0
+      "target": "tailwindcss"
     },
     {
       "relation": "imports",
@@ -2341,11 +2518,413 @@
       "source_location": "L30",
       "weight": 1.0,
       "context": "import",
+      "confidence_score": 1.0,
       "source": "package_devdependencies_typescript",
-      "target": "typescript",
+      "target": "typescript"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "app/(auth)/account/page.tsx",
+      "source_location": "L6",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "app_auth_account_page",
+      "target": "app_auth_account_page_accountpage"
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "app/(auth)/account/page.tsx",
+      "source_location": "L3",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "app_auth_account_page",
+      "target": "lib_appwrite_auth"
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "app/(auth)/account/page.tsx",
+      "source_location": "L3",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "app_auth_account_page",
+      "target": "lib_appwrite_auth_signout"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "app/(auth)/layout.tsx",
+      "source_location": "L4",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "app_auth_layout",
+      "target": "app_auth_layout_authlayout"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "app/(auth)/login/page.tsx",
+      "source_location": "L5",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "app_auth_login_page",
+      "target": "app_auth_login_page_loginpage"
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "app/(auth)/login/page.tsx",
+      "source_location": "L2",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "app_auth_login_page",
+      "target": "components_auth_login_form"
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "app/(auth)/login/page.tsx",
+      "source_location": "L2",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "app_auth_login_page",
+      "target": "components_auth_login_form_loginform"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "app/(auth)/register/page.tsx",
+      "source_location": "L5",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "app_auth_register_page",
+      "target": "app_auth_register_page_registerpage"
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "app/(auth)/register/page.tsx",
+      "source_location": "L2",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "app_auth_register_page",
+      "target": "components_auth_register_form"
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "app/(auth)/register/page.tsx",
+      "source_location": "L2",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "app_auth_register_page",
+      "target": "components_auth_register_form_registerform"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "app/page.tsx",
+      "source_location": "L5",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "app_page",
+      "target": "app_page_home"
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "app/page.tsx",
+      "source_location": "L2",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "app_page",
+      "target": "lib_appwrite_auth"
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "app/page.tsx",
+      "source_location": "L2",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "app_page",
+      "target": "lib_appwrite_auth_signout"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "components/auth/login-form.tsx",
+      "source_location": "L7",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "components_auth_login_form",
+      "target": "components_auth_login_form_initialstate"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "components/auth/login-form.tsx",
+      "source_location": "L9",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "components_auth_login_form",
+      "target": "components_auth_login_form_loginform"
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "components/auth/login-form.tsx",
+      "source_location": "L5",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "components_auth_login_form",
+      "target": "lib_appwrite_auth"
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "components/auth/login-form.tsx",
+      "source_location": "L5",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "components_auth_login_form",
+      "target": "lib_appwrite_auth_authactionstate"
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "components/auth/login-form.tsx",
+      "source_location": "L5",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "components_auth_login_form",
+      "target": "lib_appwrite_auth_signinwithemail"
+    },
+    {
+      "relation": "indirect_call",
+      "context": "argument",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "components/auth/login-form.tsx",
+      "source_location": "L11",
+      "weight": 1.0,
+      "source": "components_auth_login_form_loginform",
+      "target": "lib_appwrite_auth_signinwithemail"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "components/auth/register-form.tsx",
+      "source_location": "L7",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "components_auth_register_form",
+      "target": "components_auth_register_form_initialstate"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "components/auth/register-form.tsx",
+      "source_location": "L9",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "components_auth_register_form",
+      "target": "components_auth_register_form_registerform"
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "components/auth/register-form.tsx",
+      "source_location": "L5",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "components_auth_register_form",
+      "target": "lib_appwrite_auth"
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "components/auth/register-form.tsx",
+      "source_location": "L5",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "components_auth_register_form",
+      "target": "lib_appwrite_auth_authactionstate"
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "components/auth/register-form.tsx",
+      "source_location": "L5",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "components_auth_register_form",
+      "target": "lib_appwrite_auth_signupwithemail"
+    },
+    {
+      "relation": "indirect_call",
+      "context": "argument",
+      "confidence": "INFERRED",
+      "confidence_score": 0.8,
+      "source_file": "components/auth/register-form.tsx",
+      "source_location": "L11",
+      "weight": 1.0,
+      "source": "components_auth_register_form_registerform",
+      "target": "lib_appwrite_auth_signupwithemail"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "lib/appwrite/auth.ts",
+      "source_location": "L9",
+      "weight": 1.0,
+      "source": "lib_appwrite_auth",
+      "target": "lib_appwrite_auth_authactionstate",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "lib/appwrite/auth.ts",
+      "source_location": "L18",
+      "weight": 1.0,
+      "source": "lib_appwrite_auth",
+      "target": "lib_appwrite_auth_mapautherror",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "lib/appwrite/auth.ts",
+      "source_location": "L13",
+      "weight": 1.0,
+      "source": "lib_appwrite_auth",
+      "target": "lib_appwrite_auth_readstring",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "lib/appwrite/auth.ts",
+      "source_location": "L53",
+      "weight": 1.0,
+      "source": "lib_appwrite_auth",
+      "target": "lib_appwrite_auth_setsessioncookie",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "lib/appwrite/auth.ts",
+      "source_location": "L100",
+      "weight": 1.0,
+      "source": "lib_appwrite_auth",
+      "target": "lib_appwrite_auth_signinwithemail",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "lib/appwrite/auth.ts",
+      "source_location": "L126",
+      "weight": 1.0,
+      "source": "lib_appwrite_auth",
+      "target": "lib_appwrite_auth_signout",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "lib/appwrite/auth.ts",
+      "source_location": "L64",
+      "weight": 1.0,
+      "source": "lib_appwrite_auth",
+      "target": "lib_appwrite_auth_signupwithemail",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "lib/appwrite/auth.ts",
+      "source_location": "L104",
+      "weight": 1.0,
+      "source": "lib_appwrite_auth_signinwithemail",
+      "target": "lib_appwrite_auth_readstring",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "lib/appwrite/auth.ts",
+      "source_location": "L68",
+      "weight": 1.0,
+      "source": "lib_appwrite_auth_signupwithemail",
+      "target": "lib_appwrite_auth_readstring",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "lib/appwrite/auth.ts",
+      "source_location": "L120",
+      "weight": 1.0,
+      "source": "lib_appwrite_auth_signinwithemail",
+      "target": "lib_appwrite_auth_mapautherror",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "lib/appwrite/auth.ts",
+      "source_location": "L94",
+      "weight": 1.0,
+      "source": "lib_appwrite_auth_signupwithemail",
+      "target": "lib_appwrite_auth_mapautherror",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "lib/appwrite/auth.ts",
+      "source_location": "L117",
+      "weight": 1.0,
+      "source": "lib_appwrite_auth_signinwithemail",
+      "target": "lib_appwrite_auth_setsessioncookie",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "lib/appwrite/auth.ts",
+      "source_location": "L91",
+      "weight": 1.0,
+      "source": "lib_appwrite_auth_signupwithemail",
+      "target": "lib_appwrite_auth_setsessioncookie",
       "confidence_score": 1.0
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "97696a7c970a5125b52f29b9bc683a010606d145"
+  "built_at_commit": "21ab94931e11952a33a57c194c82820e39fdc6da"
 }

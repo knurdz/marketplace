@@ -1,0 +1,23 @@
+import { redirect } from "next/navigation";
+import { RegisterForm } from "@/components/auth/register-form";
+import { getLoggedInUser } from "@/lib/appwrite/session";
+
+export default async function RegisterPage() {
+  const user = await getLoggedInUser();
+  if (user) {
+    redirect("/account");
+  }
+
+  return (
+    <div>
+      <p className="font-mono text-sm text-accent">$ ./auth --register</p>
+      <h1 className="mt-4 text-3xl font-bold tracking-tight">Create account</h1>
+      <p className="mt-2 text-sm text-muted">
+        Email and password — phone is optional later.
+      </p>
+      <div className="mt-8">
+        <RegisterForm />
+      </div>
+    </div>
+  );
+}
