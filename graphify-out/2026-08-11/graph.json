@@ -3584,7 +3584,7 @@
       "_origin": "ast",
       "community": 29,
       "norm_label": "store-footer.tsx",
-      "community_name": "layout.tsx",
+      "community_name": "store-footer.tsx",
       "id": "components_layout_store_footer"
     },
     {
@@ -3595,7 +3595,7 @@
       "_origin": "ast",
       "community": 29,
       "norm_label": "footer_links",
-      "community_name": "layout.tsx",
+      "community_name": "store-footer.tsx",
       "id": "components_layout_store_footer_footer_links"
     },
     {
@@ -3606,7 +3606,7 @@
       "_origin": "ast",
       "community": 29,
       "norm_label": "storefooter()",
-      "community_name": "layout.tsx",
+      "community_name": "store-footer.tsx",
       "id": "components_layout_store_footer_storefooter"
     },
     {
@@ -3991,7 +3991,7 @@
       "_origin": "ast",
       "community": 39,
       "norm_label": "toast.ts",
-      "community_name": "profiles.ts",
+      "community_name": "toast.ts",
       "id": "lib_ui_toast"
     },
     {
@@ -5562,9 +5562,10 @@
       "source_file": "app/(auth)/layout.tsx",
       "source_location": "L1",
       "_origin": "ast",
-      "id": "app_auth_layout",
       "community": 6,
-      "norm_label": "layout.tsx"
+      "norm_label": "layout.tsx",
+      "id": "app_auth_layout",
+      "community_name": "portal-shell.tsx"
     },
     {
       "label": "AuthLayout()",
@@ -5572,9 +5573,10 @@
       "source_file": "app/(auth)/layout.tsx",
       "source_location": "L5",
       "_origin": "ast",
-      "id": "app_auth_layout_authlayout",
       "community": 6,
-      "norm_label": "authlayout()"
+      "norm_label": "authlayout()",
+      "id": "app_auth_layout_authlayout",
+      "community_name": "portal-shell.tsx"
     },
     {
       "label": "layout.tsx",
@@ -5582,9 +5584,10 @@
       "source_file": "app/(store)/layout.tsx",
       "source_location": "L1",
       "_origin": "ast",
-      "id": "app_store_layout",
       "community": 6,
-      "norm_label": "layout.tsx"
+      "norm_label": "layout.tsx",
+      "id": "app_store_layout",
+      "community_name": "portal-shell.tsx"
     },
     {
       "label": "StoreLayout()",
@@ -5592,9 +5595,10 @@
       "source_file": "app/(store)/layout.tsx",
       "source_location": "L7",
       "_origin": "ast",
-      "id": "app_store_layout_storelayout",
       "community": 6,
-      "norm_label": "storelayout()"
+      "norm_label": "storelayout()",
+      "id": "app_store_layout_storelayout",
+      "community_name": "portal-shell.tsx"
     },
     {
       "label": "login-form.tsx",
@@ -5602,9 +5606,10 @@
       "source_file": "components/auth/login-form.tsx",
       "source_location": "L1",
       "_origin": "ast",
-      "id": "components_auth_login_form",
       "community": 22,
-      "norm_label": "login-form.tsx"
+      "norm_label": "login-form.tsx",
+      "id": "components_auth_login_form",
+      "community_name": "page.tsx"
     },
     {
       "label": "initialState",
@@ -5612,9 +5617,10 @@
       "source_file": "components/auth/login-form.tsx",
       "source_location": "L7",
       "_origin": "ast",
-      "id": "components_auth_login_form_initialstate",
       "community": 22,
-      "norm_label": "initialstate"
+      "norm_label": "initialstate",
+      "id": "components_auth_login_form_initialstate",
+      "community_name": "page.tsx"
     },
     {
       "label": "LoginForm()",
@@ -5622,9 +5628,10 @@
       "source_file": "components/auth/login-form.tsx",
       "source_location": "L10",
       "_origin": "ast",
-      "id": "components_auth_login_form_loginform",
       "community": 22,
-      "norm_label": "loginform()"
+      "norm_label": "loginform()",
+      "id": "components_auth_login_form_loginform",
+      "community_name": "page.tsx"
     },
     {
       "label": "profile-form.tsx",
@@ -5632,9 +5639,10 @@
       "source_file": "components/auth/profile-form.tsx",
       "source_location": "L1",
       "_origin": "ast",
-      "id": "components_auth_profile_form",
       "community": 8,
-      "norm_label": "profile-form.tsx"
+      "norm_label": "profile-form.tsx",
+      "id": "components_auth_profile_form",
+      "community_name": "profiles.ts"
     },
     {
       "label": "initialState",
@@ -5642,9 +5650,10 @@
       "source_file": "components/auth/profile-form.tsx",
       "source_location": "L12",
       "_origin": "ast",
-      "id": "components_auth_profile_form_initialstate",
       "community": 8,
-      "norm_label": "initialstate"
+      "norm_label": "initialstate",
+      "id": "components_auth_profile_form_initialstate",
+      "community_name": "profiles.ts"
     },
     {
       "label": "avatarInitial",
@@ -5652,9 +5661,10 @@
       "source_file": "components/auth/profile-form.tsx",
       "source_location": "L13",
       "_origin": "ast",
-      "id": "components_auth_profile_form_avatarinitial",
       "community": 8,
-      "norm_label": "avatarinitial"
+      "norm_label": "avatarinitial",
+      "id": "components_auth_profile_form_avatarinitial",
+      "community_name": "profiles.ts"
     },
     {
       "label": "useActionToasts()",
@@ -5662,9 +5672,10 @@
       "source_file": "components/auth/profile-form.tsx",
       "source_location": "L15",
       "_origin": "ast",
-      "id": "components_auth_profile_form_useactiontoasts",
       "community": 8,
-      "norm_label": "useactiontoasts()"
+      "norm_label": "useactiontoasts()",
+      "id": "components_auth_profile_form_useactiontoasts",
+      "community_name": "profiles.ts"
     },
     {
       "label": "ProfileForm()",
@@ -5672,9 +5683,10 @@
       "source_file": "components/auth/profile-form.tsx",
       "source_location": "L30",
       "_origin": "ast",
-      "id": "components_auth_profile_form_profileform",
       "community": 8,
-      "norm_label": "profileform()"
+      "norm_label": "profileform()",
+      "id": "components_auth_profile_form_profileform",
+      "community_name": "profiles.ts"
     },
     {
       "label": "portal-shell.tsx",
@@ -5682,9 +5694,10 @@
       "source_file": "components/layout/portal-shell.tsx",
       "source_location": "L1",
       "_origin": "ast",
-      "id": "components_layout_portal_shell",
       "community": 6,
-      "norm_label": "portal-shell.tsx"
+      "norm_label": "portal-shell.tsx",
+      "id": "components_layout_portal_shell",
+      "community_name": "portal-shell.tsx"
     },
     {
       "label": "PortalNavItem",
@@ -5692,9 +5705,10 @@
       "source_file": "components/layout/portal-shell.tsx",
       "source_location": "L18",
       "_origin": "ast",
-      "id": "components_layout_portal_shell_portalnavitem",
       "community": 6,
-      "norm_label": "portalnavitem"
+      "norm_label": "portalnavitem",
+      "id": "components_layout_portal_shell_portalnavitem",
+      "community_name": "portal-shell.tsx"
     },
     {
       "label": "PortalShellProps",
@@ -5702,9 +5716,10 @@
       "source_file": "components/layout/portal-shell.tsx",
       "source_location": "L23",
       "_origin": "ast",
-      "id": "components_layout_portal_shell_portalshellprops",
       "community": 6,
-      "norm_label": "portalshellprops"
+      "norm_label": "portalshellprops",
+      "id": "components_layout_portal_shell_portalshellprops",
+      "community_name": "portal-shell.tsx"
     },
     {
       "label": "SideNav()",
@@ -5712,9 +5727,10 @@
       "source_file": "components/layout/portal-shell.tsx",
       "source_location": "L31",
       "_origin": "ast",
-      "id": "components_layout_portal_shell_sidenav",
       "community": 6,
-      "norm_label": "sidenav()"
+      "norm_label": "sidenav()",
+      "id": "components_layout_portal_shell_sidenav",
+      "community_name": "portal-shell.tsx"
     },
     {
       "label": "PortalShell()",
@@ -5722,9 +5738,10 @@
       "source_file": "components/layout/portal-shell.tsx",
       "source_location": "L55",
       "_origin": "ast",
-      "id": "components_layout_portal_shell_portalshell",
       "community": 6,
-      "norm_label": "portalshell()"
+      "norm_label": "portalshell()",
+      "id": "components_layout_portal_shell_portalshell",
+      "community_name": "portal-shell.tsx"
     },
     {
       "label": "skip-to-content.tsx",
@@ -5732,9 +5749,10 @@
       "source_file": "components/layout/skip-to-content.tsx",
       "source_location": "L1",
       "_origin": "ast",
-      "id": "components_layout_skip_to_content",
       "community": 6,
-      "norm_label": "skip-to-content.tsx"
+      "norm_label": "skip-to-content.tsx",
+      "id": "components_layout_skip_to_content",
+      "community_name": "portal-shell.tsx"
     },
     {
       "label": "SkipToContent()",
@@ -5742,9 +5760,10 @@
       "source_file": "components/layout/skip-to-content.tsx",
       "source_location": "L7",
       "_origin": "ast",
-      "id": "components_layout_skip_to_content_skiptocontent",
       "community": 6,
-      "norm_label": "skiptocontent()"
+      "norm_label": "skiptocontent()",
+      "id": "components_layout_skip_to_content_skiptocontent",
+      "community_name": "portal-shell.tsx"
     },
     {
       "label": "store-navbar.tsx",
@@ -5752,9 +5771,10 @@
       "source_file": "components/layout/store-navbar.tsx",
       "source_location": "L1",
       "_origin": "ast",
-      "id": "components_layout_store_navbar",
       "community": 6,
-      "norm_label": "store-navbar.tsx"
+      "norm_label": "store-navbar.tsx",
+      "id": "components_layout_store_navbar",
+      "community_name": "portal-shell.tsx"
     },
     {
       "label": "StoreNavbarProps",
@@ -5762,9 +5782,10 @@
       "source_file": "components/layout/store-navbar.tsx",
       "source_location": "L18",
       "_origin": "ast",
-      "id": "components_layout_store_navbar_storenavbarprops",
       "community": 6,
-      "norm_label": "storenavbarprops"
+      "norm_label": "storenavbarprops",
+      "id": "components_layout_store_navbar_storenavbarprops",
+      "community_name": "portal-shell.tsx"
     },
     {
       "label": "NavLinks()",
@@ -5772,9 +5793,10 @@
       "source_file": "components/layout/store-navbar.tsx",
       "source_location": "L22",
       "_origin": "ast",
-      "id": "components_layout_store_navbar_navlinks",
       "community": 6,
-      "norm_label": "navlinks()"
+      "norm_label": "navlinks()",
+      "id": "components_layout_store_navbar_navlinks",
+      "community_name": "portal-shell.tsx"
     },
     {
       "label": "SearchForm()",
@@ -5782,9 +5804,10 @@
       "source_file": "components/layout/store-navbar.tsx",
       "source_location": "L63",
       "_origin": "ast",
-      "id": "components_layout_store_navbar_searchform",
       "community": 6,
-      "norm_label": "searchform()"
+      "norm_label": "searchform()",
+      "id": "components_layout_store_navbar_searchform",
+      "community_name": "portal-shell.tsx"
     },
     {
       "label": "StoreNavbar()",
@@ -5792,9 +5815,10 @@
       "source_file": "components/layout/store-navbar.tsx",
       "source_location": "L87",
       "_origin": "ast",
-      "id": "components_layout_store_navbar_storenavbar",
       "community": 6,
-      "norm_label": "storenavbar()"
+      "norm_label": "storenavbar()",
+      "id": "components_layout_store_navbar_storenavbar",
+      "community_name": "portal-shell.tsx"
     },
     {
       "label": "notification-bell.tsx",
@@ -5802,9 +5826,10 @@
       "source_file": "components/notifications/notification-bell.tsx",
       "source_location": "L1",
       "_origin": "ast",
-      "id": "components_notifications_notification_bell",
       "community": 6,
-      "norm_label": "notification-bell.tsx"
+      "norm_label": "notification-bell.tsx",
+      "id": "components_notifications_notification_bell",
+      "community_name": "portal-shell.tsx"
     },
     {
       "label": "formatRelative()",
@@ -5812,9 +5837,10 @@
       "source_file": "components/notifications/notification-bell.tsx",
       "source_location": "L26",
       "_origin": "ast",
-      "id": "components_notifications_notification_bell_formatrelative",
       "community": 6,
-      "norm_label": "formatrelative()"
+      "norm_label": "formatrelative()",
+      "id": "components_notifications_notification_bell_formatrelative",
+      "community_name": "portal-shell.tsx"
     },
     {
       "label": "NotificationBell()",
@@ -5822,9 +5848,10 @@
       "source_file": "components/notifications/notification-bell.tsx",
       "source_location": "L37",
       "_origin": "ast",
-      "id": "components_notifications_notification_bell_notificationbell",
       "community": 6,
-      "norm_label": "notificationbell()"
+      "norm_label": "notificationbell()",
+      "id": "components_notifications_notification_bell_notificationbell",
+      "community_name": "portal-shell.tsx"
     }
   ],
   "links": [
@@ -14444,9 +14471,9 @@
       "source_file": "app/(auth)/layout.tsx",
       "source_location": "L5",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "app_auth_layout",
-      "target": "app_auth_layout_authlayout",
-      "confidence_score": 1.0
+      "target": "app_auth_layout_authlayout"
     },
     {
       "relation": "imports_from",
@@ -14455,9 +14482,9 @@
       "source_file": "app/(auth)/layout.tsx",
       "source_location": "L3",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "app_auth_layout",
-      "target": "components_layout_skip_to_content",
-      "confidence_score": 1.0
+      "target": "components_layout_skip_to_content"
     },
     {
       "relation": "imports",
@@ -14466,9 +14493,9 @@
       "source_file": "app/(auth)/layout.tsx",
       "source_location": "L3",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "app_auth_layout",
-      "target": "components_layout_skip_to_content_skiptocontent",
-      "confidence_score": 1.0
+      "target": "components_layout_skip_to_content_skiptocontent"
     },
     {
       "relation": "contains",
@@ -14476,9 +14503,9 @@
       "source_file": "app/(store)/layout.tsx",
       "source_location": "L7",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "app_store_layout",
-      "target": "app_store_layout_storelayout",
-      "confidence_score": 1.0
+      "target": "app_store_layout_storelayout"
     },
     {
       "relation": "imports_from",
@@ -14487,9 +14514,9 @@
       "source_file": "app/(store)/layout.tsx",
       "source_location": "L2",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "app_store_layout",
-      "target": "components_layout_skip_to_content",
-      "confidence_score": 1.0
+      "target": "components_layout_skip_to_content"
     },
     {
       "relation": "imports",
@@ -14498,9 +14525,9 @@
       "source_file": "app/(store)/layout.tsx",
       "source_location": "L2",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "app_store_layout",
-      "target": "components_layout_skip_to_content_skiptocontent",
-      "confidence_score": 1.0
+      "target": "components_layout_skip_to_content_skiptocontent"
     },
     {
       "relation": "imports_from",
@@ -14509,9 +14536,9 @@
       "source_file": "app/(store)/layout.tsx",
       "source_location": "L4",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "app_store_layout",
-      "target": "components_layout_store_navbar",
-      "confidence_score": 1.0
+      "target": "components_layout_store_navbar"
     },
     {
       "relation": "imports",
@@ -14520,9 +14547,9 @@
       "source_file": "app/(store)/layout.tsx",
       "source_location": "L4",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "app_store_layout",
-      "target": "components_layout_store_navbar_storenavbar",
-      "confidence_score": 1.0
+      "target": "components_layout_store_navbar_storenavbar"
     },
     {
       "relation": "contains",
@@ -14530,9 +14557,9 @@
       "source_file": "components/auth/login-form.tsx",
       "source_location": "L7",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "components_auth_login_form",
-      "target": "components_auth_login_form_initialstate",
-      "confidence_score": 1.0
+      "target": "components_auth_login_form_initialstate"
     },
     {
       "relation": "contains",
@@ -14540,9 +14567,9 @@
       "source_file": "components/auth/login-form.tsx",
       "source_location": "L10",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "components_auth_login_form",
-      "target": "components_auth_login_form_loginform",
-      "confidence_score": 1.0
+      "target": "components_auth_login_form_loginform"
     },
     {
       "relation": "contains",
@@ -14550,9 +14577,9 @@
       "source_file": "components/auth/profile-form.tsx",
       "source_location": "L13",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "components_auth_profile_form",
-      "target": "components_auth_profile_form_avatarinitial",
-      "confidence_score": 1.0
+      "target": "components_auth_profile_form_avatarinitial"
     },
     {
       "relation": "contains",
@@ -14560,9 +14587,9 @@
       "source_file": "components/auth/profile-form.tsx",
       "source_location": "L12",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "components_auth_profile_form",
-      "target": "components_auth_profile_form_initialstate",
-      "confidence_score": 1.0
+      "target": "components_auth_profile_form_initialstate"
     },
     {
       "relation": "contains",
@@ -14570,9 +14597,9 @@
       "source_file": "components/auth/profile-form.tsx",
       "source_location": "L30",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "components_auth_profile_form",
-      "target": "components_auth_profile_form_profileform",
-      "confidence_score": 1.0
+      "target": "components_auth_profile_form_profileform"
     },
     {
       "relation": "contains",
@@ -14580,9 +14607,9 @@
       "source_file": "components/auth/profile-form.tsx",
       "source_location": "L15",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "components_auth_profile_form",
-      "target": "components_auth_profile_form_useactiontoasts",
-      "confidence_score": 1.0
+      "target": "components_auth_profile_form_useactiontoasts"
     },
     {
       "relation": "calls",
@@ -14591,9 +14618,9 @@
       "source_file": "components/auth/profile-form.tsx",
       "source_location": "L46",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "components_auth_profile_form_profileform",
-      "target": "components_auth_profile_form_useactiontoasts",
-      "confidence_score": 1.0
+      "target": "components_auth_profile_form_useactiontoasts"
     },
     {
       "relation": "contains",
@@ -14601,9 +14628,9 @@
       "source_file": "components/layout/portal-shell.tsx",
       "source_location": "L18",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "components_layout_portal_shell",
-      "target": "components_layout_portal_shell_portalnavitem",
-      "confidence_score": 1.0
+      "target": "components_layout_portal_shell_portalnavitem"
     },
     {
       "relation": "contains",
@@ -14611,9 +14638,9 @@
       "source_file": "components/layout/portal-shell.tsx",
       "source_location": "L55",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "components_layout_portal_shell",
-      "target": "components_layout_portal_shell_portalshell",
-      "confidence_score": 1.0
+      "target": "components_layout_portal_shell_portalshell"
     },
     {
       "relation": "contains",
@@ -14621,9 +14648,9 @@
       "source_file": "components/layout/portal-shell.tsx",
       "source_location": "L23",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "components_layout_portal_shell",
-      "target": "components_layout_portal_shell_portalshellprops",
-      "confidence_score": 1.0
+      "target": "components_layout_portal_shell_portalshellprops"
     },
     {
       "relation": "contains",
@@ -14631,9 +14658,9 @@
       "source_file": "components/layout/portal-shell.tsx",
       "source_location": "L31",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "components_layout_portal_shell",
-      "target": "components_layout_portal_shell_sidenav",
-      "confidence_score": 1.0
+      "target": "components_layout_portal_shell_sidenav"
     },
     {
       "relation": "imports_from",
@@ -14642,9 +14669,9 @@
       "source_file": "components/layout/portal-shell.tsx",
       "source_location": "L5",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "components_layout_portal_shell",
-      "target": "components_layout_skip_to_content",
-      "confidence_score": 1.0
+      "target": "components_layout_skip_to_content"
     },
     {
       "relation": "imports",
@@ -14653,9 +14680,9 @@
       "source_file": "components/layout/portal-shell.tsx",
       "source_location": "L5",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "components_layout_portal_shell",
-      "target": "components_layout_skip_to_content_skiptocontent",
-      "confidence_score": 1.0
+      "target": "components_layout_skip_to_content_skiptocontent"
     },
     {
       "relation": "imports_from",
@@ -14664,9 +14691,9 @@
       "source_file": "components/layout/portal-shell.tsx",
       "source_location": "L6",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "components_layout_portal_shell",
-      "target": "components_notifications_notification_bell",
-      "confidence_score": 1.0
+      "target": "components_notifications_notification_bell"
     },
     {
       "relation": "imports",
@@ -14675,9 +14702,9 @@
       "source_file": "components/layout/portal-shell.tsx",
       "source_location": "L6",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "components_layout_portal_shell",
-      "target": "components_notifications_notification_bell_notificationbell",
-      "confidence_score": 1.0
+      "target": "components_notifications_notification_bell_notificationbell"
     },
     {
       "relation": "contains",
@@ -14685,9 +14712,9 @@
       "source_file": "components/layout/skip-to-content.tsx",
       "source_location": "L7",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "components_layout_skip_to_content",
-      "target": "components_layout_skip_to_content_skiptocontent",
-      "confidence_score": 1.0
+      "target": "components_layout_skip_to_content_skiptocontent"
     },
     {
       "relation": "contains",
@@ -14695,9 +14722,9 @@
       "source_file": "components/layout/store-navbar.tsx",
       "source_location": "L22",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "components_layout_store_navbar",
-      "target": "components_layout_store_navbar_navlinks",
-      "confidence_score": 1.0
+      "target": "components_layout_store_navbar_navlinks"
     },
     {
       "relation": "contains",
@@ -14705,9 +14732,9 @@
       "source_file": "components/layout/store-navbar.tsx",
       "source_location": "L63",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "components_layout_store_navbar",
-      "target": "components_layout_store_navbar_searchform",
-      "confidence_score": 1.0
+      "target": "components_layout_store_navbar_searchform"
     },
     {
       "relation": "contains",
@@ -14715,9 +14742,9 @@
       "source_file": "components/layout/store-navbar.tsx",
       "source_location": "L87",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "components_layout_store_navbar",
-      "target": "components_layout_store_navbar_storenavbar",
-      "confidence_score": 1.0
+      "target": "components_layout_store_navbar_storenavbar"
     },
     {
       "relation": "contains",
@@ -14725,9 +14752,9 @@
       "source_file": "components/layout/store-navbar.tsx",
       "source_location": "L18",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "components_layout_store_navbar",
-      "target": "components_layout_store_navbar_storenavbarprops",
-      "confidence_score": 1.0
+      "target": "components_layout_store_navbar_storenavbarprops"
     },
     {
       "relation": "imports_from",
@@ -14736,9 +14763,9 @@
       "source_file": "components/layout/store-navbar.tsx",
       "source_location": "L6",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "components_layout_store_navbar",
-      "target": "components_notifications_notification_bell",
-      "confidence_score": 1.0
+      "target": "components_notifications_notification_bell"
     },
     {
       "relation": "imports",
@@ -14747,9 +14774,9 @@
       "source_file": "components/layout/store-navbar.tsx",
       "source_location": "L6",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "components_layout_store_navbar",
-      "target": "components_notifications_notification_bell_notificationbell",
-      "confidence_score": 1.0
+      "target": "components_notifications_notification_bell_notificationbell"
     },
     {
       "relation": "contains",
@@ -14757,9 +14784,9 @@
       "source_file": "components/notifications/notification-bell.tsx",
       "source_location": "L26",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "components_notifications_notification_bell",
-      "target": "components_notifications_notification_bell_formatrelative",
-      "confidence_score": 1.0
+      "target": "components_notifications_notification_bell_formatrelative"
     },
     {
       "relation": "contains",
@@ -14767,9 +14794,9 @@
       "source_file": "components/notifications/notification-bell.tsx",
       "source_location": "L37",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "components_notifications_notification_bell",
-      "target": "components_notifications_notification_bell_notificationbell",
-      "confidence_score": 1.0
+      "target": "components_notifications_notification_bell_notificationbell"
     },
     {
       "relation": "calls",
@@ -14778,9 +14805,9 @@
       "source_file": "components/notifications/notification-bell.tsx",
       "source_location": "L170",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "components_notifications_notification_bell_notificationbell",
-      "target": "components_notifications_notification_bell_formatrelative",
-      "confidence_score": 1.0
+      "target": "components_notifications_notification_bell_formatrelative"
     }
   ],
   "hyperedges": [],
