@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { StoreFooter } from "@/components/layout/store-footer";
 import { StoreNavbar } from "@/components/layout/store-navbar";
 import { getLoggedInUser } from "@/lib/appwrite/session";
 
@@ -10,9 +11,10 @@ export default async function StoreLayout({
   const user = await getLoggedInUser();
 
   return (
-    <div className="min-h-screen bg-background text-foreground">
+    <div className="flex min-h-screen flex-col bg-background text-foreground">
       <StoreNavbar user={user} />
-      {children}
+      <div className="flex-1">{children}</div>
+      <StoreFooter />
     </div>
   );
 }
