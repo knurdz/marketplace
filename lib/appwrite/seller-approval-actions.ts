@@ -72,7 +72,7 @@ export async function rejectSellerApplication(
   }
 
   const reason = formData.get("reason");
-  if (typeof reason !== "string") {
+  if (typeof reason !== "string" || !reason.trim()) {
     return { error: "Rejection reason is required." };
   }
 

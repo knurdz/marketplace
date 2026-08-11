@@ -34,7 +34,7 @@ Use after every change that touches code or schema:
 - [ ] IDOR / ownership checks on reads & writes you added
 - [x] Inputs validated (frontend + server); uploads constrained if applicable
 - [ ] Payment paths (if touched): notify/hash trusted; idempotent; return_url not sole source of truth
-- [ ] Graphify consulted before work (if graph exists) and updated after
+- [x] Graphify consulted before work (if graph exists) and updated after
 - [x] Relevant Appwrite MCP tools used when touching Appwrite (docs/context/search/call)
 - [x] Relevant member checklist items below updated
 - [x] Did not break another member’s contract (types, status enums, routes)
@@ -109,7 +109,7 @@ Use after every change that touches code or schema:
 - [x] Toasts + error boundary + loading-state patterns
 - [x] Platform settings read helper
 - [ ] Schema changelog when others request fields
-- [ ] PayHere Function **interfaces** (`PAYHERE.md` + types + stub) — implementation is Member 1 payment setup below
+- [x] PayHere Function **interfaces** (`PAYHERE.md` + types + stub) — implementation is Member 1 payment setup below
 - [x] Accessibility / responsive baseline pass
 - [ ] Fix cross-member integration issues; keep API contracts consistent
 
@@ -361,7 +361,7 @@ Pick up only after Phases 1–4 are solid. Assign when claimed.
 | ---------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | 2026-08-10 | Initial distribution from project analysis                                                                                                                                                            |
 | 2026-08-10 | Merged team Full Feature Analysis: phases, filters/sort, dashboards, reviews/seller ratings, availability toggle, disputes, analytics, badges/fraud flags, backlog; clarified PayHere ownership split |
-| 2026-08-10 | Added numbered step plans (1.1–4.18) matching `docs/agent/MEMBER_IMPLEMENTATION_GUIDE.md`                                                                                                             |
+| 2026-08-10 | Added numbered step plans (1.1–1.28, 2.1–2.16, 3.1–3.15, 4.1–4.14) matching `docs/agent/MEMBER_IMPLEMENTATION_GUIDE.md` |
 | 2026-08-11 | Member 2 steps **2.5–2.6**: checkout shell + atomic `createOrder` (`orders` / `order_items` / `payments`); continuation stubs for 2.7–2.9 |
 | 2026-08-11 | Member 2 steps **2.7–2.8**: free confirm stub (`confirmFreeOrder`) + bank slip upload → `awaiting_verification`; graphify update pending CLI |
 | 2026-08-11 | Member 2 step **2.9**: PayHere checkout POST via `requestPayHereCheckout`; return/cancel pages poll DB only (2s / 60s); graceful error when hash Function not deployed |
