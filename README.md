@@ -60,12 +60,12 @@ Fill `.env.local` with Appwrite values (see below). Do not commit secrets; only 
 3. Set in `.env.local`:
    - `NEXT_PUBLIC_APPWRITE_ENDPOINT=https://sgp.cloud.appwrite.io/v1` (sgp region)
    - `NEXT_PUBLIC_APPWRITE_PROJECT_ID=` project id from **Settings**
-   - `APPWRITE_API_KEY=` a server API key with at least **`sessions.write`** (needed for SSR auth in step 1.3; never `NEXT_PUBLIC_*`)
+   - `APPWRITE_API_KEY=` a server API key with **`sessions.write`**, **`users.write`**, and **`databases.write`** (SSR auth + profile create-on-register; never `NEXT_PUBLIC_*`)
    - `NEXT_PUBLIC_APP_URL=http://localhost:3000` for local dev
 4. Under **Add a platform**, add a **Web** app with hostname `localhost` (required for browser SDK CORS and recovery/verify redirect URLs).
 5. Set `NEXT_PUBLIC_APP_URL` to the same origin you open in the browser (e.g. `http://localhost:3000`) so password-reset and email-verify links redirect correctly.
 
-Clients live in [`lib/appwrite/`](./lib/appwrite/): browser (`appwrite`) + server session/admin (`node-appwrite`). Session cookie name: `knurdz_session`.
+Clients live in [`lib/appwrite/`](./lib/appwrite/): browser (`appwrite`) + server session/admin (`node-appwrite`). Session cookie name: `knurdz_session`. TablesDB database id: `marketplace` — full table contract in [`docs/agent/SCHEMA.md`](./docs/agent/SCHEMA.md). Re-apply with `node --env-file=.env.local scripts/setup-mvp-schema.mjs`.
 
 ### Auth routes
 
@@ -73,11 +73,13 @@ Clients live in [`lib/appwrite/`](./lib/appwrite/): browser (`appwrite`) + serve
 | ------------------ | ------------------------------------------- |
 | `/login`           | Email/password sign in                      |
 | `/register`        | Create account                              |
-| `/account`         | Session display, verify resend, sign out    |
+| `/account`         | Session + profile edit, verify resend, sign out |
 | `/forgot-password` | Request password recovery email             |
 | `/reset-password`  | Set new password from recovery link         |
 | `/verify-email`    | Complete email verification from email link |
+| `/seller`          | Seller portal (requires `seller` label)     |
+| `/admin`           | Admin portal (requires `admin` label)       |
 
 ## Status
 
-Steps **1.1–1.4** (bootstrap through password reset / email verify) are in place. Profiles, roles, and remaining Phase 0 work continue in steps 1.5–1.13.
+Steps **1.1–1.7** (bootstrap through schema freeze) are in place. Storage, shells, and remaining Phase 0 work continue in steps 1.8–1.13.
