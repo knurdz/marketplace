@@ -5,6 +5,7 @@ export type {
   Order,
   OrderItem,
   Payment,
+  PlatformSetting,
   Product,
   ProductImage,
   Report,

@@ -4,7 +4,8 @@
  *      → node --env-file=.env.local scripts/seed-demo.mjs
  *
  * Creates: admin / seller / buyer users + profiles, approved seller shop,
- * two categories, one active sample product, one buyer welcome notification.
+ * two categories, one active sample product, one buyer welcome notification,
+ * MVP platform_settings rows.
  */
 import {
   Client,
@@ -61,6 +62,40 @@ const CATEGORIES = [
 const PRODUCT_ID = "seed_demo_product";
 const SELLER_PROFILE_ID = "seed_seller_profile";
 const BUYER_WELCOME_NOTIFICATION_ID = "seed_buyer_welcome_notification";
+
+const PLATFORM_SETTINGS = [
+  {
+    rowId: "seed_set_site_name",
+    key: "site.name",
+    value: "Knurdz",
+    description: "Public site / brand display name",
+  },
+  {
+    rowId: "seed_set_support_email",
+    key: "site.support_email",
+    value: "support@knurdz.demo",
+    description: "Support contact email",
+  },
+  {
+    rowId: "seed_set_currency",
+    key: "checkout.currency_default",
+    value: "LKR",
+    description: "Default checkout currency",
+  },
+  {
+    rowId: "seed_set_bank_instr",
+    key: "checkout.bank_instructions",
+    value:
+      "Transfer the order total to the seller bank details shown at checkout, then upload your slip for admin verification.",
+    description: "Buyer-facing bank transfer instructions",
+  },
+  {
+    rowId: "seed_set_free_listings",
+    key: "features.free_listings",
+    value: "true",
+    description: "Feature flag: allow free (price=0) listings",
+  },
+];
 
 const endpoint = process.env.NEXT_PUBLIC_APPWRITE_ENDPOINT?.trim();
 const projectId = process.env.NEXT_PUBLIC_APPWRITE_PROJECT_ID?.trim();
@@ -342,6 +377,51 @@ async function ensureBuyerWelcomeNotification(buyerUserId) {
   }
 }
 
+async function ensurePlatformSetting(spec) {
+  const data = {
+    key: spec.key,
+    value: spec.value,
+    description: spec.description,
+  };
+  // Table-level: read(users); create/update/delete(admin). Row security off.
+  const permissions = [
+    Permission.read(Role.users()),
+    Permission.update(Role.label("admin")),
+    Permission.delete(Role.label("admin")),
+  ];
+
+  try {
+    await db.getRow({
+      databaseId: DATABASE_ID,
+      tableId: "platform_settings",
+      rowId: spec.rowId,
+    });
+    await db.updateRow({
+      databaseId: DATABASE_ID,
+      tableId: "platform_settings",
+      rowId: spec.rowId,
+      data,
+      permissions,
+    });
+    console.log(`= platform_settings: ${spec.key}`);
+  } catch (error) {
+    if (!isNotFound(error)) throw error;
+    try {
+      await db.createRow({
+        databaseId: DATABASE_ID,
+        tableId: "platform_settings",
+        rowId: spec.rowId,
+        data,
+        permissions,
+      });
+      console.log(`+ platform_settings: ${spec.key}`);
+    } catch (createErr) {
+      if (!isConflict(createErr)) throw createErr;
+      console.log(`= platform_settings (conflict ok): ${spec.key}`);
+    }
+  }
+}
+
 async function main() {
   console.log("Seeding demo data…");
 
@@ -361,6 +441,10 @@ async function main() {
   await ensureProduct(created.seller.$id, CATEGORIES[0].rowId);
   await ensureBuyerWelcomeNotification(created.buyer.$id);
 
+  for (const setting of PLATFORM_SETTINGS) {
+    await ensurePlatformSetting(setting);
+  }
+
   console.log("\nDemo seed ready.");
   console.log(`  password (all): ${DEMO_PASSWORD}`);
   for (const spec of DEMO_USERS) {
@@ -370,6 +454,7 @@ async function main() {
   }
   console.log(`  product ${PRODUCT_ID} (status=active)`);
   console.log(`  notification ${BUYER_WELCOME_NOTIFICATION_ID} (buyer)`);
+  console.log(`  platform_settings (${PLATFORM_SETTINGS.length} keys)`);
 }
 
 main().catch((err) => {

@@ -279,6 +279,53 @@
       "lib_utils_cn"
     ],
     "9": [
+      "lib_services_index",
+      "lib_services_platform_settings",
+      "lib_services_platform_settings_asnullablestring",
+      "lib_services_platform_settings_asplatformsetting",
+      "lib_services_platform_settings_getplatformsetting",
+      "lib_services_platform_settings_getplatformsettings",
+      "lib_services_platform_settings_normalizeplatformsettingkey",
+      "lib_services_platform_settings_parseplatformsettingjson",
+      "lib_services_platform_settings_withsessiontables",
+      "lib_types_index",
+      "lib_types_models",
+      "lib_types_models_bankslip",
+      "lib_types_models_category",
+      "lib_types_models_notification",
+      "lib_types_models_order",
+      "lib_types_models_orderitem",
+      "lib_types_models_payment",
+      "lib_types_models_platformsetting",
+      "lib_types_models_product",
+      "lib_types_models_productimage",
+      "lib_types_models_report",
+      "lib_types_models_sellerprofile"
+    ],
+    "10": [
+      "scripts_seed_demo",
+      "scripts_seed_demo_apikey",
+      "scripts_seed_demo_categories",
+      "scripts_seed_demo_client",
+      "scripts_seed_demo_db",
+      "scripts_seed_demo_demo_users",
+      "scripts_seed_demo_endpoint",
+      "scripts_seed_demo_ensurebuyerwelcomenotification",
+      "scripts_seed_demo_ensurecategory",
+      "scripts_seed_demo_ensureplatformsetting",
+      "scripts_seed_demo_ensureproduct",
+      "scripts_seed_demo_ensureprofile",
+      "scripts_seed_demo_ensuresellerprofile",
+      "scripts_seed_demo_ensureuser",
+      "scripts_seed_demo_finduserbyemail",
+      "scripts_seed_demo_isconflict",
+      "scripts_seed_demo_isnotfound",
+      "scripts_seed_demo_main",
+      "scripts_seed_demo_platform_settings",
+      "scripts_seed_demo_projectid",
+      "scripts_seed_demo_users"
+    ],
+    "11": [
       "lib_appwrite_browser",
       "lib_appwrite_browser_getbrowseraccount",
       "lib_appwrite_browser_getbrowserclient",
@@ -300,7 +347,7 @@
       "lib_appwrite_session",
       "lib_appwrite_session_getloggedinuser"
     ],
-    "10": [
+    "12": [
       "app_admin_layout",
       "app_admin_layout_admin_nav",
       "app_admin_layout_adminlayout",
@@ -321,34 +368,12 @@
       "components_notifications_notification_bell_formatrelative",
       "components_notifications_notification_bell_notificationbell"
     ],
-    "11": [
-      "scripts_seed_demo",
-      "scripts_seed_demo_apikey",
-      "scripts_seed_demo_categories",
-      "scripts_seed_demo_client",
-      "scripts_seed_demo_db",
-      "scripts_seed_demo_demo_users",
-      "scripts_seed_demo_endpoint",
-      "scripts_seed_demo_ensurebuyerwelcomenotification",
-      "scripts_seed_demo_ensurecategory",
-      "scripts_seed_demo_ensureproduct",
-      "scripts_seed_demo_ensureprofile",
-      "scripts_seed_demo_ensuresellerprofile",
-      "scripts_seed_demo_ensureuser",
-      "scripts_seed_demo_finduserbyemail",
-      "scripts_seed_demo_isconflict",
-      "scripts_seed_demo_isnotfound",
-      "scripts_seed_demo_main",
-      "scripts_seed_demo_projectid",
-      "scripts_seed_demo_users"
-    ],
-    "12": [
+    "13": [
       "app_store_page",
       "app_store_page_home",
       "app_store_search_page",
       "app_store_search_page_searchpage",
       "app_store_search_page_searchpageprops",
-      "lib_services_index",
       "lib_services_products",
       "lib_services_products_asboolean",
       "lib_services_products_asnullablestring",
@@ -362,7 +387,7 @@
       "lib_services_session",
       "lib_services_session_getsessionuser"
     ],
-    "13": [
+    "14": [
       "lib_appwrite_storage",
       "lib_appwrite_storage_bankslippermissions",
       "lib_appwrite_storage_deletefile",
@@ -380,7 +405,7 @@
       "lib_appwrite_storage_uploadvalidationresult",
       "lib_appwrite_storage_validateupload"
     ],
-    "14": [
+    "15": [
       "lib_appwrite_index",
       "lib_appwrite_notification_actions",
       "lib_appwrite_notifications",
@@ -397,7 +422,7 @@
       "lib_appwrite_notifications_safenotificationlink",
       "lib_services_notifications"
     ],
-    "15": [
+    "16": [
       "app_admin_error",
       "app_admin_error_adminerror",
       "app_auth_error",
@@ -411,20 +436,6 @@
       "components_ui_error_fallback",
       "components_ui_error_fallback_errorfallback",
       "components_ui_error_fallback_errorfallbackprops"
-    ],
-    "16": [
-      "lib_types_index",
-      "lib_types_models",
-      "lib_types_models_bankslip",
-      "lib_types_models_category",
-      "lib_types_models_notification",
-      "lib_types_models_order",
-      "lib_types_models_orderitem",
-      "lib_types_models_payment",
-      "lib_types_models_product",
-      "lib_types_models_productimage",
-      "lib_types_models_report",
-      "lib_types_models_sellerprofile"
     ],
     "17": [
       "app_admin_loading",
@@ -527,50 +538,56 @@
       "components_layout_store_footer_storefooter"
     ],
     "28": [
+      "lib_platform_settings_keys",
+      "lib_platform_settings_keys_all_platform_setting_keys",
+      "lib_platform_settings_keys_platform_setting_keys",
+      "lib_platform_settings_keys_platformsettingkey"
+    ],
+    "29": [
       "app_auth_verify_email_page",
       "app_auth_verify_email_page_searchparams",
       "app_auth_verify_email_page_verifyemailpage"
     ],
-    "29": [
+    "30": [
       "components_ui_badge",
       "components_ui_badge_badge",
       "components_ui_badge_badgevariants"
     ],
-    "30": [
+    "31": [
       "cursor_mcp",
       "cursor_mcp_mcp_server_shadcn",
       "mcp_command_npx"
     ],
-    "31": [
+    "32": [
       "proxy",
       "proxy_config",
       "proxy_proxy"
     ],
-    "32": [
+    "33": [
       "app_admin_page",
       "app_admin_page_adminpage"
     ],
-    "33": [
+    "34": [
       "app_auth_layout",
       "app_auth_layout_authlayout"
     ],
-    "34": [
+    "35": [
       "app_seller_page",
       "app_seller_page_sellerpage"
     ],
-    "35": [
+    "36": [
       "eslint_config",
       "eslint_config_eslintconfig"
     ],
-    "36": [
+    "37": [
       "next_config",
       "next_config_nextconfig"
     ],
-    "37": [
+    "38": [
       "postcss_config",
       "postcss_config_config"
     ],
-    "38": [
+    "39": [
       "lib_services_uploads"
     ]
   },
@@ -584,14 +601,14 @@
     "6": 0.1422924901185771,
     "7": 0.09090909090909091,
     "8": 0.16883116883116883,
-    "9": 0.14736842105263157,
-    "10": 0.13450292397660818,
-    "11": 0.19298245614035087,
-    "12": 0.2549019607843137,
-    "13": 0.225,
-    "14": 0.44761904761904764,
-    "15": 0.21794871794871795,
-    "16": 0.3181818181818182,
+    "9": 0.19913419913419914,
+    "10": 0.18095238095238095,
+    "11": 0.14736842105263157,
+    "12": 0.13450292397660818,
+    "13": 0.22794117647058823,
+    "14": 0.225,
+    "15": 0.44761904761904764,
+    "16": 0.21794871794871795,
     "17": 0.28888888888888886,
     "18": 0.3333333333333333,
     "19": 0.24444444444444444,
@@ -603,17 +620,18 @@
     "25": 0.5,
     "26": 0.5,
     "27": 0.5,
-    "28": 0.6666666666666666,
-    "29": 1.0,
-    "30": 0.6666666666666666,
+    "28": 0.5,
+    "29": 0.6666666666666666,
+    "30": 1.0,
     "31": 0.6666666666666666,
-    "32": 1.0,
+    "32": 0.6666666666666666,
     "33": 1.0,
     "34": 1.0,
     "35": 1.0,
     "36": 1.0,
     "37": 1.0,
-    "38": 1.0
+    "38": 1.0,
+    "39": 1.0
   },
   "gods": [
     {

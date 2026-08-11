@@ -4,12 +4,12 @@
 - cluster-only mode — file stats not available
 
 ## Summary
-- 495 nodes · 776 edges · 39 communities (27 shown, 12 thin omitted)
+- 510 nodes · 803 edges · 40 communities (28 shown, 12 thin omitted)
 - Extraction: 100% EXTRACTED · 0% INFERRED · 0% AMBIGUOUS · INFERRED: 1 edges (avg confidence: 0.8)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `509c8eef`
+- Built from commit: `edb00a67`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -23,14 +23,14 @@
 - profiles.ts
 - components.json
 - cn
+- index.ts
+- seed-demo.mjs
 - config.ts
 - portal-shell.tsx
-- seed-demo.mjs
 - products.ts
 - storage.ts
 - notifications.ts
 - error-fallback.tsx
-- index.ts
 - page-loader.tsx
 - legal-page.tsx
 - setup-storage-buckets.mjs
@@ -41,6 +41,7 @@
 - page.tsx
 - page.tsx
 - layout.tsx
+- keys.ts
 - page.tsx
 - badge.tsx
 - shadcn
@@ -76,7 +77,7 @@
 ## Import Cycles
 - None detected.
 
-## Communities (39 total, 12 thin omitted)
+## Communities (40 total, 12 thin omitted)
 
 ### Community 0 - "setup-mvp-schema.mjs"
 Cohesion: 0.19
@@ -114,33 +115,33 @@ Nodes (21): aliases, components, hooks, lib, ui, utils, iconLibrary, menuAccent 
 Cohesion: 0.17
 Nodes (12): Button(), buttonVariants, Input(), Label(), Separator(), SheetContent(), SheetDescription(), SheetFooter() (+4 more)
 
-### Community 9 - "config.ts"
+### Community 9 - "index.ts"
+Cohesion: 0.20
+Nodes (18): asNullableString(), asPlatformSetting(), getPlatformSetting(), getPlatformSettings(), normalizePlatformSettingKey(), parsePlatformSettingJson(), withSessionTables(), BankSlip (+10 more)
+
+### Community 10 - "seed-demo.mjs"
+Cohesion: 0.18
+Nodes (20): apiKey, CATEGORIES, client, db, DEMO_USERS, endpoint, ensureBuyerWelcomeNotification(), ensureCategory() (+12 more)
+
+### Community 11 - "config.ts"
 Cohesion: 0.15
 Nodes (13): getBrowserAccount(), getBrowserClient(), ALL_BUCKET_IDS, ALL_TABLE_IDS, BANK_SLIP_EXTENSIONS, BANK_SLIP_MIME_TYPES, getAppwriteEndpoint(), getAppwriteProjectId() (+5 more)
 
-### Community 10 - "portal-shell.tsx"
+### Community 12 - "portal-shell.tsx"
 Cohesion: 0.13
 Nodes (8): ADMIN_NAV, SELLER_NAV, PortalNavItem, PortalShell(), PortalShellProps, StoreNavbarProps, formatRelative(), NotificationBell()
 
-### Community 11 - "seed-demo.mjs"
-Cohesion: 0.19
-Nodes (18): apiKey, CATEGORIES, client, db, DEMO_USERS, endpoint, ensureBuyerWelcomeNotification(), ensureCategory() (+10 more)
-
-### Community 12 - "products.ts"
-Cohesion: 0.25
+### Community 13 - "products.ts"
+Cohesion: 0.23
 Nodes (13): Home(), SearchPage(), SearchPageProps, asBoolean(), asNullableString(), asNumber(), asProduct(), getProduct() (+5 more)
 
-### Community 13 - "storage.ts"
+### Community 14 - "storage.ts"
 Cohesion: 0.23
 Nodes (14): bankSlipPermissions(), deleteFile(), deleteFileAsAdmin(), extensionOf(), publicImagePermissions(), toInputFile(), uploadAvatar(), uploadBankSlip() (+6 more)
 
-### Community 14 - "notifications.ts"
+### Community 15 - "notifications.ts"
 Cohesion: 0.45
 Nodes (11): asNotification(), asNullableString(), countOwnUnread(), createNotificationForUser(), getOwnNotificationFeed(), listOwnNotifications(), markAllOwnNotificationsRead(), markOwnNotificationRead() (+3 more)
-
-### Community 16 - "index.ts"
-Cohesion: 0.32
-Nodes (10): BankSlip, Category, Notification, Order, OrderItem, Payment, Product, ProductImage (+2 more)
 
 ### Community 18 - "legal-page.tsx"
 Cohesion: 0.33
@@ -166,8 +167,12 @@ Nodes (3): SearchParams, initialState, ResetPasswordForm()
 Cohesion: 0.47
 Nodes (5): requireLabel(), requireUser(), ROLE_LABELS, RoleLabel, userHasLabel()
 
+### Community 28 - "keys.ts"
+Cohesion: 0.50
+Nodes (3): ALL_PLATFORM_SETTING_KEYS, PLATFORM_SETTING_KEYS, PlatformSettingKey
+
 ## Knowledge Gaps
-- **160 isolated node(s):** `npx`, `eslintConfig`, `nextConfig`, `config`, `target` (+155 more)
+- **164 isolated node(s):** `npx`, `eslintConfig`, `nextConfig`, `config`, `target` (+159 more)
   These have ≤1 connection - possible missing edges or undocumented components.
 - **12 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
@@ -175,9 +180,9 @@ Nodes (5): requireLabel(), requireUser(), ROLE_LABELS, RoleLabel, userHasLabel()
 _Questions this graph is uniquely positioned to answer:_
 
 - **Why does `dependencies` connect `dependencies` to `devDependencies`?**
-  _High betweenness centrality (0.011) - this node is a cross-community bridge._
+  _High betweenness centrality (0.010) - this node is a cross-community bridge._
 - **What connects `npx`, `eslintConfig`, `nextConfig` to the rest of the system?**
-  _160 weakly-connected nodes found - possible documentation gaps or missing edges._
+  _164 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `rate-limit.ts` be split into smaller, more focused modules?**
   _Cohesion score 0.12857142857142856 - nodes in this community are weakly interconnected._
 - **Should `devDependencies` be split into smaller, more focused modules?**
