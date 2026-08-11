@@ -1,3 +1,5 @@
+export { getAdminMetrics } from "./admin-metrics";
+export type { AdminMetrics } from "./admin-metrics";
 export {
   asCategory,
   getCategoryBySlug,
