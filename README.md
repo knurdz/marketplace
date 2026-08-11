@@ -71,6 +71,27 @@ Shared contracts for other members:
 - Statuses / row types: [`lib/types/`](./lib/types/)
 - Session / products / uploads: [`lib/services/`](./lib/services/)
 
+### Demo seed (dev / sandbox only)
+
+After schema + buckets are applied:
+
+```bash
+npm run seed
+```
+
+Creates idempotent demo users, profiles, an approved seller shop, two categories, and one **active** sample product (`seed_demo_product`).
+
+| Role   | Email                 | Labels           |
+| ------ | --------------------- | ---------------- |
+| Admin  | `admin@knurdz.demo`   | `buyer`, `admin` |
+| Seller | `seller@knurdz.demo`  | `buyer`, `seller`|
+| Buyer  | `buyer@knurdz.demo`   | `buyer`          |
+
+Password for all demo accounts: `DemoPass123!`  
+**Sandbox only** — never reuse in production. Not a merchant/Appwrite secret; do not put in `NEXT_PUBLIC_*`.
+
+API key for seed needs **users.write** + TablesDB write (same key used for schema setup).
+
 ### Auth routes
 
 | Path               | Purpose                                     |
@@ -86,4 +107,6 @@ Shared contracts for other members:
 
 ## Status
 
-Steps **1.1–1.11** (bootstrap through thin services) are in place. Seed and done gate continue in steps 1.12–1.13.
+**Phase 0 complete (steps 1.1–1.13).** Member 1 foundation is ready: auth, schema, storage, UI shells, shared types/services, and demo seed. **Members 2–4 may bind UI to live Appwrite APIs.**
+
+Setup order for a fresh clone: env → `setup-mvp-schema.mjs` → `setup-storage-buckets.mjs` → `npm run seed` → `npm run dev`.

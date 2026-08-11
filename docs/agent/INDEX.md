@@ -28,3 +28,7 @@ All documents coding agents should read for Knurdz Marketplace live here (except
 - Humans own commits, PRs, merges
 - No GitHub MCP; approved MCPs only (see `.cursor/rules/mcp-acceleration.mdc`)
 - Tick `WORK_DISTRIBUTION.md` after each step
+
+## Phase 0 status
+
+**Complete (Member 1 steps 1.1–1.13).** Teammates can auth, open role shells, upload (avatars / helpers), and read seeded `active` products via `@/lib/services`. Members 2–4 are unblocked for live Appwrite binding.

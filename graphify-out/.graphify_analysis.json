@@ -183,6 +183,7 @@
       "package_scripts_format",
       "package_scripts_format_check",
       "package_scripts_lint",
+      "package_scripts_seed",
       "package_scripts_start",
       "package_version",
       "prettier",
@@ -331,6 +332,26 @@
       "components_tsx"
     ],
     "10": [
+      "scripts_seed_demo",
+      "scripts_seed_demo_apikey",
+      "scripts_seed_demo_categories",
+      "scripts_seed_demo_client",
+      "scripts_seed_demo_db",
+      "scripts_seed_demo_demo_users",
+      "scripts_seed_demo_endpoint",
+      "scripts_seed_demo_ensurecategory",
+      "scripts_seed_demo_ensureproduct",
+      "scripts_seed_demo_ensureprofile",
+      "scripts_seed_demo_ensuresellerprofile",
+      "scripts_seed_demo_ensureuser",
+      "scripts_seed_demo_finduserbyemail",
+      "scripts_seed_demo_isconflict",
+      "scripts_seed_demo_isnotfound",
+      "scripts_seed_demo_main",
+      "scripts_seed_demo_projectid",
+      "scripts_seed_demo_users"
+    ],
+    "11": [
       "lib_appwrite_auth",
       "lib_appwrite_auth_authactionstate",
       "lib_appwrite_auth_mapautherror",
@@ -348,7 +369,7 @@
       "lib_appwrite_roles_rolelabel",
       "lib_appwrite_roles_userhaslabel"
     ],
-    "11": [
+    "12": [
       "scripts_setup_storage_buckets",
       "scripts_setup_storage_buckets_apikey",
       "scripts_setup_storage_buckets_bucketcreateperms",
@@ -360,7 +381,7 @@
       "scripts_setup_storage_buckets_projectid",
       "scripts_setup_storage_buckets_storage"
     ],
-    "12": [
+    "13": [
       "app_auth_login_page",
       "app_auth_login_page_loginpage",
       "app_auth_login_page_safenextpath",
@@ -368,7 +389,7 @@
       "components_auth_login_form_initialstate",
       "components_auth_login_form_loginform"
     ],
-    "13": [
+    "14": [
       "app_auth_reset_password_page",
       "app_auth_reset_password_page_resetpasswordpage",
       "app_auth_reset_password_page_searchparams",
@@ -376,56 +397,56 @@
       "components_auth_reset_password_form_initialstate",
       "components_auth_reset_password_form_resetpasswordform"
     ],
-    "14": [
+    "15": [
       "app_auth_forgot_password_page",
       "app_auth_forgot_password_page_forgotpasswordpage",
       "components_auth_forgot_password_form",
       "components_auth_forgot_password_form_forgotpasswordform",
       "components_auth_forgot_password_form_initialstate"
     ],
-    "15": [
+    "16": [
       "app_auth_register_page",
       "app_auth_register_page_registerpage",
       "components_auth_register_form",
       "components_auth_register_form_initialstate",
       "components_auth_register_form_registerform"
     ],
-    "16": [
+    "17": [
       "app_auth_verify_email_page",
       "app_auth_verify_email_page_searchparams",
       "app_auth_verify_email_page_verifyemailpage"
     ],
-    "17": [
+    "18": [
       "cursor_mcp",
       "cursor_mcp_mcp_server_shadcn",
       "mcp_command_npx"
     ],
-    "18": [
+    "19": [
       "proxy",
       "proxy_config",
       "proxy_proxy"
     ],
-    "19": [
+    "20": [
       "app_admin_page",
       "app_admin_page_adminpage"
     ],
-    "20": [
+    "21": [
       "app_auth_layout",
       "app_auth_layout_authlayout"
     ],
-    "21": [
+    "22": [
       "app_seller_page",
       "app_seller_page_sellerpage"
     ],
-    "22": [
+    "23": [
       "eslint_config",
       "eslint_config_eslintconfig"
     ],
-    "23": [
+    "24": [
       "next_config",
       "next_config_nextconfig"
     ],
-    "24": [
+    "25": [
       "postcss_config",
       "postcss_config_config"
     ]
@@ -435,27 +456,28 @@
     "1": 0.18768768768768768,
     "2": 0.13015873015873017,
     "3": 0.1140819964349376,
-    "4": 0.0625,
+    "4": 0.06060606060606061,
     "5": 0.06451612903225806,
     "6": 0.1623931623931624,
     "7": 0.08,
     "8": 0.22510822510822512,
     "9": 0.09090909090909091,
-    "10": 0.21666666666666667,
-    "11": 0.24444444444444444,
-    "12": 0.4666666666666667,
-    "13": 0.4,
-    "14": 0.5,
+    "10": 0.1830065359477124,
+    "11": 0.21666666666666667,
+    "12": 0.24444444444444444,
+    "13": 0.4666666666666667,
+    "14": 0.4,
     "15": 0.5,
-    "16": 0.6666666666666666,
+    "16": 0.5,
     "17": 0.6666666666666666,
     "18": 0.6666666666666666,
-    "19": 1.0,
+    "19": 0.6666666666666666,
     "20": 1.0,
     "21": 1.0,
     "22": 1.0,
     "23": 1.0,
-    "24": 1.0
+    "24": 1.0,
+    "25": 1.0
   },
   "gods": [
     {

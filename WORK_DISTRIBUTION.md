@@ -68,7 +68,7 @@ Use after every change that touches code or schema:
 - [x] Storage buckets + shared upload helper
 - [x] UI kit / layout shells (store, seller, admin empty shells) + navbar/routing
 - [x] Shared order/payment status enums & types + thin service layer / API contracts for other members
-- [ ] Seed: demo admin, seller, buyer, categories
+- [x] Seed: demo admin, seller, buyer, categories
 - [x] README setup so teammates can clone and run
 
 ### Phase 0 — step-by-step plan (implement one step at a time)
@@ -86,8 +86,8 @@ Use after every change that touches code or schema:
 | [x] **1.9**  | UI kit + shells               | Store/seller/admin layouts + navbar                                  | Empty dashboards render                           |
 | [x] **1.10** | Shared types/enums            | Product/order/payment statuses exported                              | Single source of truth                            |
 | [x] **1.11** | Thin services                 | Session/product/upload helpers                                       | Others can import contracts                       |
-| [ ] **1.12** | Seed                          | Admin, seller, buyer, categories, sample product                     | One-command seed                                  |
-| [ ] **1.13** | Done gate                     | Announce unblock                                                     | Teammates can auth, shells, upload, read products |
+| [x] **1.12** | Seed                          | Admin, seller, buyer, categories, sample product                     | One-command seed                                  |
+| [x] **1.13** | Done gate                     | Announce unblock                                                     | Teammates can auth, shells, upload, read products |
 
 ### Phase 1 — ongoing
 
@@ -104,7 +104,7 @@ Use after every change that touches code or schema:
 
 ### Member 1 — done when
 
-- [ ] Others can auth, hit empty role dashboards, upload a file, and read seeded products
+- [x] Others can auth, hit empty role dashboards, upload a file, and read seeded products
 
 ---
 
