@@ -59,6 +59,12 @@ export type {
   AdminSellerApplication,
   SellerApprovalResult,
 } from "./seller-approvals";
+export { listUsers } from "./user-management";
+export type {
+  AdminUserView,
+  UserListResult,
+  UserManagementResult,
+} from "./user-management";
 export {
   asReview,
   canReviewProduct,
