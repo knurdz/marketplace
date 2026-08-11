@@ -23,6 +23,7 @@ export const ORDER_ERROR_CODES = {
   CONFIRM_NOT_CONFIGURED: "ORDER_CONFIRM_NOT_CONFIGURED",
   SLIP_UPLOAD_FAILED: "ORDER_SLIP_UPLOAD_FAILED",
   UPDATE_FAILED: "ORDER_UPDATE_FAILED",
+  NOT_CANCELABLE: "ORDER_NOT_CANCELABLE",
 } as const;
 
 export type OrderErrorCode =
@@ -87,3 +88,14 @@ export type SubmitBankSlipResult =
       paymentStatus: PaymentStatus;
     }
   | { ok: false; error: string; code?: OrderErrorCode };
+
+export type CancelOrderResult =
+  | { ok: true; orderStatus: OrderStatus }
+  | { ok: false; error: string; code?: OrderErrorCode };
+
+export type CancelOrderActionState = {
+  ok?: boolean;
+  error?: string;
+  code?: OrderErrorCode;
+  orderStatus?: OrderStatus;
+};

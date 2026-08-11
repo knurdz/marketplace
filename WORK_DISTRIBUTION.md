@@ -159,8 +159,8 @@ Complete payment infrastructure so Members 2–4 only consume APIs / admin UI.
 - [x] Free checkout path — UI + create order; confirm via **Member 1** free-confirm API (stub until 1.24)
 - [x] PayHere redirect + return/cancel pages (status from DB) — **UX only**; no merchant secret; uses Member 1 hash Function
 - [x] Bank transfer instructions + slip upload → `awaiting_verification`
-- [ ] Order placement + tracking timeline + order history
-- [ ] Cancel order (allowed states only)
+- [x] Order placement + tracking timeline + order history
+- [x] Cancel order (allowed states only)
 - [ ] Report listing
 - [ ] Wishlist (full page; preview on dashboard)
 - [ ] Product reviews & ratings (after completed order)
@@ -181,8 +181,8 @@ Complete payment infrastructure so Members 2–4 only consume APIs / admin UI.
 | [x] **2.7**  | Free path        | Confirm paid via **Member 1** free-confirm API           | No forged amount / no PayHere |
 | [x] **2.8**  | Bank path UX     | Instructions + slip upload → `awaiting_verification`     | Private bucket                |
 | [x] **2.9**  | PayHere UX       | Call **Member 1** hash Function; sandbox form; poll DB   | No merchant secret in client  |
-| [ ] **2.10** | Orders UI        | List + detail timeline                                   | IDOR: no other users’ orders  |
-| [ ] **2.11** | Cancel           | Early statuses only                                      | Enum rules enforced           |
+| [x] **2.10** | Orders UI        | List + detail timeline                                   | IDOR: no other users’ orders  |
+| [x] **2.11** | Cancel           | Early statuses only                                      | Enum rules enforced           |
 | [ ] **2.12** | Buyer dashboard  | Summaries + recent + wishlist preview                    | Empty states OK               |
 | [ ] **2.13** | Wishlist         | Full page CRUD                                           | Own wishlist only             |
 | [ ] **2.14** | Reviews          | After `completed`; product + seller rating               | Policy enforced               |
@@ -192,7 +192,7 @@ Complete payment infrastructure so Members 2–4 only consume APIs / admin UI.
 ### Member 2 — verification extras
 
 - [ ] Guest vs logged-in behavior is intentional and safe
-- [ ] Cannot pay or view another user’s orders
+- [x] Cannot pay or view another user’s orders
 - [x] Free path never hits PayHere with a forged amount
 - [x] Filters/sort do not leak non-`active` listings
 

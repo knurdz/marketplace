@@ -27,6 +27,7 @@ import type {
 import {
   ACTIVE_PRODUCT_STATUS,
   isBankSlipStatus,
+  isOrderCancelable,
   isOrderStatus,
   isPaymentMethod,
   isPaymentStatus,
@@ -38,6 +39,7 @@ import {
   type CreateOrderInput,
   type CreateOrderResult,
   type OrderErrorCode,
+  type CancelOrderResult,
   type SubmitBankSlipInput,
   type SubmitBankSlipResult,
 } from "./order-errors";
@@ -335,6 +337,66 @@ export async function getOwnOrder(orderId: string): Promise<Order | null> {
     return order;
   } catch {
     return null;
+  }
+}
+
+/** Newest-first list for the signed-in buyer only. */
+export async function listOwnOrders(opts?: { limit?: number }): Promise<Order[]> {
+  if (!hasAppwritePublicConfig()) return [];
+
+  const user = await getLoggedInUser();
+  if (!user) return [];
+
+  const limit = Math.min(Math.max(opts?.limit ?? 50, 1), 50);
+
+  try {
+    const { tables } = await createSessionClient();
+    const result = await tables.listRows({
+      databaseId: DATABASE_ID,
+      tableId: TABLE_ORDERS,
+      queries: [
+        Query.equal("buyerId", user.$id),
+        Query.orderDesc("$createdAt"),
+        Query.limit(limit),
+      ],
+    });
+
+    const out: Order[] = [];
+    for (const row of result.rows) {
+      const order = asOrder(row as unknown as Record<string, unknown>);
+      if (order && order.buyerId === user.$id) {
+        out.push(order);
+      }
+    }
+    return out;
+  } catch {
+    return [];
+  }
+}
+
+/** Line items for an order owned by the signed-in buyer (IDOR-safe). */
+export async function getOwnOrderItems(orderId: string): Promise<OrderItem[]> {
+  const order = await getOwnOrder(orderId);
+  if (!order) return [];
+
+  try {
+    const { tables } = await createSessionClient();
+    const result = await tables.listRows({
+      databaseId: DATABASE_ID,
+      tableId: TABLE_ORDER_ITEMS,
+      queries: [Query.equal("orderId", order.$id), Query.limit(100)],
+    });
+
+    const out: OrderItem[] = [];
+    for (const row of result.rows) {
+      const item = asOrderItem(row as unknown as Record<string, unknown>);
+      if (item && item.orderId === order.$id) {
+        out.push(item);
+      }
+    }
+    return out;
+  } catch {
+    return [];
   }
 }
 
@@ -691,6 +753,58 @@ export async function createOrder(
     orderId: orderId!,
     paymentMethod: input.paymentMethod,
   };
+}
+
+/** Cancel an owned order in early statuses only (IDOR-safe; no payment/refund side effects). */
+export async function cancelOrder(orderId: string): Promise<CancelOrderResult> {
+  if (!hasAppwritePublicConfig()) {
+    return fail<CancelOrderResult>(
+      "Orders are not configured yet.",
+      ORDER_ERROR_CODES.NOT_ALLOWED,
+    );
+  }
+
+  const user = await getLoggedInUser();
+  if (!user) {
+    return fail<CancelOrderResult>(
+      "You must be signed in to cancel an order.",
+      ORDER_ERROR_CODES.NOT_AUTHENTICATED,
+    );
+  }
+
+  const trimmed = orderId?.trim();
+  if (!trimmed) {
+    return fail<CancelOrderResult>("Invalid order id.", ORDER_ERROR_CODES.NOT_FOUND);
+  }
+
+  const order = await getOwnOrder(trimmed);
+  if (!order) {
+    return fail<CancelOrderResult>("Order not found.", ORDER_ERROR_CODES.NOT_FOUND);
+  }
+
+  if (!isOrderCancelable(order.status)) {
+    return fail<CancelOrderResult>(
+      "This order can no longer be cancelled.",
+      ORDER_ERROR_CODES.NOT_CANCELABLE,
+    );
+  }
+
+  try {
+    const { tables } = await createSessionClient();
+    await tables.updateRow({
+      databaseId: DATABASE_ID,
+      tableId: TABLE_ORDERS,
+      rowId: order.$id,
+      data: { status: "cancelled" },
+    });
+  } catch {
+    return fail<CancelOrderResult>(
+      "Could not cancel your order. Please try again.",
+      ORDER_ERROR_CODES.UPDATE_FAILED,
+    );
+  }
+
+  return { ok: true, orderStatus: "cancelled" };
 }
 
 export function checkoutContinuationPath(
