@@ -67,6 +67,10 @@ Fill `.env.local` with Appwrite values (see below). Do not commit secrets; only 
 
 Clients live in [`lib/appwrite/`](./lib/appwrite/): browser (`appwrite`) + server session/admin (`node-appwrite`). Session cookie name: `knurdz_session`. TablesDB database id: `marketplace` — full table contract in [`docs/agent/SCHEMA.md`](./docs/agent/SCHEMA.md). Re-apply with `node --env-file=.env.local scripts/setup-mvp-schema.mjs`. Storage buckets (`avatars`, `product-images`, `bank-slips`): `node --env-file=.env.local scripts/setup-storage-buckets.mjs` (API key needs **storage** write).
 
+Shared contracts for other members:
+- Statuses / row types: [`lib/types/`](./lib/types/)
+- Session / products / uploads: [`lib/services/`](./lib/services/)
+
 ### Auth routes
 
 | Path               | Purpose                                     |
@@ -82,4 +86,4 @@ Clients live in [`lib/appwrite/`](./lib/appwrite/): browser (`appwrite`) + serve
 
 ## Status
 
-Steps **1.1–1.9** (bootstrap through UI shells) are in place. Shared types, services, and seed continue in steps 1.10–1.13.
+Steps **1.1–1.11** (bootstrap through thin services) are in place. Seed and done gate continue in steps 1.12–1.13.

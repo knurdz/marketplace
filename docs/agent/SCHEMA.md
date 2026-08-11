@@ -1,7 +1,7 @@
 # Knurdz Marketplace — Appwrite SCHEMA (frozen)
 
 > Created in Member 1 **step 1.7**. Field names and enum strings are the contract for Members 2–4.  
-> Do not invent parallel status strings. TypeScript enum modules land in step **1.10**.  
+> Do not invent parallel status strings. TypeScript modules: [`lib/types/`](../../lib/types/) (step **1.10**).  
 > Re-apply / verify with: `node --env-file=.env.local scripts/setup-mvp-schema.mjs`
 
 ## Connection
@@ -12,6 +12,7 @@
 | Region endpoint (example) | `https://sgp.cloud.appwrite.io/v1` |
 | TablesDB database id | `marketplace` |
 | Code constants | [`lib/appwrite/config.ts`](../../lib/appwrite/config.ts) |
+| Status / types | [`lib/types/`](../../lib/types/) |
 
 ## Auth roles (labels)
 
@@ -365,3 +366,4 @@ Upload helpers: [`lib/appwrite/storage.ts`](../../lib/appwrite/storage.ts).
 |------|--------|
 | 2026-08-11 | Initial freeze (step 1.7) |
 | 2026-08-11 | Storage buckets + helpers (step 1.8) |
+| 2026-08-11 | TS status/types at `lib/types/` (step 1.10) |

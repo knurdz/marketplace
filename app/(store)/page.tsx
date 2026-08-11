@@ -1,9 +1,10 @@
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { getLoggedInUser } from "@/lib/appwrite/session";
+import { getSessionUser, listActiveProducts } from "@/lib/services";
 
 export default async function Home() {
-  const user = await getLoggedInUser();
+  const user = await getSessionUser();
+  const products = await listActiveProducts({ limit: 8 });
 
   return (
     <main className="relative overflow-hidden">
@@ -33,7 +34,7 @@ export default async function Home() {
 
         <div className="mt-10 flex flex-wrap gap-3">
           <Button size="lg" asChild>
-            <Link href="/#">Browse</Link>
+            <Link href="#active-listings">Browse</Link>
           </Button>
           {user ? (
             <Button variant="outline" size="lg" asChild>
@@ -46,6 +47,45 @@ export default async function Home() {
           )}
         </div>
       </div>
+
+      <section
+        id="active-listings"
+        className="relative mx-auto w-full max-w-5xl border-t border-border px-6 py-16 sm:px-10"
+      >
+        <p className="font-mono text-sm text-accent">$ ./products --active</p>
+        <h2 className="mt-3 text-2xl font-bold tracking-tight">
+          Active listings
+        </h2>
+        <p className="mt-2 text-sm text-muted-foreground">
+          Public catalog via{" "}
+          <code className="font-mono text-xs">listActiveProducts</code> — only{" "}
+          <code className="font-mono text-xs">status=active</code>.
+        </p>
+
+        {products.length === 0 ? (
+          <p className="mt-8 font-mono text-sm text-muted-foreground">
+            No active products yet. Seed lands in step 1.12.
+          </p>
+        ) : (
+          <ul className="mt-8 space-y-3">
+            {products.map((product) => (
+              <li
+                key={product.$id}
+                className="flex flex-wrap items-baseline justify-between gap-2 border-b border-border py-3"
+              >
+                <span className="font-medium tracking-tight">
+                  {product.title}
+                </span>
+                <span className="font-mono text-sm text-muted-foreground">
+                  {product.isFree
+                    ? "free"
+                    : `${product.currency} ${product.price.toFixed(2)}`}
+                </span>
+              </li>
+            ))}
+          </ul>
+        )}
+      </section>
     </main>
   );
 }
