@@ -1,10 +1,11 @@
 import Link from "next/link";
 import type { Models } from "node-appwrite";
-import { Menu } from "lucide-react";
+import { Menu, Search } from "lucide-react";
 import { signOut } from "@/lib/appwrite/auth";
 import { userHasLabel } from "@/lib/appwrite/roles";
 import { NotificationBell } from "@/components/notifications/notification-bell";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
 import {
   Sheet,
@@ -34,7 +35,7 @@ function NavLinks({
         Home
       </Link>
       <Link
-        href="/#"
+        href="/search"
         className="text-sm text-muted-foreground transition hover:text-foreground"
       >
         Browse
@@ -59,12 +60,36 @@ function NavLinks({
   );
 }
 
+function SearchForm({ className }: { className?: string }) {
+  return (
+    <form action="/search" method="get" className={className} role="search">
+      <div className="relative flex min-w-0 flex-1 items-center">
+        <Search
+          className="pointer-events-none absolute left-2.5 size-3.5 text-muted-foreground"
+          aria-hidden
+        />
+        <Input
+          type="search"
+          name="q"
+          placeholder="Search…"
+          maxLength={64}
+          aria-label="Search products"
+          className="h-8 pl-8 text-sm"
+        />
+      </div>
+      <Button type="submit" size="sm" variant="outline" className="shrink-0">
+        Go
+      </Button>
+    </form>
+  );
+}
+
 export function StoreNavbar({ user }: StoreNavbarProps) {
   return (
     <header className="sticky top-0 z-40 border-b border-border bg-background/80 backdrop-blur-md">
       <div className="mx-auto flex h-14 w-full max-w-6xl items-center justify-between gap-4 px-4 sm:px-6">
-        <div className="flex items-center gap-6">
-          <Link href="/" className="font-mono text-sm tracking-tight">
+        <div className="flex min-w-0 flex-1 items-center gap-4 md:gap-6">
+          <Link href="/" className="shrink-0 font-mono text-sm tracking-tight">
             Knurdz
             <span className="text-accent">.</span>
           </Link>
@@ -72,6 +97,7 @@ export function StoreNavbar({ user }: StoreNavbarProps) {
             user={user}
             className="hidden items-center gap-5 md:flex"
           />
+          <SearchForm className="hidden min-w-0 max-w-xs flex-1 items-center gap-2 lg:flex" />
         </div>
 
         <div className="hidden items-center gap-2 md:flex">
@@ -118,6 +144,7 @@ export function StoreNavbar({ user }: StoreNavbarProps) {
                 </SheetTitle>
               </SheetHeader>
               <div className="mt-6 flex flex-col gap-4 px-4">
+                <SearchForm className="flex w-full items-center gap-2" />
                 <NavLinks user={user} className="flex flex-col gap-3" />
                 <Separator />
                 {user ? (

@@ -122,7 +122,7 @@ Server-action rate limits live in [`lib/security/rate-limit.ts`](../../lib/secur
 | `available` | boolean | yes |
 | `currency` | string(8) | yes (e.g. `LKR`) |
 
-**Indexes:** `sellerId_idx`, `categoryId_idx`, `status_idx`, `status_category_idx`, `price_idx`  
+**Indexes:** `sellerId_idx`, `categoryId_idx`, `status_idx`, `status_category_idx`, `price_idx`, `title_fulltext` (fulltext on `title` for `searchActiveProducts`, step 1.16)  
 **Row permissions:** seller owner `read/update/delete`; public reads rely on table `read(any)` + app filter.
 
 ---
@@ -377,3 +377,4 @@ Uploads are rate-limited in `uploadFile` (see Abuse guards above).
 | 2026-08-11 | Phase 0 complete — demo seed + done gate (steps 1.12–1.13) |
 | 2026-08-11 | Auth/upload rate limits (step 1.14) |
 | 2026-08-11 | Notifications service + badge (step 1.15) |
+| 2026-08-11 | Product title fulltext + searchActiveProducts (step 1.16) |

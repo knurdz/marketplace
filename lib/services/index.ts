@@ -2,6 +2,8 @@ export {
   asProduct,
   getProduct,
   listActiveProducts,
+  normalizeProductSearchQuery,
+  searchActiveProducts,
 } from "./products";
 export {
   asNotification,
