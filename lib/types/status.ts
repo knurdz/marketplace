@@ -1,0 +1,104 @@
+/**
+ * Canonical marketplace status / method values.
+ * Must match docs/agent/SCHEMA.md and scripts/setup-mvp-schema.mjs — do not invent parallel strings.
+ */
+
+export const PRODUCT_STATUSES = [
+  "draft",
+  "pending_review",
+  "active",
+  "rejected",
+  "archived",
+] as const;
+export type ProductStatus = (typeof PRODUCT_STATUSES)[number];
+
+export const ORDER_STATUSES = [
+  "pending_payment",
+  "payment_review",
+  "paid",
+  "processing",
+  "shipped",
+  "ready_pickup",
+  "completed",
+  "cancelled",
+  "refunded",
+] as const;
+export type OrderStatus = (typeof ORDER_STATUSES)[number];
+
+export const PAYMENT_METHODS = ["payhere", "bank_transfer", "free"] as const;
+export type PaymentMethod = (typeof PAYMENT_METHODS)[number];
+
+export const PAYMENT_STATUSES = [
+  "pending",
+  "awaiting_verification",
+  "paid",
+  "failed",
+  "refunded",
+] as const;
+export type PaymentStatus = (typeof PAYMENT_STATUSES)[number];
+
+export const SELLER_STATUSES = ["pending", "rejected", "approved"] as const;
+export type SellerStatus = (typeof SELLER_STATUSES)[number];
+
+export const BANK_SLIP_STATUSES = ["pending", "approved", "rejected"] as const;
+export type BankSlipStatus = (typeof BANK_SLIP_STATUSES)[number];
+
+export const REPORT_STATUSES = [
+  "open",
+  "reviewing",
+  "resolved",
+  "dismissed",
+] as const;
+export type ReportStatus = (typeof REPORT_STATUSES)[number];
+
+/** Storefront / public listing status. */
+export const ACTIVE_PRODUCT_STATUS: ProductStatus = "active";
+
+/**
+ * Buyer cancel allowed only in early statuses (Member 2 step 2.11).
+ * Not a full FSM — later members enforce transitions in services.
+ */
+export const ORDER_CANCELABLE_STATUSES = [
+  "pending_payment",
+  "payment_review",
+] as const satisfies readonly OrderStatus[];
+export type OrderCancelableStatus = (typeof ORDER_CANCELABLE_STATUSES)[number];
+
+function isOneOf<T extends string>(
+  value: unknown,
+  allowed: readonly T[],
+): value is T {
+  return typeof value === "string" && (allowed as readonly string[]).includes(value);
+}
+
+export function isProductStatus(value: unknown): value is ProductStatus {
+  return isOneOf(value, PRODUCT_STATUSES);
+}
+
+export function isOrderStatus(value: unknown): value is OrderStatus {
+  return isOneOf(value, ORDER_STATUSES);
+}
+
+export function isPaymentMethod(value: unknown): value is PaymentMethod {
+  return isOneOf(value, PAYMENT_METHODS);
+}
+
+export function isPaymentStatus(value: unknown): value is PaymentStatus {
+  return isOneOf(value, PAYMENT_STATUSES);
+}
+
+export function isSellerStatus(value: unknown): value is SellerStatus {
+  return isOneOf(value, SELLER_STATUSES);
+}
+
+export function isBankSlipStatus(value: unknown): value is BankSlipStatus {
+  return isOneOf(value, BANK_SLIP_STATUSES);
+}
+
+export function isReportStatus(value: unknown): value is ReportStatus {
+  return isOneOf(value, REPORT_STATUSES);
+}
+
+export function isOrderCancelable(status: OrderStatus): boolean {
+  return (ORDER_CANCELABLE_STATUSES as readonly OrderStatus[]).includes(status);
+}

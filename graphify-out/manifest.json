@@ -50,9 +50,9 @@
     "semantic_hash": "b0ac995098494156060190978815963f"
   },
   "lib/appwrite/server.ts": {
-    "mtime": 1786428441.4003553,
-    "ast_hash": "ce4c53138c342d49678780e3da1da980",
-    "semantic_hash": "ce4c53138c342d49678780e3da1da980"
+    "mtime": 1786429189.8971589,
+    "ast_hash": "2a27859ef82ec9645af22511cc97bbae",
+    "semantic_hash": "2a27859ef82ec9645af22511cc97bbae"
   },
   "lib/appwrite/session.ts": {
     "mtime": 1786422086.7609916,
@@ -195,9 +195,9 @@
     "semantic_hash": "0d11eee8bdf28187f5a1909af49a0ddf"
   },
   "app/(store)/page.tsx": {
-    "mtime": 1786428857.3565917,
-    "ast_hash": "9fe194896b565c7a75a3d2da4a3e26c3",
-    "semantic_hash": "9fe194896b565c7a75a3d2da4a3e26c3"
+    "mtime": 1786429221.2942815,
+    "ast_hash": "f0a0e979b6b07766eaa4c3f87daac332",
+    "semantic_hash": "f0a0e979b6b07766eaa4c3f87daac332"
   },
   "components.json": {
     "mtime": 1786428678.5097504,
@@ -243,5 +243,40 @@
     "mtime": 1786428730.8791873,
     "ast_hash": "5a6fd53fdcf2be529e9cc0b718fde352",
     "semantic_hash": "5a6fd53fdcf2be529e9cc0b718fde352"
+  },
+  "lib/types/index.ts": {
+    "mtime": 1786429143.742779,
+    "ast_hash": "83364911aa0cdc144ad76579bd91f7ae",
+    "semantic_hash": "83364911aa0cdc144ad76579bd91f7ae"
+  },
+  "lib/types/models.ts": {
+    "mtime": 1786429155.7272556,
+    "ast_hash": "deed734f426071ac3ade509704096d2f",
+    "semantic_hash": "deed734f426071ac3ade509704096d2f"
+  },
+  "lib/types/status.ts": {
+    "mtime": 1786429141.068851,
+    "ast_hash": "6247950c7b70165c09153d62f99539b1",
+    "semantic_hash": "6247950c7b70165c09153d62f99539b1"
+  },
+  "lib/services/index.ts": {
+    "mtime": 1786429204.3969152,
+    "ast_hash": "314a2b9682c273264b3d37e46d779f5b",
+    "semantic_hash": "314a2b9682c273264b3d37e46d779f5b"
+  },
+  "lib/services/products.ts": {
+    "mtime": 1786429202.4436948,
+    "ast_hash": "322a70794de5d47073969fd019f99f0e",
+    "semantic_hash": "322a70794de5d47073969fd019f99f0e"
+  },
+  "lib/services/session.ts": {
+    "mtime": 1786429201.5467052,
+    "ast_hash": "20aeed38fd13492322c86e7e87964327",
+    "semantic_hash": "20aeed38fd13492322c86e7e87964327"
+  },
+  "lib/services/uploads.ts": {
+    "mtime": 1786429203.8487182,
+    "ast_hash": "5aab0a51e247bf094afdfb51a1bff2f9",
+    "semantic_hash": "5aab0a51e247bf094afdfb51a1bff2f9"
   }
 }

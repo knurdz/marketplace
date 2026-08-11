@@ -22,6 +22,9 @@ export async function createPublicClient() {
     get account() {
       return new Account(client);
     },
+    get tables() {
+      return new TablesDB(client);
+    },
   };
 }
 

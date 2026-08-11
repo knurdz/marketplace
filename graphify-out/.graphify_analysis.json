@@ -14,8 +14,6 @@
       "app_seller_layout_sellerlayout",
       "app_store_layout",
       "app_store_layout_storelayout",
-      "app_store_page",
-      "app_store_page_home",
       "components_layout_portal_shell",
       "components_layout_portal_shell_portalnavitem",
       "components_layout_portal_shell_portalshell",
@@ -88,6 +86,44 @@
       "scripts_setup_mvp_schema_waitcolumnsavailable"
     ],
     "2": [
+      "lib_types_index",
+      "lib_types_models",
+      "lib_types_models_bankslip",
+      "lib_types_models_category",
+      "lib_types_models_order",
+      "lib_types_models_orderitem",
+      "lib_types_models_payment",
+      "lib_types_models_product",
+      "lib_types_models_productimage",
+      "lib_types_models_report",
+      "lib_types_models_sellerprofile",
+      "lib_types_status",
+      "lib_types_status_bank_slip_statuses",
+      "lib_types_status_bankslipstatus",
+      "lib_types_status_isbankslipstatus",
+      "lib_types_status_isoneof",
+      "lib_types_status_isordercancelable",
+      "lib_types_status_isorderstatus",
+      "lib_types_status_ispaymentmethod",
+      "lib_types_status_ispaymentstatus",
+      "lib_types_status_isproductstatus",
+      "lib_types_status_isreportstatus",
+      "lib_types_status_issellerstatus",
+      "lib_types_status_order_statuses",
+      "lib_types_status_ordercancelablestatus",
+      "lib_types_status_orderstatus",
+      "lib_types_status_payment_methods",
+      "lib_types_status_payment_statuses",
+      "lib_types_status_paymentmethod",
+      "lib_types_status_paymentstatus",
+      "lib_types_status_product_statuses",
+      "lib_types_status_productstatus",
+      "lib_types_status_report_statuses",
+      "lib_types_status_reportstatus",
+      "lib_types_status_seller_statuses",
+      "lib_types_status_sellerstatus"
+    ],
+    "3": [
       "lib_appwrite_browser",
       "lib_appwrite_browser_getbrowseraccount",
       "lib_appwrite_browser_getbrowserclient",
@@ -123,7 +159,7 @@
       "lib_appwrite_storage_uploadvalidationresult",
       "lib_appwrite_storage_validateupload"
     ],
-    "3": [
+    "4": [
       "eslint",
       "eslint_config_next",
       "eslint_config_prettier",
@@ -157,7 +193,7 @@
       "types_react_dom",
       "typescript"
     ],
-    "4": [
+    "5": [
       "ref",
       "ref_dom",
       "ref_dom_iterable",
@@ -190,7 +226,36 @@
       "tsconfig_include",
       "tsconfig_paths"
     ],
-    "5": [
+    "6": [
+      "app_store_page",
+      "app_store_page_home",
+      "components_auth_resend_verification_form",
+      "components_auth_resend_verification_form_initialstate",
+      "components_auth_resend_verification_form_resendverificationform",
+      "lib_appwrite_config_getappurl",
+      "lib_appwrite_recovery",
+      "lib_appwrite_recovery_completeemailverification",
+      "lib_appwrite_recovery_completepasswordrecovery",
+      "lib_appwrite_recovery_maprecoveryerror",
+      "lib_appwrite_recovery_readstring",
+      "lib_appwrite_recovery_recoveryactionstate",
+      "lib_appwrite_recovery_requestemailverification",
+      "lib_appwrite_recovery_requestpasswordrecovery",
+      "lib_appwrite_server_createpublicclient",
+      "lib_services_index",
+      "lib_services_products",
+      "lib_services_products_asboolean",
+      "lib_services_products_asnullablestring",
+      "lib_services_products_asnumber",
+      "lib_services_products_asproduct",
+      "lib_services_products_getproduct",
+      "lib_services_products_ispubliclylisted",
+      "lib_services_products_listactiveproducts",
+      "lib_services_session",
+      "lib_services_session_getsessionuser",
+      "lib_services_uploads"
+    ],
+    "7": [
       "appwrite",
       "class_variance_authority",
       "clsx",
@@ -217,7 +282,7 @@
       "tailwind_merge",
       "tw_animate_css"
     ],
-    "6": [
+    "8": [
       "app_auth_account_page",
       "app_auth_account_page_accountpage",
       "components_auth_profile_form",
@@ -241,7 +306,7 @@
       "lib_appwrite_storage_urls_getfilepreviewurl",
       "lib_appwrite_storage_urls_getfileviewurl"
     ],
-    "7": [
+    "9": [
       "components",
       "components_aliases",
       "components_aliases_components",
@@ -265,7 +330,7 @@
       "components_tailwind_prefix",
       "components_tsx"
     ],
-    "8": [
+    "10": [
       "lib_appwrite_auth",
       "lib_appwrite_auth_authactionstate",
       "lib_appwrite_auth_mapautherror",
@@ -283,22 +348,7 @@
       "lib_appwrite_roles_rolelabel",
       "lib_appwrite_roles_userhaslabel"
     ],
-    "9": [
-      "components_auth_resend_verification_form",
-      "components_auth_resend_verification_form_initialstate",
-      "components_auth_resend_verification_form_resendverificationform",
-      "lib_appwrite_config_getappurl",
-      "lib_appwrite_recovery",
-      "lib_appwrite_recovery_completeemailverification",
-      "lib_appwrite_recovery_completepasswordrecovery",
-      "lib_appwrite_recovery_maprecoveryerror",
-      "lib_appwrite_recovery_readstring",
-      "lib_appwrite_recovery_recoveryactionstate",
-      "lib_appwrite_recovery_requestemailverification",
-      "lib_appwrite_recovery_requestpasswordrecovery",
-      "lib_appwrite_server_createpublicclient"
-    ],
-    "10": [
+    "11": [
       "scripts_setup_storage_buckets",
       "scripts_setup_storage_buckets_apikey",
       "scripts_setup_storage_buckets_bucketcreateperms",
@@ -310,7 +360,7 @@
       "scripts_setup_storage_buckets_projectid",
       "scripts_setup_storage_buckets_storage"
     ],
-    "11": [
+    "12": [
       "app_auth_login_page",
       "app_auth_login_page_loginpage",
       "app_auth_login_page_safenextpath",
@@ -318,7 +368,7 @@
       "components_auth_login_form_initialstate",
       "components_auth_login_form_loginform"
     ],
-    "12": [
+    "13": [
       "app_auth_reset_password_page",
       "app_auth_reset_password_page_resetpasswordpage",
       "app_auth_reset_password_page_searchparams",
@@ -326,85 +376,86 @@
       "components_auth_reset_password_form_initialstate",
       "components_auth_reset_password_form_resetpasswordform"
     ],
-    "13": [
+    "14": [
       "app_auth_forgot_password_page",
       "app_auth_forgot_password_page_forgotpasswordpage",
       "components_auth_forgot_password_form",
       "components_auth_forgot_password_form_forgotpasswordform",
       "components_auth_forgot_password_form_initialstate"
     ],
-    "14": [
+    "15": [
       "app_auth_register_page",
       "app_auth_register_page_registerpage",
       "components_auth_register_form",
       "components_auth_register_form_initialstate",
       "components_auth_register_form_registerform"
     ],
-    "15": [
+    "16": [
       "app_auth_verify_email_page",
       "app_auth_verify_email_page_searchparams",
       "app_auth_verify_email_page_verifyemailpage"
     ],
-    "16": [
+    "17": [
       "cursor_mcp",
       "cursor_mcp_mcp_server_shadcn",
       "mcp_command_npx"
     ],
-    "17": [
+    "18": [
       "proxy",
       "proxy_config",
       "proxy_proxy"
     ],
-    "18": [
+    "19": [
       "app_admin_page",
       "app_admin_page_adminpage"
     ],
-    "19": [
+    "20": [
       "app_auth_layout",
       "app_auth_layout_authlayout"
     ],
-    "20": [
+    "21": [
       "app_seller_page",
       "app_seller_page_sellerpage"
     ],
-    "21": [
+    "22": [
       "eslint_config",
       "eslint_config_eslintconfig"
     ],
-    "22": [
+    "23": [
       "next_config",
       "next_config_nextconfig"
     ],
-    "23": [
+    "24": [
       "postcss_config",
       "postcss_config_config"
     ]
   },
   "cohesion": {
-    "0": 0.08695652173913043,
+    "0": 0.0919661733615222,
     "1": 0.18768768768768768,
-    "2": 0.1265597147950089,
-    "3": 0.0625,
-    "4": 0.06451612903225806,
-    "5": 0.08,
-    "6": 0.22510822510822512,
-    "7": 0.09090909090909091,
-    "8": 0.21666666666666667,
-    "9": 0.3333333333333333,
-    "10": 0.24444444444444444,
-    "11": 0.4666666666666667,
-    "12": 0.4,
-    "13": 0.5,
+    "2": 0.13015873015873017,
+    "3": 0.1140819964349376,
+    "4": 0.0625,
+    "5": 0.06451612903225806,
+    "6": 0.1623931623931624,
+    "7": 0.08,
+    "8": 0.22510822510822512,
+    "9": 0.09090909090909091,
+    "10": 0.21666666666666667,
+    "11": 0.24444444444444444,
+    "12": 0.4666666666666667,
+    "13": 0.4,
     "14": 0.5,
-    "15": 0.6666666666666666,
+    "15": 0.5,
     "16": 0.6666666666666666,
     "17": 0.6666666666666666,
-    "18": 1.0,
+    "18": 0.6666666666666666,
     "19": 1.0,
     "20": 1.0,
     "21": 1.0,
     "22": 1.0,
-    "23": 1.0
+    "23": 1.0,
+    "24": 1.0
   },
   "gods": [
     {
@@ -448,13 +499,13 @@
       "degree": 10
     },
     {
-      "id": "lib_appwrite_server_createsessionclient",
-      "label": "createSessionClient()",
-      "degree": 10
-    },
-    {
       "id": "scripts_setup_mvp_schema_setupcartitems",
       "label": "setupCartItems()",
+      "degree": 8
+    },
+    {
+      "id": "scripts_setup_mvp_schema_setuporders",
+      "label": "setupOrders()",
       "degree": 8
     }
   ],
