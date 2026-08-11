@@ -65,7 +65,7 @@ export default async function Home({ searchParams }: HomeProps) {
           </Button>
           {user ? (
             <Button variant="outline" size="lg" asChild>
-              <Link href="/account">Account</Link>
+              <Link href="/dashboard">Dashboard</Link>
             </Button>
           ) : (
             <Button variant="outline" size="lg" asChild>

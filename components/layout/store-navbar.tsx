@@ -51,6 +51,14 @@ function NavLinks({
       ) : null}
       {user ? (
         <Link
+          href="/dashboard"
+          className="text-sm text-muted-foreground transition hover:text-foreground"
+        >
+          Dashboard
+        </Link>
+      ) : null}
+      {user ? (
+        <Link
           href="/orders"
           className="text-sm text-muted-foreground transition hover:text-foreground"
         >
@@ -141,6 +149,9 @@ export function StoreNavbar({ user, cartItemCount = 0 }: StoreNavbarProps) {
               </Button>
               <NotificationBell className="size-10" />
               <Button variant="outline" size="sm" asChild>
+                <Link href="/dashboard">Dashboard</Link>
+              </Button>
+              <Button variant="outline" size="sm" asChild>
                 <Link href="/orders">Orders</Link>
               </Button>
               <Button variant="outline" size="sm" asChild>
@@ -189,6 +200,11 @@ export function StoreNavbar({ user, cartItemCount = 0 }: StoreNavbarProps) {
               <div className="mt-6 flex flex-col gap-4 px-4">
                 <SearchForm className="flex w-full items-center gap-2" />
                 <NavLinks user={user} className="flex flex-col gap-3" />
+                {user ? (
+                  <Button variant="outline" asChild>
+                    <Link href="/dashboard">Dashboard</Link>
+                  </Button>
+                ) : null}
                 {user ? (
                   <Button variant="outline" asChild>
                     <Link href="/orders">Orders</Link>

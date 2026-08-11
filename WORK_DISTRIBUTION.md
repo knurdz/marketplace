@@ -151,7 +151,7 @@ Complete payment infrastructure so Members 2–4 only consume APIs / admin UI.
 
 ### Tasks
 
-- [ ] Buyer dashboard: order summary (pending/completed), recent purchases, wishlist preview
+- [x] Buyer dashboard: order summary (pending/completed), recent purchases, wishlist preview
 - [x] Browse: categories, filters, sorting
 - [x] Product detail: images, description, seller info, ratings & reviews display
 - [x] Cart add/update/remove
@@ -183,7 +183,7 @@ Complete payment infrastructure so Members 2–4 only consume APIs / admin UI.
 | [x] **2.9**  | PayHere UX       | Call **Member 1** hash Function; sandbox form; poll DB   | No merchant secret in client  |
 | [x] **2.10** | Orders UI        | List + detail timeline                                   | IDOR: no other users’ orders  |
 | [x] **2.11** | Cancel           | Early statuses only                                      | Enum rules enforced           |
-| [ ] **2.12** | Buyer dashboard  | Summaries + recent + wishlist preview                    | Empty states OK               |
+| [x] **2.12** | Buyer dashboard  | Summaries + recent + wishlist preview                    | Empty states OK               |
 | [x] **2.13** | Wishlist         | Full page CRUD                                           | Own wishlist only             |
 | [ ] **2.14** | Reviews          | After `completed`; product + seller rating               | Policy enforced               |
 | [ ] **2.15** | Report listing   | Create `reports`                                         | Feeds admin queue             |
@@ -364,4 +364,4 @@ Pick up only after Phases 1–4 are solid. Assign when claimed.
 | 2026-08-10 | Added numbered step plans (1.1–4.18) matching `docs/agent/MEMBER_IMPLEMENTATION_GUIDE.md`                                                                                                             |
 | 2026-08-11 | Member 2 steps **2.5–2.6**: checkout shell + atomic `createOrder` (`orders` / `order_items` / `payments`); continuation stubs for 2.7–2.9 |
 | 2026-08-11 | Member 2 steps **2.7–2.8**: free confirm stub (`confirmFreeOrder`) + bank slip upload → `awaiting_verification`; graphify update pending CLI |
-| 2026-08-11 | Member 2 step **2.9**: PayHere checkout POST via `requestPayHereCheckout`; return/cancel pages poll DB only (2s / 60s); graceful error when hash Function not deployed |
+| 2026-08-11 | Member 2 step **2.12**: buyer dashboard at `/dashboard` — order summary counts, recent orders (5), wishlist preview (4); nav + home CTA |
