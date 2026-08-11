@@ -1,4 +1,8 @@
-export default function Home() {
+import { getLoggedInUser } from "@/lib/appwrite/session";
+
+export default async function Home() {
+  const user = await getLoggedInUser();
+
   return (
     <main className="relative min-h-screen overflow-hidden bg-background text-foreground">
       <div
@@ -19,6 +23,10 @@ export default function Home() {
         <p className="mt-4 max-w-xl text-lg text-muted sm:text-xl">
           A marketplace for creators — browse listings, sell what you build, and
           check out with PayHere, bank transfer, or free.
+        </p>
+
+        <p className="mt-4 font-mono text-sm text-muted">
+          {user ? `Signed in as ${user.email}` : "Signed out"}
         </p>
 
         <div className="mt-10 flex flex-wrap gap-4">
