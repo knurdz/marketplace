@@ -9,12 +9,14 @@ import { isPaymentMethod } from "@/lib/types";
 import { confirmFreeOrder } from "./free-order";
 import {
   ORDER_ERROR_CODES,
+  type CancelOrderActionState,
   type ConfirmFreeOrderActionState,
   type CreateOrderActionState,
   type PollPayHerePaymentStatusActionState,
   type SubmitBankSlipActionState,
 } from "./order-errors";
 import {
+  cancelOrder as cancelOrderImpl,
   checkoutContinuationPath,
   createOrder as createOrderImpl,
   getOwnOrder,
@@ -30,6 +32,13 @@ function revalidateCheckoutPaths() {
   revalidatePath("/checkout/payhere");
   revalidatePath("/checkout/payhere/return");
   revalidatePath("/checkout/payhere/cancel");
+}
+
+function revalidateOrderPaths(orderId?: string) {
+  revalidatePath("/orders");
+  if (orderId) {
+    revalidatePath(`/orders/${orderId}`);
+  }
 }
 
 export async function createOrder(
@@ -220,9 +229,37 @@ export async function pollPayHerePaymentStatusAction(
   };
 }
 
+export async function cancelOrderAction(
+  _prev: CancelOrderActionState,
+  formData: FormData,
+): Promise<CancelOrderActionState> {
+  const orderId = String(formData.get("orderId") ?? "").trim();
+  if (!orderId) {
+    return { ok: false, error: "Invalid order id." };
+  }
+
+  const result = await cancelOrderImpl(orderId);
+
+  if (result.ok) {
+    revalidateOrderPaths(orderId);
+    revalidateCheckoutPaths();
+    return {
+      ok: true,
+      orderStatus: result.orderStatus,
+    };
+  }
+
+  return {
+    ok: false,
+    error: result.error,
+    code: result.code,
+  };
+}
+
 export { checkoutContinuationPath };
 
 export type {
+  CancelOrderActionState,
   ConfirmFreeOrderActionState,
   CreateOrderActionState,
   PollPayHerePaymentStatusActionState,
