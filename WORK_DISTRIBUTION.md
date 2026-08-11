@@ -152,7 +152,7 @@ Complete payment infrastructure so Members 2–4 only consume APIs / admin UI.
 ### Tasks
 
 - [ ] Buyer dashboard: order summary (pending/completed), recent purchases, wishlist preview
-- [ ] Browse: categories, filters, sorting
+- [x] Browse: categories, filters, sorting
 - [ ] Product detail: images, description, seller info, ratings & reviews display
 - [ ] Cart add/update/remove
 - [ ] Checkout (address + method: PayHere / bank / free) — **UX only**; calls Member 1 payment APIs
@@ -173,7 +173,7 @@ Complete payment infrastructure so Members 2–4 only consume APIs / admin UI.
 | Step         | Goal             | Do                                                       | Verify                        |
 | ------------ | ---------------- | -------------------------------------------------------- | ----------------------------- |
 | [x] **2.1**  | Browse list      | Category list + product grid (`status=active` only)      | Non-active never shown        |
-| [ ] **2.2**  | Filters & sort   | Price, category, sort by newest/price                    | Matches SCHEMA indexes        |
+| [x] **2.2**  | Filters & sort   | Price, category, sort by newest/price                    | Matches SCHEMA indexes        |
 | [ ] **2.3**  | Product detail   | Images, description, seller info, reviews slot           | 404 for inactive              |
 | [ ] **2.4**  | Cart             | Add/update/remove; single-seller or warn on multi-seller | Persist for logged-in user    |
 | [ ] **2.5**  | Checkout shell   | Address + method radio (payhere/bank/free)               | Validation clear              |
@@ -194,7 +194,7 @@ Complete payment infrastructure so Members 2–4 only consume APIs / admin UI.
 - [ ] Guest vs logged-in behavior is intentional and safe
 - [ ] Cannot pay or view another user’s orders
 - [ ] Free path never hits PayHere with a forged amount
-- [ ] Filters/sort do not leak non-`active` listings
+- [x] Filters/sort do not leak non-`active` listings
 
 ---
 
