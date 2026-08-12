@@ -140,9 +140,9 @@
     "semantic_hash": "668fb973ea0a5e8e2914d3730527f252"
   },
   "app/admin/layout.tsx": {
-    "mtime": 1786507953.7417457,
-    "ast_hash": "fe2b1f128abef9a13c1ac63296ffed94",
-    "semantic_hash": "fe2b1f128abef9a13c1ac63296ffed94"
+    "mtime": 1786508649.0103495,
+    "ast_hash": "c930a8c4c611c5ae5d8dd9ec3921ae62",
+    "semantic_hash": "c930a8c4c611c5ae5d8dd9ec3921ae62"
   },
   "app/admin/page.tsx": {
     "mtime": 1786461358.9930313,
@@ -260,9 +260,9 @@
     "semantic_hash": "a55801fbe7e6173323c50074537d78d2"
   },
   "lib/services/index.ts": {
-    "mtime": 1786507916.6672442,
-    "ast_hash": "3bbcae4dce2c8e16bc383568f683e956",
-    "semantic_hash": "3bbcae4dce2c8e16bc383568f683e956"
+    "mtime": 1786508653.15388,
+    "ast_hash": "1599c37e3662e895a2b9e9e2ee63113f",
+    "semantic_hash": "1599c37e3662e895a2b9e9e2ee63113f"
   },
   "lib/services/products.ts": {
     "mtime": 1786461359.21775,
@@ -465,7 +465,7 @@
     "semantic_hash": "341e097fc396f2876db4603aaeba229d"
   },
   "lib/services/categories.ts": {
-    "mtime": 1786507916.666059,
+    "mtime": 1786508208.9013047,
     "ast_hash": "295e56a86af8b3f37b5790eca40bac92",
     "semantic_hash": "295e56a86af8b3f37b5790eca40bac92"
   },
@@ -815,28 +815,53 @@
     "semantic_hash": "bd4776fe0d398f5d77436ef85cda8577"
   },
   "app/admin/orders/page.tsx": {
-    "mtime": 1786506907.4925377,
+    "mtime": 1786508208.862142,
     "ast_hash": "4282d9f31352a17099e3752dc36cf5ed",
     "semantic_hash": "4282d9f31352a17099e3752dc36cf5ed"
   },
   "lib/services/admin-orders.ts": {
-    "mtime": 1786506897.865509,
+    "mtime": 1786508208.9002938,
     "ast_hash": "2c983e318346e1ef9f1685d6ce56765b",
     "semantic_hash": "2c983e318346e1ef9f1685d6ce56765b"
   },
   "app/admin/categories/page.tsx": {
-    "mtime": 1786507916.6127737,
+    "mtime": 1786508208.857699,
     "ast_hash": "931d48c6106d29e0564689c0148a0333",
     "semantic_hash": "931d48c6106d29e0564689c0148a0333"
   },
   "components/admin/categories-manager.tsx": {
-    "mtime": 1786507916.615986,
+    "mtime": 1786508208.8631413,
     "ast_hash": "5db7d500a2af088a89ca01ae3e454674",
     "semantic_hash": "5db7d500a2af088a89ca01ae3e454674"
   },
   "lib/appwrite/categories-actions.ts": {
-    "mtime": 1786507916.6627848,
+    "mtime": 1786508208.8987837,
     "ast_hash": "d39ff589aecd6a3396ccafcf1be25ce6",
     "semantic_hash": "d39ff589aecd6a3396ccafcf1be25ce6"
+  },
+  "app/admin/payments/bank-slips/page.tsx": {
+    "mtime": 1786508648.6666973,
+    "ast_hash": "7ddb7f3cb7ab8ebb8cf61534db62d0c2",
+    "semantic_hash": "7ddb7f3cb7ab8ebb8cf61534db62d0c2"
+  },
+  "app/api/admin/bank-slips/[fileId]/route.ts": {
+    "mtime": 1786508636.4465652,
+    "ast_hash": "53deb7882afa52a785c1f276e2604e28",
+    "semantic_hash": "53deb7882afa52a785c1f276e2604e28"
+  },
+  "components/admin/bank-slip-review-actions.tsx": {
+    "mtime": 1786508644.8477466,
+    "ast_hash": "c681bf29ce8acc02d72351754a30f0d0",
+    "semantic_hash": "c681bf29ce8acc02d72351754a30f0d0"
+  },
+  "lib/appwrite/bank-slip-actions.ts": {
+    "mtime": 1786508634.8330443,
+    "ast_hash": "de71f41f152302ff97b1905264002faa",
+    "semantic_hash": "de71f41f152302ff97b1905264002faa"
+  },
+  "lib/services/bank-slip-review.ts": {
+    "mtime": 1786508629.2921746,
+    "ast_hash": "6b937036f9e682b55b463576e6dd8bd0",
+    "semantic_hash": "6b937036f9e682b55b463576e6dd8bd0"
   }
 }
