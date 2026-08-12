@@ -260,10 +260,10 @@ Complete payment infrastructure so Members 2–4 only consume APIs / admin UI.
 
 - [x] Admin dashboard: total users, sellers, orders, revenue insights
 - [x] Seller approval queue (approve/reject + reason)
-- [ ] User management: view, ban/suspend, role tools
+- [x] User management: view, ban/suspend, role tools
 - [ ] Monitor seller performance (basic metrics)
 - [x] Listing moderation (approve/reject/remove inappropriate)
-- [ ] Categories CRUD
+- [x] Categories CRUD
 - [x] All-orders oversight + payment filters
 - [ ] Dispute handling (orders flagged by buyers/sellers)
 - [ ] Bank slip verification UI (approve/reject proofs)
@@ -284,9 +284,9 @@ Complete payment infrastructure so Members 2–4 only consume APIs / admin UI.
 | ------------ | ----------------------- | ----------------------------------------- | --------------------------- |
 | [x] **4.1**  | Admin metrics           | Users, sellers, orders, revenue           | Admin-only                  |
 | [x] **4.2**  | Seller approval         | Approve → `seller` label; reject + reason | Audit logged                |
-| [ ] **4.3**  | User management         | View, suspend; block checkout/publish     | Server-side enforcement     |
+| [x] **4.3**  | User management         | View, suspend; block checkout/publish     | Server-side enforcement     |
 | [x] **4.4**  | Listing moderation      | Approve/reject/remove                     | Status enums only           |
-| [ ] **4.5**  | Categories CRUD         | Create/update/order                       | Storefront reads them       |
+| [x] **4.5**  | Categories CRUD         | Create/update/order                       | Storefront reads them       |
 | [x] **4.6**  | All orders + filters    | By payment method/status                  | Admin access only           |
 | [ ] **4.7**  | Bank slip queue         | Approve → `paid` + stock; reject          | Idempotent; audit           |
 | [ ] **4.8**  | Reports / disputes      | Triage workflow                           | Status transitions          |
@@ -300,7 +300,7 @@ Complete payment infrastructure so Members 2–4 only consume APIs / admin UI.
 ### Member 4 — verification extras
 
 - [x] Admin actions audited
-- [ ] Suspended users cannot checkout or publish
+- [x] Suspended users cannot checkout or publish
 - [ ] Bank slip approve/reject is idempotent and audited
 - [x] Does **not** implement PayHere Functions (Member 1)
 
@@ -369,4 +369,6 @@ Pick up only after Phases 1–4 are solid. Assign when claimed.
 | 2026-08-11 | Member 2 steps **2.14–2.15**: product reviews (completed-order eligibility + `order_buyer_unique`) + report listing create (`status=open`); no admin moderation UI |
 | 2026-08-11 | Member 4 step **4.2**: seller approval queue (`/admin/sellers`); approve merges Auth `seller` label + `seller_profiles.status=approved` with audit; reject + reason; unblocks Member 3 real `/seller` access once applicants are approved |
 | 2026-08-11 | Member 4 step **4.4**: listing moderation (`/admin/listings`); approve `pending_review`→`active`, reject→`rejected` (reason in audit meta), remove `active`→`archived`; admin SDK + status enums only; no product hard-delete |
+| 2026-08-12 | Member 4 step **4.3**: confirmed complete — `/admin/users` view/search/suspend/unsuspend + audit; `updateStatus(false)` + `deleteSessions`; `getLoggedInUser` returns null when `status === false` (blocks checkout/publish); tick + graphify update |
+| 2026-08-12 | Member 4 step **4.5**: categories CRUD (`/admin/categories`); `listCategories`/`listCategoryTree`/`generateSlug`; admin session writes + audit; delete guards for products/children; up/down reorder |
 | 2026-08-12 | Member 4 step **4.6**: read-only all-orders oversight (`/admin/orders`); server-side filters (order status, payment method, payment status) + cursor pagination; `createAdminClient` API key bypasses row permissions; `requireLabel("admin")` in layout + service; no mutations |

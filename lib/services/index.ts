@@ -10,9 +10,12 @@ export {
 export type { AdminOrderView, ListAllOrdersResult } from "./admin-orders";
 export {
   asCategory,
+  generateSlug,
   getCategoryBySlug,
   listCategories,
+  listCategoryTree,
 } from "./categories";
+export type { CategoryTreeNode } from "./categories";
 export {
   asProduct,
   asProductImage,
