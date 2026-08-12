@@ -2,9 +2,12 @@ export { getAdminMetrics } from "./admin-metrics";
 export type { AdminMetrics } from "./admin-metrics";
 export {
   asCategory,
+  generateSlug,
   getCategoryBySlug,
   listCategories,
+  listCategoryTree,
 } from "./categories";
+export type { CategoryTreeNode } from "./categories";
 export {
   asProduct,
   asProductImage,
