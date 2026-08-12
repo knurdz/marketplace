@@ -264,7 +264,7 @@ Complete payment infrastructure so Members 2–4 only consume APIs / admin UI.
 - [ ] Monitor seller performance (basic metrics)
 - [x] Listing moderation (approve/reject/remove inappropriate)
 - [x] Categories CRUD
-- [ ] All-orders oversight + payment filters
+- [x] All-orders oversight + payment filters
 - [ ] Dispute handling (orders flagged by buyers/sellers)
 - [ ] Bank slip verification UI (approve/reject proofs)
 - [ ] User/listing reports triage
@@ -287,7 +287,7 @@ Complete payment infrastructure so Members 2–4 only consume APIs / admin UI.
 | [x] **4.3**  | User management         | View, suspend; block checkout/publish     | Server-side enforcement     |
 | [x] **4.4**  | Listing moderation      | Approve/reject/remove                     | Status enums only           |
 | [x] **4.5**  | Categories CRUD         | Create/update/order                       | Storefront reads them       |
-| [ ] **4.6**  | All orders + filters    | By payment method/status                  | Admin access only           |
+| [x] **4.6**  | All orders + filters    | By payment method/status                  | Admin access only           |
 | [ ] **4.7**  | Bank slip queue         | Approve → `paid` + stock; reject          | Idempotent; audit           |
 | [ ] **4.8**  | Reports / disputes      | Triage workflow                           | Status transitions          |
 | [ ] **4.9**  | Platform settings UI    | Sandbox, bank copy, fees (admin write)    | Safe public fields only     |
@@ -371,3 +371,4 @@ Pick up only after Phases 1–4 are solid. Assign when claimed.
 | 2026-08-11 | Member 4 step **4.4**: listing moderation (`/admin/listings`); approve `pending_review`→`active`, reject→`rejected` (reason in audit meta), remove `active`→`archived`; admin SDK + status enums only; no product hard-delete |
 | 2026-08-12 | Member 4 step **4.3**: confirmed complete — `/admin/users` view/search/suspend/unsuspend + audit; `updateStatus(false)` + `deleteSessions`; `getLoggedInUser` returns null when `status === false` (blocks checkout/publish); tick + graphify update |
 | 2026-08-12 | Member 4 step **4.5**: categories CRUD (`/admin/categories`); `listCategories`/`listCategoryTree`/`generateSlug`; admin session writes + audit; delete guards for products/children; up/down reorder |
+| 2026-08-12 | Member 4 step **4.6**: read-only all-orders oversight (`/admin/orders`); server-side filters (order status, payment method, payment status) + cursor pagination; `createAdminClient` API key bypasses row permissions; `requireLabel("admin")` in layout + service; no mutations |
