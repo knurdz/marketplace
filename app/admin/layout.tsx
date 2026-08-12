@@ -10,6 +10,7 @@ const ADMIN_NAV = [
   { href: "/admin/categories", label: "Categories" },
   { href: "/admin/orders", label: "Orders" },
   { href: "/admin/payments/bank-slips", label: "Bank slips" },
+  { href: "/admin/settings", label: "Settings" },
   { href: "/admin#reports", label: "Reports" },
 ];
 

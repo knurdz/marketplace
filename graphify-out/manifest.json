@@ -140,9 +140,9 @@
     "semantic_hash": "668fb973ea0a5e8e2914d3730527f252"
   },
   "app/admin/layout.tsx": {
-    "mtime": 1786508649.0103495,
-    "ast_hash": "c930a8c4c611c5ae5d8dd9ec3921ae62",
-    "semantic_hash": "c930a8c4c611c5ae5d8dd9ec3921ae62"
+    "mtime": 1786536715.140926,
+    "ast_hash": "18904fd7b2368bb9241df607bcb77568",
+    "semantic_hash": "18904fd7b2368bb9241df607bcb77568"
   },
   "app/admin/page.tsx": {
     "mtime": 1786461358.9930313,
@@ -260,9 +260,9 @@
     "semantic_hash": "a55801fbe7e6173323c50074537d78d2"
   },
   "lib/services/index.ts": {
-    "mtime": 1786508653.15388,
-    "ast_hash": "1599c37e3662e895a2b9e9e2ee63113f",
-    "semantic_hash": "1599c37e3662e895a2b9e9e2ee63113f"
+    "mtime": 1786536716.4553833,
+    "ast_hash": "a6185bf235e0ca62734106c37c068437",
+    "semantic_hash": "a6185bf235e0ca62734106c37c068437"
   },
   "lib/services/products.ts": {
     "mtime": 1786461359.21775,
@@ -425,9 +425,9 @@
     "semantic_hash": "f0630f19a9484899e9ed9394503b4336"
   },
   "lib/platform-settings/keys.ts": {
-    "mtime": 1786438725.4377916,
-    "ast_hash": "cbc595ed1f4770f132a0ae951578ac0b",
-    "semantic_hash": "cbc595ed1f4770f132a0ae951578ac0b"
+    "mtime": 1786536684.1816902,
+    "ast_hash": "fddaae8526cccb5ea47b2169cd78a6e3",
+    "semantic_hash": "fddaae8526cccb5ea47b2169cd78a6e3"
   },
   "lib/services/platform-settings.ts": {
     "mtime": 1786438725.4425845,
@@ -840,28 +840,53 @@
     "semantic_hash": "d39ff589aecd6a3396ccafcf1be25ce6"
   },
   "app/admin/payments/bank-slips/page.tsx": {
-    "mtime": 1786508648.6666973,
+    "mtime": 1786509403.2914765,
     "ast_hash": "7ddb7f3cb7ab8ebb8cf61534db62d0c2",
     "semantic_hash": "7ddb7f3cb7ab8ebb8cf61534db62d0c2"
   },
   "app/api/admin/bank-slips/[fileId]/route.ts": {
-    "mtime": 1786508636.4465652,
+    "mtime": 1786509403.2934825,
     "ast_hash": "53deb7882afa52a785c1f276e2604e28",
     "semantic_hash": "53deb7882afa52a785c1f276e2604e28"
   },
   "components/admin/bank-slip-review-actions.tsx": {
-    "mtime": 1786508644.8477466,
+    "mtime": 1786509403.2954893,
     "ast_hash": "c681bf29ce8acc02d72351754a30f0d0",
     "semantic_hash": "c681bf29ce8acc02d72351754a30f0d0"
   },
   "lib/appwrite/bank-slip-actions.ts": {
-    "mtime": 1786508634.8330443,
+    "mtime": 1786509403.322363,
     "ast_hash": "de71f41f152302ff97b1905264002faa",
     "semantic_hash": "de71f41f152302ff97b1905264002faa"
   },
   "lib/services/bank-slip-review.ts": {
-    "mtime": 1786508629.2921746,
+    "mtime": 1786509403.3237612,
     "ast_hash": "6b937036f9e682b55b463576e6dd8bd0",
     "semantic_hash": "6b937036f9e682b55b463576e6dd8bd0"
+  },
+  "app/admin/settings/page.tsx": {
+    "mtime": 1786536714.482025,
+    "ast_hash": "e58a7c23155d2399801f9d035b7ba304",
+    "semantic_hash": "e58a7c23155d2399801f9d035b7ba304"
+  },
+  "components/admin/platform-settings-manager.tsx": {
+    "mtime": 1786536720.297827,
+    "ast_hash": "345c3f8885a3a42ab2d07cc17d5d5087",
+    "semantic_hash": "345c3f8885a3a42ab2d07cc17d5d5087"
+  },
+  "lib/appwrite/platform-settings-actions.ts": {
+    "mtime": 1786536700.044575,
+    "ast_hash": "564eade4c81e4c61d37865c8e17c29d9",
+    "semantic_hash": "564eade4c81e4c61d37865c8e17c29d9"
+  },
+  "lib/services/platform-settings-admin.ts": {
+    "mtime": 1786536806.465657,
+    "ast_hash": "7bed8343fddd7fd55bf854966b89c357",
+    "semantic_hash": "7bed8343fddd7fd55bf854966b89c357"
+  },
+  "scripts/verify-platform-settings-validation.ts": {
+    "mtime": 1786536818.5930681,
+    "ast_hash": "11d50343505aee7890e2d82b3e044f20",
+    "semantic_hash": "11d50343505aee7890e2d82b3e044f20"
   }
 }

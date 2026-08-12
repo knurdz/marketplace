@@ -137,6 +137,14 @@ export {
   normalizePlatformSettingKey,
   parsePlatformSettingJson,
 } from "./platform-settings";
+export {
+  listAllPlatformSettings,
+  updatePlatformSettingCore,
+} from "./platform-settings-admin";
+export type {
+  PlatformSettingListItem,
+  PlatformSettingMutationResult,
+} from "./platform-settings-admin";
 export { requestPayHereCheckout } from "./payhere";
 export { confirmFreeOrder } from "./free-order";
 export { getSessionUser } from "./session";
