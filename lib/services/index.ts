@@ -9,6 +9,19 @@ export {
 } from "./admin-orders";
 export type { AdminOrderView, ListAllOrdersResult } from "./admin-orders";
 export {
+  approveBankSlipCore,
+  asBankSlip,
+  bankSlipFileExists,
+  getBankSlipReviewUrl,
+  listPendingBankSlips,
+  rejectBankSlipCore,
+} from "./bank-slip-review";
+export type {
+  BankSlipReviewResult,
+  ListPendingBankSlipsResult,
+  PendingBankSlipView,
+} from "./bank-slip-review";
+export {
   asCategory,
   generateSlug,
   getCategoryBySlug,

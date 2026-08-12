@@ -31,9 +31,9 @@ Use after every change that touches code or schema:
 - [x] Re-read own changes end-to-end; no uncertain behavior left unresolved
 - [x] AuthZ checked (roles/labels + Appwrite permissions; not UI-only)
 - [x] No secrets in client / `NEXT_PUBLIC_*`
-- [ ] IDOR / ownership checks on reads & writes you added
+- [x] IDOR / ownership checks on reads & writes you added — admin-only approve/reject + proxy checks `bankSlipFileExists`; no buyer-facing slip mutation
 - [x] Inputs validated (frontend + server); uploads constrained if applicable
-- [ ] Payment paths (if touched): notify/hash trusted; idempotent; return_url not sole source of truth
+- [x] Payment paths (if touched): notify/hash trusted; idempotent; return_url not sole source of truth — bank approve/reject idempotent guards + TablesDB txn; live E2E pending seeded data
 - [x] Graphify consulted before work (if graph exists) and updated after
 - [x] Relevant Appwrite MCP tools used when touching Appwrite (docs/context/search/call)
 - [x] Relevant member checklist items below updated
@@ -266,7 +266,7 @@ Complete payment infrastructure so Members 2–4 only consume APIs / admin UI.
 - [x] Categories CRUD
 - [x] All-orders oversight + payment filters
 - [ ] Dispute handling (orders flagged by buyers/sellers)
-- [ ] Bank slip verification UI (approve/reject proofs)
+- [x] Bank slip verification UI (approve/reject proofs)
 - [ ] User/listing reports triage
 - [ ] Audit log viewer
 - [ ] Platform settings (sandbox flag, fees, bank copy) — admin write UI
@@ -288,7 +288,7 @@ Complete payment infrastructure so Members 2–4 only consume APIs / admin UI.
 | [x] **4.4**  | Listing moderation      | Approve/reject/remove                     | Status enums only           |
 | [x] **4.5**  | Categories CRUD         | Create/update/order                       | Storefront reads them       |
 | [x] **4.6**  | All orders + filters    | By payment method/status                  | Admin access only           |
-| [ ] **4.7**  | Bank slip queue         | Approve → `paid` + stock; reject          | Idempotent; audit           |
+| [x] **4.7**  | Bank slip queue         | Approve → `paid` + stock; reject          | Idempotent; audit           |
 | [ ] **4.8**  | Reports / disputes      | Triage workflow                           | Status transitions          |
 | [ ] **4.9**  | Platform settings UI    | Sandbox, bank copy, fees (admin write)    | Safe public fields only     |
 | [ ] **4.10** | Audit viewer            | List admin actions                        | Append-only                 |
@@ -372,3 +372,4 @@ Pick up only after Phases 1–4 are solid. Assign when claimed.
 | 2026-08-12 | Member 4 step **4.3**: confirmed complete — `/admin/users` view/search/suspend/unsuspend + audit; `updateStatus(false)` + `deleteSessions`; `getLoggedInUser` returns null when `status === false` (blocks checkout/publish); tick + graphify update |
 | 2026-08-12 | Member 4 step **4.5**: categories CRUD (`/admin/categories`); `listCategories`/`listCategoryTree`/`generateSlug`; admin session writes + audit; delete guards for products/children; up/down reorder |
 | 2026-08-12 | Member 4 step **4.6**: read-only all-orders oversight (`/admin/orders`); server-side filters (order status, payment method, payment status) + cursor pagination; `createAdminClient` API key bypasses row permissions; `requireLabel("admin")` in layout + service; no mutations |
+| 2026-08-12 | Member 4 step **4.7**: bank slip review queue (`/admin/payments/bank-slips`); approve → slip approved + payment paid + order paid + atomic stock decrement (TablesDB txn); reject → payment failed; admin-only proxy for private slip images; idempotency guards in code — live approve/reject/oversold/re-approve E2E not run (needs seeded pending slip); verification extras idempotent item left unchecked until live test |
