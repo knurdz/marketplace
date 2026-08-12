@@ -9,6 +9,13 @@ export {
 } from "./admin-orders";
 export type { AdminOrderView, ListAllOrdersResult } from "./admin-orders";
 export {
+  asAuditLogEntry,
+  getAuditLogsForResource,
+  listAuditLogs,
+  parseAuditLogFilter,
+} from "./audit-logs";
+export type { ListAuditLogsResult } from "./audit-logs";
+export {
   approveBankSlipCore,
   asBankSlip,
   bankSlipFileExists,

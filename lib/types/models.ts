@@ -200,3 +200,14 @@ export type PlatformSetting = {
   value: string;
   description: string | null;
 };
+
+export type AuditLogEntry = {
+  $id: string;
+  actorId: string | null;
+  event: string;
+  resourceType: string;
+  resourceId: string | null;
+  meta: string | null;
+  ip: string | null;
+  $createdAt: string;
+};
