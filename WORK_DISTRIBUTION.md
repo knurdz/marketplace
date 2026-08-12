@@ -271,7 +271,7 @@ Complete payment infrastructure so Members 2–4 only consume APIs / admin UI.
 - [x] Audit log viewer
 - [x] Platform settings (sandbox flag, fees, bank copy) — admin write UI
 - [ ] Admin order overrides (cancel/refund) with audit
-- [ ] Sales reports + user growth analytics (basic charts OK)
+- [x] Sales reports + user growth analytics (basic charts OK)
 - [ ] Seller verification badge controls
 - [ ] Basic fraud flags (e.g. repeated failed pays, multi-account signals) — rules-based, not ML
 - [ ] Featured product / boost tooling (optional — Phase 5; admin-controlled)
@@ -292,7 +292,7 @@ Complete payment infrastructure so Members 2–4 only consume APIs / admin UI.
 | [ ] **4.8**  | Reports / disputes      | Triage workflow                           | Status transitions          |
 | [x] **4.9**  | Platform settings UI    | Sandbox, bank copy, fees (admin write)    | Safe public fields only     |
 | [x] **4.10** | Audit viewer            | List admin actions                        | Append-only                 |
-| [ ] **4.11** | Analytics               | Sales + user growth                       | No PII leakage              |
+| [x] **4.11** | Analytics               | Sales + user growth                       | No PII leakage              |
 | [ ] **4.12** | Badges + fraud flags    | Verification badge; rule flags            | Rules documented            |
 | [ ] **4.13** | Notify log viewer (opt) | Read-only UI over Member 1 failure logs   | No secrets in UI            |
 | [ ] **4.14** | Optional Phase 5        | Featured listings, coupons                | After E2E                   |
@@ -375,3 +375,4 @@ Pick up only after Phases 1–4 are solid. Assign when claimed.
 | 2026-08-12 | Member 4 step **4.7**: bank slip review queue (`/admin/payments/bank-slips`); approve → slip approved + payment paid + order paid + atomic stock decrement (TablesDB txn); reject → payment failed; admin-only proxy for private slip images; idempotency guards in code — live approve/reject/oversold/re-approve E2E not run (needs seeded pending slip); verification extras idempotent item left unchecked until live test |
 | 2026-08-12 | Member 4 step **4.9**: platform settings admin UI (`/admin/settings`); allowlist-only writes via `ALL_PLATFORM_SETTING_KEYS` + key denylist; new keys `checkout.sandbox_mode_display` (public banner flag, not PayHere Function env) and `checkout.fee_percent` (0–100); reuses `checkout.bank_instructions`; session upsert + audit `platform_setting.updated`; validation self-check script |
 | 2026-08-12 | Member 4 step **4.10**: read-only audit log viewer (`/admin/audit`); `listAuditLogs` / `getAuditLogsForResource` via `createAdminClient` only (table permissions none); URL filters (actorId, event, resourceType, resourceId) + cursor pagination; `requireLabel("admin")` in layout + service; session-client read blocked (verified); empty table OK; live row/filter/pagination E2E pending admin actions in env |
+| 2026-08-12 | Member 4 step **4.11**: admin analytics (`/admin/analytics`); `getSalesOverTime` + `getUserGrowthOverTime` in `admin-analytics.ts` — bounded date-range queries (default **30d** daily / **12m** monthly toggle), cursor pagination, zero-filled buckets, paid-only revenue matching 4.1; user signups via Users API `registration` range filter; approved sellers via `seller_profiles.$createdAt`; added **recharts**; aggregate charts only (no drill-down/PII); `requireLabel("admin")` in layout + service; self-check `scripts/verify-admin-analytics.mjs` |

@@ -1,6 +1,17 @@
 export { getAdminMetrics } from "./admin-metrics";
 export type { AdminMetrics } from "./admin-metrics";
 export {
+  getSalesOverTime,
+  getUserGrowthOverTime,
+  parseAnalyticsRange,
+} from "./admin-analytics";
+export type {
+  AnalyticsBucket,
+  AnalyticsRange,
+  SalesBucket,
+  UserGrowthBucket,
+} from "./admin-analytics";
+export {
   asAdminOrder,
   listAllOrders,
   parseOrderStatusFilter,

@@ -12,6 +12,7 @@ const ADMIN_NAV = [
   { href: "/admin/payments/bank-slips", label: "Bank slips" },
   { href: "/admin/settings", label: "Settings" },
   { href: "/admin/audit", label: "Audit" },
+  { href: "/admin/analytics", label: "Analytics" },
   { href: "/admin#reports", label: "Reports" },
 ];
 
