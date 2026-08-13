@@ -136,6 +136,18 @@ export type {
   CheckoutSellerBankDetails,
   PublicSellerInfo,
 } from "./sellers";
+export {
+  getOwnSellerProfile,
+  normalizeShopSlug,
+  parseSellerApplicationInput,
+  resolveUniqueShopSlug,
+  submitSellerApplicationCore,
+} from "./seller-application";
+export type {
+  ParsedSellerApplicationInput,
+  SellerApplicationResult,
+  SubmitSellerApplicationInput,
+} from "./seller-application";
 export type { ProductCatalogParams, ProductCatalogSort } from "./products";
 export {
   asNotification,
