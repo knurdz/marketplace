@@ -1,3 +1,4 @@
+import Link from "next/link";
 import type { PublicSellerInfo } from "@/lib/services/sellers";
 
 type SellerInfoCardProps = {
@@ -16,9 +17,12 @@ export function SellerInfoCard({ seller }: SellerInfoCardProps) {
       {seller ? (
         <div className="mt-4 space-y-2">
           <p className="text-lg font-semibold tracking-tight">{seller.shopName}</p>
-          <p className="font-mono text-xs text-muted-foreground">
+          <Link
+            href={`/shop/${seller.slug}`}
+            className="font-mono text-xs text-accent hover:underline"
+          >
             @{seller.slug}
-          </p>
+          </Link>
           {seller.bio ? (
             <p className="max-w-prose text-sm text-muted-foreground">{seller.bio}</p>
           ) : null}

@@ -78,4 +78,5 @@ export {
   getAvatarViewUrl,
   getFilePreviewUrl,
   getFileViewUrl,
+  getShopBannerPreviewUrl,
 } from "./storage-urls";

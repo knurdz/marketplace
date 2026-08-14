@@ -1,11 +1,13 @@
 import { AppwriteException, ID, Permission, Query, Role } from "node-appwrite";
 import {
+  BUCKET_AVATARS,
   DATABASE_ID,
   TABLE_SELLER_PROFILES,
   hasAppwritePublicConfig,
 } from "@/lib/appwrite/config";
 import { ROLE_LABELS, userHasLabel } from "@/lib/appwrite/roles";
 import { createAdminClient, createSessionClient } from "@/lib/appwrite/server";
+import { deleteFile, uploadAvatar } from "@/lib/appwrite/storage";
 import { getLoggedInUser } from "@/lib/appwrite/session";
 import type { SellerProfile } from "@/lib/types";
 import { generateSlug } from "./categories";
@@ -30,6 +32,19 @@ export type SellerApplicationResult =
 
 export type ParsedSellerApplicationInput =
   | { ok: true; shopName: string; slug: string; bio: string | null }
+  | { ok: false; error: string };
+
+export type UpdateShopProfileInput = {
+  shopName: string;
+  bio?: string;
+};
+
+export type ShopProfileUpdateResult =
+  | { ok: true; message: string; slug: string }
+  | { ok: false; error: string };
+
+export type ShopBannerUpdateResult =
+  | { ok: true; message: string; slug: string }
   | { ok: false; error: string };
 
 /**
@@ -256,5 +271,144 @@ export async function submitSellerApplicationCore(
       }
     }
     return { ok: false, error: "Could not submit application. Please try again." };
+  }
+}
+
+/**
+ * Update shop name + bio for the signed-in approved seller only.
+ * Never mutates slug, status, bank fields, or userId.
+ */
+export async function updateOwnShopProfileCore(
+  input: UpdateShopProfileInput,
+): Promise<ShopProfileUpdateResult> {
+  if (!hasAppwritePublicConfig()) {
+    return { ok: false, error: "Marketplace is not configured." };
+  }
+
+  const user = await getLoggedInUser();
+  if (!user) {
+    return { ok: false, error: "You must be signed in to update your shop." };
+  }
+
+  const parsed = parseSellerApplicationInput({
+    shopName: input.shopName,
+    bio: input.bio,
+  });
+  if (!parsed.ok) {
+    return { ok: false, error: parsed.error };
+  }
+
+  const existing = await getOwnSellerProfile();
+  if (!existing || existing.userId !== user.$id) {
+    return { ok: false, error: "Seller profile not found." };
+  }
+  if (existing.status !== "approved") {
+    return { ok: false, error: "Only approved sellers can edit shop details." };
+  }
+
+  try {
+    const { tables } = await createSessionClient();
+    await tables.updateRow({
+      databaseId: DATABASE_ID,
+      tableId: TABLE_SELLER_PROFILES,
+      rowId: existing.$id,
+      data: {
+        shopName: parsed.shopName,
+        bio: parsed.bio,
+        userId: user.$id,
+      },
+    });
+
+    return {
+      ok: true,
+      message: "Shop profile updated.",
+      slug: existing.slug,
+    };
+  } catch (error) {
+    if (error instanceof AppwriteException) {
+      if (error.code === 401 || error.code === 404) {
+        return { ok: false, error: "Not allowed to update this shop." };
+      }
+    }
+    return { ok: false, error: "Could not update shop profile. Please try again." };
+  }
+}
+
+/**
+ * Upload shop banner for the signed-in approved seller only.
+ * Reuses avatars bucket (public read); deletes previous banner on success.
+ */
+export async function updateOwnShopBannerCore(
+  file: File,
+): Promise<ShopBannerUpdateResult> {
+  if (!hasAppwritePublicConfig()) {
+    return { ok: false, error: "Marketplace is not configured." };
+  }
+
+  const user = await getLoggedInUser();
+  if (!user) {
+    return { ok: false, error: "You must be signed in to upload a banner." };
+  }
+
+  if (!(file instanceof File) || file.size <= 0) {
+    return { ok: false, error: "Choose an image file to upload." };
+  }
+
+  const existing = await getOwnSellerProfile();
+  if (!existing || existing.userId !== user.$id) {
+    return { ok: false, error: "Seller profile not found." };
+  }
+  if (existing.status !== "approved") {
+    return { ok: false, error: "Only approved sellers can upload a banner." };
+  }
+
+  let uploadedFileId: string | null = null;
+  const previousFileId = existing.bannerFileId;
+
+  try {
+    const { fileId } = await uploadAvatar(file);
+    uploadedFileId = fileId;
+
+    const { tables } = await createSessionClient();
+    await tables.updateRow({
+      databaseId: DATABASE_ID,
+      tableId: TABLE_SELLER_PROFILES,
+      rowId: existing.$id,
+      data: {
+        bannerFileId: fileId,
+        userId: user.$id,
+      },
+    });
+
+    if (previousFileId && previousFileId !== fileId) {
+      try {
+        await deleteFile(BUCKET_AVATARS, previousFileId);
+      } catch {
+        // Best-effort cleanup; new banner is already linked.
+      }
+    }
+
+    return {
+      ok: true,
+      message: "Shop banner updated.",
+      slug: existing.slug,
+    };
+  } catch (error) {
+    if (uploadedFileId) {
+      try {
+        await deleteFile(BUCKET_AVATARS, uploadedFileId);
+      } catch {
+        // Ignore cleanup failure.
+      }
+    }
+    if (error instanceof Error && !(error instanceof AppwriteException)) {
+      return { ok: false, error: error.message };
+    }
+    if (error instanceof AppwriteException) {
+      if (error.code === 401 || error.code === 404) {
+        return { ok: false, error: "Not allowed to update this shop." };
+      }
+    }
+    return { ok: false, error: "Could not upload banner. Please try again." };
   }
 }
