@@ -1,13 +1,13 @@
 "use client";
 
 import { useActionState } from "react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import {
   submitSellerApplication,
   type SellerApplicationActionState,
 } from "@/lib/appwrite/seller-application-actions";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 
 const initialState: SellerApplicationActionState = {};
 
@@ -18,17 +18,39 @@ export function SellerApplyForm() {
   );
 
   return (
-    <form action={formAction} className="mt-8 space-y-5">
+    <form action={formAction} className="mt-8 max-w-lg space-y-5">
+      {state.error ? (
+        <p
+          role="alert"
+          className="rounded-md border border-border bg-card px-3 py-2 font-mono text-sm text-accent-bright"
+        >
+          {state.error}
+        </p>
+      ) : null}
+      {state.success ? (
+        <p
+          role="status"
+          className="rounded-md border border-border bg-card px-3 py-2 text-sm text-foreground"
+        >
+          {state.success}
+        </p>
+      ) : null}
+
       <div className="space-y-2">
         <Label htmlFor="shopName">Shop name</Label>
         <Input
           id="shopName"
           name="shopName"
+          type="text"
           required
           maxLength={128}
-          placeholder="Campus Crafts"
           autoComplete="organization"
+          placeholder="e.g. Campus Crafts"
+          disabled={Boolean(state.success)}
         />
+        <p className="text-xs text-muted-foreground">
+          Shown to buyers once your shop is approved.
+        </p>
       </div>
 
       <div className="space-y-2">
@@ -36,12 +58,15 @@ export function SellerApplyForm() {
         <Input
           id="slug"
           name="slug"
+          type="text"
           maxLength={128}
+          autoComplete="off"
           placeholder="campus-crafts"
-          spellCheck={false}
+          disabled={Boolean(state.success)}
         />
         <p className="text-xs text-muted-foreground">
-          Lowercase letters, numbers, and hyphens. Defaults from shop name.
+          Lowercase letters, numbers, and hyphens. Leave blank to derive from
+          shop name.
         </p>
       </div>
 
@@ -50,26 +75,13 @@ export function SellerApplyForm() {
         <textarea
           id="bio"
           name="bio"
-          maxLength={2000}
           rows={4}
-          placeholder="Tell buyers about your shop…"
-          className="flex min-h-[80px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+          maxLength={2000}
+          disabled={Boolean(state.success)}
+          placeholder="What do you sell? Who is it for?"
+          className="w-full rounded-lg border border-input bg-transparent px-2.5 py-2 text-sm outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 disabled:opacity-50"
         />
-        <p className="text-xs text-muted-foreground">
-          Shown to buyers once your shop is approved.
-        </p>
       </div>
-
-      {state.error ? (
-        <p className="text-sm text-destructive" role="alert">
-          {state.error}
-        </p>
-      ) : null}
-      {state.success ? (
-        <p className="text-sm text-accent" role="status">
-          {state.success}
-        </p>
-      ) : null}
 
       <Button type="submit" disabled={pending || Boolean(state.success)}>
         {pending ? "Submitting…" : "Submit application"}

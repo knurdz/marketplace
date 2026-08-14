@@ -1,34 +1,38 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { submitSellerApplicationCore } from "@/lib/services/seller-application";
+import {
+  submitSellerApplicationCore,
+  type SubmitSellerApplicationInput,
+} from "@/lib/services/seller-application";
 
 export type SellerApplicationActionState = {
   success?: string;
   error?: string;
 };
 
-function revalidateSellerApplicationPaths(): void {
-  revalidatePath("/become-seller");
-  revalidatePath("/seller");
+function readString(formData: FormData, key: string): string {
+  const value = formData.get(key);
+  return typeof value === "string" ? value.trim() : "";
 }
 
 export async function submitSellerApplication(
   _prev: SellerApplicationActionState,
   formData: FormData,
 ): Promise<SellerApplicationActionState> {
-  const shopName = formData.get("shopName");
-  const slug = formData.get("slug");
-  const bio = formData.get("bio");
+  const input: SubmitSellerApplicationInput = {
+    shopName: readString(formData, "shopName"),
+    slug: readString(formData, "slug") || undefined,
+    bio: readString(formData, "bio") || undefined,
+  };
 
-  const result = await submitSellerApplicationCore({
-    shopName: typeof shopName === "string" ? shopName : "",
-    slug: typeof slug === "string" && slug.trim() ? slug : undefined,
-    bio: typeof bio === "string" && bio.trim() ? bio : undefined,
-  });
+  const result = await submitSellerApplicationCore(input);
+  if (!result.ok) {
+    return { error: result.error };
+  }
 
-  if (!result.ok) return { error: result.error };
-
-  revalidateSellerApplicationPaths();
+  revalidatePath("/become-seller");
+  revalidatePath("/seller");
+  revalidatePath("/admin/sellers");
   return { success: result.message };
 }
