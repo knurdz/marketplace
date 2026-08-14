@@ -167,17 +167,20 @@ Use shared enums from [`lib/types/status.ts`](../../lib/types/status.ts) — do 
 
 ## Free confirm (not a PayHere Function)
 
-Contract name for Member 2 server action: **`confirmFreeOrder`**.
+Contract name: **`confirmFreeOrder`** (`lib/services/free-order.ts`, Member 1 step **1.24**).
 
-Types: `ConfirmFreeOrderRequest` / `ConfirmFreeOrderResult` in `lib/types/payhere.ts`.
+Types: `ConfirmFreeOrderRequest` / `ConfirmFreeOrderResult` in `lib/types/payhere.ts`.  
+Eligibility (pure): `evaluateFreeConfirm` in `lib/services/free-order-rules.ts`.  
+Member 2 UX calls `confirmFreeOrderAction` → this API; never writes `paid` from the client.
 
 ### Rules
 
-1. Session required; `order.buyerId ===` session user.
-2. `payment.method === "free"` and `payment.amount === 0` (and order total 0).
-3. Never call PayHere with a forged zero amount for a paid listing.
-4. Idempotent: already `paid` → success no-op.
-5. Implementation lands with Member 2 order creation (2.6–2.7); this step only freezes the types/docs.
+1. Session required (`getLoggedInUser`; suspended accounts are treated as signed-out); `order.buyerId ===` session user. Other buyers get a generic not-found (IDOR).
+2. Re-load order + payment + items with the **admin SDK**. `payment.method === "free"` and `payment.amount === 0` and `order.totalAmount === 0`. Every line item `unitPrice` / `lineTotal` must be `0`. Amounts are never taken from the request body.
+3. Never call PayHere with a forged zero amount for a paid listing. This path does not import or invoke PayHere.
+4. Idempotent: already `paid` → success no-op. Concurrent retries that lose the TablesDB transaction re-read payment and succeed if already `paid`. First successful settle sets `payments.idempotencyKey = free:<orderId>`.
+5. Stock decrements **once** in the same transaction as `paid` (`decrementRowColumn` `min: 0`). Insufficient stock **rejects** (free path has not collected money). Repair of a half-written row does **not** decrement again.
+6. Writes use `APPWRITE_API_KEY` (server-only). Missing key → `{ ok: false, error: "Free order confirmation is not configured yet." }`. Rate-limited per user+IP (`RATE_LIMITS.checkout`).
 
 ---
 
@@ -215,8 +218,8 @@ sequenceDiagram
   participant DB as TablesDB
 
   Buyer->>Next: Confirm free order
-  Next->>DB: Own order + method free + amount 0
-  Next->>DB: Mark paid idempotent
+  Next->>DB: Own order + method free + amount 0 (DB)
+  Next->>DB: paid once + stock once (transaction)
   Next-->>Buyer: ok
 ```
 
@@ -242,9 +245,10 @@ Placeholders in [`.env.example`](../../.env.example) document Function ownership
 - [ ] Hash amount from DB, not client
 - [ ] Order ownership checked in hash Function
 - [ ] Notify verifies md5sig before mutate
-- [ ] Notify + free confirm idempotent
+- [ ] Notify idempotent (step 1.23)
+- [x] Free confirm idempotent (step 1.24)
 - [ ] Return/cancel pages poll DB only
-- [ ] Free path never hits PayHere
+- [x] Free path never hits PayHere (step 1.24)
 - [ ] Do not log secrets, full card numbers, or raw bank account numbers
 
 ---

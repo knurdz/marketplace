@@ -244,7 +244,7 @@ Server-action rate limits live in [`lib/security/rate-limit.ts`](../../lib/secur
 | `idempotencyKey` | string(128) | no |
 
 **Indexes:** `orderId_idx`, `idempotencyKey_unique`  
-**Intent:** PayHere notify / free / bank paid updates are server-side and idempotent (**Member 1** payment setup; bank *approve UI* is Member 4).
+**Intent:** PayHere notify / free / bank paid updates are server-side and idempotent (**Member 1** payment setup; bank *approve UI* is Member 4). Free confirm (step **1.24**) writes `status=paid` + `idempotencyKey=free:<orderId>` via admin SDK; buyers must not be trusted to set `paid`.
 
 ---
 
