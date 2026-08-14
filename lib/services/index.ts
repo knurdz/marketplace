@@ -117,15 +117,18 @@ export type {
   UpdateShopProfileInput,
 } from "./seller-application";
 export {
+  canSubmitListingForReview,
   countProductImagesForOwnProducts,
   createDraftProductCore,
   listOwnProducts,
   parseCreateDraftProductInput,
+  submitListingForReviewCore,
 } from "./seller-listings";
 export type {
   CreateDraftProductInput,
   CreateDraftProductResult,
   ParsedCreateDraftProductInput,
+  SubmitListingForReviewResult,
 } from "./seller-listings";
 export {
   listPendingModerationQueue,

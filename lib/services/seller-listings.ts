@@ -23,10 +23,12 @@ import {
   RATE_LIMIT_MESSAGE,
   RATE_LIMITS,
 } from "@/lib/security/rate-limit";
-import type { Product } from "@/lib/types";
+import type { Product, ProductStatus } from "@/lib/types";
 import { asProduct, listProductImages } from "./products";
 
 const DRAFT_STATUS = "draft" as const;
+const PENDING_REVIEW_STATUS = "pending_review" as const;
+const REJECTED_STATUS = "rejected" as const;
 const DEFAULT_CURRENCY = "LKR";
 const MAX_TITLE_LENGTH = 200;
 const MAX_DESCRIPTION_LENGTH = 10000;
@@ -42,6 +44,10 @@ export type CreateDraftProductInput = {
 
 export type CreateDraftProductResult =
   | { ok: true; message: string; productId: string }
+  | { ok: false; error: string };
+
+export type SubmitListingForReviewResult =
+  | { ok: true; message: string }
   | { ok: false; error: string };
 
 export type ParsedCreateDraftProductInput =
@@ -392,4 +398,96 @@ export async function countProductImagesForOwnProducts(
   );
 
   return counts;
+}
+
+/** Whether a seller may submit this listing for admin review. */
+export function canSubmitListingForReview(status: ProductStatus): boolean {
+  return status === DRAFT_STATUS || status === REJECTED_STATUS;
+}
+
+async function loadOwnProduct(
+  productId: string,
+  sellerId: string,
+): Promise<Product | null> {
+  const trimmed = productId?.trim();
+  if (!trimmed) return null;
+
+  try {
+    const { tables } = await createSessionClient();
+    const row = await tables.getRow({
+      databaseId: DATABASE_ID,
+      tableId: TABLE_PRODUCTS,
+      rowId: trimmed,
+    });
+    const product = asProduct(row as unknown as Record<string, unknown>);
+    if (!product || product.sellerId !== sellerId) return null;
+    return product;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Submit an own draft or rejected listing for admin moderation.
+ * Sellers never write active — only pending_review.
+ */
+export async function submitListingForReviewCore(
+  productId: string,
+): Promise<SubmitListingForReviewResult> {
+  if (!hasAppwritePublicConfig()) {
+    return { ok: false, error: "Marketplace is not configured." };
+  }
+
+  const user = await getLoggedInUser();
+  if (!user) {
+    return { ok: false, error: "You must be signed in to submit a listing." };
+  }
+  if (!userHasLabel(user, ROLE_LABELS.seller)) {
+    return { ok: false, error: "Seller access is required to submit listings." };
+  }
+
+  const rate = assertRateLimit({
+    bucket: "listings.publish",
+    key: `user:${user.$id}`,
+    ...RATE_LIMITS.listings,
+  });
+  if (!rate.ok) {
+    return { ok: false, error: RATE_LIMIT_MESSAGE };
+  }
+
+  const product = await loadOwnProduct(productId, user.$id);
+  if (!product) {
+    return { ok: false, error: "Listing not found." };
+  }
+
+  if (product.status === PENDING_REVIEW_STATUS) {
+    return {
+      ok: true,
+      message: `"${product.title}" is already awaiting review.`,
+    };
+  }
+
+  if (!canSubmitListingForReview(product.status)) {
+    return {
+      ok: false,
+      error: `Listing is ${product.status}. Only drafts and rejected listings can be submitted.`,
+    };
+  }
+
+  try {
+    const { tables } = await createSessionClient();
+    await tables.updateRow({
+      databaseId: DATABASE_ID,
+      tableId: TABLE_PRODUCTS,
+      rowId: product.$id,
+      data: { status: PENDING_REVIEW_STATUS },
+    });
+  } catch {
+    return { ok: false, error: "Could not submit listing. Please try again." };
+  }
+
+  return {
+    ok: true,
+    message: `"${product.title}" submitted for review. An admin will approve it before it goes live.`,
+  };
 }

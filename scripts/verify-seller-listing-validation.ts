@@ -2,7 +2,10 @@
  * Runnable validation checks for seller draft listing input parsing.
  * Run: npx tsx scripts/verify-seller-listing-validation.ts
  */
-import { parseCreateDraftProductInput } from "../lib/services/seller-listings";
+import {
+  canSubmitListingForReview,
+  parseCreateDraftProductInput,
+} from "../lib/services/seller-listings";
 
 function assert(condition: boolean, message: string): void {
   if (!condition) throw new Error(message);
@@ -123,5 +126,11 @@ assert(
   }).ok,
   "status from form rejected",
 );
+
+assert(canSubmitListingForReview("draft"), "draft can submit");
+assert(canSubmitListingForReview("rejected"), "rejected can submit");
+assert(!canSubmitListingForReview("pending_review"), "pending_review cannot submit");
+assert(!canSubmitListingForReview("active"), "active cannot submit");
+assert(!canSubmitListingForReview("archived"), "archived cannot submit");
 
 console.log("seller-listing validation checks passed");

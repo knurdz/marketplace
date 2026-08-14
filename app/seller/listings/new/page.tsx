@@ -11,8 +11,8 @@ export default async function NewListingPage() {
       <p className="font-mono text-sm text-accent">$ ./seller --listings new</p>
       <h2 className="mt-3 text-3xl font-bold tracking-tight">New listing</h2>
       <p className="mt-2 max-w-xl text-sm text-muted-foreground">
-        Saves as a draft. Buyers will not see it on the storefront until you
-        publish.
+        Saves as a draft. Submit it for admin review from your listings page
+        before buyers can see it on the storefront.
       </p>
 
       <CreateListingForm categories={categories} />

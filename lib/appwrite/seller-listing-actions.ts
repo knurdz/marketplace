@@ -2,9 +2,17 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { createDraftProductCore } from "@/lib/services/seller-listings";
+import {
+  createDraftProductCore,
+  submitListingForReviewCore,
+} from "@/lib/services/seller-listings";
 
 export type CreateListingActionState = {
+  error?: string;
+};
+
+export type SubmitListingActionState = {
+  success?: string;
   error?: string;
 };
 
@@ -39,4 +47,23 @@ export async function createDraftListing(
 
   revalidatePath("/seller/listings");
   redirect("/seller/listings");
+}
+
+export async function submitListingForReview(
+  _prev: SubmitListingActionState,
+  formData: FormData,
+): Promise<SubmitListingActionState> {
+  const productId = readString(formData, "productId");
+  if (!productId) {
+    return { error: "Missing listing." };
+  }
+
+  const result = await submitListingForReviewCore(productId);
+  if (!result.ok) {
+    return { error: result.error };
+  }
+
+  revalidatePath("/seller/listings");
+  revalidatePath("/admin/listings");
+  return { success: result.message };
 }
