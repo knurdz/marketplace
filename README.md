@@ -68,6 +68,7 @@ Fill `.env.local` with Appwrite values (see below). Do not commit secrets; only 
 Clients live in [`lib/appwrite/`](./lib/appwrite/): browser (`appwrite`) + server session/admin (`node-appwrite`). Session cookie name: `knurdz_session`. TablesDB database id: `marketplace` — full table contract in [`docs/agent/SCHEMA.md`](./docs/agent/SCHEMA.md). Re-apply with `node --env-file=.env.local scripts/setup-mvp-schema.mjs`. Storage buckets (`avatars`, `product-images`, `bank-slips`): `node --env-file=.env.local scripts/setup-storage-buckets.mjs` (API key needs **storage** write).
 
 Shared contracts for other members:
+
 - Statuses / row types: [`lib/types/`](./lib/types/)
 - Session / products / uploads: [`lib/services/`](./lib/services/)
 
@@ -81,11 +82,11 @@ npm run seed
 
 Creates idempotent demo users, profiles, an approved seller shop, two categories, and one **active** sample product (`seed_demo_product`).
 
-| Role   | Email                 | Labels           |
-| ------ | --------------------- | ---------------- |
-| Admin  | `admin@knurdz.demo`   | `buyer`, `admin` |
-| Seller | `seller@knurdz.demo`  | `buyer`, `seller`|
-| Buyer  | `buyer@knurdz.demo`   | `buyer`          |
+| Role   | Email                | Labels            |
+| ------ | -------------------- | ----------------- |
+| Admin  | `admin@knurdz.demo`  | `buyer`, `admin`  |
+| Seller | `seller@knurdz.demo` | `buyer`, `seller` |
+| Buyer  | `buyer@knurdz.demo`  | `buyer`           |
 
 Password for all demo accounts: `DemoPass123!`  
 **Sandbox only** — never reuse in production. Not a merchant/Appwrite secret; do not put in `NEXT_PUBLIC_*`.
@@ -94,16 +95,18 @@ API key for seed needs **users.write** + TablesDB write (same key used for schem
 
 ### Auth routes
 
-| Path               | Purpose                                     |
-| ------------------ | ------------------------------------------- |
-| `/login`           | Email/password sign in                      |
-| `/register`        | Create account                              |
+Shared storefront `/` is the landing page for every role. There is a single `/login` (no `/admin/login` or `/seller/login`). After sign-in, users are sent to their portal: **admin → `/admin`**, **seller → `/seller`**, **buyer → `/`**. The storefront itself does not auto-redirect by role. A `?next=` return path is honored only when it is a same-origin relative URL the user’s labels may visit.
+
+| Path               | Purpose                                         |
+| ------------------ | ----------------------------------------------- |
+| `/login`           | Email/password sign in (role redirect after)    |
+| `/register`        | Create account (buyer → `/`)                    |
 | `/account`         | Session + profile edit, verify resend, sign out |
-| `/forgot-password` | Request password recovery email             |
-| `/reset-password`  | Set new password from recovery link         |
-| `/verify-email`    | Complete email verification from email link |
-| `/seller`          | Seller portal (requires `seller` label)     |
-| `/admin`           | Admin portal (requires `admin` label)       |
+| `/forgot-password` | Request password recovery email                 |
+| `/reset-password`  | Set new password from recovery link             |
+| `/verify-email`    | Complete email verification from email link     |
+| `/seller`          | Seller portal (requires `seller` label)         |
+| `/admin`           | Admin portal (requires `admin` label)           |
 
 ## Status
 

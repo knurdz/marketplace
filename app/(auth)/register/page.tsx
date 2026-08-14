@@ -1,11 +1,12 @@
 import { redirect } from "next/navigation";
 import { RegisterForm } from "@/components/auth/register-form";
+import { homePathForUser } from "@/lib/appwrite/roles";
 import { getLoggedInUser } from "@/lib/appwrite/session";
 
 export default async function RegisterPage() {
   const user = await getLoggedInUser();
   if (user) {
-    redirect("/account");
+    redirect(homePathForUser(user));
   }
 
   return (

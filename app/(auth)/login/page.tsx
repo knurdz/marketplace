@@ -1,14 +1,7 @@
 import { redirect } from "next/navigation";
 import { LoginForm } from "@/components/auth/login-form";
+import { postLoginPath, safeNextPath } from "@/lib/appwrite/roles";
 import { getLoggedInUser } from "@/lib/appwrite/session";
-
-function safeNextPath(raw: string | undefined): string | undefined {
-  if (!raw) return undefined;
-  if (!raw.startsWith("/") || raw.startsWith("//") || raw.includes("://")) {
-    return undefined;
-  }
-  return raw;
-}
 
 export default async function LoginPage({
   searchParams,
@@ -16,10 +9,10 @@ export default async function LoginPage({
   searchParams: Promise<{ next?: string }>;
 }) {
   const params = await searchParams;
-  const nextPath = safeNextPath(params.next);
+  const nextPath = safeNextPath(params.next) ?? undefined;
   const user = await getLoggedInUser();
   if (user) {
-    redirect(nextPath ?? "/account");
+    redirect(postLoginPath(user, nextPath));
   }
 
   return (

@@ -13,7 +13,7 @@ import {
 } from "@/lib/security/rate-limit";
 import { DATABASE_ID, SESSION_COOKIE, TABLE_PROFILES } from "./config";
 import { createProfileForUser } from "./profiles";
-import { ROLE_LABELS } from "./roles";
+import { postLoginPath, ROLE_LABELS } from "./roles";
 import { createAdminClient, createSessionClient } from "./server";
 
 async function rollbackSignup(userId: string) {
@@ -32,14 +32,6 @@ async function rollbackSignup(userId: string) {
   } catch {
     // Best-effort cleanup.
   }
-}
-
-/** Only allow same-origin relative paths (blocks open redirects). */
-function safeNextPath(raw: string): string | null {
-  if (!raw.startsWith("/") || raw.startsWith("//") || raw.includes("://")) {
-    return null;
-  }
-  return raw;
 }
 
 export type AuthActionState = {
@@ -165,7 +157,7 @@ export async function signUpWithEmail(
     return { error: mapAuthError(error) };
   }
 
-  redirect("/account");
+  redirect("/");
 }
 
 export async function signInWithEmail(
@@ -174,7 +166,7 @@ export async function signInWithEmail(
 ): Promise<AuthActionState> {
   const email = readString(formData, "email");
   const password = readString(formData, "password");
-  const next = safeNextPath(readString(formData, "next")) ?? "/account";
+  const nextRaw = readString(formData, "next");
 
   if (!email || !password) {
     return { error: "Email and password are required." };
@@ -198,19 +190,28 @@ export async function signInWithEmail(
     return { error: RATE_LIMIT_MESSAGE };
   }
 
+  let destination = "/";
+
   try {
-    const { account } = await createAdminClient();
+    const { account, users } = await createAdminClient();
     const session = await account.createEmailPasswordSession({
       email,
       password,
     });
     await setSessionCookie(session.secret, session.expire);
+    try {
+      const user = await users.get({ userId: session.userId });
+      destination = postLoginPath(user, nextRaw);
+    } catch {
+      // Session cookie is already set; label lookup failed — storefront is safe.
+      destination = "/";
+    }
   } catch (error) {
     unstable_rethrow(error);
     return { error: mapAuthError(error) };
   }
 
-  redirect(next);
+  redirect(destination);
 }
 
 export async function signOut() {

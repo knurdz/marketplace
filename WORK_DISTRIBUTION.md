@@ -117,6 +117,7 @@ Use after every change that touches code or schema:
 - [ ] Schema changelog when others request fields
 - [x] PayHere Function **interfaces** (`PAYHERE.md` + types + stub) — implementation is Member 1 payment setup below
 - [x] Accessibility / responsive baseline pass
+- [x] Role-based post-login redirects (admin → `/admin`, seller → `/seller`, buyer → `/`); single `/login`
 - [ ] Fix cross-member integration issues; keep API contracts consistent
 
 ### Payment setup (Member 1 — was formerly Members 2 + 4)
