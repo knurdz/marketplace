@@ -64,6 +64,7 @@ export {
   getCartItemCount,
   getOrCreateCart,
 } from "./cart";
+export { listOwnOrders } from "./orders";
 export {
   CART_ERROR_CODES,
   type CartActionState,
@@ -120,6 +121,8 @@ export {
   canSubmitListingForReview,
   countProductImagesForOwnProducts,
   createDraftProductCore,
+  deleteOwnProductImageCore,
+  getOwnProduct,
   listOwnProducts,
   parseCreateDraftProductInput,
   submitListingForReviewCore,

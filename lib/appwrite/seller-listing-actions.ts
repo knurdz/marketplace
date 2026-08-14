@@ -26,18 +26,28 @@ function readImageFiles(formData: FormData): File[] {
   return entries.filter((e): e is File => e instanceof File && e.size > 0);
 }
 
+function readListingFields(formData: FormData) {
+  return {
+    title: readString(formData, "title"),
+    description: readString(formData, "description"),
+    categoryId: readString(formData, "categoryId"),
+    price: readString(formData, "price"),
+    stock: readString(formData, "stock"),
+  };
+}
+
+function revalidateListingPaths(productId: string): void {
+  revalidatePath("/seller/listings");
+  revalidatePath(`/seller/listings/${productId}`);
+  revalidatePath(`/products/${productId}`);
+}
+
 export async function createDraftListing(
   _prev: CreateListingActionState,
   formData: FormData,
 ): Promise<CreateListingActionState> {
   const result = await createDraftProductCore(
-    {
-      title: readString(formData, "title"),
-      description: readString(formData, "description"),
-      categoryId: readString(formData, "categoryId"),
-      price: readString(formData, "price"),
-      stock: readString(formData, "stock"),
-    },
+    readListingFields(formData),
     readImageFiles(formData),
   );
 

@@ -220,7 +220,7 @@ Complete payment infrastructure so Members 2–4 only consume APIs / admin UI.
 - [x] Seller application form
 - [x] Pending / rejected / approved status screens
 - [x] Shop profile + public storefront (mini shop)
-- [ ] Product CRUD + multi-image gallery (Appwrite Storage) — create draft + images (3.4); edit/archive in 3.5
+- [x] Product CRUD + multi-image gallery (Appwrite Storage) — create draft + images (3.4); edit/archive in 3.5
 - [ ] Draft / publish / archive + category selection
 - [ ] Inventory / stock + availability toggle
 - [ ] Free vs paid listing toggle
@@ -243,7 +243,7 @@ Complete payment infrastructure so Members 2–4 only consume APIs / admin UI.
 | [x] **3.2**  | Status screens | Pending / rejected / approved gate                  | `/seller` blocked if not approved |
 | [x] **3.3**  | Shop profile   | Name, bio, banner; public shop page                 | Approved shops only public        |
 | [x] **3.4**  | Create product | Draft + images                                      | Own `sellerId` only               |
-| [ ] **3.5**  | Edit / archive | Update / archive                                    | Cannot edit others’ products      |
+| [x] **3.5**  | Edit / archive | Update / archive                                    | Cannot edit others’ products      |
 | [x] **3.6**  | Publish flow   | `draft` → `pending_review` / `active` per policy    | Align with Member 4 moderation    |
 | [ ] **3.7**  | Inventory      | Stock + availability toggle                         | Unavailable hides buy CTA         |
 | [ ] **3.8**  | Free listing   | `price=0` / `isFree`                                | Buyer free path works             |
@@ -257,7 +257,7 @@ Complete payment infrastructure so Members 2–4 only consume APIs / admin UI.
 
 ### Member 3 — verification extras
 
-- [x] Sellers only mutate **own** products/orders (create draft: server-forced `sellerId`)
+- [x] Sellers only mutate **own** products/orders (create draft + edit/archive: server-forced `sellerId` + ownership checks)
 - [x] Unpublished / rejected listings not publicly buyable (draft hidden from storefront reads)
 - [ ] Stock cannot go negative on confirm
 - [ ] Availability off hides buy CTA even if stock > 0
