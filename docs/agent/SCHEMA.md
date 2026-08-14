@@ -44,7 +44,7 @@ Server-action rate limits live in [`lib/security/rate-limit.ts`](../../lib/secur
 | Bank slip `status` | `pending` \| `approved` \| `rejected` |
 | Report `status` | `open` \| `reviewing` \| `resolved` \| `dismissed` |
 
-## Tables (17)
+## Tables (18)
 
 ### `profiles`
 
@@ -357,6 +357,28 @@ Server-action rate limits live in [`lib/security/rate-limit.ts`](../../lib/secur
 
 **Indexes:** `actorId_idx`, `resource_idx`
 
+---
+
+### `payhere_notify_logs`
+
+- **Row security:** no  
+- **Table permissions:** none (admin SDK / `payhere-notify` Function API key only)  
+- **Step:** Member 1 **1.26** — persist sanitized PayHere notify outcomes for ops. Never store `md5sig`, merchant secret, or card/PAN fields.
+
+| Column | Type | Required | Notes |
+|--------|------|----------|-------|
+| `outcome` | string(32) | yes | `NOTIFY_LOG_OUTCOMES` in [`notify-log-redact.ts`](../../lib/services/notify-log-redact.ts) |
+| `orderId` | string(36) | no | Posted `order_id` |
+| `payherePaymentId` | string(64) | no | Posted `payment_id` (PayHere id, not a secret) |
+| `statusCode` | string(8) | no | PayHere `status_code` |
+| `reason` | string(64) | no | Ignore/reject reason (`bad_sig`, `amount_mismatch`, …) |
+| `httpStatus` | integer | yes | Function HTTP status returned to PayHere |
+| `sanitizedPayload` | string(2000) | no | JSON allowlist: merchant_id, order_id, payment_id, amount, currency, status_code, method, status_message, custom_1/2 |
+
+**Indexes:** `outcome_idx`, `orderId_idx`
+
+**App read path:** [`listNotifyLogs`](../../lib/services/notify-logs.ts) via admin SDK (`requireLabel("admin")`). Session clients cannot read this table.
+
 ## Storage (step 1.8)
 
 Buckets created in console; re-apply with `node --env-file=.env.local scripts/setup-storage-buckets.mjs`.  
@@ -377,7 +399,7 @@ Uploads are rate-limited in `uploadFile` (see Abuse guards above).
 ## Console match checklist
 
 - [x] Database `marketplace` exists (TablesDB)
-- [x] All 17 table ids present and enabled
+- [x] All 18 table ids present and enabled
 - [x] Columns/indexes available (verified via SDK list)
 - [x] Enum values match this document
 - [x] Code constants in `lib/appwrite/config.ts` match table ids
@@ -398,3 +420,4 @@ Uploads are rate-limited in `uploadFile` (see Abuse guards above).
 | 2026-08-11 | Product title fulltext + searchActiveProducts (step 1.16) |
 | 2026-08-11 | Platform settings read helpers + seed keys (step 1.19) |
 | 2026-08-11 | PayHere Function interface freeze — see PAYHERE.md (step 1.20) |
+| 2026-08-14 | `payhere_notify_logs` table for sanitized notify ops rows (step 1.26) |

@@ -30,15 +30,15 @@ const OUTCOME_LABELS: Record<NotifyLogOutcome, string> = {
 };
 
 const SOURCE_EMPTY: Record<NotifyLogSource, string> = {
-  ready: "No notify executions match this filter.",
+  ready: "No notify logs match this filter.",
   empty:
-    "No payhere-notify executions yet. Ignored, rejected, and failed callbacks will appear here after the Function runs.",
+    "No notify log rows yet. Ignored, rejected, and failed callbacks will appear here after payhere-notify runs.",
   not_configured:
-    "Admin API is not configured on this server, so Function execution logs cannot be read.",
+    "Admin API is not configured on this server, so notify logs cannot be read.",
   not_deployed:
-    "The payhere-notify Function is not deployed in this project, and Member 1 has not persisted a dedicated notify-log table yet (step 1.26). This page will list Function execution logs (order id, status code, ignore/reject reason) once the Function exists. Merchant secret, hash, and card data are never shown.",
+    "Neither payhere_notify_logs nor the payhere-notify Function is available in this project. After the table exists and notify runs, ignored, rejected, and failed callbacks appear here. Merchant secret, hash, and card data are never shown.",
   unavailable:
-    "Could not read payhere-notify execution logs. Confirm APPWRITE_API_KEY can list Function executions. No secrets are displayed on this page.",
+    "Could not read notify logs. Confirm APPWRITE_API_KEY can read TablesDB (payhere_notify_logs) or Function executions. No secrets are displayed on this page.",
 };
 
 function formatCreatedAt(iso: string): string {

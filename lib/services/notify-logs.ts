@@ -1,10 +1,15 @@
 import { AppwriteException, Query } from "node-appwrite";
-import { hasAppwritePublicConfig } from "@/lib/appwrite/config";
+import {
+  DATABASE_ID,
+  hasAppwritePublicConfig,
+  TABLE_PAYHERE_NOTIFY_LOGS,
+} from "@/lib/appwrite/config";
 import { requireLabel } from "@/lib/appwrite/roles";
 import { createAdminClient } from "@/lib/appwrite/server";
 import { FUNCTION_PAYHERE_NOTIFY } from "@/lib/types/payhere";
 import {
   isNotifyLogIssue,
+  NOTIFY_LOG_OUTCOMES,
   parseNotifyLogText,
   redactNotifyLogText,
   type NotifyLogOutcome,
@@ -60,6 +65,68 @@ function appwriteCode(err: unknown): number | null {
   return null;
 }
 
+function asOutcome(raw: unknown): NotifyLogOutcome {
+  if (
+    typeof raw === "string" &&
+    (NOTIFY_LOG_OUTCOMES as readonly string[]).includes(raw)
+  ) {
+    return raw as NotifyLogOutcome;
+  }
+  return "unknown";
+}
+
+function asOptionalString(raw: unknown): string | null {
+  if (typeof raw !== "string") return null;
+  const trimmed = raw.trim();
+  return trimmed.length > 0 ? trimmed : null;
+}
+
+function asHttpStatus(raw: unknown): number {
+  if (typeof raw === "number" && Number.isFinite(raw)) return raw;
+  if (typeof raw === "string" && raw.trim() !== "") {
+    const n = Number(raw);
+    if (Number.isFinite(n)) return n;
+  }
+  return 0;
+}
+
+function asNotifyLogTableEntry(row: Record<string, unknown>): NotifyLogEntry {
+  const outcome = asOutcome(row.outcome);
+  const httpStatus = asHttpStatus(row.httpStatus);
+  const executionStatus = httpStatus >= 400 ? "failed" : "completed";
+  const orderId = asOptionalString(row.orderId);
+  const reason = asOptionalString(row.reason);
+  const statusCode = asOptionalString(row.statusCode);
+  const payload = asOptionalString(row.sanitizedPayload) ?? "";
+  const summary = [
+    `payhere-notify ${outcome}`,
+    orderId ? `order=${orderId}` : null,
+    statusCode ? `status=${statusCode}` : null,
+    reason ? `reason=${reason}` : null,
+    payload ? `payload=${payload}` : null,
+  ]
+    .filter(Boolean)
+    .join(" ");
+  const logs = redactNotifyLogText(summary);
+
+  return {
+    $id: String(row.$id ?? ""),
+    $createdAt: String(row.$createdAt ?? ""),
+    executionStatus,
+    responseStatusCode: httpStatus,
+    duration: 0,
+    trigger: "http",
+    requestMethod: "POST",
+    outcome,
+    orderId,
+    reason,
+    statusCode,
+    logs,
+    errors: "",
+    isIssue: isNotifyLogIssue(outcome, executionStatus, httpStatus),
+  };
+}
+
 function asNotifyLogEntry(execution: {
   $id: string;
   $createdAt: string;
@@ -108,11 +175,49 @@ export function parseNotifyLogCursor(raw: unknown): string | undefined {
   return trimmed.length > 0 ? trimmed : undefined;
 }
 
+async function listNotifyLogsFromTable(opts: {
+  view: NotifyLogView;
+  limit: number;
+  cursor?: string;
+}): Promise<ListNotifyLogsResult | null> {
+  try {
+    const { tables } = await createAdminClient();
+    const queries = [Query.orderDesc("$createdAt"), Query.limit(opts.limit)];
+    if (opts.cursor) {
+      queries.push(Query.cursorAfter(opts.cursor));
+    }
+
+    const result = await tables.listRows({
+      databaseId: DATABASE_ID,
+      tableId: TABLE_PAYHERE_NOTIFY_LOGS,
+      queries,
+    });
+
+    const mapped = result.rows.map((row) =>
+      asNotifyLogTableEntry(row as unknown as Record<string, unknown>),
+    );
+    const entries =
+      opts.view === "issues" ? mapped.filter((row) => row.isIssue) : mapped;
+    const last = mapped.at(-1);
+    const nextCursor =
+      result.rows.length === opts.limit && last ? last.$id : null;
+
+    return {
+      source: mapped.length === 0 && !opts.cursor ? "empty" : "ready",
+      entries,
+      nextCursor,
+    };
+  } catch (err) {
+    const code = appwriteCode(err);
+    if (code === 404) return null;
+    return { source: "unavailable", entries: [], nextCursor: null };
+  }
+}
+
 /**
- * Admin-only read of `payhere-notify` Function execution logs.
- * Member 1 step 1.26 has not persisted a dedicated table yet — this uses
- * Function stdout/stderr (order_id, status_code, ignore/reject reason).
- * Request bodies, headers, md5sig, merchant secret, and card fields are never returned.
+ * Admin-only read of persisted `payhere_notify_logs` (step 1.26).
+ * Falls back to Function execution stdout if the table is not deployed.
+ * Request bodies, md5sig, merchant secret, and card fields are never returned.
  */
 export async function listNotifyLogs(opts?: {
   view?: NotifyLogView;
@@ -128,6 +233,9 @@ export async function listNotifyLogs(opts?: {
   const limit = clampLimit(opts?.limit);
   const cursor = opts?.cursor?.trim() || undefined;
   const view: NotifyLogView = opts?.view === "issues" ? "issues" : "all";
+
+  const fromTable = await listNotifyLogsFromTable({ view, limit, cursor });
+  if (fromTable) return fromTable;
 
   try {
     const { functions } = await createAdminClient();
@@ -145,7 +253,8 @@ export async function listNotifyLogs(opts?: {
     const mapped = result.executions.map((execution) =>
       asNotifyLogEntry(execution),
     );
-    const entries = view === "issues" ? mapped.filter((row) => row.isIssue) : mapped;
+    const entries =
+      view === "issues" ? mapped.filter((row) => row.isIssue) : mapped;
     const last = mapped.at(-1);
     const nextCursor =
       result.executions.length === limit && last ? last.$id : null;

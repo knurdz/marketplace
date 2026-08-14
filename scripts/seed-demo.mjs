@@ -4,8 +4,8 @@
  *      → node --env-file=.env.local scripts/seed-demo.mjs
  *
  * Creates: admin / seller / buyer users + profiles, approved seller shop,
- * two categories, one active sample product, one buyer welcome notification,
- * MVP platform_settings rows.
+ * two categories, paid + free active sample products, one buyer welcome
+ * notification, MVP platform_settings rows.
  */
 import {
   Client,
@@ -59,7 +59,26 @@ const CATEGORIES = [
   },
 ];
 
-const PRODUCT_ID = "seed_demo_product";
+const PRODUCTS = [
+  {
+    rowId: "seed_demo_product",
+    title: "Demo Sticker Pack",
+    description:
+      "Seeded sample product for Knurdz Marketplace. Active listing used by listActiveProducts.",
+    price: 500,
+    isFree: false,
+    stock: 25,
+  },
+  {
+    rowId: "seed_demo_free_product",
+    title: "Demo Free Sticker",
+    description:
+      "Seeded free listing for confirmFreeOrder (price=0). Active; used by the free checkout path.",
+    price: 0,
+    isFree: true,
+    stock: 25,
+  },
+];
 const SELLER_PROFILE_ID = "seed_seller_profile";
 const BUYER_WELCOME_NOTIFICATION_ID = "seed_buyer_welcome_notification";
 
@@ -273,17 +292,16 @@ async function ensureCategory(spec) {
   }
 }
 
-async function ensureProduct(sellerUserId, categoryId) {
+async function ensureProduct(sellerUserId, categoryId, spec) {
   const data = {
     sellerId: sellerUserId,
     categoryId,
-    title: "Demo Sticker Pack",
-    description:
-      "Seeded sample product for Knurdz Marketplace. Active listing used by listActiveProducts.",
-    price: 500,
-    isFree: false,
+    title: spec.title,
+    description: spec.description,
+    price: spec.price,
+    isFree: spec.isFree,
     status: "active",
-    stock: 25,
+    stock: spec.stock,
     available: true,
     currency: "LKR",
   };
@@ -301,26 +319,26 @@ async function ensureProduct(sellerUserId, categoryId) {
     await db.getRow({
       databaseId: DATABASE_ID,
       tableId: "products",
-      rowId: PRODUCT_ID,
+      rowId: spec.rowId,
     });
     await db.updateRow({
       databaseId: DATABASE_ID,
       tableId: "products",
-      rowId: PRODUCT_ID,
+      rowId: spec.rowId,
       data,
       permissions,
     });
-    console.log(`= product: ${PRODUCT_ID}`);
+    console.log(`= product: ${spec.rowId}`);
   } catch (error) {
     if (!isNotFound(error)) throw error;
     await db.createRow({
       databaseId: DATABASE_ID,
       tableId: "products",
-      rowId: PRODUCT_ID,
+      rowId: spec.rowId,
       data,
       permissions,
     });
-    console.log(`+ product: ${PRODUCT_ID}`);
+    console.log(`+ product: ${spec.rowId}`);
   }
 }
 
@@ -438,7 +456,9 @@ async function main() {
     await ensureCategory(cat);
   }
 
-  await ensureProduct(created.seller.$id, CATEGORIES[0].rowId);
+  for (const product of PRODUCTS) {
+    await ensureProduct(created.seller.$id, CATEGORIES[0].rowId, product);
+  }
   await ensureBuyerWelcomeNotification(created.buyer.$id);
 
   for (const setting of PLATFORM_SETTINGS) {
@@ -452,7 +472,11 @@ async function main() {
       `  ${spec.key.padEnd(6)} ${spec.email}  labels=[${spec.labels.join(",")}]`,
     );
   }
-  console.log(`  product ${PRODUCT_ID} (status=active)`);
+  for (const product of PRODUCTS) {
+    console.log(
+      `  product ${product.rowId} (status=active, isFree=${product.isFree})`,
+    );
+  }
   console.log(`  notification ${BUYER_WELCOME_NOTIFICATION_ID} (buyer)`);
   console.log(`  platform_settings (${PLATFORM_SETTINGS.length} keys)`);
 }

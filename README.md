@@ -12,7 +12,7 @@ Multi-role marketplace web app built with **Next.js** (frontend) and **Appwrite*
 
 ## Payments (MVP)
 
-- **PayHere** — sandbox card checkout (server-side hash + notify verification)
+- **PayHere** — sandbox card checkout (server-side hash + notify verification). Test cards and a click-path demo: [`docs/agent/PAYHERE.md`](./docs/agent/PAYHERE.md#sandbox-demo-step-127).
 - **Bank transfer** — instructions + slip upload, then verification
 - **Free** — zero-price listings / checkout without a gateway
 
@@ -80,7 +80,7 @@ After schema + buckets are applied:
 npm run seed
 ```
 
-Creates idempotent demo users, profiles, an approved seller shop, two categories, and one **active** sample product (`seed_demo_product`).
+Creates idempotent demo users, profiles, an approved seller shop, two categories, and two **active** sample products: `seed_demo_product` (500 LKR, PayHere) and `seed_demo_free_product` (price 0, free checkout). PayHere sandbox + free click-paths: [`docs/agent/PAYHERE.md`](./docs/agent/PAYHERE.md#sandbox-demo-step-127).
 
 | Role   | Email                | Labels            |
 | ------ | -------------------- | ----------------- |
@@ -111,5 +111,7 @@ Shared storefront `/` is the landing page for every role. There is a single `/lo
 ## Status
 
 **Phase 0 complete (steps 1.1–1.13).** Member 1 foundation is ready: auth, schema, storage, UI shells, shared types/services, and demo seed. **Members 2–4 may bind UI to live Appwrite APIs.**
+
+**Payment setup complete (steps 1.22–1.28).** Member 2 checkout UX calls `requestPayHereCheckout` and `confirmFreeOrder`; Member 4 reads notify logs. Sandbox test cards and the consume contract: [`docs/agent/PAYHERE.md`](./docs/agent/PAYHERE.md). Card E2E still needs merchant id/secret + notify domain on Function env in the console (never `NEXT_PUBLIC_*`).
 
 Setup order for a fresh clone: env → `setup-mvp-schema.mjs` → `setup-storage-buckets.mjs` → `npm run seed` → `npm run dev`.

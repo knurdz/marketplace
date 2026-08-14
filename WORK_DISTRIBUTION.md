@@ -131,9 +131,9 @@ Complete payment infrastructure so Members 2–4 only consume APIs / admin UI.
 | [x] **1.23** | PayHere notify Function          | `payhere-notify`; verify md5sig; idempotent `paid` + stock once             | Replay notify safe                                                 |
 | [x] **1.24** | Free confirm path                | Secure server/Function confirm for `method=free` (no client-trusted amount) | Free orders mark paid once                                         |
 | [x] **1.25** | Wire client stub → live Function | `requestPayHereCheckout` calls real hash Function                           | Member 2 can POST sandbox form                                     |
-| [ ] **1.26** | Notify / webhook failure logging | Persist failed/raw notify for ops (admin-readable later)                    | No secrets in logs/UI                                              |
-| [ ] **1.27** | Sandbox payment notes            | Test cards + demo steps in `docs/agent/PAYHERE.md`                          | Human-runnable                                                     |
-| [ ] **1.28** | Payment setup done gate          | Announce to Members 2 & 4                                                   | Free + PayHere sandbox paths work end-to-end with stub/checkout UX |
+| [x] **1.26** | Notify / webhook failure logging | Persist failed/raw notify for ops (admin-readable later)                    | No secrets in logs/UI                                              |
+| [x] **1.27** | Sandbox payment notes            | Test cards + demo steps in `docs/agent/PAYHERE.md`                          | Human-runnable                                                     |
+| [x] **1.28** | Payment setup done gate          | Announce to Members 2 & 4                                                   | Free + PayHere sandbox paths work end-to-end with stub/checkout UX |
 
 
 **Checklist**
@@ -141,14 +141,14 @@ Complete payment infrastructure so Members 2–4 only consume APIs / admin UI.
 - [x] Appwrite Function: PayHere checkout hash
 - [x] Appwrite Function: PayHere notify verify + idempotent `paid`
 - [x] Free payment confirm (server-side)
-- [ ] Monitor / log PayHere notify failures
-- [ ] Sandbox demo / test-card notes
+- [x] Monitor / log PayHere notify failures
+- [x] Sandbox demo / test-card notes
 - [x] Merchant secret only in Function env (never `NEXT_PUBLIC_*`)
 
 ### Member 1 — done when
 
 - [x] Others can auth, hit empty role dashboards, upload a file, and read seeded products
-- [ ] Payment setup (1.22–1.28): others can complete free + PayHere sandbox via Member 1 Functions
+- [x] Payment setup (1.22–1.28): others can complete free + PayHere sandbox via Member 1 Functions
 
 ---
 

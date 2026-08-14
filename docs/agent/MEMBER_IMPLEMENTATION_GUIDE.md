@@ -104,7 +104,7 @@ WORK_DISTRIBUTION.md          # Root — checklists + step plans
 
 ### Minimum collections (Member 1 creates)
 
-`profiles`, `seller_profiles`, `categories`, `products`, `product_images` (or image IDs on product), `carts`/`cart_items` (or client+server cart), `orders`, `order_items`, `payments`, `bank_slips`, `reviews`, `reports`, `notifications`, `platform_settings`, `audit_logs`
+`profiles`, `seller_profiles`, `categories`, `products`, `product_images` (or image IDs on product), `carts`/`cart_items` (or client+server cart), `orders`, `order_items`, `payments`, `bank_slips`, `reviews`, `reports`, `notifications`, `platform_settings`, `audit_logs`, `payhere_notify_logs`
 
 ### Agent rules every step
 
@@ -182,6 +182,8 @@ None (you start first). Own **payment setup** (PayHere Functions + free confirm)
 ### Member 1 — Definition of done
 
 Others can: register/login → hit role shell → upload a file → list seeded `active` products.
+
+**Payment setup (1.22–1.28):** others can complete **free** checkout via `confirmFreeOrder` (seeded `seed_demo_free_product`) and **PayHere sandbox** via `requestPayHereCheckout` + Member 2 UX, once Function merchant env + `PAYHERE_NOTIFY_URL` are set in the console. See [`PAYHERE.md`](./PAYHERE.md) consumer contract.
 
 ---
 

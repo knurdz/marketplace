@@ -661,6 +661,33 @@ async function setupAuditLogs() {
   ]);
 }
 
+async function setupPayhereNotifyLogs() {
+  // Function + admin SDK only — empty client permissions (same as audit_logs).
+  await ensureTable("payhere_notify_logs", "PayHere Notify Logs", [], false);
+  await ensureString("payhere_notify_logs", "outcome", 32, true);
+  await ensureString("payhere_notify_logs", "orderId", 36, false);
+  await ensureString("payhere_notify_logs", "payherePaymentId", 64, false);
+  await ensureString("payhere_notify_logs", "statusCode", 8, false);
+  await ensureString("payhere_notify_logs", "reason", 64, false);
+  await ensureInt("payhere_notify_logs", "httpStatus", true);
+  await ensureString("payhere_notify_logs", "sanitizedPayload", 2000, false);
+  await waitColumnsAvailable("payhere_notify_logs", [
+    "outcome",
+    "orderId",
+    "payherePaymentId",
+    "statusCode",
+    "reason",
+    "httpStatus",
+    "sanitizedPayload",
+  ]);
+  await ensureIndex("payhere_notify_logs", "outcome_idx", TablesDBIndexType.Key, [
+    "outcome",
+  ]);
+  await ensureIndex("payhere_notify_logs", "orderId_idx", TablesDBIndexType.Key, [
+    "orderId",
+  ]);
+}
+
 async function main() {
   console.log(`Setting up schema in database=${DATABASE_ID}`);
   // profiles + categories already created via MCP; keep idempotent helpers unused for them.
@@ -679,6 +706,7 @@ async function main() {
   await setupNotifications();
   await setupPlatformSettings();
   await setupAuditLogs();
+  await setupPayhereNotifyLogs();
   console.log("Done.");
 }
 

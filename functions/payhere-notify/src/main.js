@@ -1,4 +1,5 @@
-import { Client, Query, TablesDB } from "node-appwrite";
+import { Client, ID, Query, TablesDB } from "node-appwrite";
+import { notifyLogRowFromDecision } from "./log.js";
 import { parseNotifyForm } from "./md5.js";
 import { decideNotifyAction, verifyNotifySignature } from "./notify.js";
 
@@ -7,6 +8,7 @@ const TABLE_ORDERS = "orders";
 const TABLE_ORDER_ITEMS = "order_items";
 const TABLE_PAYMENTS = "payments";
 const TABLE_PRODUCTS = "products";
+const TABLE_NOTIFY_LOGS = "payhere_notify_logs";
 
 function header(req, name) {
   const headers = req.headers || {};
@@ -32,6 +34,35 @@ function asNumber(value, fallback = 0) {
     if (Number.isFinite(n)) return n;
   }
   return fallback;
+}
+
+function tryCreateTables(req) {
+  const endpoint = process.env.APPWRITE_FUNCTION_API_ENDPOINT?.trim();
+  const projectId = process.env.APPWRITE_FUNCTION_PROJECT_ID?.trim();
+  const apiKey =
+    header(req, "x-appwrite-key").trim() ||
+    process.env.APPWRITE_API_KEY?.trim() ||
+    "";
+  if (!endpoint || !projectId || !apiKey) return null;
+  const client = new Client()
+    .setEndpoint(endpoint)
+    .setProject(projectId)
+    .setKey(apiKey);
+  return new TablesDB(client);
+}
+
+async function persistNotifyLog(tables, row) {
+  if (!tables || !row) return;
+  try {
+    await tables.createRow({
+      databaseId: DATABASE_ID,
+      tableId: TABLE_NOTIFY_LOGS,
+      rowId: ID.unique(),
+      data: row,
+    });
+  } catch {
+    // Log insert must never change the PayHere HTTP contract.
+  }
 }
 
 async function loadOrderPaymentItems(tables, orderId) {
@@ -182,37 +213,45 @@ async function handlePayHereNotify({ req, res, log, error }) {
     return res.text("Method not allowed.", 405);
   }
 
+  const posted = parseNotifyForm(req.bodyText ?? req.body ?? req.bodyJson);
   const merchantId = process.env.PAYHERE_MERCHANT_ID?.trim() || "";
   const merchantSecret = process.env.PAYHERE_MERCHANT_SECRET || "";
   if (!merchantId || !merchantSecret.trim()) {
     error("payhere-notify missing Function env (no secrets logged)");
+    const tables = tryCreateTables(req);
+    await persistNotifyLog(
+      tables,
+      notifyLogRowFromDecision({
+        posted,
+        kind: "config_error",
+        reason: "missing_env",
+        httpStatus: 500,
+      }),
+    );
     return res.text("Not configured.", 500);
   }
 
-  const posted = parseNotifyForm(req.bodyText ?? req.body ?? req.bodyJson);
   const sig = verifyNotifySignature(posted, merchantSecret, merchantId);
   if (!sig.ok) {
     log(`payhere-notify ignored reason=${sig.reason}`);
+    const tables = tryCreateTables(req);
+    await persistNotifyLog(
+      tables,
+      notifyLogRowFromDecision({
+        posted,
+        kind: "ignored",
+        reason: sig.reason,
+        httpStatus: 200,
+      }),
+    );
     return ok(res);
   }
 
-  const endpoint = process.env.APPWRITE_FUNCTION_API_ENDPOINT?.trim();
-  const projectId = process.env.APPWRITE_FUNCTION_PROJECT_ID?.trim();
-  const apiKey =
-    header(req, "x-appwrite-key").trim() ||
-    process.env.APPWRITE_API_KEY?.trim() ||
-    "";
-
-  if (!endpoint || !projectId || !apiKey) {
+  const tables = tryCreateTables(req);
+  if (!tables) {
     error("payhere-notify missing Appwrite Function credentials");
     return res.text("Not configured.", 500);
   }
-
-  const client = new Client()
-    .setEndpoint(endpoint)
-    .setProject(projectId)
-    .setKey(apiKey);
-  const tables = new TablesDB(client);
 
   const orderId = posted.order_id;
   try {
@@ -225,11 +264,28 @@ async function handlePayHereNotify({ req, res, log, error }) {
 
     if (decision.action === "noop") {
       log(`payhere-notify noop order=${orderId} status=${posted.status_code}`);
+      await persistNotifyLog(
+        tables,
+        notifyLogRowFromDecision({
+          posted,
+          decision,
+          paymentStatus: loaded.payment?.status,
+          httpStatus: 200,
+        }),
+      );
       return ok(res);
     }
 
     if (decision.action === "reject") {
       log(`payhere-notify reject order=${orderId} reason=${decision.reason}`);
+      await persistNotifyLog(
+        tables,
+        notifyLogRowFromDecision({
+          posted,
+          decision,
+          httpStatus: 200,
+        }),
+      );
       return ok(res);
     }
 
@@ -241,6 +297,14 @@ async function handlePayHereNotify({ req, res, log, error }) {
         data: { status: "failed" },
       });
       log(`payhere-notify payment_failed order=${orderId}`);
+      await persistNotifyLog(
+        tables,
+        notifyLogRowFromDecision({
+          posted,
+          decision,
+          httpStatus: 200,
+        }),
+      );
       return ok(res);
     }
 
@@ -263,6 +327,14 @@ async function handlePayHereNotify({ req, res, log, error }) {
       });
       await tables.updateTransaction({ transactionId, commit: true });
       log(`payhere-notify refunded order=${orderId}`);
+      await persistNotifyLog(
+        tables,
+        notifyLogRowFromDecision({
+          posted,
+          decision,
+          httpStatus: 200,
+        }),
+      );
       return ok(res);
     }
 
@@ -279,19 +351,52 @@ async function handlePayHereNotify({ req, res, log, error }) {
     } catch (err) {
       if (await paymentAlreadyPaid(tables, orderId)) {
         log(`payhere-notify settle race already_paid order=${orderId}`);
+        await persistNotifyLog(
+          tables,
+          notifyLogRowFromDecision({
+            posted,
+            kind: "already_paid",
+            httpStatus: 200,
+          }),
+        );
         return ok(res);
       }
       error(
         `payhere-notify settle failed: ${err instanceof Error ? err.message : "unknown"}`,
       );
+      await persistNotifyLog(
+        tables,
+        notifyLogRowFromDecision({
+          posted,
+          kind: "settle_failed",
+          httpStatus: 500,
+        }),
+      );
       return res.text("Retry.", 500);
     }
 
     log(`payhere-notify settled order=${orderId}`);
+    await persistNotifyLog(
+      tables,
+      notifyLogRowFromDecision({
+        posted,
+        kind: "settled",
+        decision,
+        httpStatus: 200,
+      }),
+    );
     return ok(res);
   } catch (err) {
     error(
       `payhere-notify failed: ${err instanceof Error ? err.message : "unknown"}`,
+    );
+    await persistNotifyLog(
+      tables,
+      notifyLogRowFromDecision({
+        posted,
+        kind: "error",
+        httpStatus: 500,
+      }),
     );
     return res.text("Retry.", 500);
   }
