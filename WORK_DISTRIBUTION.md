@@ -28,28 +28,28 @@
 
 Use after every change that touches code or schema:
 
-- [ ] Re-read own changes end-to-end; no uncertain behavior left unresolved
-- [ ] AuthZ checked (roles/labels + Appwrite permissions; not UI-only)
-- [ ] No secrets in client / `NEXT_PUBLIC_*`
-- [ ] IDOR / ownership checks on reads & writes you added
-- [ ] Inputs validated (frontend + server); uploads constrained if applicable
-- [ ] Payment paths (if touched): notify/hash trusted; idempotent; return_url not sole source of truth
-- [ ] Graphify consulted before work (if graph exists) and updated after
-- [ ] Relevant Appwrite MCP tools used when touching Appwrite (docs/context/search/call)
-- [ ] Relevant member checklist items below updated
-- [ ] Did not break another member’s contract (types, status enums, routes)
+- [x] Re-read own changes end-to-end; no uncertain behavior left unresolved
+- [x] AuthZ checked (roles/labels + Appwrite permissions; not UI-only)
+- [x] No secrets in client / `NEXT_PUBLIC_*`
+- [ ] IDOR / ownership checks on reads & writes you added — N/A (no new resource mutations)
+- [x] Inputs validated (frontend + server); uploads constrained if applicable
+- [ ] Payment paths (if touched): notify/hash trusted; idempotent; return_url not sole source of truth — N/A
+- [x] Graphify consulted before work (graph exists). CLI `graphify` not on PATH — update skipped; retry when the CLI is available
+- [ ] Relevant Appwrite MCP tools used when touching Appwrite (docs/context/search/call) — N/A (no schema/API mutation)
+- [x] Relevant member checklist items below updated
+- [x] Did not break another member’s contract (types, status enums, routes)
 
 ---
 
 ## Development phases (team sync)
 
-| Phase                | Focus                                    | Primary owners     |
-| -------------------- | ---------------------------------------- | ------------------ |
-| 1 — Foundation       | Auth, DB, storage, shells, guards        | Member 1           |
-| 2 — Core marketplace | Listings, cart, checkout, orders         | Members 2–3        |
-| 3 — Role systems     | Seller dashboard, admin panel            | Members 3–4        |
+| Phase                | Focus                                                | Primary owners     |
+| -------------------- | ---------------------------------------------------- | ------------------ |
+| 1 — Foundation       | Auth, DB, storage, shells, guards                    | Member 1           |
+| 2 — Core marketplace | Listings, cart, checkout, orders                     | Members 2–3        |
+| 3 — Role systems     | Seller dashboard, admin panel                        | Members 3–4        |
 | 4 — Payments         | PayHere Functions + free confirm + payment E2E setup | **Member 1**       |
-| 5 — Enhancements     | Reviews, notifications, creative backlog | As capacity allows |
+| 5 — Enhancements     | Reviews, notifications, creative backlog             | As capacity allows |
 
 ---
 
@@ -91,16 +91,16 @@ Use after every change that touches code or schema:
 
 ### Phase 1 — ongoing
 
-| Step         | Goal                          | Do                                                                   | Verify                                            |
-| ------------ | ----------------------------- | -------------------------------------------------------------------- | ------------------------------------------------- |
-| [x] **1.14** | Auth/upload rate limits       | In-process sliding window on auth + upload server actions            | Burst login/recovery blocked; recovery non-enumerating |
-| [x] **1.15** | Notifications badge           | Own-only service + polling bell in store/portal nav + demo seed      | Unread badge; mark read; guest has no bell            |
-| [x] **1.16** | Global product search         | `title_fulltext` + `searchActiveProducts` + `/search` verify UI      | Active-only results; empty q → []; demo “sticker” hits |
-| [x] **1.17** | Legal / FAQ pages             | Static Terms, Privacy, FAQ + store footer links                      | Routes render; footer links work                      |
-| [x] **1.18** | Toasts + errors + loading     | Sonner toasts, segment error.tsx / loading.tsx, profile-form sample  | Toast on profile save; error/loading UI present       |
-| [x] **1.19** | Platform settings reader      | `getPlatformSetting(s)` + seeded MVP keys                            | Signed-in read; guest → null; unknown key → null      |
-| [x] **1.20** | PayHere Function interfaces   | `PAYHERE.md` + types + `requestPayHereCheckout` stub (no secrets)    | Contract frozen; missing Function → typed error       |
-| [x] **1.21** | A11y / responsive baseline    | Skip link, reduced motion, landmarks, touch targets, form alerts     | Skip→#main-content; login/profile errors wired        |
+| Step         | Goal                        | Do                                                                  | Verify                                                 |
+| ------------ | --------------------------- | ------------------------------------------------------------------- | ------------------------------------------------------ |
+| [x] **1.14** | Auth/upload rate limits     | In-process sliding window on auth + upload server actions           | Burst login/recovery blocked; recovery non-enumerating |
+| [x] **1.15** | Notifications badge         | Own-only service + polling bell in store/portal nav + demo seed     | Unread badge; mark read; guest has no bell             |
+| [x] **1.16** | Global product search       | `title_fulltext` + `searchActiveProducts` + `/search` verify UI     | Active-only results; empty q → []; demo “sticker” hits |
+| [x] **1.17** | Legal / FAQ pages           | Static Terms, Privacy, FAQ + store footer links                     | Routes render; footer links work                       |
+| [x] **1.18** | Toasts + errors + loading   | Sonner toasts, segment error.tsx / loading.tsx, profile-form sample | Toast on profile save; error/loading UI present        |
+| [x] **1.19** | Platform settings reader    | `getPlatformSetting(s)` + seeded MVP keys                           | Signed-in read; guest → null; unknown key → null       |
+| [x] **1.20** | PayHere Function interfaces | `PAYHERE.md` + types + `requestPayHereCheckout` stub (no secrets)   | Contract frozen; missing Function → typed error        |
+| [x] **1.21** | A11y / responsive baseline  | Skip link, reduced motion, landmarks, touch targets, form alerts    | Skip→#main-content; login/profile errors wired         |
 
 - [x] In-app notifications collection + badge hook/UI (polling OK for MVP; realtime later)
 - [x] Global product search helper
@@ -111,21 +111,22 @@ Use after every change that touches code or schema:
 - [ ] Schema changelog when others request fields
 - [ ] PayHere Function **interfaces** (`PAYHERE.md` + types + stub) — implementation is Member 1 payment setup below
 - [x] Accessibility / responsive baseline pass
+- [x] Role-based post-login redirects (admin → `/admin`, seller → `/seller`, buyer → `/`); single `/login`
 - [ ] Fix cross-member integration issues; keep API contracts consistent
 
 ### Payment setup (Member 1 — was formerly Members 2 + 4)
 
 Complete payment infrastructure so Members 2–4 only consume APIs / admin UI.
 
-| Step | Goal | Do | Verify |
-|------|------|----|--------|
-| [ ] **1.22** | PayHere hash Function | Appwrite Function `payhere-checkout-hash`; secret in Function env only | Signed checkout fields from DB order |
-| [ ] **1.23** | PayHere notify Function | `payhere-notify`; verify md5sig; idempotent `paid` + stock once | Replay notify safe |
-| [ ] **1.24** | Free confirm path | Secure server/Function confirm for `method=free` (no client-trusted amount) | Free orders mark paid once |
-| [ ] **1.25** | Wire client stub → live Function | `requestPayHereCheckout` calls real hash Function | Member 2 can POST sandbox form |
-| [ ] **1.26** | Notify / webhook failure logging | Persist failed/raw notify for ops (admin-readable later) | No secrets in logs/UI |
-| [ ] **1.27** | Sandbox payment notes | Test cards + demo steps in `docs/agent/PAYHERE.md` | Human-runnable |
-| [ ] **1.28** | Payment setup done gate | Announce to Members 2 & 4 | Free + PayHere sandbox paths work end-to-end with stub/checkout UX |
+| Step         | Goal                             | Do                                                                          | Verify                                                             |
+| ------------ | -------------------------------- | --------------------------------------------------------------------------- | ------------------------------------------------------------------ |
+| [ ] **1.22** | PayHere hash Function            | Appwrite Function `payhere-checkout-hash`; secret in Function env only      | Signed checkout fields from DB order                               |
+| [ ] **1.23** | PayHere notify Function          | `payhere-notify`; verify md5sig; idempotent `paid` + stock once             | Replay notify safe                                                 |
+| [ ] **1.24** | Free confirm path                | Secure server/Function confirm for `method=free` (no client-trusted amount) | Free orders mark paid once                                         |
+| [ ] **1.25** | Wire client stub → live Function | `requestPayHereCheckout` calls real hash Function                           | Member 2 can POST sandbox form                                     |
+| [ ] **1.26** | Notify / webhook failure logging | Persist failed/raw notify for ops (admin-readable later)                    | No secrets in logs/UI                                              |
+| [ ] **1.27** | Sandbox payment notes            | Test cards + demo steps in `docs/agent/PAYHERE.md`                          | Human-runnable                                                     |
+| [ ] **1.28** | Payment setup done gate          | Announce to Members 2 & 4                                                   | Free + PayHere sandbox paths work end-to-end with stub/checkout UX |
 
 **Checklist**
 
@@ -280,22 +281,22 @@ Complete payment infrastructure so Members 2–4 only consume APIs / admin UI.
 
 ### Step-by-step plan (implement one step at a time)
 
-| Step         | Goal                    | Do                                        | Verify                      |
-| ------------ | ----------------------- | ----------------------------------------- | --------------------------- |
-| [ ] **4.1**  | Admin metrics           | Users, sellers, orders, revenue           | Admin-only                  |
-| [ ] **4.2**  | Seller approval         | Approve → `seller` label; reject + reason | Audit logged                |
-| [ ] **4.3**  | User management         | View, suspend; block checkout/publish     | Server-side enforcement     |
-| [ ] **4.4**  | Listing moderation      | Approve/reject/remove                     | Status enums only           |
-| [ ] **4.5**  | Categories CRUD         | Create/update/order                       | Storefront reads them       |
-| [ ] **4.6**  | All orders + filters    | By payment method/status                  | Admin access only           |
-| [ ] **4.7**  | Bank slip queue         | Approve → `paid` + stock; reject          | Idempotent; audit           |
-| [ ] **4.8**  | Reports / disputes      | Triage workflow                           | Status transitions          |
-| [ ] **4.9**  | Platform settings UI    | Sandbox, bank copy, fees (admin write)    | Safe public fields only     |
-| [ ] **4.10** | Audit viewer            | List admin actions                        | Append-only                 |
-| [ ] **4.11** | Analytics               | Sales + user growth                       | No PII leakage              |
-| [ ] **4.12** | Badges + fraud flags    | Verification badge; rule flags            | Rules documented            |
-| [ ] **4.13** | Notify log viewer (opt) | Read-only UI over Member 1 failure logs   | No secrets in UI            |
-| [ ] **4.14** | Optional Phase 5        | Featured listings, coupons                | After E2E                   |
+| Step         | Goal                    | Do                                        | Verify                  |
+| ------------ | ----------------------- | ----------------------------------------- | ----------------------- |
+| [ ] **4.1**  | Admin metrics           | Users, sellers, orders, revenue           | Admin-only              |
+| [ ] **4.2**  | Seller approval         | Approve → `seller` label; reject + reason | Audit logged            |
+| [ ] **4.3**  | User management         | View, suspend; block checkout/publish     | Server-side enforcement |
+| [ ] **4.4**  | Listing moderation      | Approve/reject/remove                     | Status enums only       |
+| [ ] **4.5**  | Categories CRUD         | Create/update/order                       | Storefront reads them   |
+| [ ] **4.6**  | All orders + filters    | By payment method/status                  | Admin access only       |
+| [ ] **4.7**  | Bank slip queue         | Approve → `paid` + stock; reject          | Idempotent; audit       |
+| [ ] **4.8**  | Reports / disputes      | Triage workflow                           | Status transitions      |
+| [ ] **4.9**  | Platform settings UI    | Sandbox, bank copy, fees (admin write)    | Safe public fields only |
+| [ ] **4.10** | Audit viewer            | List admin actions                        | Append-only             |
+| [ ] **4.11** | Analytics               | Sales + user growth                       | No PII leakage          |
+| [ ] **4.12** | Badges + fraud flags    | Verification badge; rule flags            | Rules documented        |
+| [ ] **4.13** | Notify log viewer (opt) | Read-only UI over Member 1 failure logs   | No secrets in UI        |
+| [ ] **4.14** | Optional Phase 5        | Featured listings, coupons                | After E2E               |
 
 ### Member 4 — verification extras
 
@@ -324,25 +325,25 @@ Pick up only after Phases 1–4 are solid. Assign when claimed.
 
 ## Risks (track while implementing)
 
-| Risk                              | Mitigation                                          |
-| --------------------------------- | --------------------------------------------------- |
-| Bank transfer verification delays | Clear buyer status + admin queue SLAs; reminders    |
-| Fake sellers / spam               | Approval gate, badges, reports, suspend tools       |
-| Appwrite limits                   | Lean queries, indexes, avoid N+1; monitor usage     |
-| UI scope creep                    | Freeze MVP checklists; park extras in backlog above |
-| Payment secret leakage            | **Member 1** Functions only; Member 2 UX-only PayHere   |
+| Risk                              | Mitigation                                            |
+| --------------------------------- | ----------------------------------------------------- |
+| Bank transfer verification delays | Clear buyer status + admin queue SLAs; reminders      |
+| Fake sellers / spam               | Approval gate, badges, reports, suspend tools         |
+| Appwrite limits                   | Lean queries, indexes, avoid N+1; monitor usage       |
+| UI scope creep                    | Freeze MVP checklists; park extras in backlog above   |
+| Payment secret leakage            | **Member 1** Functions only; Member 2 UX-only PayHere |
 
 ---
 
 ## Suggested timeline
 
-| When       | Focus                                          |
-| ---------- | ---------------------------------------------- |
-| Week 1     | Member 1 Phase 0; others wireframe / mock only |
-| Week 1 end | Schema freeze v1 + seed                        |
-| Weeks 2–3  | Members 2–4 implement portals (Phases 2–3)     |
+| When       | Focus                                                             |
+| ---------- | ----------------------------------------------------------------- |
+| Week 1     | Member 1 Phase 0; others wireframe / mock only                    |
+| Week 1 end | Schema freeze v1 + seed                                           |
+| Weeks 2–3  | Members 2–4 implement portals (Phases 2–3)                        |
 | Week 3     | E2E payments: Member 1 setup + Member 2 UX + Member 4 bank verify |
-| Week 4     | Hardening, demo, Phase 5 extras if ahead       |
+| Week 4     | Hardening, demo, Phase 5 extras if ahead                          |
 
 ---
 
@@ -362,4 +363,4 @@ Pick up only after Phases 1–4 are solid. Assign when claimed.
 | 2026-08-10 | Initial distribution from project analysis                                                                                                                                                            |
 | 2026-08-10 | Merged team Full Feature Analysis: phases, filters/sort, dashboards, reviews/seller ratings, availability toggle, disputes, analytics, badges/fraud flags, backlog; clarified PayHere ownership split |
 | 2026-08-10 | Added numbered step plans (1.1–4.18) matching `docs/agent/MEMBER_IMPLEMENTATION_GUIDE.md`                                                                                                             |
-| 2026-08-11 | **Payment setup → Member 1** (steps 1.22–1.28). Removed PayHere Functions from Members 2 & 4; Member 2 keeps checkout UX only; Member 4 keeps bank-slip admin UI |
+| 2026-08-11 | **Payment setup → Member 1** (steps 1.22–1.28). Removed PayHere Functions from Members 2 & 4; Member 2 keeps checkout UX only; Member 4 keeps bank-slip admin UI                                      |
