@@ -1,34 +1,34 @@
 # Graph Report - knurdz-marketplace  (2026-08-15)
 
 ## Corpus Check
-- 228 files · ~102,130 words
+- 230 files · ~104,814 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 1783 nodes · 4887 edges · 89 communities (77 shown, 12 thin omitted)
-- Extraction: 99% EXTRACTED · 1% INFERRED · 0% AMBIGUOUS · INFERRED: 36 edges (avg confidence: 0.79)
+- 1816 nodes · 5032 edges · 96 communities (84 shown, 12 thin omitted)
+- Extraction: 99% EXTRACTED · 1% INFERRED · 0% AMBIGUOUS · INFERRED: 40 edges (avg confidence: 0.79)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `54f1b1f0`
+- Built from commit: `81e4a40a`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
 ## Community Hubs (Navigation)
-- store-navbar.tsx
-- auth.ts
+- portal-shell.tsx
+- assertRateLimit
 - platform-settings-admin.ts
 - categories.ts
 - createSessionClient
-- types/index.ts
+- status.ts
 - setup-mvp-schema.mjs
-- listing-moderation-actions.ts
+- listing-moderation.ts
 - admin-analytics.ts
-- report-triage.ts
+- config.ts
 - Knurdz Marketplace — Member Implementation Guide (Agent Reference)
 - verify-payhere-checkout-hash.ts
 - seller-listings.ts
-- free-order.ts
+- free-order-rules.ts
 - compilerOptions
 - dashboard/page.tsx
 - seller-application.ts
@@ -38,179 +38,186 @@
 - verify-payhere-notify.ts
 - components.json
 - reviews.ts
-- bank-slip-review-actions.tsx
+- bank-slip-actions.ts
 - devDependencies
 - seed-demo.mjs
-- report-triage-actions.tsx
-- user-management-actions.tsx
+- report-triage.ts
+- roles.ts
 - dependencies
 - getLoggedInUser
-- trust-signals.ts
+- rules.ts
 - cn
-- types/payhere.ts
+- types/index.ts
 - Tables (18)
 - createAdminClient
 - error-fallback.tsx
 - seller-approvals.ts
 - cart-contents.tsx
-- reports.ts
+- edit-listing-form.tsx
 - wishlist.ts
-- orders.ts
+- order-actions.ts
 - PayHere contract (Knurdz Marketplace)
 - Trust rules (Knurdz Marketplace)
 - verify-admin-analytics.mjs
 - page-loader.tsx
 - legal-page.tsx
-- Notify Function
+- profiles.ts
 - Knurdz Marketplace
 - setup-storage-buckets.mjs
 - scripts
 - verify-user-suspend.mjs
 - button.tsx
 - admin-orders.ts
-- appwrite/index.ts
-- wishlist/page.tsx
+- server.ts
+- toast.ts
 - Agent reference docs
 - devDependencies
-- listing-moderation.ts
+- trust-signals.ts
 - package.json
 - shadcn
 - AGENTS.md
-- seller-application-actions.ts
+- storage.ts
 - eslint.config.mjs
-- roles.ts
+- ROLE_LABELS
 - next.config.ts
 - payhere-checkout-hash/package.json
 - postcss.config.mjs
 - payhere-notify/package.json
-- reports/page.tsx
-- userHasLabel
-- user-management.ts
-- admin/listings/page.tsx
+- appwrite/notifications.ts
+- requireLabel
+- admin-metrics.ts
+- free-order.ts
 - node-appwrite
 - app/layout.tsx
 - shadcn
-- Sandbox demo (step 1.27)
+- listSellersWithFlags
 - tw-animate-css
-- Knurdz Marketplace — Appwrite SCHEMA (frozen)
-- users/page.tsx
+- notify-logs/page.tsx
+- services/payhere.ts
 - services/index.ts
-- Hash Function
+- bank-slips/page.tsx
 - Member 1 — Foundation (must-dos first)
-- Member 4 — Admin, moderation, trust
-- react
+- audit/page.tsx
+- 5. Member 1 — Core infrastructure (critical path)
+- 6. Member 2 — Buyer / storefront
+- 8. Member 4 — Admin, moderation, trust
 - clsx
-- (store)/layout.tsx
-- products/[id]/page.tsx
+- payhere-payment-status.tsx
+- wishlist-list.tsx
+- 3. Shared contracts (do not fork)
+- 2. Technical stack (detail)
+- sellers.ts
+- Member 3 — Seller portal
+- class-variance-authority
 
 ## God Nodes (most connected - your core abstractions)
-1. `getLoggedInUser()` - 108 edges
+1. `getLoggedInUser()` - 109 edges
 2. `createAdminClient()` - 94 edges
-3. `hasAppwritePublicConfig()` - 76 edges
-4. `createSessionClient()` - 76 edges
-5. `Button()` - 49 edges
-6. `userHasLabel()` - 39 edges
-7. `cn()` - 31 edges
-8. `DATABASE_ID` - 30 edges
-9. `assertRateLimit()` - 28 edges
+3. `createSessionClient()` - 83 edges
+4. `hasAppwritePublicConfig()` - 77 edges
+5. `Button()` - 51 edges
+6. `userHasLabel()` - 40 edges
+7. `assertRateLimit()` - 32 edges
+8. `cn()` - 31 edges
+9. `DATABASE_ID` - 30 edges
 10. `getOwnOrder()` - 26 edges
 
 ## Surprising Connections (you probably didn't know these)
-- `AdminLayout()` --calls--> `requireLabel()`  [EXTRACTED]
-  app/admin/layout.tsx → lib/appwrite/roles.ts
 - `RootLayout()` --calls--> `cn()`  [EXTRACTED]
   app/layout.tsx → lib/utils.ts
+- `ResendVerificationForm()` --indirect_call--> `requestEmailVerification()`  [INFERRED]
+  components/auth/resend-verification-form.tsx → lib/appwrite/recovery.ts
+- `SideNav()` --calls--> `cn()`  [EXTRACTED]
+  components/layout/portal-shell.tsx → lib/utils.ts
 - `CreateListingForm()` --indirect_call--> `createDraftListing()`  [INFERRED]
   components/seller/create-listing-form.tsx → lib/appwrite/seller-listing-actions.ts
 - `SellerApplyForm()` --indirect_call--> `submitSellerApplication()`  [INFERRED]
   components/seller/seller-apply-form.tsx → lib/appwrite/seller-application-actions.ts
-- `SheetOverlay()` --calls--> `cn()`  [EXTRACTED]
-  components/ui/sheet.tsx → lib/utils.ts
 
 ## Import Cycles
 - None detected.
 
-## Communities (89 total, 12 thin omitted)
+## Communities (96 total, 12 thin omitted)
 
-### Community 0 - "store-navbar.tsx"
-Cohesion: 0.18
-Nodes (13): StoreNavbarProps, ReportListingButton(), ReportListingButtonProps, Sheet(), SheetContent(), SheetDescription(), SheetFooter(), SheetHeader() (+5 more)
+### Community 0 - "portal-shell.tsx"
+Cohesion: 0.13
+Nodes (18): PortalNavItem, PortalShellProps, SideNav(), SkipToContent(), StoreNavbar(), StoreNavbarProps, ReportListingButton(), ReportListingButtonProps (+10 more)
 
-### Community 1 - "auth.ts"
-Cohesion: 0.07
-Nodes (45): LoginPage(), SearchParams, SearchParams, VerifyEmailPage(), ForgotPasswordForm(), initialState, initialState, LoginForm() (+37 more)
+### Community 1 - "assertRateLimit"
+Cohesion: 0.10
+Nodes (28): SearchParams, SearchParams, VerifyEmailPage(), ForgotPasswordForm(), initialState, initialState, ResetPasswordForm(), getAppUrl() (+20 more)
 
 ### Community 2 - "platform-settings-admin.ts"
 Cohesion: 0.08
-Nodes (45): AdminSettingsPage(), BOOLEAN_KEYS, initial, KEY_HELP, KEY_LABELS, PlatformSettingsManager(), PlatformSettingsManagerProps, SettingFieldForm() (+37 more)
+Nodes (46): AdminSettingsPage(), BOOLEAN_KEYS, initial, KEY_HELP, KEY_LABELS, PlatformSettingsManager(), PlatformSettingsManagerProps, SettingFieldForm() (+38 more)
 
 ### Community 3 - "categories.ts"
 Cohesion: 0.10
-Nodes (45): AdminCategoriesPage(), NewListingPage(), CategoriesPage(), CategoriesManager(), CategoriesManagerProps, CategoryRow(), CategoryRowProps, CreateCategoryForm() (+37 more)
+Nodes (43): AdminCategoriesPage(), NewListingPage(), CategoriesPage(), CategoriesManager(), CategoryRow(), CreateCategoryForm(), parentOptions(), useCategoryToast() (+35 more)
 
 ### Community 4 - "createSessionClient"
-Cohesion: 0.26
-Nodes (23): createSessionClient(), addToCart(), asCart(), asCartItem(), asNullableString(), asNumber(), assertCartMutationRateLimit(), buildCartLine() (+15 more)
+Cohesion: 0.25
+Nodes (24): createSessionClient(), addToCart(), asCart(), asCartItem(), asNullableString(), asNumber(), assertCartMutationRateLimit(), buildCartLine() (+16 more)
 
-### Community 5 - "types/index.ts"
-Cohesion: 0.11
-Nodes (34): SellerApplicationStatus(), SellerApplicationStatusProps, BankSlip, Cart, CartItem, CartLine, CartLineIssue, Category (+26 more)
+### Community 5 - "status.ts"
+Cohesion: 0.14
+Nodes (17): BANK_SLIP_STATUSES, HAPPY_PATH, isBankSlipStatus(), isOneOf(), isOrderStatus(), isPaymentStatus(), isProductStatus(), ORDER_CANCELABLE_STATUSES (+9 more)
 
 ### Community 6 - "setup-mvp-schema.mjs"
 Cohesion: 0.18
 Nodes (39): apiKey, client, db, endpoint, ensureBool(), ensureEnum(), ensureFloat(), ensureIndex() (+31 more)
 
-### Community 7 - "listing-moderation-actions.ts"
-Cohesion: 0.26
-Nodes (15): initial, ListingApproveButton(), ListingRejectForm(), ListingRemoveForm(), ListingRowActionsProps, useModerationToast(), approveListing(), approveListingFormAction() (+7 more)
+### Community 7 - "listing-moderation.ts"
+Cohesion: 0.11
+Nodes (34): AdminListingsPage(), formatPrice(), PageProps, initial, ListingApproveButton(), ListingDescription(), ListingRejectForm(), ListingRemoveForm() (+26 more)
 
 ### Community 8 - "admin-analytics.ts"
 Cohesion: 0.11
 Nodes (32): AdminAnalyticsPage(), PageProps, rangeHref(), AnalyticsCharts(), AnalyticsChartsProps, formatBucketLabel(), formatCurrency(), GrowthTooltipProps (+24 more)
 
-### Community 9 - "report-triage.ts"
-Cohesion: 0.17
-Nodes (15): TABLE_REPORTS, planStockDecrements(), asProduct(), AdminReportView, adminSdkAvailable(), asCreatedAt(), DISMISSED_STATUS, listReports() (+7 more)
+### Community 9 - "config.ts"
+Cohesion: 0.13
+Nodes (25): ALL_BUCKET_IDS, ALL_TABLE_IDS, AVATAR_MAX_BYTES, BANK_SLIP_MAX_BYTES, BUCKET_BANK_SLIPS, PRODUCT_IMAGE_MAX_BYTES, SESSION_COOKIE, TABLE_AUDIT_LOGS (+17 more)
 
 ### Community 10 - "Knurdz Marketplace — Member Implementation Guide (Agent Reference)"
-Cohesion: 0.05
-Nodes (42): 10. Cross-member E2E test script (Playwright MCP), 11. Quick “who owns what” cheat sheet, 12. How to use this with your agent, 1. What you are building, 2. Technical stack (detail), 3. Shared contracts (do not fork), 4. How agents should work (all members), 5. Member 1 — Core infrastructure (critical path) (+34 more)
+Cohesion: 0.13
+Nodes (15): 10. Cross-member E2E test script (Playwright MCP), 11. Quick “who owns what” cheat sheet, 12. How to use this with your agent, 1. What you are building, 4. How agents should work (all members), 7. Member 3 — Seller portal, 9. Integration map (who waits on whom), Dependencies (+7 more)
 
 ### Community 11 - "verify-payhere-checkout-hash.ts"
 Cohesion: 0.09
 Nodes (37): buildCheckoutUrls(), checkoutActionUrl(), computePayHereCheckoutHash(), evaluateSandboxCheckoutPolicy(), formatPayHereAmount(), isSandboxEnv(), itemsDescription(), md5Upper() (+29 more)
 
 ### Community 12 - "seller-listings.ts"
-Cohesion: 0.09
-Nodes (34): formatPrice(), SellerListingsPage(), initial, SubmitListingButton(), SubmitListingButtonProps, TABLE_CATEGORIES, createDraftListing(), CreateListingActionState (+26 more)
-
-### Community 13 - "free-order.ts"
 Cohesion: 0.08
-Nodes (39): TABLE_ORDER_ITEMS, fetchPaymentsByOrderIds(), adminSdkAvailable(), applyPaidSettlement(), confirmFreeOrder(), GENERIC_FAILURE, loadAdminOrder(), loadAdminOrderItems() (+31 more)
+Nodes (42): EditListingPage(), EditListingPageProps, formatPrice(), SellerListingsPage(), WishlistPage(), listProductImages(), ARCHIVED_STATUS, archivedMutationError() (+34 more)
+
+### Community 13 - "free-order-rules.ts"
+Cohesion: 0.14
+Nodes (17): evaluateFreeConfirm(), FREE_CONFIRM_CLOSED, FREE_CONFIRM_NO_ITEMS, FREE_CONFIRM_NOT_FOUND, FREE_CONFIRM_NOT_FREE, FREE_CONFIRM_STOCK, FREE_CONFIRM_WRONG_STATE, FreeConfirmDecision (+9 more)
 
 ### Community 14 - "compilerOptions"
 Cohesion: 0.07
 Nodes (28): dom, dom.iterable, esnext, **/*.mts, .next/dev/types/**/*.ts, next-env.d.ts, .next/types/**/*.ts, node_modules (+20 more)
 
 ### Community 15 - "dashboard/page.tsx"
-Cohesion: 0.13
-Nodes (23): COMPLETED_STATUSES, countOrdersBySummaryBucket(), DashboardPage(), IN_PROGRESS_STATUSES, OrderSummaryCounts, PENDING_STATUSES, wishlistIssueLabel(), OrderDetailPage() (+15 more)
+Cohesion: 0.14
+Nodes (19): COMPLETED_STATUSES, countOrdersBySummaryBucket(), DashboardPage(), IN_PROGRESS_STATUSES, OrderSummaryCounts, PENDING_STATUSES, wishlistIssueLabel(), OrderListRow() (+11 more)
 
 ### Community 16 - "seller-application.ts"
-Cohesion: 0.13
-Nodes (17): existingApplicationMessage(), normalizeShopSlug(), ParsedSellerApplicationInput, parseSellerApplicationInput(), PENDING_STATUS, resolveUniqueShopSlug(), SellerApplicationResult, sellerProfilePermissions() (+9 more)
+Cohesion: 0.11
+Nodes (27): ShopProfileForm(), useActionToasts(), readString(), revalidateShopPaths(), SellerApplicationActionState, ShopProfileActionState, submitSellerApplication(), updateOwnShopBanner() (+19 more)
 
 ### Community 17 - "products.ts"
-Cohesion: 0.10
-Nodes (32): CategoryPage(), CategoryPageProps, Home(), HomeProps, SearchPage(), SearchPageProps, ShopPage(), ShopPageProps (+24 more)
+Cohesion: 0.19
+Nodes (20): CategoryPage(), Home(), SearchPage(), asBoolean(), asNullableString(), asNumber(), asProduct(), asProductImage() (+12 more)
 
 ### Community 18 - "notify-logs.ts"
-Cohesion: 0.09
-Nodes (35): AdminNotifyLogsPage(), formatCreatedAt(), formatDuration(), OUTCOME_LABELS, PageProps, SOURCE_EMPTY, VIEW_TABS, TABLE_PAYHERE_NOTIFY_LOGS (+27 more)
+Cohesion: 0.15
+Nodes (22): isNotifyLogIssue(), ISSUE_OUTCOMES, NOTIFY_LOG_OUTCOMES, NotifyLogOutcome, ParsedNotifyLog, parseNotifyLogText(), redactNotifyLogText(), adminSdkAvailable() (+14 more)
 
 ### Community 19 - "Work Distribution — Knurdz Marketplace"
 Cohesion: 0.12
-Nodes (16): Creative & advanced backlog (do not duplicate into MVP lanes), Development phases (team sync), Member 2 — Buyer / storefront, Member 2 — verification extras, Member 3 — Seller portal, Member 3 — verification extras, Principles, Risks (track while implementing) (+8 more)
+Nodes (16): Creative & advanced backlog (do not duplicate into MVP lanes), Development phases (team sync), Member 2 — Buyer / storefront, Member 2 — verification extras, Member 4 — Admin, moderation, trust, Member 4 — verification extras, Principles, Risks (track while implementing) (+8 more)
 
 ### Community 20 - "verify-payhere-notify.ts"
 Cohesion: 0.08
@@ -221,12 +228,12 @@ Cohesion: 0.09
 Nodes (21): aliases, components, hooks, lib, ui, utils, iconLibrary, menuAccent (+13 more)
 
 ### Community 22 - "reviews.ts"
-Cohesion: 0.15
-Nodes (23): ProductPage(), TABLE_REVIEWS, getProduct(), REVIEW_ERROR_CODES, ReviewActionState, ReviewErrorCode, asNullableString(), asNumber() (+15 more)
+Cohesion: 0.17
+Nodes (21): ProductPage(), ProductPageProps, getProduct(), isActiveProduct(), asNullableString(), asNumber(), asRating(), asReview() (+13 more)
 
-### Community 23 - "bank-slip-review-actions.tsx"
-Cohesion: 0.20
-Nodes (14): AdminBankSlipsPage(), formatAmount(), formatUploadedAt(), PageProps, BankSlipApproveButton(), BankSlipImage(), BankSlipRejectForm(), BankSlipReviewActions() (+6 more)
+### Community 23 - "bank-slip-actions.ts"
+Cohesion: 0.32
+Nodes (11): BankSlipApproveButton(), BankSlipRejectForm(), initial, useBankSlipToast(), approveBankSlip(), approveBankSlipFormAction(), assertAdmin(), BankSlipActionState (+3 more)
 
 ### Community 24 - "devDependencies"
 Cohesion: 0.10
@@ -236,65 +243,65 @@ Nodes (21): eslint, eslint-config-next, eslint-config-prettier, devDependencies,
 Cohesion: 0.16
 Nodes (21): apiKey, CATEGORIES, client, db, DEMO_USERS, endpoint, ensureBuyerWelcomeNotification(), ensureCategory() (+13 more)
 
-### Community 26 - "report-triage-actions.tsx"
-Cohesion: 0.18
-Nodes (22): initial, ReportDismissForm(), ReportNoteForm(), ReportResolveForm(), ReportStartReviewButton(), useTriageToast(), assertAdmin(), dismissReport() (+14 more)
+### Community 26 - "report-triage.ts"
+Cohesion: 0.06
+Nodes (58): AdminReportsPage(), EMPTY_COPY, formatCreatedAt(), PageProps, STATUS_LABELS, initial, ReportDetails(), ReportDismissForm() (+50 more)
 
-### Community 27 - "user-management-actions.tsx"
-Cohesion: 0.29
-Nodes (11): suspendInitial, unsuspendInitial, useManagementToast(), UserSuspendForm(), UserSuspendFormProps, UserUnsuspendButton(), assertAdmin(), revalidateUserPaths() (+3 more)
+### Community 27 - "roles.ts"
+Cohesion: 0.07
+Nodes (49): AdminUsersPage(), formatJoinedAt(), formatLabels(), PageProps, LoginPage(), RegisterPage(), suspendInitial, unsuspendInitial (+41 more)
 
 ### Community 28 - "dependencies"
 Cohesion: 0.11
-Nodes (19): appwrite, class-variance-authority, lucide-react, next, dependencies, appwrite, class-variance-authority, lucide-react (+11 more)
+Nodes (19): appwrite, lucide-react, next, dependencies, appwrite, lucide-react, next, radix-ui (+11 more)
 
 ### Community 29 - "getLoggedInUser"
-Cohesion: 0.17
-Nodes (19): CheckoutBankPage(), CheckoutContinuationPageProps, CheckoutContinuationPageProps, CheckoutFreePage(), CheckoutPage(), PayHereCancelPage(), PayHereCancelPageProps, CheckoutContinuationPageProps (+11 more)
+Cohesion: 0.10
+Nodes (42): CartPage(), CheckoutBankPage(), CheckoutContinuationPageProps, CheckoutContinuationPageProps, CheckoutFreePage(), CheckoutPage(), PayHereCancelPage(), PayHereCancelPageProps (+34 more)
 
-### Community 30 - "trust-signals.ts"
-Cohesion: 0.05
-Nodes (74): AdminAuditPage(), buildFilterHref(), formatCreatedAt(), formatMetaDisplay(), PageProps, AdminTrustPage(), RULE_LABELS, ruleLabel() (+66 more)
+### Community 30 - "rules.ts"
+Cohesion: 0.11
+Nodes (24): BadgeEligibilityResult, CANCELLATION_RATE_THRESHOLD, daysSince(), evaluateBadgeEligibility(), evaluateFraudFlags(), FRAUD_ROLLING_WINDOW_DAYS, HIGH_FIRST_ORDER_AMOUNT_LKR, isWithinRollingWindow() (+16 more)
 
 ### Community 31 - "cn"
-Cohesion: 0.19
-Nodes (18): PortalNavItem, PortalShellProps, SideNav(), formatRelative(), NotificationBell(), Badge(), badgeVariants, Popover() (+10 more)
+Cohesion: 0.20
+Nodes (16): formatRelative(), NotificationBell(), Badge(), badgeVariants, Label(), Popover(), PopoverContent(), PopoverDescription() (+8 more)
 
-### Community 32 - "types/payhere.ts"
-Cohesion: 0.13
-Nodes (24): PayHereCheckoutForm(), PayHereCheckoutFormProps, submitPayHereCheckoutForm(), mapExecutionError(), normalizePayHereOrderId(), requestPayHereCheckout(), FIELD_KEYS, FUNCTION_PAYHERE_CHECKOUT_HASH (+16 more)
+### Community 32 - "types/index.ts"
+Cohesion: 0.10
+Nodes (29): ProductReviewsPlaceholderProps, BankSlip, Cart, CartItem, CartLine, CartLineIssue, ProductImage, Review (+21 more)
 
 ### Community 33 - "Tables (18)"
-Cohesion: 0.11
-Nodes (19): `audit_logs`, `bank_slips`, `cart_items`, `carts`, `categories`, `notifications`, `order_items`, `orders` (+11 more)
+Cohesion: 0.07
+Nodes (27): Abuse guards (step 1.14), `audit_logs`, Auth roles (labels), `bank_slips`, `cart_items`, `carts`, `categories`, Changelog (+19 more)
 
 ### Community 34 - "createAdminClient"
-Cohesion: 0.18
-Nodes (22): approveBankSlip(), assertAdmin(), rejectBankSlip(), revalidateBankSlipPaths(), TABLE_BANK_SLIPS, createAdminClient(), adminSdkAvailable(), approveBankSlipCore() (+14 more)
+Cohesion: 0.19
+Nodes (23): GET(), RouteParams, createAdminClient(), fetchPaymentsByOrderIds(), adminSdkAvailable(), approveBankSlipCore(), asNullableString(), bankSlipFileExists() (+15 more)
 
 ### Community 36 - "seller-approvals.ts"
-Cohesion: 0.06
-Nodes (50): AdminPage(), formatCount(), formatRevenue(), AdminSellersPage(), formatAppliedAt(), approveInitial, rejectInitial, SellerApprovalRowProps (+42 more)
+Cohesion: 0.12
+Nodes (29): AdminSellersPage(), formatAppliedAt(), approveInitial, rejectInitial, SellerApprovalRowProps, SellerApproveButton(), SellerApproveButtonProps, SellerRejectForm() (+21 more)
 
 ### Community 37 - "cart-contents.tsx"
-Cohesion: 0.21
-Nodes (15): CartPage(), AddToCartButton(), CartContents(), CartContentsProps, CartLineRow(), CartLineRowProps, issueLabel(), addToCart() (+7 more)
+Cohesion: 0.26
+Nodes (13): AddToCartButton(), AddToCartButtonProps, CartContents(), CartContentsProps, CartLineRow(), CartLineRowProps, issueLabel(), addToCart() (+5 more)
 
-### Community 38 - "reports.ts"
-Cohesion: 0.25
-Nodes (13): REPORT_ERROR_CODES, ReportActionState, ReportErrorCode, asNullableString(), asReport(), assertReportMutationRateLimit(), createProductReport(), CreateProductReportInput (+5 more)
+### Community 38 - "edit-listing-form.tsx"
+Cohesion: 0.16
+Nodes (25): DeleteImageButton(), EditListingForm(), EditListingFormProps, initial, useActionToasts(), initial, SubmitListingButton(), SubmitListingButtonProps (+17 more)
 
 ### Community 39 - "wishlist.ts"
-Cohesion: 0.31
-Nodes (14): addToOwnWishlist(), asNullableString(), assertWishlistMutationRateLimit(), asWishlistItem(), buildWishlistLine(), isProductInOwnWishlist(), listOwnWishlistItems(), mapWishlistError() (+6 more)
+Cohesion: 0.23
+Nodes (18): addToOwnWishlist(), asNullableString(), assertWishlistMutationRateLimit(), asWishlistItem(), buildWishlistLine(), WISHLIST_ERROR_CODES, WishlistActionState, WishlistErrorCode (+10 more)
 
-### Community 40 - "orders.ts"
-Cohesion: 0.09
-Nodes (43): BankSlipUploadForm(), CheckoutForm(), FreeOrderConfirmForm(), FreeOrderConfirmFormProps, initialState, initialState, OrderCancelForm(), OrderCancelFormProps (+35 more)
+### Community 40 - "order-actions.ts"
+Cohesion: 0.08
+Nodes (36): BankSlipUploadForm(), BankSlipUploadFormProps, initialState, CheckoutForm(), CheckoutFormProps, initialState, METHOD_LABELS, FreeOrderConfirmForm() (+28 more)
 
 ### Community 41 - "PayHere contract (Knurdz Marketplace)"
-Cohesion: 0.15
-Nodes (13): Checkout URLs, Consumer contract (step 1.28), Environment, Free confirm (not a PayHere Function), Free path, Function IDs, Ownership, PayHere card (sandbox) (+5 more)
+Cohesion: 0.06
+Nodes (32): Checkout URLs, Consumer contract (step 1.28), Decline, cancel, idempotency, Environment, Fields (see `PAYHERE_NOTIFY_FIELDS`), Free confirm (not a PayHere Function), Free path, Free path (seeded) (+24 more)
 
 ### Community 42 - "Trust rules (Knurdz Marketplace)"
 Cohesion: 0.17
@@ -308,9 +315,9 @@ Nodes (8): emptySales, generateBucketKeys(), keys12, keys30, r12, r30, toDayBuck
 Cohesion: 0.33
 Nodes (3): LegalPage(), LegalPageProps, LegalSection()
 
-### Community 46 - "Notify Function"
-Cohesion: 0.33
-Nodes (6): Fields (see `PAYHERE_NOTIFY_FIELDS`), Idempotency, md5sig verification (mandatory before any DB write), Notify Function, Status mapping, Trust boundary
+### Community 46 - "profiles.ts"
+Cohesion: 0.18
+Nodes (18): AccountPage(), avatarInitial, initialState, ProfileForm(), useActionToasts(), initialState, ResendVerificationForm(), asProfile() (+10 more)
 
 ### Community 47 - "Knurdz Marketplace"
 Cohesion: 0.20
@@ -329,20 +336,20 @@ Cohesion: 0.47
 Nodes (8): adminClient(), assert(), countAuditEvents(), findUserByEmail(), main(), requireEnv(), sessionGet(), tryLogin()
 
 ### Community 51 - "button.tsx"
-Cohesion: 0.13
-Nodes (21): CreateListingForm(), CreateListingFormProps, initialState, initialState, bannerInitial, profileInitial, ShopProfileFormProps, AddToCartButtonProps (+13 more)
+Cohesion: 0.11
+Nodes (23): CategoryPageProps, HomeProps, SearchPageProps, CategoriesManagerProps, CategoryRowProps, initial, CreateListingForm(), CreateListingFormProps (+15 more)
 
 ### Community 52 - "admin-orders.ts"
 Cohesion: 0.18
 Nodes (20): AdminOrdersPage(), buildFilterHref(), formatAmount(), formatCreatedAt(), formatPaymentStatus(), PageProps, PAYMENT_STATUS_LABELS, truncateAddress() (+12 more)
 
-### Community 54 - "appwrite/index.ts"
-Cohesion: 0.05
-Nodes (80): AccountPage(), avatarInitial, initialState, ProfileForm(), useActionToasts(), ProductImageGallery(), ProductImageGalleryProps, getBrowserAccount() (+72 more)
+### Community 54 - "server.ts"
+Cohesion: 0.14
+Nodes (18): ProductImageGallery(), ProductImageGalleryProps, getBrowserAccount(), getBrowserClient(), BUCKET_AVATARS, BUCKET_PRODUCT_IMAGES, getAppwriteEndpoint(), getAppwriteProjectId() (+10 more)
 
-### Community 55 - "wishlist/page.tsx"
-Cohesion: 0.26
-Nodes (9): WishlistPage(), issueLabel(), WishlistList(), WishlistListProps, WishlistRemoveButton(), WishlistRemoveButtonProps, listProductImages(), removeFromWishlist() (+1 more)
+### Community 55 - "toast.ts"
+Cohesion: 0.24
+Nodes (8): WishlistRemoveButton(), WishlistRemoveButtonProps, WishlistToggleButton(), WishlistToggleButtonProps, addToWishlist(), removeFromWishlist(), revalidateWishlistPaths(), toggleWishlistProduct()
 
 ### Community 56 - "Agent reference docs"
 Cohesion: 0.33
@@ -352,21 +359,21 @@ Nodes (6): Agent reference docs, By member, Non-negotiables, Payment setup statu
 Cohesion: 0.50
 Nodes (3): devDependencies, shadcn, shadcn
 
-### Community 58 - "listing-moderation.ts"
-Cohesion: 0.21
-Nodes (14): TABLE_PRODUCTS, ACTIVE_STATUS, adminSdkAvailable(), approveListingCore(), ARCHIVED_STATUS, ListingModerationResult, loadProduct(), parseReason() (+6 more)
+### Community 58 - "trust-signals.ts"
+Cohesion: 0.19
+Nodes (21): asNullableString(), buildEvaluationBundle(), chunk(), countOpenReportsBySeller(), fetchOpenReportsForProductIds(), fetchOrdersForSellerIds(), fetchProductIdsForSellers(), fetchRejectedSlipsInWindow() (+13 more)
 
 ### Community 59 - "package.json"
 Cohesion: 0.50
 Nodes (3): name, private, version
 
-### Community 63 - "seller-application-actions.ts"
-Cohesion: 0.23
-Nodes (13): SellerShopPage(), ShopProfileForm(), useActionToasts(), readString(), revalidateShopPaths(), SellerApplicationActionState, ShopProfileActionState, submitSellerApplication() (+5 more)
+### Community 63 - "storage.ts"
+Cohesion: 0.19
+Nodes (17): BANK_SLIP_EXTENSIONS, BANK_SLIP_MIME_TYPES, IMAGE_EXTENSIONS, IMAGE_MIME_TYPES, bankSlipPermissions(), deleteFile(), deleteFileAsAdmin(), extensionOf() (+9 more)
 
-### Community 65 - "roles.ts"
-Cohesion: 0.17
-Nodes (13): ADMIN_NAV, AdminLayout(), RegisterPage(), SELLER_NAV, SellerLayout(), PortalShell(), homePathForUser(), LabeledUser (+5 more)
+### Community 65 - "ROLE_LABELS"
+Cohesion: 0.15
+Nodes (13): SELLER_NAV, SellerLayout(), SellerShopPage(), BecomeSellerPage(), SellerApplicationStatus(), SellerApplicationStatusProps, SellerApplyForm(), requireUser() (+5 more)
 
 ### Community 67 - "payhere-checkout-hash/package.json"
 Cohesion: 0.22
@@ -376,81 +383,109 @@ Nodes (8): dependencies, node-appwrite, node-appwrite, main, name, private, type
 Cohesion: 0.22
 Nodes (8): dependencies, node-appwrite, node-appwrite, main, name, private, type, version
 
-### Community 70 - "reports/page.tsx"
-Cohesion: 0.24
-Nodes (9): AdminReportsPage(), EMPTY_COPY, formatCreatedAt(), PageProps, STATUS_LABELS, ReportDetails(), ReportRowActions(), parseReportStatusFilter() (+1 more)
+### Community 70 - "appwrite/notifications.ts"
+Cohesion: 0.31
+Nodes (12): asNotification(), asNullableString(), countOwnUnread(), createNotificationForUser(), getOwnNotificationFeed(), listOwnNotifications(), markAllOwnNotificationsRead(), markOwnNotificationRead() (+4 more)
 
-### Community 71 - "userHasLabel"
-Cohesion: 0.29
-Nodes (8): GET(), RouteParams, BecomeSellerPage(), NavLinks(), SellerApplyForm(), ROLE_LABELS, userHasLabel(), bankSlipFileExists()
+### Community 71 - "requireLabel"
+Cohesion: 0.23
+Nodes (13): ADMIN_NAV, AdminLayout(), PortalShell(), requireLabel(), adminSdkAvailable(), asAuditLogEntry(), asNullableString(), buildListQueries() (+5 more)
 
-### Community 72 - "user-management.ts"
-Cohesion: 0.39
-Nodes (8): AdminUserView, assertCanModifyTarget(), loadTargetUser(), suspendUserCore(), unsuspendUserCore(), UserListResult, UserManagementResult, writeAuditLog()
+### Community 72 - "admin-metrics.ts"
+Cohesion: 0.27
+Nodes (12): AdminPage(), formatCount(), formatRevenue(), AdminMetrics, asNullableString(), asNumber(), countTableRows(), countUsers() (+4 more)
 
-### Community 73 - "admin/listings/page.tsx"
-Cohesion: 0.36
-Nodes (8): AdminListingsPage(), formatPrice(), PageProps, ListingDescription(), ListingRowActions(), listPendingModerationQueue(), listProductsByStatus(), getPublicSellerByUserId()
+### Community 73 - "free-order.ts"
+Cohesion: 0.25
+Nodes (13): adminSdkAvailable(), applyPaidSettlement(), confirmFreeOrder(), GENERIC_FAILURE, loadAdminOrder(), loadAdminOrderItems(), loadAdminPaymentForOrder(), normalizeOrderId() (+5 more)
 
 ### Community 75 - "app/layout.tsx"
 Cohesion: 0.33
 Nodes (5): jetbrainsMono, metadata, RootLayout(), spaceGrotesk, Toaster()
 
-### Community 77 - "Sandbox demo (step 1.27)"
-Cohesion: 0.29
-Nodes (7): Decline, cancel, idempotency, Free path (seeded), Happy path (PayHere), Local Next.js vs `notify_url`, Prerequisites, Sandbox demo (step 1.27), Test cards (sandbox only)
+### Community 77 - "listSellersWithFlags"
+Cohesion: 0.27
+Nodes (12): AdminTrustPage(), RULE_LABELS, ruleLabel(), adminSdkAvailable(), evaluateSellerFromBundle(), fetchApprovedSellerProfiles(), fetchSellerProfileByUserId(), getSellerTrustSignals() (+4 more)
 
-### Community 79 - "Knurdz Marketplace — Appwrite SCHEMA (frozen)"
-Cohesion: 0.25
-Nodes (8): Abuse guards (step 1.14), Auth roles (labels), Changelog, Connection, Console match checklist, Knurdz Marketplace — Appwrite SCHEMA (frozen), Status / method enums (canonical), Storage (step 1.8)
+### Community 79 - "notify-logs/page.tsx"
+Cohesion: 0.23
+Nodes (11): AdminNotifyLogsPage(), formatCreatedAt(), formatDuration(), OUTCOME_LABELS, PageProps, SOURCE_EMPTY, VIEW_TABS, NotifyLogSource (+3 more)
 
-### Community 80 - "users/page.tsx"
-Cohesion: 0.43
-Nodes (6): AdminUsersPage(), formatJoinedAt(), formatLabels(), PageProps, listUsers(), toAdminUserView()
+### Community 80 - "services/payhere.ts"
+Cohesion: 0.36
+Nodes (9): PayHereCheckoutForm(), PayHereCheckoutFormProps, submitPayHereCheckoutForm(), mapExecutionError(), normalizePayHereOrderId(), requestPayHereCheckout(), isNonEmptyString(), isPayHereSandboxActionUrl() (+1 more)
 
 ### Community 81 - "services/index.ts"
-Cohesion: 0.23
-Nodes (12): WishlistToggleButton(), AdminOrderView, ListAllOrdersResult, CART_ERROR_CODES, CartActionState, CartErrorCode, addToWishlist(), revalidateWishlistPaths() (+4 more)
+Cohesion: 0.19
+Nodes (13): ProductReviewsPlaceholder(), CART_ERROR_CODES, CartActionState, CartErrorCode, ListNotifyLogsResult, ProductCatalogParams, ProductCatalogSort, createProductReview() (+5 more)
 
-### Community 82 - "Hash Function"
-Cohesion: 0.33
-Nodes (6): Hash formula (server-only), Hash Function, Next.js client, Request, Response, Security rules (this Function — Member 1 step 1.22)
+### Community 82 - "bank-slips/page.tsx"
+Cohesion: 0.36
+Nodes (7): AdminBankSlipsPage(), formatAmount(), formatUploadedAt(), PageProps, BankSlipImage(), BankSlipReviewActions(), getBankSlipReviewUrl()
 
 ### Community 83 - "Member 1 — Foundation (must-dos first)"
 Cohesion: 0.33
 Nodes (6): Member 1 — done when, Member 1 — Foundation (must-dos first), Payment setup (Member 1 — was formerly Members 2 + 4), Phase 0 — blockers (do before others ship against APIs), Phase 0 — step-by-step plan (implement one step at a time), Phase 1 — ongoing
 
-### Community 84 - "Member 4 — Admin, moderation, trust"
+### Community 84 - "audit/page.tsx"
+Cohesion: 0.48
+Nodes (6): AdminAuditPage(), buildFilterHref(), formatCreatedAt(), formatMetaDisplay(), PageProps, parseAuditLogFilter()
+
+### Community 85 - "5. Member 1 — Core infrastructure (critical path)"
+Cohesion: 0.33
+Nodes (6): 5. Member 1 — Core infrastructure (critical path), Blocker rule, Dependencies, Member 1 — Definition of done, Step-by-step plan (small slices), You are building
+
+### Community 86 - "6. Member 2 — Buyer / storefront"
+Cohesion: 0.33
+Nodes (6): 6. Member 2 — Buyer / storefront, Dependencies, Member 2 — Agent sub-prompt example, Member 2 — Definition of done, Step-by-step plan, You are building
+
+### Community 87 - "8. Member 4 — Admin, moderation, trust"
+Cohesion: 0.33
+Nodes (6): 8. Member 4 — Admin, moderation, trust, Dependencies, Member 4 — Critical security steps (never skip), Member 4 — Definition of done, Step-by-step plan, You are building
+
+### Community 89 - "payhere-payment-status.tsx"
 Cohesion: 0.50
-Nodes (4): Member 4 — Admin, moderation, trust, Member 4 — verification extras, Step-by-step plan (implement one step at a time), Tasks
+Nodes (4): PayHerePaymentStatus(), PayHerePaymentStatusProps, pollPayHerePaymentStatusAction(), PaymentStatus
 
-### Community 91 - "(store)/layout.tsx"
-Cohesion: 0.27
-Nodes (5): StoreLayout(), SkipToContent(), FOOTER_LINKS, StoreFooter(), StoreNavbar()
+### Community 90 - "wishlist-list.tsx"
+Cohesion: 0.50
+Nodes (4): issueLabel(), WishlistList(), WishlistListProps, WishlistLine
 
-### Community 93 - "products/[id]/page.tsx"
-Cohesion: 0.17
-Nodes (10): ProductPageProps, ProductReviewsPlaceholder(), ProductReviewsPlaceholderProps, SellerInfoCard(), SellerInfoCardProps, createProductReview(), revalidateReviewPaths(), CreateProductReviewInput (+2 more)
+### Community 91 - "3. Shared contracts (do not fork)"
+Cohesion: 0.40
+Nodes (5): 3. Shared contracts (do not fork), Agent rules every step, Minimum collections (Member 1 creates), Ownership of payments, Status enums
+
+### Community 92 - "2. Technical stack (detail)"
+Cohesion: 0.50
+Nodes (4): 2. Technical stack (detail), Approved MCPs (agents), Suggested env (Member 1 defines `.env.example`), Suggested folder layout (Member 1 establishes; others follow)
+
+### Community 93 - "sellers.ts"
+Cohesion: 0.16
+Nodes (14): ShopPage(), ShopPageProps, SellerInfoCard(), SellerInfoCardProps, asNullableString(), CheckoutSellerBankDetails, getPublicSellerBySlug(), getPublicSellerByUserId() (+6 more)
+
+### Community 94 - "Member 3 — Seller portal"
+Cohesion: 0.50
+Nodes (4): Member 3 — Seller portal, Member 3 — verification extras, Step-by-step plan (implement one step at a time), Tasks
 
 ## Knowledge Gaps
-- **469 isolated node(s):** `npx`, `SearchParams`, `SearchParams`, `CategoryPageProps`, `CheckoutContinuationPageProps` (+464 more)
+- **476 isolated node(s):** `npx`, `SearchParams`, `SearchParams`, `CategoryPageProps`, `CheckoutContinuationPageProps` (+471 more)
   These have ≤1 connection - possible missing edges or undocumented components.
 - **12 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `getLoggedInUser()` connect `getLoggedInUser` to `auth.ts`, `platform-settings-admin.ts`, `categories.ts`, `createSessionClient`, `listing-moderation-actions.ts`, `seller-listings.ts`, `free-order.ts`, `dashboard/page.tsx`, `seller-application.ts`, `products.ts`, `reviews.ts`, `report-triage-actions.tsx`, `user-management-actions.tsx`, `types/payhere.ts`, `createAdminClient`, `seller-approvals.ts`, `cart-contents.tsx`, `reports.ts`, `wishlist.ts`, `orders.ts`, `appwrite/index.ts`, `wishlist/page.tsx`, `seller-application-actions.ts`, `roles.ts`, `userHasLabel`, `(store)/layout.tsx`, `products/[id]/page.tsx`?**
-  _High betweenness centrality (0.027) - this node is a cross-community bridge._
-- **Why does `Button()` connect `button.tsx` to `store-navbar.tsx`, `platform-settings-admin.ts`, `categories.ts`, `listing-moderation-actions.ts`, `seller-listings.ts`, `dashboard/page.tsx`, `products.ts`, `bank-slip-review-actions.tsx`, `report-triage-actions.tsx`, `user-management-actions.tsx`, `getLoggedInUser`, `trust-signals.ts`, `cn`, `types/payhere.ts`, `error-fallback.tsx`, `seller-approvals.ts`, `cart-contents.tsx`, `orders.ts`, `admin-orders.ts`, `wishlist/page.tsx`, `users/page.tsx`, `products/[id]/page.tsx`?**
-  _High betweenness centrality (0.022) - this node is a cross-community bridge._
-- **Why does `createAdminClient()` connect `createAdminClient` to `auth.ts`, `platform-settings-admin.ts`, `categories.ts`, `admin-analytics.ts`, `report-triage.ts`, `free-order.ts`, `seller-application.ts`, `products.ts`, `notify-logs.ts`, `report-triage-actions.tsx`, `trust-signals.ts`, `seller-approvals.ts`, `admin-orders.ts`, `appwrite/index.ts`, `listing-moderation.ts`, `userHasLabel`, `user-management.ts`, `admin/listings/page.tsx`, `users/page.tsx`?**
-  _High betweenness centrality (0.021) - this node is a cross-community bridge._
+- **Why does `getLoggedInUser()` connect `getLoggedInUser` to `assertRateLimit`, `platform-settings-admin.ts`, `categories.ts`, `createSessionClient`, `listing-moderation.ts`, `config.ts`, `seller-listings.ts`, `dashboard/page.tsx`, `seller-application.ts`, `reviews.ts`, `bank-slip-actions.ts`, `report-triage.ts`, `roles.ts`, `createAdminClient`, `seller-approvals.ts`, `edit-listing-form.tsx`, `wishlist.ts`, `profiles.ts`, `button.tsx`, `server.ts`, `storage.ts`, `ROLE_LABELS`, `appwrite/notifications.ts`, `free-order.ts`, `services/payhere.ts`?**
+  _High betweenness centrality (0.042) - this node is a cross-community bridge._
+- **Why does `createAdminClient()` connect `createAdminClient` to `platform-settings-admin.ts`, `categories.ts`, `listing-moderation.ts`, `admin-analytics.ts`, `config.ts`, `seller-application.ts`, `notify-logs.ts`, `report-triage.ts`, `roles.ts`, `seller-approvals.ts`, `profiles.ts`, `admin-orders.ts`, `server.ts`, `trust-signals.ts`, `storage.ts`, `appwrite/notifications.ts`, `requireLabel`, `admin-metrics.ts`, `free-order.ts`, `listSellersWithFlags`, `sellers.ts`?**
+  _High betweenness centrality (0.030) - this node is a cross-community bridge._
+- **Why does `Button()` connect `button.tsx` to `portal-shell.tsx`, `platform-settings-admin.ts`, `categories.ts`, `listing-moderation.ts`, `seller-listings.ts`, `dashboard/page.tsx`, `reviews.ts`, `bank-slip-actions.ts`, `report-triage.ts`, `roles.ts`, `getLoggedInUser`, `cn`, `types/index.ts`, `error-fallback.tsx`, `seller-approvals.ts`, `cart-contents.tsx`, `edit-listing-form.tsx`, `order-actions.ts`, `admin-orders.ts`, `server.ts`, `toast.ts`, `services/payhere.ts`, `bank-slips/page.tsx`, `audit/page.tsx`, `payhere-payment-status.tsx`?**
+  _High betweenness centrality (0.025) - this node is a cross-community bridge._
 - **What connects `npx`, `SearchParams`, `SearchParams` to the rest of the system?**
-  _469 weakly-connected nodes found - possible documentation gaps or missing edges._
-- **Should `auth.ts` be split into smaller, more focused modules?**
-  _Cohesion score 0.07288135593220339 - nodes in this community are weakly interconnected._
+  _476 weakly-connected nodes found - possible documentation gaps or missing edges._
+- **Should `portal-shell.tsx` be split into smaller, more focused modules?**
+  _Cohesion score 0.12698412698412698 - nodes in this community are weakly interconnected._
+- **Should `assertRateLimit` be split into smaller, more focused modules?**
+  _Cohesion score 0.10099573257467995 - nodes in this community are weakly interconnected._
 - **Should `platform-settings-admin.ts` be split into smaller, more focused modules?**
-  _Cohesion score 0.07767722473604827 - nodes in this community are weakly interconnected._
-- **Should `categories.ts` be split into smaller, more focused modules?**
-  _Cohesion score 0.09568627450980392 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.07619738751814223 - nodes in this community are weakly interconnected._

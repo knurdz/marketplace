@@ -23,7 +23,33 @@ if (valid.ok) {
   assert(valid.title === "Sticker pack", "title preserved");
   assert(valid.isFree === false, "paid listing not free");
   assert(valid.stock === 10, "stock preserved");
+  assert(valid.available === true, "omitted available defaults true");
 }
+
+const unavailable = parseCreateDraftProductInput({
+  title: "Paused item",
+  description: "Temporarily off sale.",
+  categoryId: "cat_demo_001",
+  price: 100,
+  stock: 5,
+  available: false,
+});
+assert(unavailable.ok, "available false should parse");
+if (unavailable.ok) {
+  assert(unavailable.available === false, "available false preserved");
+}
+
+assert(
+  !parseCreateDraftProductInput({
+    title: "Item",
+    description: "x",
+    categoryId: "c1",
+    price: 1,
+    stock: 1,
+    available: "maybe",
+  }).ok,
+  "invalid available rejected",
+);
 
 const freeListing = parseCreateDraftProductInput({
   title: "Free sample",

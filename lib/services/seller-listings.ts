@@ -23,12 +23,13 @@ import {
   RATE_LIMIT_MESSAGE,
   RATE_LIMITS,
 } from "@/lib/security/rate-limit";
-import type { Product, ProductStatus } from "@/lib/types";
-import { asProduct, listProductImages } from "./products";
+import type { Product, ProductImage, ProductStatus } from "@/lib/types";
+import { asProduct, asProductImage, listProductImages } from "./products";
 
 const DRAFT_STATUS = "draft" as const;
 const PENDING_REVIEW_STATUS = "pending_review" as const;
 const REJECTED_STATUS = "rejected" as const;
+const ARCHIVED_STATUS = "archived" as const;
 const DEFAULT_CURRENCY = "LKR";
 const MAX_TITLE_LENGTH = 200;
 const MAX_DESCRIPTION_LENGTH = 10000;
@@ -40,7 +41,12 @@ export type CreateDraftProductInput = {
   categoryId: string;
   price: unknown;
   stock: unknown;
+  available?: unknown;
 };
+
+export type SellerListingMutationResult =
+  | { ok: true; message: string }
+  | { ok: false; error: string };
 
 export type CreateDraftProductResult =
   | { ok: true; message: string; productId: string }
@@ -59,6 +65,7 @@ export type ParsedCreateDraftProductInput =
       price: number;
       stock: number;
       isFree: boolean;
+      available: boolean;
     }
   | { ok: false; error: string };
 
@@ -120,6 +127,14 @@ function parseStock(raw: unknown): number | FieldParseError {
   return { ok: false, error: "Stock is required." };
 }
 
+function parseAvailable(raw: unknown): boolean | FieldParseError {
+  if (raw === undefined) return true;
+  if (typeof raw === "boolean") return raw;
+  if (raw === "true") return true;
+  if (raw === "false") return false;
+  return { ok: false, error: "Availability must be true or false." };
+}
+
 /** Validate create-listing fields (no I/O). Ignores sellerId/status — set server-side only. */
 export function parseCreateDraftProductInput(
   input: CreateDraftProductInput & {
@@ -167,6 +182,9 @@ export function parseCreateDraftProductInput(
   const stock = parseStock(input.stock);
   if (typeof stock !== "number") return stock;
 
+  const available = parseAvailable(input.available);
+  if (typeof available !== "boolean") return available;
+
   return {
     ok: true,
     title,
@@ -175,6 +193,7 @@ export function parseCreateDraftProductInput(
     price,
     stock,
     isFree: price === 0,
+    available,
   };
 }
 
@@ -365,6 +384,7 @@ export async function updateOwnProductCore(
         price: parsed.price,
         isFree: parsed.isFree,
         stock: parsed.stock,
+        available: parsed.available,
       },
     });
 
@@ -654,7 +674,7 @@ export async function createDraftProductCore(
         isFree: parsed.isFree,
         status: DRAFT_STATUS,
         stock: parsed.stock,
-        available: true,
+        available: parsed.available,
         currency: DEFAULT_CURRENCY,
       },
       permissions,

@@ -117,6 +117,26 @@ export function CreateListingForm({ categories }: CreateListingFormProps) {
       </div>
 
       <div className="space-y-2">
+        <div className="flex items-center gap-3">
+          <input
+            id="available"
+            name="available"
+            type="checkbox"
+            value="true"
+            defaultChecked
+            disabled={pending}
+            className="size-4 rounded border border-border"
+          />
+          <Label htmlFor="available" className="font-normal">
+            Available for purchase
+          </Label>
+        </div>
+        <p className="text-xs text-muted-foreground">
+          Uncheck to hide the buy button even when stock is greater than zero.
+        </p>
+      </div>
+
+      <div className="space-y-2">
         <Label htmlFor="images">Images (optional, up to 8)</Label>
         <Input
           id="images"
