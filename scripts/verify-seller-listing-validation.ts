@@ -3,8 +3,8 @@
  * Run: npx tsx scripts/verify-seller-listing-validation.ts
  */
 import {
+  canSubmitListingForReview,
   parseCreateDraftProductInput,
-  parseSellerListingId,
 } from "../lib/services/seller-listings";
 
 function assert(condition: boolean, message: string): void {
@@ -127,8 +127,10 @@ assert(
   "status from form rejected",
 );
 
-assert(parseSellerListingId("  prod_123  ") === "prod_123", "listing id trimmed");
-assert(parseSellerListingId("") === null, "empty listing id rejected");
-assert(parseSellerListingId("   ") === null, "whitespace listing id rejected");
+assert(canSubmitListingForReview("draft"), "draft can submit");
+assert(canSubmitListingForReview("rejected"), "rejected can submit");
+assert(!canSubmitListingForReview("pending_review"), "pending_review cannot submit");
+assert(!canSubmitListingForReview("active"), "active cannot submit");
+assert(!canSubmitListingForReview("archived"), "archived cannot submit");
 
 console.log("seller-listing validation checks passed");

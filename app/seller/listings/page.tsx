@@ -1,8 +1,10 @@
 import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { SubmitListingButton } from "@/components/seller/submit-listing-button";
 import { listCategories } from "@/lib/services/categories";
 import {
+  canSubmitListingForReview,
   countProductImagesForOwnProducts,
   listOwnProducts,
 } from "@/lib/services/seller-listings";
@@ -27,8 +29,8 @@ export default async function SellerListingsPage() {
           <p className="font-mono text-sm text-accent">$ ./seller --listings</p>
           <h2 className="mt-3 text-3xl font-bold tracking-tight">Listings</h2>
           <p className="mt-2 max-w-xl text-sm text-muted-foreground">
-            Drafts stay private until you publish (step 3.6). Only you can see
-            them here.
+            Drafts stay private until you submit for review. Approved listings
+            appear on the storefront; rejected listings can be resubmitted.
           </p>
         </div>
         <Button asChild disabled={categories.length === 0}>
@@ -70,9 +72,9 @@ export default async function SellerListingsPage() {
               </div>
               <div className="flex flex-wrap items-center gap-2">
                 <Badge variant="outline">{product.status}</Badge>
-                <Button variant="outline" size="sm" asChild>
-                  <Link href={`/seller/listings/${product.$id}`}>Edit</Link>
-                </Button>
+                {canSubmitListingForReview(product.status) ? (
+                  <SubmitListingButton productId={product.$id} />
+                ) : null}
               </div>
             </li>
           ))}

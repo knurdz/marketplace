@@ -118,22 +118,20 @@ export type {
   UpdateShopProfileInput,
 } from "./seller-application";
 export {
-  addOwnProductImagesCore,
-  archiveOwnProductCore,
+  canSubmitListingForReview,
   countProductImagesForOwnProducts,
   createDraftProductCore,
   deleteOwnProductImageCore,
   getOwnProduct,
   listOwnProducts,
   parseCreateDraftProductInput,
-  parseSellerListingId,
-  updateOwnProductCore,
+  submitListingForReviewCore,
 } from "./seller-listings";
 export type {
   CreateDraftProductInput,
   CreateDraftProductResult,
   ParsedCreateDraftProductInput,
-  SellerListingMutationResult,
+  SubmitListingForReviewResult,
 } from "./seller-listings";
 export {
   listPendingModerationQueue,
