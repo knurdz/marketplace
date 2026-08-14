@@ -13,4 +13,4 @@ Before planning or implementing, read:
 4. `.cursor/rules/*`
 5. `docs/agent/SCHEMA.md` and `docs/agent/PAYHERE.md` when they exist
 
-Implement **one numbered step** at a time. Tick the matching step in `WORK_DISTRIBUTION.md` when done. Do not commit unless the human explicitly asks.
+Implement **one numbered step** at a time. Tick the matching step in `WORK_DISTRIBUTION.md` when done. Do not commit unless the human explicitly asks. When a commit is allowed, use `.cursor/rules/git-commit-identity.mdc` (invoking member as author and committer).

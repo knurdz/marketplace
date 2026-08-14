@@ -126,6 +126,11 @@ Until the Function is **deployed** with env vars (step 1.22+), the helper return
 
 PayHere POSTs `application/x-www-form-urlencoded` to the Function’s public URL (`notify_url`).
 
+Source: [`functions/payhere-notify/`](../../functions/payhere-notify/) (Member 1 step **1.23**).  
+Execute permission: **`any`** (PayHere cannot send a user JWT). Auth is **md5sig + merchant id**, not the Appwrite session. Dynamic API key scopes: **databases.read** and **databases.write** (TablesDB).
+
+Never invoke this Function from the browser. Member 2 return/cancel pages poll DB only.
+
 ### Fields (see `PAYHERE_NOTIFY_FIELDS`)
 
 `merchant_id`, `order_id`, `payment_id`, `payhere_amount`, `payhere_currency`, `status_code`, `md5sig`, `method`, `status_message`, `custom_1`, `custom_2` (+ card fields for card methods — do not log full PAN).
@@ -143,7 +148,9 @@ md5sig = UPPER(MD5(
 ))
 ```
 
-If local md5sig ≠ posted `md5sig` → **do not** mark paid; respond without mutating payment.
+If local md5sig ≠ posted `md5sig` → **do not** mark paid; respond `200 OK` without mutating payment (stops PayHere retries; attacker cannot settle without the secret).
+
+Missing Function env or TablesDB settle errors → HTTP 500 so PayHere retries.
 
 ### Status mapping
 
@@ -159,8 +166,11 @@ Use shared enums from [`lib/types/status.ts`](../../lib/types/status.ts) — do 
 
 ### Idempotency
 
-- Prefer `payments.idempotencyKey` / unique `payherePaymentId`.
-- Replay of the same successful notify must **not** double-decrement stock or double-apply `paid`.
+- Prefer `payments.idempotencyKey` = `payhere:<PayHere payment_id>` and `payherePaymentId`.
+- Replay of the same successful notify must **not** double-decrement stock or double-apply `paid` (already-`paid` → no-op; unique key races re-read `paid`).
+- Posted `payhere_amount` / `payhere_currency` must match the **DB** payment row; mismatch → no mutate.
+- Success (`2`) still marks `paid` if stock is short (money already captured); stock decrement is clamped at 0.
+- Logs: `order_id`, `status_code`, ignore/reject **reason** only — never `md5sig`, merchant secret, or card/PAN fields.
 
 ### Trust boundary
 
@@ -243,6 +253,8 @@ sequenceDiagram
 
 **Deploy `payhere-checkout-hash`:** Console → Functions → create with id `payhere-checkout-hash`, runtime Node, entrypoint `src/main.js`, root `functions/payhere-checkout-hash`, build `npm install`, execute **users**. Set the Function env vars above. Do not enable guest execute. Dynamic API key scopes can stay empty (JWT is used for DB reads).
 
+**Deploy `payhere-notify`:** id `payhere-notify`, entrypoint `src/main.js`, root `functions/payhere-notify`, build `npm install`, execute **any**, timeout ≥ 15s. Same merchant env as hash. Dynamic API key scopes: databases.read + databases.write. Copy the Function’s public HTTP URL into hash Function env `PAYHERE_NOTIFY_URL`.
+
 Placeholders in [`.env.example`](../../.env.example) document Function ownership. Local Next `.env.local` should **not** need the merchant secret for normal app boot.
 
 ---
@@ -252,12 +264,12 @@ Placeholders in [`.env.example`](../../.env.example) document Function ownership
 - [x] No merchant secret in client bundles or `NEXT_PUBLIC_*`
 - [x] Hash amount from DB, not client (step 1.22)
 - [x] Order ownership checked in hash Function (step 1.22)
-- [ ] Notify verifies md5sig before mutate
-- [ ] Notify idempotent (step 1.23)
+- [x] Notify verifies md5sig before mutate (step 1.23)
+- [x] Notify idempotent (step 1.23)
 - [x] Free confirm idempotent (step 1.24)
 - [ ] Return/cancel pages poll DB only
 - [x] Free path never hits PayHere (step 1.24)
-- [ ] Do not log secrets, full card numbers, or raw bank account numbers
+- [x] Do not log secrets, full card numbers, or raw bank account numbers
 
 ---
 

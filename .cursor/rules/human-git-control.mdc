@@ -20,3 +20,5 @@ Agents must **not** create commits, open/update PRs, merge, push, rebase, or ame
 - Batch “I’ll just commit this” after finishing a feature.
 
 If the human later says “commit” or “open a PR,” follow their request and the repo’s git safety rules at that time.
+
+When a commit **is** allowed (human asked, or Cloud Agent PR flow), identity must follow `.cursor/rules/git-commit-identity.mdc`: author and committer are the **invoking member**, never a bot identity.
