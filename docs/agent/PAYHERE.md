@@ -4,6 +4,7 @@
 > Function **bodies**, merchant secret, free confirm, notify logging, sandbox notes: **Member 1** (steps **1.22–1.28**).  
 > **1.25:** `requestPayHereCheckout` calls the live hash Function; **sandbox `actionUrl` only** until merchant authorization. Bank / free do not depend on this Function.  
 > **1.27:** sandbox test cards + click-path demo (this doc).  
+> **1.28:** payment-setup done gate — Members 2 and 4 consume the APIs below.  
 > Checkout UX / return-cancel polling: **Member 2** (steps 2.7–2.9) — calls Member 1 APIs only.
 
 Shared TypeScript: [`lib/types/payhere.ts`](../../lib/types/payhere.ts) · client helper: [`lib/services/payhere.ts`](../../lib/services/payhere.ts).
@@ -311,9 +312,32 @@ Name on card, CVV, and expiry: any valid values. Any card number **not** in this
 - **Cancel:** PayHere cancel redirects to `/checkout/payhere/cancel?orderId=…`, which also polls DB only.
 - **Already paid:** `/checkout/payhere` shows confirmed and does not re-POST. A replayed success notify must **not** double-decrement stock (step 1.23).
 
-### Free path (not seeded)
+### Free path (seeded)
 
-`/checkout/free` + `confirmFreeOrder` (step 1.24) never call PayHere. Seed has **no** `price=0` product (Member 3.8). To try free E2E, create a listing with `price=0` / `isFree=true` in the Appwrite console (or wait for seller free-listing). Bank transfer slip verify is **Member 4**, not this step.
+`/checkout/free` + `confirmFreeOrder` (step 1.24) never call PayHere.
+
+1. Sign in as `buyer@knurdz.demo`.
+2. Open `/products/seed_demo_free_product` (seeded “Demo Free Sticker”, **price 0**), add to cart (empty the paid sticker first — carts are single-seller; mixing free + paid totals is not free checkout).
+3. `/checkout` → method **Free** (only offered when the cart total is 0).
+4. Continue on `/checkout/free?orderId=…` and confirm. Server reloads DB amounts; `payments.status = paid` once.
+5. Confirm on `/orders/[id]`.
+
+Bank transfer slip verify is **Member 4**, not this step.
+
+---
+
+## Consumer contract (step 1.28)
+
+Payment setup (1.22–1.28) is **code-complete**. Members 2 and 4 consume these APIs only — do not add a second hash, notify, or `paid` writer.
+
+| Who | Call / read | Must not |
+|-----|-------------|----------|
+| Member 2 | `requestPayHereCheckout(orderId)` then POST sandbox form; poll DB on return/cancel | Hash locally; put merchant secret in the client; trust `return_url` query params |
+| Member 2 | `confirmFreeOrder` / `confirmFreeOrderAction` for `method=free` | Send a forged amount; call PayHere for zero-total orders |
+| Member 4 | `/admin/payments/notify-logs` (sanitized) | Implement PayHere Functions; display secrets / PAN |
+| Member 4 | Bank slip approve/reject UI (existing) | Treat bank verify as a PayHere path |
+
+**Console (human, once):** both Functions exist (`payhere-checkout-hash` execute **users**, `payhere-notify` execute **any**). Hash env already has `PAYHERE_SANDBOX=true` and `APP_URL=http://localhost:3000`. Copy the **payhere-notify Domains** URL into hash env `PAYHERE_NOTIFY_URL`. Set `PAYHERE_MERCHANT_ID` and `PAYHERE_MERCHANT_SECRET` on **both** Functions in the console (never git / `NEXT_PUBLIC_*`). Until merchant vars + notify URL are set, checkout correctly returns “PayHere checkout is not configured yet.” Sandbox card click-path: [Sandbox demo](#sandbox-demo-step-127). This gate does **not** claim a live Visa charge was completed in the agent session.
 
 ---
 
@@ -330,6 +354,7 @@ Name on card, CVV, and expiry: any valid values. Any card number **not** in this
 - [x] Sandbox-only `actionUrl` (step 1.25) until merchant authorization
 - [x] Persist sanitized notify outcomes in `payhere_notify_logs` (step 1.26)
 - [x] Sandbox demo / test-card notes (step 1.27)
+- [x] Payment setup done gate announced (step 1.28)
 - [x] Do not log secrets, full card numbers, or raw bank account numbers
 
 ---
