@@ -81,6 +81,14 @@ function NavLinks({
           Seller
         </Link>
       ) : null}
+      {user && !userHasLabel(user, "seller") ? (
+        <Link
+          href="/become-seller"
+          className="text-sm text-muted-foreground transition hover:text-foreground"
+        >
+          Sell
+        </Link>
+      ) : null}
       {user && userHasLabel(user, "admin") ? (
         <Link
           href="/admin"

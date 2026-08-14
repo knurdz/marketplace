@@ -206,7 +206,7 @@ Complete payment infrastructure so Members 2–4 only consume APIs / admin UI.
 
 ### Tasks
 
-- [ ] Seller application form
+- [x] Seller application form
 - [ ] Pending / rejected / approved status screens
 - [ ] Shop profile + public storefront (mini shop)
 - [ ] Product CRUD + multi-image gallery (Appwrite Storage)
@@ -225,7 +225,7 @@ Complete payment infrastructure so Members 2–4 only consume APIs / admin UI.
 
 | Step         | Goal           | Do                                                  | Verify                            |
 | ------------ | -------------- | --------------------------------------------------- | --------------------------------- |
-| [ ] **3.1**  | Apply form     | `seller_profiles` status=`pending`                  | One application per user          |
+| [x] **3.1**  | Apply form     | `seller_profiles` status=`pending`                  | One application per user          |
 | [ ] **3.2**  | Status screens | Pending / rejected / approved gate                  | `/seller` blocked if not approved |
 | [ ] **3.3**  | Shop profile   | Name, bio, banner; public shop page                 | Approved shops only public        |
 | [ ] **3.4**  | Create product | Draft + images                                      | Own `sellerId` only               |
@@ -377,3 +377,4 @@ Pick up only after Phases 1–4 are solid. Assign when claimed.
 | 2026-08-12 | Member 4 step **4.10**: read-only audit log viewer (`/admin/audit`); `listAuditLogs` / `getAuditLogsForResource` via `createAdminClient` only (table permissions none); URL filters (actorId, event, resourceType, resourceId) + cursor pagination; `requireLabel("admin")` in layout + service; session-client read blocked (verified); empty table OK; live row/filter/pagination E2E pending admin actions in env |
 | 2026-08-12 | Member 4 step **4.11**: admin analytics (`/admin/analytics`); `getSalesOverTime` + `getUserGrowthOverTime` in `admin-analytics.ts` — bounded date-range queries (default **30d** daily / **12m** monthly toggle), cursor pagination, zero-filled buckets, paid-only revenue matching 4.1; user signups via Users API `registration` range filter; approved sellers via `seller_profiles.$createdAt`; added **recharts**; aggregate charts only (no drill-down/PII); `requireLabel("admin")` in layout + service; self-check `scripts/verify-admin-analytics.mjs` |
 | 2026-08-12 | Member 4 step **4.12**: computed trust signals (`/admin/trust`); `lib/trust/rules.ts` + `lib/services/trust-signals.ts` — Verified badge eligibility (approved, ≥14d, ≥3 completed orders, 0 open reports) + 4 fraud flags (rejected slips, new-seller high first order, open reports, cancellation rate w/ small-sample guard); read-only admin UI; `docs/agent/TRUST_RULES.md`; bulk batched queries (cap 100 approved sellers); **no schema changes**; no persisted badge/flag state |
+| 2026-08-13 | Member 3 step **3.1**: seller apply form (`/become-seller`); `submitSellerApplicationCore` creates `seller_profiles` `status=pending` via session client with owner+admin row ACL; one application per `userId`; slug uniquification; pending/rejected status screens on apply page; navbar **Sell** link; self-check `scripts/verify-seller-application-validation.ts` |

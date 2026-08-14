@@ -20,9 +20,12 @@ export default function FaqPage() {
 
       <LegalSection title="How do I become a seller?">
         <p>
-          Register as a buyer, then apply through the seller portal once Member
-          3’s onboarding is live. An admin must approve your seller profile
-          before you can publish listings.
+          Register as a buyer, then apply at{" "}
+          <a href="/become-seller" className="text-accent hover:underline">
+            Become a seller
+          </a>
+          . An admin must approve your seller profile before you can publish
+          listings.
         </p>
       </LegalSection>
 
