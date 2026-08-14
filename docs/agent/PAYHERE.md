@@ -3,6 +3,7 @@
 > Drafted in **Member 1 step 1.20** (names/payloads/security).  
 > Function **bodies**, merchant secret, free confirm, notify logging, sandbox notes: **Member 1** (steps **1.22–1.28**).  
 > **1.25:** `requestPayHereCheckout` calls the live hash Function; **sandbox `actionUrl` only** until merchant authorization. Bank / free do not depend on this Function.  
+> **1.27:** sandbox test cards + click-path demo (this doc).  
 > Checkout UX / return-cancel polling: **Member 2** (steps 2.7–2.9) — calls Member 1 APIs only.
 
 Shared TypeScript: [`lib/types/payhere.ts`](../../lib/types/payhere.ts) · client helper: [`lib/services/payhere.ts`](../../lib/services/payhere.ts).
@@ -265,6 +266,57 @@ Placeholders in [`.env.example`](../../.env.example) document Function ownership
 
 ---
 
+## Sandbox demo (step 1.27)
+
+Human-runnable PayHere **sandbox** checkout. Official test cards: [PayHere sandbox and testing](https://support.payhere.lk/sandbox-and-testing). No real charges. **Never paste `PAYHERE_MERCHANT_SECRET` into this doc, git, README, or `NEXT_PUBLIC_*`.** Sandbox card numbers below are public PayHere test PANs, not secrets.
+
+### Prerequisites
+
+1. Deploy `payhere-checkout-hash` (execute **users**) and `payhere-notify` (execute **any**) — steps 1.22–1.23.
+2. Set Function env (values stay in the Appwrite console, not git):
+   - `PAYHERE_MERCHANT_ID` / `PAYHERE_MERCHANT_SECRET`
+   - `PAYHERE_SANDBOX` unset or `true` (`false` / `live` → HTTP 501)
+   - `APP_URL` — same origin the tester opens (e.g. `http://localhost:3000`)
+   - `PAYHERE_NOTIFY_URL` — **public** HTTP URL of `payhere-notify` (not localhost)
+3. Next.js: fill `.env.local` from [`.env.example`](../../.env.example), `npm run seed`, `npm run dev`.
+4. Checkout toast **“PayHere checkout is not configured yet.”** means missing Function env, undeployed hash Function, or live-locked `PAYHERE_SANDBOX` — not a client hash bug.
+
+### Local Next.js vs `notify_url`
+
+PayHere’s generic FAQ says `notify_url` cannot be localhost. This app already avoids that: `notify_url` is the **public Appwrite Function URL** (`PAYHERE_NOTIFY_URL`). `return_url` / `cancel_url` come from Function `APP_URL` and **may** be `http://localhost:3000` because PayHere redirects the **buyer’s browser**. Do **not** set `notify_url` to localhost or add a tunnel unless you changed that contract.
+
+### Test cards (sandbox only)
+
+| Card number         | Type        | Result   |
+| ------------------- | ----------- | -------- |
+| `4916217501611292`  | Visa        | Success  |
+| `5307732125531191`  | Mastercard  | Success  |
+| `346781005510225`   | Amex        | Success  |
+
+Name on card, CVV, and expiry: any valid values. Any card number **not** in this table declines in sandbox.
+
+### Happy path (PayHere)
+
+1. Sign in as demo buyer `buyer@knurdz.demo` (password in [`README.md`](../../README.md) Demo seed — sandbox only).
+2. Open `/products/seed_demo_product` (seeded “Demo Sticker Pack”, **500 LKR**), add to cart, go to `/checkout`, choose **PayHere**.
+3. Continue on `/checkout/payhere?orderId=…`. Member 2 UX calls `requestPayHereCheckout`; the hash Function signs fields from the **DB** order. Form `action` must stay `https://sandbox.payhere.lk/pay/checkout`.
+4. Pay with a success test card.
+5. Land on `/checkout/payhere/return?orderId=…`. Wait for DB poll: `payments.status = paid`. **Do not** treat PayHere query params (`status_code`, `payment_id`, `md5sig`) as proof.
+6. Confirm the order on `/orders/[id]`.
+7. Sign in as `admin@knurdz.demo` → `/admin/payments/notify-logs`. Expect a sanitized **settled** row for that `order_id`. The UI never shows merchant secret, `md5sig`, or card/PAN.
+
+### Decline, cancel, idempotency
+
+- **Decline:** use any card number not in the table. Payment must stay non-`paid` (`pending` or `failed`). Notify log may show **payment_failed** / **ignored** (never secrets).
+- **Cancel:** PayHere cancel redirects to `/checkout/payhere/cancel?orderId=…`, which also polls DB only.
+- **Already paid:** `/checkout/payhere` shows confirmed and does not re-POST. A replayed success notify must **not** double-decrement stock (step 1.23).
+
+### Free path (not seeded)
+
+`/checkout/free` + `confirmFreeOrder` (step 1.24) never call PayHere. Seed has **no** `price=0` product (Member 3.8). To try free E2E, create a listing with `price=0` / `isFree=true` in the Appwrite console (or wait for seller free-listing). Bank transfer slip verify is **Member 4**, not this step.
+
+---
+
 ## Security checklist
 
 - [x] No merchant secret in client bundles or `NEXT_PUBLIC_*`
@@ -277,6 +329,7 @@ Placeholders in [`.env.example`](../../.env.example) document Function ownership
 - [x] Free path never hits PayHere (step 1.24)
 - [x] Sandbox-only `actionUrl` (step 1.25) until merchant authorization
 - [x] Persist sanitized notify outcomes in `payhere_notify_logs` (step 1.26)
+- [x] Sandbox demo / test-card notes (step 1.27)
 - [x] Do not log secrets, full card numbers, or raw bank account numbers
 
 ---

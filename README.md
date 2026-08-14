@@ -12,7 +12,7 @@ Multi-role marketplace web app built with **Next.js** (frontend) and **Appwrite*
 
 ## Payments (MVP)
 
-- **PayHere** — sandbox card checkout (server-side hash + notify verification)
+- **PayHere** — sandbox card checkout (server-side hash + notify verification). Test cards and a click-path demo: [`docs/agent/PAYHERE.md`](./docs/agent/PAYHERE.md#sandbox-demo-step-127).
 - **Bank transfer** — instructions + slip upload, then verification
 - **Free** — zero-price listings / checkout without a gateway
 
@@ -79,7 +79,7 @@ After schema + buckets are applied:
 npm run seed
 ```
 
-Creates idempotent demo users, profiles, an approved seller shop, two categories, and one **active** sample product (`seed_demo_product`).
+Creates idempotent demo users, profiles, an approved seller shop, two categories, and one **active** sample product (`seed_demo_product`, 500 LKR). PayHere sandbox checkout against that listing: [`docs/agent/PAYHERE.md`](./docs/agent/PAYHERE.md#sandbox-demo-step-127).
 
 | Role   | Email                 | Labels           |
 | ------ | --------------------- | ---------------- |
