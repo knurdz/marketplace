@@ -49,6 +49,21 @@ export function isSandboxEnv(raw) {
   return true;
 }
 
+/**
+ * Step 1.25: live PayHere is not authorized yet.
+ * Unset / true → sandbox OK. false / live / 0 / no / off → 501 (same user message as missing env).
+ */
+export function evaluateSandboxCheckoutPolicy(raw) {
+  if (!isSandboxEnv(raw)) {
+    return {
+      ok: false,
+      status: 501,
+      error: "PayHere checkout is not configured yet.",
+    };
+  }
+  return { ok: true };
+}
+
 export function splitDisplayName(displayName, email) {
   const parts = String(displayName ?? "")
     .trim()

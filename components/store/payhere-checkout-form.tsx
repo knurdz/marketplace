@@ -5,10 +5,19 @@ import { useState, useTransition } from "react";
 import { Button } from "@/components/ui/button";
 import { requestPayHereCheckout } from "@/lib/services/payhere";
 import type { Order, Payment } from "@/lib/types";
-import type { PayHereCheckoutPayload } from "@/lib/types/payhere";
+import {
+  isPayHereSandboxActionUrl,
+  type PayHereCheckoutPayload,
+} from "@/lib/types/payhere";
 import { toast } from "@/lib/ui/toast";
 
-function submitPayHereCheckoutForm(payload: PayHereCheckoutPayload) {
+const LIVE_REFUSED = "PayHere checkout is not configured yet.";
+
+function submitPayHereCheckoutForm(payload: PayHereCheckoutPayload): boolean {
+  if (!isPayHereSandboxActionUrl(payload.actionUrl)) {
+    return false;
+  }
+
   const form = document.createElement("form");
   form.method = "POST";
   form.action = payload.actionUrl;
@@ -23,6 +32,7 @@ function submitPayHereCheckoutForm(payload: PayHereCheckoutPayload) {
 
   document.body.appendChild(form);
   form.submit();
+  return true;
 }
 
 type PayHereCheckoutFormProps = {
@@ -61,7 +71,10 @@ export function PayHereCheckoutForm({ order, payment }: PayHereCheckoutFormProps
         toast.error(result.error);
         return;
       }
-      submitPayHereCheckoutForm(result.payload);
+      if (!submitPayHereCheckoutForm(result.payload)) {
+        setError(LIVE_REFUSED);
+        toast.error(LIVE_REFUSED);
+      }
     });
   };
 

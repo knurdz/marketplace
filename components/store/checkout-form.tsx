@@ -22,7 +22,7 @@ type CheckoutFormProps = {
 };
 
 const METHOD_LABELS: Record<(typeof PAYMENT_METHODS)[number], string> = {
-  payhere: "PayHere (card / wallet)",
+  payhere: "PayHere (sandbox — test only)",
   bank_transfer: "Bank transfer",
   free: "Free checkout",
 };
@@ -57,8 +57,8 @@ export function CheckoutForm({ cartView }: CheckoutFormProps) {
     }
   }, [state, router]);
 
-  const defaultMethod = isFreeOrder ? "free" : "payhere";
-  const paidMethods = PAYMENT_METHODS.filter((method) => method !== "free");
+  const defaultMethod = isFreeOrder ? "free" : "bank_transfer";
+  const paidMethods = ["bank_transfer", "payhere"] as const;
   const availableMethods = isFreeOrder
     ? (["free"] as const)
     : paidMethods;
@@ -163,6 +163,12 @@ export function CheckoutForm({ cartView }: CheckoutFormProps) {
                   {method === "free" ? (
                     <span className="mt-1 block text-sm text-muted-foreground">
                       All items in this order are free.
+                    </span>
+                  ) : null}
+                  {method === "payhere" ? (
+                    <span className="mt-1 block text-sm text-muted-foreground">
+                      Sandbox card checkout for testing. Live PayHere is not
+                      available until merchant authorization.
                     </span>
                   ) : null}
                 </span>

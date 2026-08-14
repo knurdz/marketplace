@@ -132,9 +132,15 @@ function isNonEmptyString(value: unknown): value is string {
   return typeof value === "string" && value.trim().length > 0;
 }
 
+/** Step 1.25: only sandbox checkout may be posted until merchant authorization. */
+export function isPayHereSandboxActionUrl(url: string): boolean {
+  return url.trim() === PAYHERE_CHECKOUT_SANDBOX_URL;
+}
+
 /**
  * Validate Function JSON into a safe checkout payload.
  * Rejects objects that include secret-like keys.
+ * Rejects live PayHere action URLs (sandbox-only until merchant authorization).
  */
 export function parsePayHereCheckoutPayload(
   raw: unknown,
@@ -147,6 +153,8 @@ export function parsePayHereCheckoutPayload(
   }
 
   if (!isNonEmptyString(obj.actionUrl)) return null;
+  const actionUrl = obj.actionUrl.trim();
+  if (!isPayHereSandboxActionUrl(actionUrl)) return null;
   const fieldsRaw = obj.fields;
   if (!fieldsRaw || typeof fieldsRaw !== "object") return null;
   const fieldsObj = fieldsRaw as Record<string, unknown>;
@@ -163,7 +171,7 @@ export function parsePayHereCheckoutPayload(
   }
 
   return {
-    actionUrl: obj.actionUrl.trim(),
+    actionUrl,
     fields,
   };
 }

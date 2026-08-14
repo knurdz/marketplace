@@ -1,9 +1,9 @@
 "use server";
 
 /**
- * PayHere checkout hash client (step 1.20).
- * Calls Appwrite Function `payhere-checkout-hash` — Member 1 owns the Function body + merchant secret (steps 1.22–1.28).
- * See docs/agent/PAYHERE.md for full contract (notify + free confirm implemented by Member 1 payment setup).
+ * PayHere checkout hash client (step 1.25).
+ * Calls Appwrite Function `payhere-checkout-hash` — sandbox action URL only until merchant authorization.
+ * See docs/agent/PAYHERE.md. Merchant secret never leaves Function env.
  */
 
 import { ExecutionMethod } from "node-appwrite";
@@ -14,14 +14,20 @@ import {
 import { createSessionClient } from "@/lib/appwrite/server";
 import { getLoggedInUser } from "@/lib/appwrite/session";
 import {
+  assertRateLimit,
+  getClientIp,
+  RATE_LIMIT_MESSAGE,
+  RATE_LIMITS,
+} from "@/lib/security/rate-limit";
+import {
+  isPayHereSandboxActionUrl,
   parsePayHereCheckoutPayload,
   type PayHereCheckoutHashRequest,
   type PayHereCheckoutHashResult,
 } from "@/lib/types/payhere";
 
 const ORDER_ID_MAX = 36;
-const NOT_CONFIGURED =
-  "PayHere checkout is not configured yet.";
+const NOT_CONFIGURED = "PayHere checkout is not configured yet.";
 const GENERIC_FAILURE =
   "Unable to start PayHere checkout. Please try again later.";
 
@@ -59,9 +65,7 @@ function mapExecutionError(error: unknown): string {
 /**
  * Request a PayHere checkout form payload for an order (signed-in buyer).
  * Amount/currency must be resolved inside the Function from DB — never trust client totals.
- *
- * Free confirm and notify are separate contracts — see docs/agent/PAYHERE.md
- * (`confirmFreeOrder` types; `payhere-notify` is HTTP-only from PayHere).
+ * Only sandbox `actionUrl` is accepted (step 1.25). Bank/free checkout never call this.
  */
 export async function requestPayHereCheckout(
   orderId: string,
@@ -78,6 +82,16 @@ export async function requestPayHereCheckout(
   const user = await getLoggedInUser();
   if (!user) {
     return { ok: false, error: "You must be signed in to checkout." };
+  }
+
+  const ip = await getClientIp();
+  const limited = assertRateLimit({
+    bucket: "payhere-checkout",
+    key: `${user.$id}:${ip}`,
+    ...RATE_LIMITS.checkout,
+  });
+  if (!limited.ok) {
+    return { ok: false, error: RATE_LIMIT_MESSAGE };
   }
 
   const body: PayHereCheckoutHashRequest = { orderId: normalized };
@@ -144,7 +158,7 @@ export async function requestPayHereCheckout(
     }
 
     const payload = parsePayHereCheckoutPayload(candidate);
-    if (!payload) {
+    if (!payload || !isPayHereSandboxActionUrl(payload.actionUrl)) {
       return { ok: false, error: GENERIC_FAILURE };
     }
 
