@@ -51,14 +51,18 @@ Controlled by Function env `PAYHERE_SANDBOX` (not a client toggle of amount/hash
 
 Type: `PayHereCheckoutHashRequest`.
 
-### Security rules (Member 4 must enforce)
+### Security rules (this Function — Member 1 step 1.22)
 
-1. Require authenticated user (execution inherits session when called from `createSessionClient`).
-2. Load order + payment from TablesDB; reject if `buyerId !==` session user (IDOR).
-3. Reject if `payment.method !== "payhere"` or amount ≤ 0.
-4. **Amount / currency / items** come from DB snapshots — never from client body extras.
-5. `merchant_secret` only in Function env; never write secret into response JSON.
-6. Set `return_url` / `cancel_url` / `notify_url` from trusted app config (e.g. `NEXT_PUBLIC_APP_URL` equivalents in Function env).
+Source: [`functions/payhere-checkout-hash/`](../../functions/payhere-checkout-hash/). Execute permission: **`users`** (session `createExecution` only).
+
+1. Require authenticated user: `x-appwrite-user-id` **and** `x-appwrite-user-jwt` (JWT verified via `Account.get()`). Execution inherits session when called from `createSessionClient`.
+2. Load order + payment + items from TablesDB with the **user JWT** (least privilege); reject if `buyerId !==` session user (IDOR → generic not-found).
+3. Reject if `payment.method !== "payhere"` or amount ≤ 0. Free orders use `confirmFreeOrder` (1.24).
+4. **Amount / currency / items** come from DB snapshots — extra client body fields (including `amount`) are ignored.
+5. `merchant_secret` only in Function env; never write secret into response JSON (payload is scanned before return).
+6. Set `return_url` / `cancel_url` from Function env `APP_URL`; `notify_url` from Function env `PAYHERE_NOTIFY_URL` (public `payhere-notify` URL from step 1.23).
+
+Missing merchant id/secret, `APP_URL`, or `PAYHERE_NOTIFY_URL` → HTTP 501 `{ ok: false, error: "PayHere checkout is not configured yet." }`.
 
 ### Response
 
@@ -114,7 +118,7 @@ if (!result.ok) { /* toast result.error */ }
 // POST result.payload.fields to result.payload.actionUrl
 ```
 
-Until Member 1 deploys the Function (step 1.22+), the helper returns a typed `{ ok: false, error: "PayHere checkout is not configured yet." }`.
+Until the Function is **deployed** with env vars (step 1.22+), the helper returns a typed `{ ok: false, error: "PayHere checkout is not configured yet." }` (missing Function, 404, or 501).
 
 ---
 
@@ -231,9 +235,13 @@ sequenceDiagram
 |----------|--------|--------|
 | `NEXT_PUBLIC_APPWRITE_*` / `NEXT_PUBLIC_APP_URL` | Next.js | Public only |
 | `APPWRITE_API_KEY` | Next.js server | Never PayHere secret |
+| `APP_URL` | **Function env** | Public origin for `return_url` / `cancel_url` (same value as `NEXT_PUBLIC_APP_URL`, not a `NEXT_PUBLIC_*` inside the Function) |
+| `PAYHERE_NOTIFY_URL` | **Function env** | Public HTTP URL of `payhere-notify` (step 1.23). Required before hash can return a complete payload. |
 | `PAYHERE_MERCHANT_ID` | **Appwrite Function env** | May appear in checkout form fields |
 | `PAYHERE_MERCHANT_SECRET` | **Appwrite Function env only** | Never `NEXT_PUBLIC_*`, never Next app imports, never git |
-| `PAYHERE_SANDBOX` | Function env | `true` → sandbox checkout URL |
+| `PAYHERE_SANDBOX` | Function env | unset/`true` → sandbox checkout URL; `false`/`live` → live URL |
+
+**Deploy `payhere-checkout-hash`:** Console → Functions → create with id `payhere-checkout-hash`, runtime Node, entrypoint `src/main.js`, root `functions/payhere-checkout-hash`, build `npm install`, execute **users**. Set the Function env vars above. Do not enable guest execute. Dynamic API key scopes can stay empty (JWT is used for DB reads).
 
 Placeholders in [`.env.example`](../../.env.example) document Function ownership. Local Next `.env.local` should **not** need the merchant secret for normal app boot.
 
@@ -241,9 +249,9 @@ Placeholders in [`.env.example`](../../.env.example) document Function ownership
 
 ## Security checklist
 
-- [ ] No merchant secret in client bundles or `NEXT_PUBLIC_*`
-- [ ] Hash amount from DB, not client
-- [ ] Order ownership checked in hash Function
+- [x] No merchant secret in client bundles or `NEXT_PUBLIC_*`
+- [x] Hash amount from DB, not client (step 1.22)
+- [x] Order ownership checked in hash Function (step 1.22)
 - [ ] Notify verifies md5sig before mutate
 - [ ] Notify idempotent (step 1.23)
 - [x] Free confirm idempotent (step 1.24)
