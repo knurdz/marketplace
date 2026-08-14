@@ -126,7 +126,7 @@ Complete payment infrastructure so Members 2–4 only consume APIs / admin UI.
 
 | Step         | Goal                             | Do                                                                          | Verify                                                             |
 | ------------ | -------------------------------- | --------------------------------------------------------------------------- | ------------------------------------------------------------------ |
-| [ ] **1.22** | PayHere hash Function            | Appwrite Function `payhere-checkout-hash`; secret in Function env only      | Signed checkout fields from DB order                               |
+| [x] **1.22** | PayHere hash Function            | Appwrite Function `payhere-checkout-hash`; secret in Function env only      | Signed checkout fields from DB order                               |
 | [ ] **1.23** | PayHere notify Function          | `payhere-notify`; verify md5sig; idempotent `paid` + stock once             | Replay notify safe                                                 |
 | [x] **1.24** | Free confirm path                | Secure server/Function confirm for `method=free` (no client-trusted amount) | Free orders mark paid once                                         |
 | [ ] **1.25** | Wire client stub → live Function | `requestPayHereCheckout` calls real hash Function                           | Member 2 can POST sandbox form                                     |
@@ -137,12 +137,12 @@ Complete payment infrastructure so Members 2–4 only consume APIs / admin UI.
 
 **Checklist**
 
-- [ ] Appwrite Function: PayHere checkout hash
+- [x] Appwrite Function: PayHere checkout hash
 - [ ] Appwrite Function: PayHere notify verify + idempotent `paid`
 - [x] Free payment confirm (server-side)
 - [ ] Monitor / log PayHere notify failures
 - [ ] Sandbox demo / test-card notes
-- [ ] Merchant secret only in Function env (never `NEXT_PUBLIC_*`)
+- [x] Merchant secret only in Function env (never `NEXT_PUBLIC_*`)
 
 ### Member 1 — done when
 

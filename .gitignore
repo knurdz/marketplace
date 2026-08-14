@@ -34,6 +34,9 @@ yarn-error.log*
 .env*
 !.env.example
 
+# function deps (installed in Appwrite build)
+functions/**/node_modules
+
 # vercel
 .vercel
 
