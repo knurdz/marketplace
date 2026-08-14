@@ -1,0 +1,52 @@
+---
+description: Commit as the invoking member — never a bot identity on GitHub
+alwaysApply: true
+---
+
+# Git commit identity
+
+When this agent creates a git commit (Cloud Agent PR flow, or the human explicitly asked to commit):
+
+## Author and committer
+
+Use the **member who asked this agent to commit** as both **author and committer**. Do not hardcode one teammate. Do not use a bot name or `cursoragent@cursor.com`.
+
+Resolve identity for **this run** (first match wins):
+
+1. The human named in this conversation / run owner.
+2. `CO_AUTHOR='Name <email>'` in the managed `commit-msg` co-author hook (set per run to the invoking member).
+3. Repo-local `user.name` / `user.email` if they already match that member.
+
+Set **repo-local** git identity before every commit (do not rely on the Cloud Agent global `~/.gitconfig`):
+
+```bash
+git config --local user.name "$MEMBER_NAME"
+git config --local user.email "$MEMBER_EMAIL"
+git config --local commit.gpgsign false
+```
+
+Run the commit with matching env:
+
+```bash
+GIT_AUTHOR_NAME="$MEMBER_NAME" \
+GIT_AUTHOR_EMAIL="$MEMBER_EMAIL" \
+GIT_COMMITTER_NAME="$MEMBER_NAME" \
+GIT_COMMITTER_EMAIL="$MEMBER_EMAIL" \
+git commit -m "..."
+```
+
+Do **not** use `--no-verify`. The managed `commit-msg` hook may append `Co-authored-by: Name <email>` for the same human — that is expected.
+
+Do **not** SSH-sign with the environment signing key (`commit.gpgsign` false in this repo).
+
+After committing, confirm `git log -1 --format='%an <%ae> / %cn <%ce>'` is the invoking member. If it is still a bot identity, `git commit --amend --reset-author` with the same env (feature branch only).
+
+Commit **messages** must not name bot identities.
+
+## Force-push
+
+`git push --force-with-lease` only this agent's **feature branch** when rewriting a commit we just made. Never force-push `dev` or `main`.
+
+## Honest limit
+
+The GitHub App that pushes may still appear on the PR **timeline** as the pusher. The commit **author and committer** must still be the invoking member.
