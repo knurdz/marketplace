@@ -1,6 +1,6 @@
 import Link from "next/link";
 import type { Models } from "node-appwrite";
-import { Menu, Search } from "lucide-react";
+import { Menu, Search, ShoppingCart } from "lucide-react";
 import { signOut } from "@/lib/appwrite/auth";
 import { userHasLabel } from "@/lib/appwrite/roles";
 import { NotificationBell } from "@/components/notifications/notification-bell";
@@ -17,6 +17,7 @@ import {
 
 type StoreNavbarProps = {
   user: Models.User<Models.Preferences> | null;
+  cartItemCount?: number;
 };
 
 function NavLinks({
@@ -40,12 +41,52 @@ function NavLinks({
       >
         Browse
       </Link>
+      {user ? (
+        <Link
+          href="/cart"
+          className="text-sm text-muted-foreground transition hover:text-foreground"
+        >
+          Cart
+        </Link>
+      ) : null}
+      {user ? (
+        <Link
+          href="/dashboard"
+          className="text-sm text-muted-foreground transition hover:text-foreground"
+        >
+          Dashboard
+        </Link>
+      ) : null}
+      {user ? (
+        <Link
+          href="/orders"
+          className="text-sm text-muted-foreground transition hover:text-foreground"
+        >
+          Orders
+        </Link>
+      ) : null}
+      {user ? (
+        <Link
+          href="/wishlist"
+          className="text-sm text-muted-foreground transition hover:text-foreground"
+        >
+          Wishlist
+        </Link>
+      ) : null}
       {user && userHasLabel(user, "seller") ? (
         <Link
           href="/seller"
           className="text-sm text-muted-foreground transition hover:text-foreground"
         >
           Seller
+        </Link>
+      ) : null}
+      {user && !userHasLabel(user, "seller") ? (
+        <Link
+          href="/become-seller"
+          className="text-sm text-muted-foreground transition hover:text-foreground"
+        >
+          Sell
         </Link>
       ) : null}
       {user && userHasLabel(user, "admin") ? (
@@ -84,7 +125,7 @@ function SearchForm({ className }: { className?: string }) {
   );
 }
 
-export function StoreNavbar({ user }: StoreNavbarProps) {
+export function StoreNavbar({ user, cartItemCount = 0 }: StoreNavbarProps) {
   return (
     <header className="sticky top-0 z-40 border-b border-border bg-background/80 backdrop-blur-md">
       <div className="mx-auto flex h-14 w-full max-w-6xl items-center justify-between gap-4 px-4 sm:px-6">
@@ -103,7 +144,27 @@ export function StoreNavbar({ user }: StoreNavbarProps) {
         <div className="hidden items-center gap-2 md:flex">
           {user ? (
             <>
+              <Button variant="ghost" size="sm" className="relative gap-1.5" asChild>
+                <Link href="/cart" aria-label={`Cart${cartItemCount > 0 ? `, ${cartItemCount} items` : ""}`}>
+                  <ShoppingCart className="size-4" aria-hidden />
+                  Cart
+                  {cartItemCount > 0 ? (
+                    <span className="font-mono text-xs tabular-nums text-accent">
+                      ({cartItemCount})
+                    </span>
+                  ) : null}
+                </Link>
+              </Button>
               <NotificationBell className="size-10" />
+              <Button variant="outline" size="sm" asChild>
+                <Link href="/dashboard">Dashboard</Link>
+              </Button>
+              <Button variant="outline" size="sm" asChild>
+                <Link href="/orders">Orders</Link>
+              </Button>
+              <Button variant="outline" size="sm" asChild>
+                <Link href="/wishlist">Wishlist</Link>
+              </Button>
               <Button variant="outline" size="sm" asChild>
                 <Link href="/account">Account</Link>
               </Button>
@@ -147,6 +208,29 @@ export function StoreNavbar({ user }: StoreNavbarProps) {
               <div className="mt-6 flex flex-col gap-4 px-4">
                 <SearchForm className="flex w-full items-center gap-2" />
                 <NavLinks user={user} className="flex flex-col gap-3" />
+                {user ? (
+                  <Button variant="outline" asChild>
+                    <Link href="/dashboard">Dashboard</Link>
+                  </Button>
+                ) : null}
+                {user ? (
+                  <Button variant="outline" asChild>
+                    <Link href="/orders">Orders</Link>
+                  </Button>
+                ) : null}
+                {user ? (
+                  <Button variant="outline" asChild>
+                    <Link href="/wishlist">Wishlist</Link>
+                  </Button>
+                ) : null}
+                {user ? (
+                  <Button variant="outline" asChild>
+                    <Link href="/cart">
+                      Cart
+                      {cartItemCount > 0 ? ` (${cartItemCount})` : ""}
+                    </Link>
+                  </Button>
+                ) : null}
                 <Separator />
                 {user ? (
                   <div className="flex flex-col gap-2">

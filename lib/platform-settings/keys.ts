@@ -7,6 +7,8 @@ export const PLATFORM_SETTING_KEYS = {
   siteSupportEmail: "site.support_email",
   checkoutCurrencyDefault: "checkout.currency_default",
   checkoutBankInstructions: "checkout.bank_instructions",
+  checkoutSandboxModeDisplay: "checkout.sandbox_mode_display",
+  checkoutFeePercent: "checkout.fee_percent",
   featuresFreeListings: "features.free_listings",
 } as const;
 

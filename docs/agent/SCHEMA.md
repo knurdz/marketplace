@@ -44,7 +44,7 @@ Server-action rate limits live in [`lib/security/rate-limit.ts`](../../lib/secur
 | Bank slip `status` | `pending` \| `approved` \| `rejected` |
 | Report `status` | `open` \| `reviewing` \| `resolved` \| `dismissed` |
 
-## Tables (16)
+## Tables (17)
 
 ### `profiles`
 
@@ -174,6 +174,22 @@ Server-action rate limits live in [`lib/security/rate-limit.ts`](../../lib/secur
 
 ---
 
+### `wishlist_items`
+
+- **Row security:** yes  
+- **Table permissions:** `create(users)`
+
+| Column | Type | Required | Notes |
+|--------|------|----------|-------|
+| `userId` | string(36) | yes | Auth `$id` of owner |
+| `productId` | string(36) | yes | Saved product row id |
+
+**Indexes:** `userId_idx`, `user_product_unique` (unique: `userId`,`productId`); `productId_idx`  
+**Row permissions on create:** `read`/`update`/`delete` → `Role.user(userId)`; admin read/update/delete  
+**Intent:** owner-only saved products; IDOR checks in services. Timestamps use system `$createdAt` / `$updatedAt`.
+
+---
+
 ### `orders`
 
 - **Row security:** yes  
@@ -228,7 +244,7 @@ Server-action rate limits live in [`lib/security/rate-limit.ts`](../../lib/secur
 | `idempotencyKey` | string(128) | no |
 
 **Indexes:** `orderId_idx`, `idempotencyKey_unique`  
-**Intent:** PayHere notify / free / bank paid updates are server-side and idempotent (**Member 1** payment setup; bank *approve UI* is Member 4).
+**Intent:** PayHere notify / free / bank paid updates are server-side and idempotent (**Member 1** payment setup; bank *approve UI* is Member 4). Free confirm (step **1.24**) writes `status=paid` + `idempotencyKey=free:<orderId>` via admin SDK; buyers must not be trusted to set `paid`.
 
 ---
 
@@ -361,7 +377,7 @@ Uploads are rate-limited in `uploadFile` (see Abuse guards above).
 ## Console match checklist
 
 - [x] Database `marketplace` exists (TablesDB)
-- [x] All 16 table ids present and enabled
+- [x] All 17 table ids present and enabled
 - [x] Columns/indexes available (verified via SDK list)
 - [x] Enum values match this document
 - [x] Code constants in `lib/appwrite/config.ts` match table ids

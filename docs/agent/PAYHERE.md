@@ -51,14 +51,18 @@ Controlled by Function env `PAYHERE_SANDBOX` (not a client toggle of amount/hash
 
 Type: `PayHereCheckoutHashRequest`.
 
-### Security rules (Member 4 must enforce)
+### Security rules (this Function — Member 1 step 1.22)
 
-1. Require authenticated user (execution inherits session when called from `createSessionClient`).
-2. Load order + payment from TablesDB; reject if `buyerId !==` session user (IDOR).
-3. Reject if `payment.method !== "payhere"` or amount ≤ 0.
-4. **Amount / currency / items** come from DB snapshots — never from client body extras.
-5. `merchant_secret` only in Function env; never write secret into response JSON.
-6. Set `return_url` / `cancel_url` / `notify_url` from trusted app config (e.g. `NEXT_PUBLIC_APP_URL` equivalents in Function env).
+Source: [`functions/payhere-checkout-hash/`](../../functions/payhere-checkout-hash/). Execute permission: **`users`** (session `createExecution` only).
+
+1. Require authenticated user: `x-appwrite-user-id` **and** `x-appwrite-user-jwt` (JWT verified via `Account.get()`). Execution inherits session when called from `createSessionClient`.
+2. Load order + payment + items from TablesDB with the **user JWT** (least privilege); reject if `buyerId !==` session user (IDOR → generic not-found).
+3. Reject if `payment.method !== "payhere"` or amount ≤ 0. Free orders use `confirmFreeOrder` (1.24).
+4. **Amount / currency / items** come from DB snapshots — extra client body fields (including `amount`) are ignored.
+5. `merchant_secret` only in Function env; never write secret into response JSON (payload is scanned before return).
+6. Set `return_url` / `cancel_url` from Function env `APP_URL`; `notify_url` from Function env `PAYHERE_NOTIFY_URL` (public `payhere-notify` URL from step 1.23).
+
+Missing merchant id/secret, `APP_URL`, or `PAYHERE_NOTIFY_URL` → HTTP 501 `{ ok: false, error: "PayHere checkout is not configured yet." }`.
 
 ### Response
 
@@ -114,13 +118,18 @@ if (!result.ok) { /* toast result.error */ }
 // POST result.payload.fields to result.payload.actionUrl
 ```
 
-Until Member 1 deploys the Function (step 1.22+), the helper returns a typed `{ ok: false, error: "PayHere checkout is not configured yet." }`.
+Until the Function is **deployed** with env vars (step 1.22+), the helper returns a typed `{ ok: false, error: "PayHere checkout is not configured yet." }` (missing Function, 404, or 501).
 
 ---
 
 ## Notify Function
 
 PayHere POSTs `application/x-www-form-urlencoded` to the Function’s public URL (`notify_url`).
+
+Source: [`functions/payhere-notify/`](../../functions/payhere-notify/) (Member 1 step **1.23**).  
+Execute permission: **`any`** (PayHere cannot send a user JWT). Auth is **md5sig + merchant id**, not the Appwrite session. Dynamic API key scopes: **databases.read** and **databases.write** (TablesDB).
+
+Never invoke this Function from the browser. Member 2 return/cancel pages poll DB only.
 
 ### Fields (see `PAYHERE_NOTIFY_FIELDS`)
 
@@ -139,7 +148,9 @@ md5sig = UPPER(MD5(
 ))
 ```
 
-If local md5sig ≠ posted `md5sig` → **do not** mark paid; respond without mutating payment.
+If local md5sig ≠ posted `md5sig` → **do not** mark paid; respond `200 OK` without mutating payment (stops PayHere retries; attacker cannot settle without the secret).
+
+Missing Function env or TablesDB settle errors → HTTP 500 so PayHere retries.
 
 ### Status mapping
 
@@ -155,8 +166,11 @@ Use shared enums from [`lib/types/status.ts`](../../lib/types/status.ts) — do 
 
 ### Idempotency
 
-- Prefer `payments.idempotencyKey` / unique `payherePaymentId`.
-- Replay of the same successful notify must **not** double-decrement stock or double-apply `paid`.
+- Prefer `payments.idempotencyKey` = `payhere:<PayHere payment_id>` and `payherePaymentId`.
+- Replay of the same successful notify must **not** double-decrement stock or double-apply `paid` (already-`paid` → no-op; unique key races re-read `paid`).
+- Posted `payhere_amount` / `payhere_currency` must match the **DB** payment row; mismatch → no mutate.
+- Success (`2`) still marks `paid` if stock is short (money already captured); stock decrement is clamped at 0.
+- Logs: `order_id`, `status_code`, ignore/reject **reason** only — never `md5sig`, merchant secret, or card/PAN fields.
 
 ### Trust boundary
 
@@ -167,17 +181,20 @@ Use shared enums from [`lib/types/status.ts`](../../lib/types/status.ts) — do 
 
 ## Free confirm (not a PayHere Function)
 
-Contract name for Member 2 server action: **`confirmFreeOrder`**.
+Contract name: **`confirmFreeOrder`** (`lib/services/free-order.ts`, Member 1 step **1.24**).
 
-Types: `ConfirmFreeOrderRequest` / `ConfirmFreeOrderResult` in `lib/types/payhere.ts`.
+Types: `ConfirmFreeOrderRequest` / `ConfirmFreeOrderResult` in `lib/types/payhere.ts`.  
+Eligibility (pure): `evaluateFreeConfirm` in `lib/services/free-order-rules.ts`.  
+Member 2 UX calls `confirmFreeOrderAction` → this API; never writes `paid` from the client.
 
 ### Rules
 
-1. Session required; `order.buyerId ===` session user.
-2. `payment.method === "free"` and `payment.amount === 0` (and order total 0).
-3. Never call PayHere with a forged zero amount for a paid listing.
-4. Idempotent: already `paid` → success no-op.
-5. Implementation lands with Member 2 order creation (2.6–2.7); this step only freezes the types/docs.
+1. Session required (`getLoggedInUser`; suspended accounts are treated as signed-out); `order.buyerId ===` session user. Other buyers get a generic not-found (IDOR).
+2. Re-load order + payment + items with the **admin SDK**. `payment.method === "free"` and `payment.amount === 0` and `order.totalAmount === 0`. Every line item `unitPrice` / `lineTotal` must be `0`. Amounts are never taken from the request body.
+3. Never call PayHere with a forged zero amount for a paid listing. This path does not import or invoke PayHere.
+4. Idempotent: already `paid` → success no-op. Concurrent retries that lose the TablesDB transaction re-read payment and succeed if already `paid`. First successful settle sets `payments.idempotencyKey = free:<orderId>`.
+5. Stock decrements **once** in the same transaction as `paid` (`decrementRowColumn` `min: 0`). Insufficient stock **rejects** (free path has not collected money). Repair of a half-written row does **not** decrement again.
+6. Writes use `APPWRITE_API_KEY` (server-only). Missing key → `{ ok: false, error: "Free order confirmation is not configured yet." }`. Rate-limited per user+IP (`RATE_LIMITS.checkout`).
 
 ---
 
@@ -215,8 +232,8 @@ sequenceDiagram
   participant DB as TablesDB
 
   Buyer->>Next: Confirm free order
-  Next->>DB: Own order + method free + amount 0
-  Next->>DB: Mark paid idempotent
+  Next->>DB: Own order + method free + amount 0 (DB)
+  Next->>DB: paid once + stock once (transaction)
   Next-->>Buyer: ok
 ```
 
@@ -228,9 +245,15 @@ sequenceDiagram
 |----------|--------|--------|
 | `NEXT_PUBLIC_APPWRITE_*` / `NEXT_PUBLIC_APP_URL` | Next.js | Public only |
 | `APPWRITE_API_KEY` | Next.js server | Never PayHere secret |
+| `APP_URL` | **Function env** | Public origin for `return_url` / `cancel_url` (same value as `NEXT_PUBLIC_APP_URL`, not a `NEXT_PUBLIC_*` inside the Function) |
+| `PAYHERE_NOTIFY_URL` | **Function env** | Public HTTP URL of `payhere-notify` (step 1.23). Required before hash can return a complete payload. |
 | `PAYHERE_MERCHANT_ID` | **Appwrite Function env** | May appear in checkout form fields |
 | `PAYHERE_MERCHANT_SECRET` | **Appwrite Function env only** | Never `NEXT_PUBLIC_*`, never Next app imports, never git |
-| `PAYHERE_SANDBOX` | Function env | `true` → sandbox checkout URL |
+| `PAYHERE_SANDBOX` | Function env | unset/`true` → sandbox checkout URL; `false`/`live` → live URL |
+
+**Deploy `payhere-checkout-hash`:** Console → Functions → create with id `payhere-checkout-hash`, runtime Node, entrypoint `src/main.js`, root `functions/payhere-checkout-hash`, build `npm install`, execute **users**. Set the Function env vars above. Do not enable guest execute. Dynamic API key scopes can stay empty (JWT is used for DB reads).
+
+**Deploy `payhere-notify`:** id `payhere-notify`, entrypoint `src/main.js`, root `functions/payhere-notify`, build `npm install`, execute **any**, timeout ≥ 15s. Same merchant env as hash. Dynamic API key scopes: databases.read + databases.write. Copy the Function’s public HTTP URL into hash Function env `PAYHERE_NOTIFY_URL`.
 
 Placeholders in [`.env.example`](../../.env.example) document Function ownership. Local Next `.env.local` should **not** need the merchant secret for normal app boot.
 
@@ -238,14 +261,15 @@ Placeholders in [`.env.example`](../../.env.example) document Function ownership
 
 ## Security checklist
 
-- [ ] No merchant secret in client bundles or `NEXT_PUBLIC_*`
-- [ ] Hash amount from DB, not client
-- [ ] Order ownership checked in hash Function
-- [ ] Notify verifies md5sig before mutate
-- [ ] Notify + free confirm idempotent
+- [x] No merchant secret in client bundles or `NEXT_PUBLIC_*`
+- [x] Hash amount from DB, not client (step 1.22)
+- [x] Order ownership checked in hash Function (step 1.22)
+- [x] Notify verifies md5sig before mutate (step 1.23)
+- [x] Notify idempotent (step 1.23)
+- [x] Free confirm idempotent (step 1.24)
 - [ ] Return/cancel pages poll DB only
-- [ ] Free path never hits PayHere
-- [ ] Do not log secrets, full card numbers, or raw bank account numbers
+- [x] Free path never hits PayHere (step 1.24)
+- [x] Do not log secrets, full card numbers, or raw bank account numbers
 
 ---
 

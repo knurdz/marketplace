@@ -1,10 +1,37 @@
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { getSessionUser, listActiveProducts } from "@/lib/services";
+import { ProductCatalogFilters } from "@/components/store/product-catalog-filters";
+import { ProductList } from "@/components/store/product-list";
+import {
+  getSessionUser,
+  listActiveProducts,
+  parseProductCatalogParams,
+} from "@/lib/services";
 
-export default async function Home() {
+type HomeProps = {
+  searchParams: Promise<{
+    minPrice?: string;
+    maxPrice?: string;
+    sort?: string;
+  }>;
+};
+
+export default async function Home({ searchParams }: HomeProps) {
   const user = await getSessionUser();
-  const products = await listActiveProducts({ limit: 8 });
+  const params = await searchParams;
+  const catalogParams = parseProductCatalogParams(params);
+  const products = await listActiveProducts({
+    limit: 24,
+    minPrice: catalogParams.minPrice,
+    maxPrice: catalogParams.maxPrice,
+    sort: catalogParams.sort,
+    invalidPriceRange: catalogParams.invalidPriceRange,
+  });
+
+  const hasActiveFilters =
+    catalogParams.minPrice != null ||
+    catalogParams.maxPrice != null ||
+    catalogParams.sort !== "newest";
 
   return (
     <main className="relative overflow-hidden">
@@ -38,7 +65,7 @@ export default async function Home() {
           </Button>
           {user ? (
             <Button variant="outline" size="lg" asChild>
-              <Link href="/account">Account</Link>
+              <Link href="/dashboard">Dashboard</Link>
             </Button>
           ) : (
             <Button variant="outline" size="lg" asChild>
@@ -62,29 +89,29 @@ export default async function Home() {
           <code className="font-mono text-xs">status=active</code>.
         </p>
 
-        {products.length === 0 ? (
+        <ProductCatalogFilters action="/" defaults={catalogParams} />
+
+        {catalogParams.invalidPriceRange ? (
           <p className="mt-8 font-mono text-sm text-muted-foreground">
-            No active products yet. Seed lands in step 1.12.
+            Minimum price cannot be greater than maximum price.
+          </p>
+        ) : products.length === 0 ? (
+          <p className="mt-8 font-mono text-sm text-muted-foreground">
+            {hasActiveFilters
+              ? "No active products match these filters."
+              : "No active products yet. Seed lands in step 1.12."}
           </p>
         ) : (
-          <ul className="mt-8 space-y-3">
-            {products.map((product) => (
-              <li
-                key={product.$id}
-                className="flex flex-wrap items-baseline justify-between gap-2 border-b border-border py-3"
-              >
-                <span className="font-medium tracking-tight">
-                  {product.title}
-                </span>
-                <span className="font-mono text-sm text-muted-foreground">
-                  {product.isFree
-                    ? "free"
-                    : `${product.currency} ${product.price.toFixed(2)}`}
-                </span>
-              </li>
-            ))}
-          </ul>
+          <div className="mt-8">
+            <ProductList products={products} />
+          </div>
         )}
+
+        <p className="mt-8">
+          <Button variant="outline" size="sm" asChild>
+            <Link href="/categories">Browse categories</Link>
+          </Button>
+        </p>
       </section>
     </main>
   );

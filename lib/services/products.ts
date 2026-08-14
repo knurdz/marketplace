@@ -1,11 +1,12 @@
 import { AppwriteException, Query } from "node-appwrite";
 import {
   DATABASE_ID,
+  TABLE_PRODUCT_IMAGES,
   TABLE_PRODUCTS,
   hasAppwritePublicConfig,
 } from "@/lib/appwrite/config";
 import { createPublicClient } from "@/lib/appwrite/server";
-import type { Product } from "@/lib/types";
+import type { Product, ProductImage } from "@/lib/types";
 import {
   ACTIVE_PRODUCT_STATUS,
   isProductStatus,
@@ -63,38 +64,142 @@ function isPubliclyListed(product: Product): boolean {
   return product.status === ACTIVE_PRODUCT_STATUS && product.available;
 }
 
+export type ProductCatalogSort = "newest" | "price_asc" | "price_desc";
+
+export type ProductCatalogParams = {
+  minPrice?: number;
+  maxPrice?: number;
+  sort: ProductCatalogSort;
+  /** When true, callers must return [] without querying TablesDB. */
+  invalidPriceRange: boolean;
+};
+
+type ProductCatalogFilterOpts = {
+  minPrice?: number;
+  maxPrice?: number;
+  sort?: ProductCatalogSort;
+};
+
+function parseOptionalPrice(raw: unknown): number | undefined {
+  if (raw == null || raw === "") return undefined;
+  const n = typeof raw === "number" ? raw : Number(String(raw).trim());
+  if (!Number.isFinite(n) || n < 0) return undefined;
+  return n;
+}
+
+function normalizeProductCatalogSort(raw: unknown): ProductCatalogSort {
+  if (raw === "price_asc" || raw === "price_desc" || raw === "newest") {
+    return raw;
+  }
+  return "newest";
+}
+
+/** Parse storefront URL params for price range + sort. Invalid bounds are omitted. */
+export function parseProductCatalogParams(raw: {
+  minPrice?: string | number | null;
+  maxPrice?: string | number | null;
+  sort?: string | null;
+}): ProductCatalogParams {
+  const minPrice = parseOptionalPrice(raw.minPrice);
+  const maxPrice = parseOptionalPrice(raw.maxPrice);
+  const sort = normalizeProductCatalogSort(raw.sort);
+  const invalidPriceRange =
+    minPrice != null && maxPrice != null && minPrice > maxPrice;
+
+  return {
+    ...(minPrice != null ? { minPrice } : {}),
+    ...(maxPrice != null ? { maxPrice } : {}),
+    sort,
+    invalidPriceRange,
+  };
+}
+
+function productCatalogSortQuery(sort: ProductCatalogSort): string {
+  switch (sort) {
+    case "price_asc":
+      return Query.orderAsc("price");
+    case "price_desc":
+      return Query.orderDesc("price");
+    default:
+      return Query.orderDesc("$createdAt");
+  }
+}
+
+function buildProductCatalogQueries(
+  filters: ProductCatalogFilterOpts & {
+    categoryId?: string | null;
+    sellerId?: string | null;
+  },
+): string[] {
+  const categoryId = filters.categoryId?.trim() || null;
+  const sellerId = filters.sellerId?.trim() || null;
+
+  return [
+    Query.equal("status", ACTIVE_PRODUCT_STATUS),
+    Query.equal("available", true),
+    ...(sellerId ? [Query.equal("sellerId", sellerId)] : []),
+    ...(categoryId ? [Query.equal("categoryId", categoryId)] : []),
+    ...(filters.minPrice != null
+      ? [Query.greaterThanEqual("price", filters.minPrice)]
+      : []),
+    ...(filters.maxPrice != null
+      ? [Query.lessThanEqual("price", filters.maxPrice)]
+      : []),
+    productCatalogSortQuery(filters.sort ?? "newest"),
+  ];
+}
+
+function mapPublicProductRows(rows: unknown[]): Product[] {
+  const products: Product[] = [];
+  for (const row of rows) {
+    const product = asProduct(row as Record<string, unknown>);
+    if (product && isPubliclyListed(product)) {
+      products.push(product);
+    }
+  }
+  return products;
+}
+
 /**
  * List storefront products: `status=active` and `available=true` only.
+ * Optional `categoryId` narrows via `status_category_idx` (still active-only).
+ * Price bounds use `price_idx`; sort applies across newest/price.
  * Uses public TablesDB client (table has read(any)); never returns inactive.
  */
 export async function listActiveProducts(opts?: {
   limit?: number;
+  categoryId?: string;
+  sellerId?: string;
+  minPrice?: number;
+  maxPrice?: number;
+  sort?: ProductCatalogSort;
+  invalidPriceRange?: boolean;
 }): Promise<Product[]> {
-  if (!hasAppwritePublicConfig()) return [];
+  if (!hasAppwritePublicConfig() || opts?.invalidPriceRange) return [];
 
   const limit = Math.min(Math.max(opts?.limit ?? 24, 1), 100);
+  const categoryId = opts?.categoryId?.trim() || null;
+  const sellerId = opts?.sellerId?.trim() || null;
 
   try {
     const { tables } = await createPublicClient();
+    const queries = [
+      ...buildProductCatalogQueries({
+        categoryId,
+        sellerId,
+        minPrice: opts?.minPrice,
+        maxPrice: opts?.maxPrice,
+        sort: opts?.sort,
+      }),
+      Query.limit(limit),
+    ];
     const result = await tables.listRows({
       databaseId: DATABASE_ID,
       tableId: TABLE_PRODUCTS,
-      queries: [
-        Query.equal("status", ACTIVE_PRODUCT_STATUS),
-        Query.equal("available", true),
-        Query.orderDesc("$createdAt"),
-        Query.limit(limit),
-      ],
+      queries,
     });
 
-    const products: Product[] = [];
-    for (const row of result.rows) {
-      const product = asProduct(row as unknown as Record<string, unknown>);
-      if (product && isPubliclyListed(product)) {
-        products.push(product);
-      }
-    }
-    return products;
+    return mapPublicProductRows(result.rows);
   } catch {
     return [];
   }
@@ -116,10 +221,22 @@ export function normalizeProductSearchQuery(
  */
 export async function searchActiveProducts(
   query: string,
-  opts?: { limit?: number },
+  opts?: {
+    limit?: number;
+    minPrice?: number;
+    maxPrice?: number;
+    sort?: ProductCatalogSort;
+    invalidPriceRange?: boolean;
+  },
 ): Promise<Product[]> {
   const normalized = normalizeProductSearchQuery(query);
-  if (!normalized || !hasAppwritePublicConfig()) return [];
+  if (
+    !normalized ||
+    !hasAppwritePublicConfig() ||
+    opts?.invalidPriceRange
+  ) {
+    return [];
+  }
 
   const limit = Math.min(Math.max(opts?.limit ?? 24, 1), 48);
 
@@ -130,20 +247,16 @@ export async function searchActiveProducts(
       tableId: TABLE_PRODUCTS,
       queries: [
         Query.search("title", normalized),
-        Query.equal("status", ACTIVE_PRODUCT_STATUS),
-        Query.equal("available", true),
+        ...buildProductCatalogQueries({
+          minPrice: opts?.minPrice,
+          maxPrice: opts?.maxPrice,
+          sort: opts?.sort,
+        }),
         Query.limit(limit),
       ],
     });
 
-    const products: Product[] = [];
-    for (const row of result.rows) {
-      const product = asProduct(row as unknown as Record<string, unknown>);
-      if (product && isPubliclyListed(product)) {
-        products.push(product);
-      }
-    }
-    return products;
+    return mapPublicProductRows(result.rows);
   } catch {
     return [];
   }
@@ -172,5 +285,58 @@ export async function getProduct(id: string): Promise<Product | null> {
       return null;
     }
     return null;
+  }
+}
+
+/** Map a TablesDB row to ProductImage; returns null if required fields are missing. */
+export function asProductImage(
+  row: Record<string, unknown>,
+): ProductImage | null {
+  const $id = asNullableString(row.$id);
+  const productId = asNullableString(row.productId);
+  const fileId = asNullableString(row.fileId);
+  if (!$id || !productId || !fileId) return null;
+
+  return {
+    $id,
+    productId,
+    fileId,
+    sortOrder: Math.max(0, Math.floor(asNumber(row.sortOrder))),
+    alt: asNullableString(row.alt),
+  };
+}
+
+/**
+ * List images for a product (table has read(any)).
+ * Ordered by sortOrder ascending. Scoped to the given productId only.
+ */
+export async function listProductImages(
+  productId: string,
+): Promise<ProductImage[]> {
+  const trimmed = productId?.trim();
+  if (!trimmed || !hasAppwritePublicConfig()) return [];
+
+  try {
+    const { tables } = await createPublicClient();
+    const result = await tables.listRows({
+      databaseId: DATABASE_ID,
+      tableId: TABLE_PRODUCT_IMAGES,
+      queries: [
+        Query.equal("productId", trimmed),
+        Query.orderAsc("sortOrder"),
+        Query.limit(24),
+      ],
+    });
+
+    const images: ProductImage[] = [];
+    for (const row of result.rows) {
+      const image = asProductImage(row as unknown as Record<string, unknown>);
+      if (image && image.productId === trimmed) {
+        images.push(image);
+      }
+    }
+    return images;
+  } catch {
+    return [];
   }
 }

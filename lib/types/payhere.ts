@@ -56,7 +56,7 @@ export type PayHereCheckoutHashResult =
 
 /**
  * Notify POST field names from PayHere (form-urlencoded).
- * Member 4 verifies md5sig; never trust without verification.
+ * Member 1 `payhere-notify` verifies md5sig before any DB write.
  */
 export const PAYHERE_NOTIFY_FIELDS = [
   "merchant_id",

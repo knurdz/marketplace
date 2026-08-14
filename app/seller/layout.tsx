@@ -1,9 +1,15 @@
 import type { ReactNode } from "react";
+import { redirect } from "next/navigation";
 import { PortalShell } from "@/components/layout/portal-shell";
-import { requireLabel } from "@/lib/appwrite/roles";
+import { ROLE_LABELS, requireUser, userHasLabel } from "@/lib/appwrite/roles";
+import {
+  blockedSellerPortalDestination,
+  getOwnSellerProfile,
+} from "@/lib/services/seller-application";
 
 const SELLER_NAV = [
   { href: "/seller", label: "Dashboard" },
+  { href: "/seller/shop", label: "Shop" },
   { href: "/seller#listings", label: "Listings" },
   { href: "/seller#orders", label: "Orders" },
   { href: "/seller#settings", label: "Settings" },
@@ -14,7 +20,14 @@ export default async function SellerLayout({
 }: {
   children: ReactNode;
 }) {
-  await requireLabel("seller");
+  const user = await requireUser();
+  const hasSellerLabel = userHasLabel(user, ROLE_LABELS.seller);
+
+  if (!hasSellerLabel) {
+    const profile = await getOwnSellerProfile();
+    const dest = blockedSellerPortalDestination(hasSellerLabel, profile);
+    if (dest) redirect(dest);
+  }
 
   return (
     <PortalShell
