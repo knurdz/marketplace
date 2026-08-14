@@ -117,6 +117,17 @@ export type {
   UpdateShopProfileInput,
 } from "./seller-application";
 export {
+  countProductImagesForOwnProducts,
+  createDraftProductCore,
+  listOwnProducts,
+  parseCreateDraftProductInput,
+} from "./seller-listings";
+export type {
+  CreateDraftProductInput,
+  CreateDraftProductResult,
+  ParsedCreateDraftProductInput,
+} from "./seller-listings";
+export {
   listPendingModerationQueue,
   listProductsByStatus,
 } from "./listing-moderation";
