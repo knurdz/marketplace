@@ -183,6 +183,8 @@ None (you start first). Own **payment setup** (PayHere Functions + free confirm)
 
 Others can: register/login → hit role shell → upload a file → list seeded `active` products.
 
+**Payment setup (1.22–1.28):** others can complete **free** checkout via `confirmFreeOrder` (seeded `seed_demo_free_product`) and **PayHere sandbox** via `requestPayHereCheckout` + Member 2 UX, once Function merchant env + `PAYHERE_NOTIFY_URL` are set in the console. See [`PAYHERE.md`](./PAYHERE.md) consumer contract.
+
 ---
 
 ## 6. Member 2 — Buyer / storefront

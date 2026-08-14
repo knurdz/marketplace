@@ -32,3 +32,7 @@ All documents coding agents should read for Knurdz Marketplace live here (except
 ## Phase 0 status
 
 **Complete (Member 1 steps 1.1–1.13).** Teammates can auth, open role shells, upload (avatars / helpers), and read seeded `active` products via `@/lib/services`. Members 2–4 are unblocked for live Appwrite binding.
+
+## Payment setup status
+
+**Complete (Member 1 steps 1.22–1.28).** Members 2 and 4 consume Member 1 APIs only: `requestPayHereCheckout`, `confirmFreeOrder`, and `/admin/payments/notify-logs`. Click-path: [`PAYHERE.md`](./PAYHERE.md) (sandbox demo + 1.28 consumer contract). Seeded SKUs: `seed_demo_product` (PayHere) and `seed_demo_free_product` (free). Sandbox **card** E2E still needs merchant env + notify domain on the hash Function in the Appwrite console (never git).
