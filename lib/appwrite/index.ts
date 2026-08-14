@@ -28,6 +28,7 @@ export {
   TABLE_REPORTS,
   TABLE_REVIEWS,
   TABLE_SELLER_PROFILES,
+  TABLE_PAYHERE_NOTIFY_LOGS,
   getAppUrl,
   getAppwriteEndpoint,
   getAppwriteProjectId,
