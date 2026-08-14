@@ -176,6 +176,7 @@ Use shared enums from [`lib/types/status.ts`](../../lib/types/status.ts) — do 
 - Posted `payhere_amount` / `payhere_currency` must match the **DB** payment row; mismatch → no mutate.
 - Success (`2`) still marks `paid` if stock is short (money already captured); stock decrement is clamped at 0.
 - Logs: `order_id`, `status_code`, ignore/reject **reason** only — never `md5sig`, merchant secret, or card/PAN fields.
+- **Persist (step 1.26):** each notify attempt writes one row to `payhere_notify_logs` (Function API key). Payload is an allowlist JSON (`merchant_id`, `order_id`, `payment_id`, amounts, `status_code`, `method`, `status_message`, `custom_1`/`custom_2`). A failed log insert **must not** change the HTTP status returned to PayHere (ignore/reject/settle success stay 200). Admin UI: [`listNotifyLogs`](../../lib/services/notify-logs.ts).
 
 ### Trust boundary
 
@@ -275,6 +276,7 @@ Placeholders in [`.env.example`](../../.env.example) document Function ownership
 - [x] Return/cancel pages poll DB only
 - [x] Free path never hits PayHere (step 1.24)
 - [x] Sandbox-only `actionUrl` (step 1.25) until merchant authorization
+- [x] Persist sanitized notify outcomes in `payhere_notify_logs` (step 1.26)
 - [x] Do not log secrets, full card numbers, or raw bank account numbers
 
 ---

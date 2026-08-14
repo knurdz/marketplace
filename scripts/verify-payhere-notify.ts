@@ -1,5 +1,5 @@
 /**
- * Step 1.23 checks for PayHere notify md5sig + action mapping (no live Function).
+ * Step 1.23 + 1.26 checks for PayHere notify md5sig, action mapping, and sanitized log rows.
  * Run: npx tsx scripts/verify-payhere-notify.ts
  */
 import { createHash } from "node:crypto";
@@ -15,6 +15,11 @@ import {
   decideNotifyAction,
   verifyNotifySignature,
 } from "../functions/payhere-notify/src/notify.js";
+import {
+  notifyLogRowFromDecision,
+  notifyLogRowHasSecret,
+  sanitizeNotifyPayload,
+} from "../functions/payhere-notify/src/log.js";
 
 function assert(condition: boolean, message: string): void {
   if (!condition) throw new Error(`FAIL: ${message}`);
@@ -139,5 +144,61 @@ const pending = decideNotifyAction({
   payment,
 });
 assert(pending.action === "noop", "pending leaves unpaid");
+
+const dirtyPosted = {
+  ...form,
+  md5sig: expectedSig,
+  card_no: "4111111111111111",
+  card_holder_name: "Ada Buyer",
+};
+const sanitized = sanitizeNotifyPayload(dirtyPosted);
+assert(sanitized.order_id === orderId, "sanitize keeps order_id");
+assert(sanitized.payment_id === "ph_99", "sanitize keeps payment_id");
+assert(sanitized.status_code === statusOk, "sanitize keeps status_code");
+assert(!("md5sig" in sanitized), "sanitize drops md5sig");
+assert(!("card_no" in sanitized), "sanitize drops card_no");
+assert(!JSON.stringify(sanitized).includes("411111"), "sanitize drops PAN");
+
+const ignoredRow = notifyLogRowFromDecision({
+  posted: dirtyPosted,
+  kind: "ignored",
+  reason: "bad_sig",
+  httpStatus: 200,
+});
+assert(ignoredRow.outcome === "ignored", "ignored outcome");
+assert(ignoredRow.reason === "bad_sig", "ignored reason");
+assert(ignoredRow.httpStatus === 200, "ignored still 200");
+assert(ignoredRow.orderId === orderId, "row stores order id");
+assert(
+  notifyLogRowHasSecret(ignoredRow) === false,
+  "ignored row has no secret fields",
+);
+assert(!ignoredRow.sanitizedPayload.includes("md5sig"), "payload json no md5sig");
+
+const rejectRow = notifyLogRowFromDecision({
+  posted: form,
+  decision: { action: "reject", reason: "amount_mismatch" },
+  httpStatus: 200,
+});
+assert(rejectRow.outcome === "rejected", "reject maps to rejected");
+assert(rejectRow.reason === "amount_mismatch", "reject reason");
+
+const settleRow = notifyLogRowFromDecision({
+  posted: form,
+  kind: "settled",
+  decision: { action: "settle", payherePaymentId: "ph_99" },
+  httpStatus: 200,
+});
+assert(settleRow.outcome === "settled", "settle maps to settled");
+assert(settleRow.payherePaymentId === "ph_99", "settle stores payment id");
+assert(settleRow.httpStatus === 200, "settle http 200");
+
+const failRow = notifyLogRowFromDecision({
+  posted: form,
+  kind: "settle_failed",
+  httpStatus: 500,
+});
+assert(failRow.outcome === "settle_failed", "settle_failed outcome");
+assert(failRow.httpStatus === 500, "settle_failed http 500");
 
 console.log("payhere-notify helper checks passed");

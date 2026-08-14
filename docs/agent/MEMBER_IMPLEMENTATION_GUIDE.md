@@ -104,7 +104,7 @@ WORK_DISTRIBUTION.md          # Root — checklists + step plans
 
 ### Minimum collections (Member 1 creates)
 
-`profiles`, `seller_profiles`, `categories`, `products`, `product_images` (or image IDs on product), `carts`/`cart_items` (or client+server cart), `orders`, `order_items`, `payments`, `bank_slips`, `reviews`, `reports`, `notifications`, `platform_settings`, `audit_logs`
+`profiles`, `seller_profiles`, `categories`, `products`, `product_images` (or image IDs on product), `carts`/`cart_items` (or client+server cart), `orders`, `order_items`, `payments`, `bank_slips`, `reviews`, `reports`, `notifications`, `platform_settings`, `audit_logs`, `payhere_notify_logs`
 
 ### Agent rules every step
 

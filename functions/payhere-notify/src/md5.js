@@ -59,7 +59,9 @@ function firstString(value) {
   return String(value);
 }
 
-/** Allowlisted form fields only — never copies card_no / PAN. */
+/** Allowlisted form fields only — never copies card_no / PAN.
+ * @returns {Record<string, string>}
+ */
 export function parseNotifyForm(raw) {
   const out = {};
   for (const key of PAYHERE_NOTIFY_FIELDS) {
