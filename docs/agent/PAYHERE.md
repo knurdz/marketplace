@@ -2,6 +2,7 @@
 
 > Drafted in **Member 1 step 1.20** (names/payloads/security).  
 > Function **bodies**, merchant secret, free confirm, notify logging, sandbox notes: **Member 1** (steps **1.22–1.28**).  
+> **1.25:** `requestPayHereCheckout` calls the live hash Function; **sandbox `actionUrl` only** until merchant authorization. Bank / free do not depend on this Function.  
 > Checkout UX / return-cancel polling: **Member 2** (steps 2.7–2.9) — calls Member 1 APIs only.
 
 Shared TypeScript: [`lib/types/payhere.ts`](../../lib/types/payhere.ts) · client helper: [`lib/services/payhere.ts`](../../lib/services/payhere.ts).
@@ -13,6 +14,7 @@ Shared TypeScript: [`lib/types/payhere.ts`](../../lib/types/payhere.ts) · clien
 | Piece | Owner |
 |-------|--------|
 | Contract freeze (this doc + TS types + `requestPayHereCheckout` stub) | Member 1 (1.20) |
+| Wire stub → live hash Function, sandbox-only `actionUrl` | Member 1 (1.25) |
 | `payhere-checkout-hash` + `payhere-notify` Functions, merchant secret, idempotent `paid`, free confirm | **Member 1** (1.22–1.28) |
 | Checkout UI, POST form to PayHere, return/cancel pages that **poll DB** | Member 2 |
 | Bank slip approve/reject (admin UI) | Member 4 (default policy) |
@@ -34,10 +36,12 @@ Constants: `FUNCTION_PAYHERE_CHECKOUT_HASH`, `FUNCTION_PAYHERE_NOTIFY` in `lib/t
 
 | Mode | Form `action` |
 |------|----------------|
-| Sandbox | `https://sandbox.payhere.lk/pay/checkout` |
-| Live | `https://www.payhere.lk/pay/checkout` |
+| Sandbox (step **1.25**, current) | `https://sandbox.payhere.lk/pay/checkout` |
+| Live (not authorized yet) | `https://www.payhere.lk/pay/checkout` |
 
-Controlled by Function env `PAYHERE_SANDBOX` (not a client toggle of amount/hash).
+Until merchant authorization, hash Function env `PAYHERE_SANDBOX=false` / `live` returns **501** (same user message as missing env). The Next parser and checkout form refuse any non-sandbox `actionUrl`. Bank transfer and free checkout do **not** call this Function.
+
+Live URL helper `checkoutActionUrl(false)` remains in Function source for a later authorized-live step — it is not used by `payhere-checkout-hash` today.
 
 ---
 
@@ -61,8 +65,9 @@ Source: [`functions/payhere-checkout-hash/`](../../functions/payhere-checkout-ha
 4. **Amount / currency / items** come from DB snapshots — extra client body fields (including `amount`) are ignored.
 5. `merchant_secret` only in Function env; never write secret into response JSON (payload is scanned before return).
 6. Set `return_url` / `cancel_url` from Function env `APP_URL`; `notify_url` from Function env `PAYHERE_NOTIFY_URL` (public `payhere-notify` URL from step 1.23).
+7. **Sandbox only (1.25):** `evaluateSandboxCheckoutPolicy` refuses live env (`false` / `live` / `0` / `no` / `off`) with HTTP 501. Payload `actionUrl` is always the sandbox checkout URL.
 
-Missing merchant id/secret, `APP_URL`, or `PAYHERE_NOTIFY_URL` → HTTP 501 `{ ok: false, error: "PayHere checkout is not configured yet." }`.
+Missing merchant id/secret, `APP_URL`, `PAYHERE_NOTIFY_URL`, or live-locked env → HTTP 501 `{ ok: false, error: "PayHere checkout is not configured yet." }`.
 
 ### Response
 
@@ -115,10 +120,10 @@ import { requestPayHereCheckout } from "@/lib/services/payhere";
 
 const result = await requestPayHereCheckout(orderId);
 if (!result.ok) { /* toast result.error */ }
-// POST result.payload.fields to result.payload.actionUrl
+// POST result.payload.fields to result.payload.actionUrl (sandbox only)
 ```
 
-Until the Function is **deployed** with env vars (step 1.22+), the helper returns a typed `{ ok: false, error: "PayHere checkout is not configured yet." }` (missing Function, 404, or 501).
+`requestPayHereCheckout` (step **1.25**) calls the live `payhere-checkout-hash` Function via session `createExecution`. Rate-limited with `RATE_LIMITS.checkout`. `parsePayHereCheckoutPayload` requires `actionUrl === PAYHERE_CHECKOUT_SANDBOX_URL`. Missing Function, 404, or 501 → `{ ok: false, error: "PayHere checkout is not configured yet." }`. Bank / free paths never call this helper.
 
 ---
 
@@ -249,7 +254,7 @@ sequenceDiagram
 | `PAYHERE_NOTIFY_URL` | **Function env** | Public HTTP URL of `payhere-notify` (step 1.23). Required before hash can return a complete payload. |
 | `PAYHERE_MERCHANT_ID` | **Appwrite Function env** | May appear in checkout form fields |
 | `PAYHERE_MERCHANT_SECRET` | **Appwrite Function env only** | Never `NEXT_PUBLIC_*`, never Next app imports, never git |
-| `PAYHERE_SANDBOX` | Function env | unset/`true` → sandbox checkout URL; `false`/`live` → live URL |
+| `PAYHERE_SANDBOX` | Function env | unset/`true` → sandbox checkout URL. `false`/`live` → **501** until merchant authorization (do not emit live URL). |
 
 **Deploy `payhere-checkout-hash`:** Console → Functions → create with id `payhere-checkout-hash`, runtime Node, entrypoint `src/main.js`, root `functions/payhere-checkout-hash`, build `npm install`, execute **users**. Set the Function env vars above. Do not enable guest execute. Dynamic API key scopes can stay empty (JWT is used for DB reads).
 
@@ -267,8 +272,9 @@ Placeholders in [`.env.example`](../../.env.example) document Function ownership
 - [x] Notify verifies md5sig before mutate (step 1.23)
 - [x] Notify idempotent (step 1.23)
 - [x] Free confirm idempotent (step 1.24)
-- [ ] Return/cancel pages poll DB only
+- [x] Return/cancel pages poll DB only
 - [x] Free path never hits PayHere (step 1.24)
+- [x] Sandbox-only `actionUrl` (step 1.25) until merchant authorization
 - [x] Do not log secrets, full card numbers, or raw bank account numbers
 
 ---

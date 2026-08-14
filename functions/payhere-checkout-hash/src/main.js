@@ -1,5 +1,5 @@
 import { Account, Client, Query, TablesDB } from "node-appwrite";
-import { isSandboxEnv, parseOrderIdFromBody } from "./hash.js";
+import { evaluateSandboxCheckoutPolicy, parseOrderIdFromBody } from "./hash.js";
 import { buildPayHereCheckoutPayload } from "./payload.js";
 
 const DATABASE_ID = process.env.DATABASE_ID?.trim() || "marketplace";
@@ -61,6 +61,12 @@ async function handleCheckoutHash({ req, res, log, error }) {
   ) {
     log("payhere-checkout-hash missing Function env (no secrets logged)");
     return fail(res, NOT_CONFIGURED, 501);
+  }
+
+  const sandboxPolicy = evaluateSandboxCheckoutPolicy(env.sandboxRaw);
+  if (!sandboxPolicy.ok) {
+    log("payhere-checkout-hash refused live PayHere (not authorized)");
+    return fail(res, sandboxPolicy.error, sandboxPolicy.status);
   }
 
   const userId = header(req, "x-appwrite-user-id").trim();
@@ -184,7 +190,7 @@ async function handleCheckoutHash({ req, res, log, error }) {
       merchantSecret: env.merchantSecret,
       appUrl: env.appUrl,
       notifyUrl: env.notifyUrl,
-      sandbox: isSandboxEnv(env.sandboxRaw),
+      sandbox: true,
       email: String(user.email ?? "").trim(),
       displayName,
       phone,

@@ -35,8 +35,9 @@ export default async function CheckoutPayHerePage({
         Amount due: {order.currency} {order.totalAmount.toFixed(2)}
       </p>
       <p className="mt-2 text-sm text-muted-foreground">
-        You will be redirected to PayHere to complete card payment. Checkout
-        fields and hash are signed server-side — never in the browser.
+        Sandbox testing only — not live merchant checkout. You will be
+        redirected to PayHere sandbox. Checkout fields and hash are signed
+        server-side — never in the browser.
       </p>
 
       <PayHereCheckoutForm order={order} payment={payment} />

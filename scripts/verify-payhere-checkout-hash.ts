@@ -1,11 +1,12 @@
 /**
- * Step 1.22 checks for PayHere checkout hash helpers (no live Function / no secrets).
+ * Step 1.22 + 1.25 checks for PayHere checkout hash helpers (no live Function / no secrets).
  * Run: npx tsx scripts/verify-payhere-checkout-hash.ts
  */
 import { createHash } from "node:crypto";
-import { parsePayHereCheckoutPayload } from "../lib/types/payhere";
 import {
   computePayHereCheckoutHash,
+  checkoutActionUrl,
+  evaluateSandboxCheckoutPolicy,
   formatPayHereAmount,
   isSandboxEnv,
   parseOrderIdFromBody,
@@ -13,6 +14,10 @@ import {
   PAYHERE_CHECKOUT_LIVE_URL,
   PAYHERE_CHECKOUT_SANDBOX_URL,
 } from "../functions/payhere-checkout-hash/src/hash.js";
+import {
+  isPayHereSandboxActionUrl,
+  parsePayHereCheckoutPayload,
+} from "../lib/types/payhere";
 import {
   ALREADY_PAID,
   BAD_AMOUNT,
@@ -28,6 +33,29 @@ function assert(condition: boolean, message: string): void {
 
 function md5Upper(text: string): string {
   return createHash("md5").update(text, "utf8").digest("hex").toUpperCase();
+}
+
+function isBuiltPayload(result: unknown): result is {
+  ok: true;
+  payload: { actionUrl: string; fields: Record<string, string> };
+} {
+  if (!result || typeof result !== "object") return false;
+  const obj = result as { ok?: unknown; payload?: unknown };
+  return obj.ok === true && !!obj.payload && typeof obj.payload === "object";
+}
+
+function isPolicyBlocked(result: unknown): result is {
+  ok: false;
+  status: number;
+  error: string;
+} {
+  if (!result || typeof result !== "object") return false;
+  const obj = result as { ok?: unknown; status?: unknown; error?: unknown };
+  return (
+    obj.ok === false &&
+    typeof obj.status === "number" &&
+    typeof obj.error === "string"
+  );
 }
 
 const order = {
@@ -82,6 +110,36 @@ assert(isSandboxEnv(undefined) === true, "sandbox default true");
 assert(isSandboxEnv("true") === true, "sandbox true");
 assert(isSandboxEnv("false") === false, "sandbox false");
 assert(isSandboxEnv("live") === false, "sandbox live");
+
+assert(
+  evaluateSandboxCheckoutPolicy(undefined).ok === true,
+  "unset PAYHERE_SANDBOX allowed",
+);
+assert(
+  evaluateSandboxCheckoutPolicy("true").ok === true,
+  "PAYHERE_SANDBOX true allowed",
+);
+const liveBlocked = evaluateSandboxCheckoutPolicy("live");
+assert(isPolicyBlocked(liveBlocked), "live env blocked");
+if (isPolicyBlocked(liveBlocked)) {
+  assert(liveBlocked.status === 501, "live env 501");
+  assert(
+    liveBlocked.error === "PayHere checkout is not configured yet.",
+    "live env same not-configured message",
+  );
+}
+assert(
+  evaluateSandboxCheckoutPolicy("false").ok === false,
+  "false env blocked",
+);
+assert(
+  checkoutActionUrl(false) === PAYHERE_CHECKOUT_LIVE_URL,
+  "helper still knows live URL for later authorization",
+);
+assert(
+  checkoutActionUrl(true) === PAYHERE_CHECKOUT_SANDBOX_URL,
+  "helper sandbox URL",
+);
 
 assert(
   parseOrderIdFromBody({ orderId: "ord_abc", amount: "0.00" }) === "ord_abc",
@@ -146,41 +204,48 @@ const forged = buildPayHereCheckoutPayload({
   clientAmount: "0.01",
 });
 
-assert(forged.ok === true, "happy path builds payload");
-if (forged.ok) {
+assert(isBuiltPayload(forged), "happy path builds payload");
+if (isBuiltPayload(forged)) {
+  const sandboxPayload = forged.payload;
   assert(
-    forged.payload.fields.amount === "1500.00",
+    sandboxPayload.fields.amount === "1500.00",
     "amount comes from DB not client",
   );
   assert(
-    forged.payload.actionUrl === PAYHERE_CHECKOUT_SANDBOX_URL,
+    sandboxPayload.actionUrl === PAYHERE_CHECKOUT_SANDBOX_URL,
     "sandbox action url",
   );
   assert(
-    forged.payload.fields.hash === expected,
+    sandboxPayload.fields.hash === expected,
     "payload hash uses DB amount",
   );
   assert(
-    !JSON.stringify(forged.payload).includes(secret),
+    !JSON.stringify(sandboxPayload).includes(secret),
     "merchant secret not in payload JSON",
   );
   assert(
-    payloadContainsSecret(forged.payload, secret) === false,
+    payloadContainsSecret(sandboxPayload, secret) === false,
     "payloadContainsSecret false for clean payload",
   );
   assert(
     payloadContainsSecret({ merchant_secret: secret }, secret) === true,
     "detects secret key",
   );
-  const parsed = parsePayHereCheckoutPayload(forged.payload);
+  const parsed = parsePayHereCheckoutPayload(sandboxPayload);
   assert(parsed !== null, "payload matches Next parsePayHereCheckoutPayload");
+  if (parsed) {
+    assert(
+      isPayHereSandboxActionUrl(parsed.actionUrl),
+      "parsed actionUrl is sandbox",
+    );
+  }
   assert(
-    forged.payload.fields.return_url.includes("orderId=ord_abc"),
+    sandboxPayload.fields.return_url.includes("orderId=ord_abc"),
     "return_url includes order id",
   );
   assert(
-    forged.payload.fields.first_name === "Ada" &&
-      forged.payload.fields.last_name === "Buyer",
+    sandboxPayload.fields.first_name === "Ada" &&
+      sandboxPayload.fields.last_name === "Buyer",
     "display name split",
   );
 }
@@ -199,13 +264,30 @@ const live = buildPayHereCheckoutPayload({
   displayName: "Ada Buyer",
   phone: "0771234567",
 });
-assert(live.ok === true, "live payload ok");
-if (live.ok) {
+assert(isBuiltPayload(live), "live payload helper still builds");
+if (isBuiltPayload(live)) {
   assert(
     live.payload.actionUrl === PAYHERE_CHECKOUT_LIVE_URL,
     "live action url",
   );
+  assert(
+    parsePayHereCheckoutPayload(live.payload) === null,
+    "Next parser rejects live actionUrl",
+  );
+  assert(
+    isPayHereSandboxActionUrl(live.payload.actionUrl) === false,
+    "live URL is not sandbox",
+  );
 }
+
+assert(
+  parsePayHereCheckoutPayload({
+    actionUrl: PAYHERE_CHECKOUT_SANDBOX_URL,
+    merchant_secret: "nope",
+    fields: {},
+  }) === null,
+  "parser rejects secret-like keys",
+);
 
 const missingSecret = buildPayHereCheckoutPayload({
   userId: "buyer_1",
@@ -221,8 +303,8 @@ const missingSecret = buildPayHereCheckoutPayload({
   displayName: "Ada",
   phone: "",
 });
-assert(missingSecret.ok === false, "missing secret → not configured");
-if (!missingSecret.ok) {
+assert(isPolicyBlocked(missingSecret), "missing secret → not configured");
+if (isPolicyBlocked(missingSecret)) {
   assert(missingSecret.status === 501, "501 when secret missing");
 }
 
