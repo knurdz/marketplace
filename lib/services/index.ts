@@ -64,6 +64,7 @@ export {
   getCartItemCount,
   getOrCreateCart,
 } from "./cart";
+export { listOwnOrders } from "./orders";
 export {
   CART_ERROR_CODES,
   type CartActionState,
@@ -117,15 +118,22 @@ export type {
   UpdateShopProfileInput,
 } from "./seller-application";
 export {
+  addOwnProductImagesCore,
+  archiveOwnProductCore,
   countProductImagesForOwnProducts,
   createDraftProductCore,
+  deleteOwnProductImageCore,
+  getOwnProduct,
   listOwnProducts,
   parseCreateDraftProductInput,
+  parseSellerListingId,
+  updateOwnProductCore,
 } from "./seller-listings";
 export type {
   CreateDraftProductInput,
   CreateDraftProductResult,
   ParsedCreateDraftProductInput,
+  SellerListingMutationResult,
 } from "./seller-listings";
 export {
   listPendingModerationQueue,
