@@ -32,6 +32,7 @@ export async function submitSellerApplication(
   }
 
   revalidatePath("/become-seller");
+  revalidatePath("/seller");
   revalidatePath("/admin/sellers");
   return { success: result.message };
 }

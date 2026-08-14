@@ -98,6 +98,20 @@ export {
   maskBankAccountNumber,
 } from "./seller-approvals";
 export {
+  blockedSellerPortalDestination,
+  getOwnSellerProfile,
+  normalizeShopSlug,
+  parseSellerApplicationInput,
+  resolveUniqueShopSlug,
+  submitSellerApplicationCore,
+} from "./seller-application";
+export type {
+  BlockedSellerPortalDestination,
+  ParsedSellerApplicationInput,
+  SellerApplicationResult,
+  SubmitSellerApplicationInput,
+} from "./seller-application";
+export {
   listPendingModerationQueue,
   listProductsByStatus,
 } from "./listing-moderation";

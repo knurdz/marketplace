@@ -1,6 +1,6 @@
-import Link from "next/link";
 import { redirect } from "next/navigation";
 import { SellerApplyForm } from "@/components/seller/seller-apply-form";
+import { SellerApplicationStatus } from "@/components/seller/seller-application-status";
 import { ROLE_LABELS, userHasLabel } from "@/lib/appwrite/roles";
 import { getLoggedInUser } from "@/lib/appwrite/session";
 import { getOwnSellerProfile } from "@/lib/services/seller-application";
@@ -30,39 +30,8 @@ export default async function BecomeSellerPage() {
         can publish listings.
       </p>
 
-      {existing?.status === "pending" ? (
-        <div className="mt-8 rounded-md border border-border bg-card p-5">
-          <p className="font-medium">Application under review</p>
-          <p className="mt-2 text-sm text-muted-foreground">
-            Your shop <strong>{existing.shopName}</strong> (
-            <span className="font-mono">{existing.slug}</span>) is waiting for
-            admin approval. You will get seller portal access once approved.
-          </p>
-          <p className="mt-4 text-sm text-muted-foreground">
-            <Link href="/" className="text-accent hover:underline">
-              Back to storefront
-            </Link>
-          </p>
-        </div>
-      ) : null}
-
-      {existing?.status === "rejected" ? (
-        <div className="mt-8 rounded-md border border-border bg-card p-5">
-          <p className="font-medium">Application not approved</p>
-          {existing.rejectionReason ? (
-            <p className="mt-2 text-sm text-muted-foreground">
-              Reason: {existing.rejectionReason}
-            </p>
-          ) : (
-            <p className="mt-2 text-sm text-muted-foreground">
-              Your seller application was rejected. Contact support if you have
-              questions.
-            </p>
-          )}
-          <p className="mt-4 text-sm text-muted-foreground">
-            Re-application will be available in a later update.
-          </p>
-        </div>
+      {existing?.status === "pending" || existing?.status === "rejected" ? (
+        <SellerApplicationStatus profile={existing} />
       ) : null}
 
       {!existing ? <SellerApplyForm /> : null}

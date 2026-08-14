@@ -16,6 +16,8 @@ const MAX_SHOP_NAME_LENGTH = 128;
 const MAX_SLUG_LENGTH = 128;
 const MAX_BIO_LENGTH = 2000;
 
+export type BlockedSellerPortalDestination = "/become-seller" | "/" | null;
+
 export type SubmitSellerApplicationInput = {
   shopName: string;
   slug?: string;
@@ -29,6 +31,21 @@ export type SellerApplicationResult =
 export type ParsedSellerApplicationInput =
   | { ok: true; shopName: string; slug: string; bio: string | null }
   | { ok: false; error: string };
+
+/**
+ * Where to send a signed-in user without the seller label who hits /seller.
+ * null = allow portal; pending/rejected → status UX; else home.
+ */
+export function blockedSellerPortalDestination(
+  hasSellerLabel: boolean,
+  profile: SellerProfile | null,
+): BlockedSellerPortalDestination {
+  if (hasSellerLabel) return null;
+  if (profile?.status === "pending" || profile?.status === "rejected") {
+    return "/become-seller";
+  }
+  return "/";
+}
 
 /** Validate apply form fields (no I/O). */
 export function parseSellerApplicationInput(
