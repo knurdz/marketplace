@@ -104,12 +104,17 @@ export {
   parseSellerApplicationInput,
   resolveUniqueShopSlug,
   submitSellerApplicationCore,
+  updateOwnShopBannerCore,
+  updateOwnShopProfileCore,
 } from "./seller-application";
 export type {
   BlockedSellerPortalDestination,
   ParsedSellerApplicationInput,
   SellerApplicationResult,
+  ShopBannerUpdateResult,
+  ShopProfileUpdateResult,
   SubmitSellerApplicationInput,
+  UpdateShopProfileInput,
 } from "./seller-application";
 export {
   listPendingModerationQueue,
@@ -143,25 +148,15 @@ export {
   type ReportErrorCode,
 } from "./report-errors";
 export {
+  getPublicSellerBySlug,
   getPublicSellerByUserId,
   getSellerBankDetailsForCheckout,
+  isApprovedPublicSellerStatus,
 } from "./sellers";
 export type {
   CheckoutSellerBankDetails,
   PublicSellerInfo,
 } from "./sellers";
-export {
-  getOwnSellerProfile,
-  normalizeShopSlug,
-  parseSellerApplicationInput,
-  resolveUniqueShopSlug,
-  submitSellerApplicationCore,
-} from "./seller-application";
-export type {
-  ParsedSellerApplicationInput,
-  SellerApplicationResult,
-  SubmitSellerApplicationInput,
-} from "./seller-application";
 export type { ProductCatalogParams, ProductCatalogSort } from "./products";
 export {
   asNotification,

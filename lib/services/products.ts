@@ -126,13 +126,18 @@ function productCatalogSortQuery(sort: ProductCatalogSort): string {
 }
 
 function buildProductCatalogQueries(
-  filters: ProductCatalogFilterOpts & { categoryId?: string | null },
+  filters: ProductCatalogFilterOpts & {
+    categoryId?: string | null;
+    sellerId?: string | null;
+  },
 ): string[] {
   const categoryId = filters.categoryId?.trim() || null;
+  const sellerId = filters.sellerId?.trim() || null;
 
   return [
     Query.equal("status", ACTIVE_PRODUCT_STATUS),
     Query.equal("available", true),
+    ...(sellerId ? [Query.equal("sellerId", sellerId)] : []),
     ...(categoryId ? [Query.equal("categoryId", categoryId)] : []),
     ...(filters.minPrice != null
       ? [Query.greaterThanEqual("price", filters.minPrice)]
@@ -164,6 +169,7 @@ function mapPublicProductRows(rows: unknown[]): Product[] {
 export async function listActiveProducts(opts?: {
   limit?: number;
   categoryId?: string;
+  sellerId?: string;
   minPrice?: number;
   maxPrice?: number;
   sort?: ProductCatalogSort;
@@ -173,12 +179,14 @@ export async function listActiveProducts(opts?: {
 
   const limit = Math.min(Math.max(opts?.limit ?? 24, 1), 100);
   const categoryId = opts?.categoryId?.trim() || null;
+  const sellerId = opts?.sellerId?.trim() || null;
 
   try {
     const { tables } = await createPublicClient();
     const queries = [
       ...buildProductCatalogQueries({
         categoryId,
+        sellerId,
         minPrice: opts?.minPrice,
         maxPrice: opts?.maxPrice,
         sort: opts?.sort,

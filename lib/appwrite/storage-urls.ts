@@ -40,3 +40,14 @@ export function getAvatarViewUrl(avatarFileId: string | null): string | null {
   if (!avatarFileId) return null;
   return getFileViewUrl(BUCKET_AVATARS, avatarFileId);
 }
+
+/** Public shop banner preview (avatars bucket, read(any)). */
+export function getShopBannerPreviewUrl(
+  bannerFileId: string | null,
+): string | null {
+  if (!bannerFileId) return null;
+  return getFilePreviewUrl(BUCKET_AVATARS, bannerFileId, {
+    width: 1200,
+    height: 320,
+  });
+}
