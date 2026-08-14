@@ -2,7 +2,10 @@
  * Runnable validation checks for seller draft listing input parsing.
  * Run: npx tsx scripts/verify-seller-listing-validation.ts
  */
-import { parseCreateDraftProductInput } from "../lib/services/seller-listings";
+import {
+  parseCreateDraftProductInput,
+  parseSellerListingId,
+} from "../lib/services/seller-listings";
 
 function assert(condition: boolean, message: string): void {
   if (!condition) throw new Error(message);
@@ -123,5 +126,9 @@ assert(
   }).ok,
   "status from form rejected",
 );
+
+assert(parseSellerListingId("  prod_123  ") === "prod_123", "listing id trimmed");
+assert(parseSellerListingId("") === null, "empty listing id rejected");
+assert(parseSellerListingId("   ") === null, "whitespace listing id rejected");
 
 console.log("seller-listing validation checks passed");

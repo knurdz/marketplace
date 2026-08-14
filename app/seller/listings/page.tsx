@@ -55,7 +55,12 @@ export default async function SellerListingsPage() {
               className="flex flex-wrap items-center justify-between gap-3 px-4 py-4"
             >
               <div className="min-w-0 flex-1">
-                <p className="truncate font-medium">{product.title}</p>
+                <Link
+                  href={`/seller/listings/${product.$id}`}
+                  className="truncate font-medium hover:underline"
+                >
+                  {product.title}
+                </Link>
                 <p className="mt-1 text-sm text-muted-foreground">
                   {formatPrice(product.price, product.currency, product.isFree)}
                   {" · "}
@@ -63,7 +68,12 @@ export default async function SellerListingsPage() {
                   {(imageCounts.get(product.$id) ?? 0) === 1 ? "" : "s"}
                 </p>
               </div>
-              <Badge variant="outline">{product.status}</Badge>
+              <div className="flex flex-wrap items-center gap-2">
+                <Badge variant="outline">{product.status}</Badge>
+                <Button variant="outline" size="sm" asChild>
+                  <Link href={`/seller/listings/${product.$id}`}>Edit</Link>
+                </Button>
+              </div>
             </li>
           ))}
         </ul>

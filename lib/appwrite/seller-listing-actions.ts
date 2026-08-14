@@ -2,9 +2,20 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { createDraftProductCore } from "@/lib/services/seller-listings";
+import {
+  addOwnProductImagesCore,
+  archiveOwnProductCore,
+  createDraftProductCore,
+  deleteOwnProductImageCore,
+  updateOwnProductCore,
+} from "@/lib/services/seller-listings";
 
 export type CreateListingActionState = {
+  error?: string;
+};
+
+export type EditListingActionState = {
+  success?: string;
   error?: string;
 };
 
@@ -18,18 +29,28 @@ function readImageFiles(formData: FormData): File[] {
   return entries.filter((e): e is File => e instanceof File && e.size > 0);
 }
 
+function readListingFields(formData: FormData) {
+  return {
+    title: readString(formData, "title"),
+    description: readString(formData, "description"),
+    categoryId: readString(formData, "categoryId"),
+    price: readString(formData, "price"),
+    stock: readString(formData, "stock"),
+  };
+}
+
+function revalidateListingPaths(productId: string): void {
+  revalidatePath("/seller/listings");
+  revalidatePath(`/seller/listings/${productId}`);
+  revalidatePath(`/products/${productId}`);
+}
+
 export async function createDraftListing(
   _prev: CreateListingActionState,
   formData: FormData,
 ): Promise<CreateListingActionState> {
   const result = await createDraftProductCore(
-    {
-      title: readString(formData, "title"),
-      description: readString(formData, "description"),
-      categoryId: readString(formData, "categoryId"),
-      price: readString(formData, "price"),
-      stock: readString(formData, "stock"),
-    },
+    readListingFields(formData),
     readImageFiles(formData),
   );
 
@@ -39,4 +60,77 @@ export async function createDraftListing(
 
   revalidatePath("/seller/listings");
   redirect("/seller/listings");
+}
+
+export async function updateOwnListing(
+  _prev: EditListingActionState,
+  formData: FormData,
+): Promise<EditListingActionState> {
+  const productId = readString(formData, "productId");
+  if (!productId) {
+    return { error: "Missing listing." };
+  }
+
+  const result = await updateOwnProductCore(productId, readListingFields(formData));
+  if (!result.ok) {
+    return { error: result.error };
+  }
+
+  revalidateListingPaths(productId);
+  return { success: result.message };
+}
+
+export async function addOwnListingImages(
+  _prev: EditListingActionState,
+  formData: FormData,
+): Promise<EditListingActionState> {
+  const productId = readString(formData, "productId");
+  if (!productId) {
+    return { error: "Missing listing." };
+  }
+
+  const result = await addOwnProductImagesCore(productId, readImageFiles(formData));
+  if (!result.ok) {
+    return { error: result.error };
+  }
+
+  revalidateListingPaths(productId);
+  return { success: result.message };
+}
+
+export async function deleteOwnListingImage(
+  _prev: EditListingActionState,
+  formData: FormData,
+): Promise<EditListingActionState> {
+  const productId = readString(formData, "productId");
+  const imageId = readString(formData, "imageId");
+  if (!productId || !imageId) {
+    return { error: "Missing image." };
+  }
+
+  const result = await deleteOwnProductImageCore(productId, imageId);
+  if (!result.ok) {
+    return { error: result.error };
+  }
+
+  revalidateListingPaths(productId);
+  return { success: result.message };
+}
+
+export async function archiveOwnListing(
+  _prev: EditListingActionState,
+  formData: FormData,
+): Promise<EditListingActionState> {
+  const productId = readString(formData, "productId");
+  if (!productId) {
+    return { error: "Missing listing." };
+  }
+
+  const result = await archiveOwnProductCore(productId);
+  if (!result.ok) {
+    return { error: result.error };
+  }
+
+  revalidateListingPaths(productId);
+  return { success: result.message };
 }

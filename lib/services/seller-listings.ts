@@ -23,10 +23,11 @@ import {
   RATE_LIMIT_MESSAGE,
   RATE_LIMITS,
 } from "@/lib/security/rate-limit";
-import type { Product } from "@/lib/types";
-import { asProduct, listProductImages } from "./products";
+import type { Product, ProductImage } from "@/lib/types";
+import { asProduct, asProductImage, listProductImages } from "./products";
 
 const DRAFT_STATUS = "draft" as const;
+const ARCHIVED_STATUS = "archived" as const;
 const DEFAULT_CURRENCY = "LKR";
 const MAX_TITLE_LENGTH = 200;
 const MAX_DESCRIPTION_LENGTH = 10000;
@@ -42,6 +43,10 @@ export type CreateDraftProductInput = {
 
 export type CreateDraftProductResult =
   | { ok: true; message: string; productId: string }
+  | { ok: false; error: string };
+
+export type SellerListingMutationResult =
+  | { ok: true; message: string }
   | { ok: false; error: string };
 
 export type ParsedCreateDraftProductInput =
@@ -215,6 +220,375 @@ async function cleanupUploadedFiles(fileIds: string[]): Promise<void> {
       // Best-effort cleanup.
     }
   }
+}
+
+type SellerAuth =
+  | { ok: true; userId: string }
+  | { ok: false; error: string };
+
+async function requireSellerUser(): Promise<SellerAuth> {
+  if (!hasAppwritePublicConfig()) {
+    return { ok: false, error: "Marketplace is not configured." };
+  }
+
+  const user = await getLoggedInUser();
+  if (!user) {
+    return { ok: false, error: "You must be signed in." };
+  }
+  if (!userHasLabel(user, ROLE_LABELS.seller)) {
+    return { ok: false, error: "Seller access is required." };
+  }
+
+  return { ok: true, userId: user.$id };
+}
+
+function parseProductId(productId: string): string | null {
+  const trimmed = productId?.trim();
+  return trimmed ? trimmed : null;
+}
+
+/** Trim listing id from form/route input; empty → null. */
+export function parseSellerListingId(productId: string): string | null {
+  return parseProductId(productId);
+}
+
+/** Load a product only when owned by the signed-in seller. */
+export async function getOwnProduct(productId: string): Promise<Product | null> {
+  const id = parseProductId(productId);
+  if (!id) return null;
+
+  const auth = await requireSellerUser();
+  if (!auth.ok) return null;
+
+  try {
+    const { tables } = await createSessionClient();
+    const row = await tables.getRow({
+      databaseId: DATABASE_ID,
+      tableId: TABLE_PRODUCTS,
+      rowId: id,
+    });
+    const product = asProduct(row as unknown as Record<string, unknown>);
+    if (!product || product.sellerId !== auth.userId) return null;
+    return product;
+  } catch {
+    return null;
+  }
+}
+
+async function loadOwnedProductForMutation(
+  productId: string,
+): Promise<
+  | { ok: true; userId: string; product: Product }
+  | { ok: false; error: string }
+> {
+  const auth = await requireSellerUser();
+  if (!auth.ok) return auth;
+
+  const id = parseProductId(productId);
+  if (!id) {
+    return { ok: false, error: "Listing not found." };
+  }
+
+  try {
+    const { tables } = await createSessionClient();
+    const row = await tables.getRow({
+      databaseId: DATABASE_ID,
+      tableId: TABLE_PRODUCTS,
+      rowId: id,
+    });
+    const product = asProduct(row as unknown as Record<string, unknown>);
+    if (!product || product.sellerId !== auth.userId) {
+      return { ok: false, error: "Listing not found." };
+    }
+    return { ok: true, userId: auth.userId, product };
+  } catch (error) {
+    if (error instanceof AppwriteException && error.code === 404) {
+      return { ok: false, error: "Listing not found." };
+    }
+    return { ok: false, error: "Could not load listing." };
+  }
+}
+
+function archivedMutationError(): SellerListingMutationResult {
+  return {
+    ok: false,
+    error: "Archived listings cannot be changed.",
+  };
+}
+
+/**
+ * Update listing fields for the signed-in seller. Does not change status or sellerId.
+ */
+export async function updateOwnProductCore(
+  productId: string,
+  input: CreateDraftProductInput,
+): Promise<SellerListingMutationResult> {
+  const auth = await requireSellerUser();
+  if (!auth.ok) return auth;
+
+  const rate = assertRateLimit({
+    bucket: "listings.update",
+    key: `user:${auth.userId}`,
+    ...RATE_LIMITS.listings,
+  });
+  if (!rate.ok) {
+    return { ok: false, error: RATE_LIMIT_MESSAGE };
+  }
+
+  const loaded = await loadOwnedProductForMutation(productId);
+  if (!loaded.ok) return loaded;
+
+  if (loaded.product.status === ARCHIVED_STATUS) {
+    return archivedMutationError();
+  }
+
+  const parsed = parseCreateDraftProductInput(input);
+  if (!parsed.ok) {
+    return { ok: false, error: parsed.error };
+  }
+
+  if (!(await categoryExists(parsed.categoryId))) {
+    return { ok: false, error: "Selected category was not found." };
+  }
+
+  try {
+    const { tables } = await createSessionClient();
+    await tables.updateRow({
+      databaseId: DATABASE_ID,
+      tableId: TABLE_PRODUCTS,
+      rowId: loaded.product.$id,
+      data: {
+        categoryId: parsed.categoryId,
+        title: parsed.title,
+        description: parsed.description,
+        price: parsed.price,
+        isFree: parsed.isFree,
+        stock: parsed.stock,
+      },
+    });
+
+    return { ok: true, message: "Listing updated." };
+  } catch (error) {
+    if (error instanceof AppwriteException && error.code === 401) {
+      return { ok: false, error: "You must be signed in." };
+    }
+    return { ok: false, error: "Could not update listing. Please try again." };
+  }
+}
+
+/**
+ * Archive an owned listing (any non-archived status → archived).
+ * Idempotent when already archived.
+ */
+export async function archiveOwnProductCore(
+  productId: string,
+): Promise<SellerListingMutationResult> {
+  const auth = await requireSellerUser();
+  if (!auth.ok) return auth;
+
+  const rate = assertRateLimit({
+    bucket: "listings.archive",
+    key: `user:${auth.userId}`,
+    ...RATE_LIMITS.listings,
+  });
+  if (!rate.ok) {
+    return { ok: false, error: RATE_LIMIT_MESSAGE };
+  }
+
+  const loaded = await loadOwnedProductForMutation(productId);
+  if (!loaded.ok) return loaded;
+
+  if (loaded.product.status === ARCHIVED_STATUS) {
+    return { ok: true, message: "Listing is already archived." };
+  }
+
+  try {
+    const { tables } = await createSessionClient();
+    await tables.updateRow({
+      databaseId: DATABASE_ID,
+      tableId: TABLE_PRODUCTS,
+      rowId: loaded.product.$id,
+      data: { status: ARCHIVED_STATUS },
+    });
+
+    return { ok: true, message: "Listing archived." };
+  } catch (error) {
+    if (error instanceof AppwriteException && error.code === 401) {
+      return { ok: false, error: "You must be signed in." };
+    }
+    return { ok: false, error: "Could not archive listing. Please try again." };
+  }
+}
+
+/**
+ * Add images to an owned listing (up to 8 total).
+ */
+export async function addOwnProductImagesCore(
+  productId: string,
+  imageFiles: File[],
+): Promise<SellerListingMutationResult> {
+  const auth = await requireSellerUser();
+  if (!auth.ok) return auth;
+
+  const rate = assertRateLimit({
+    bucket: "listings.images",
+    key: `user:${auth.userId}`,
+    ...RATE_LIMITS.listings,
+  });
+  if (!rate.ok) {
+    return { ok: false, error: RATE_LIMIT_MESSAGE };
+  }
+
+  const loaded = await loadOwnedProductForMutation(productId);
+  if (!loaded.ok) return loaded;
+
+  if (loaded.product.status === ARCHIVED_STATUS) {
+    return archivedMutationError();
+  }
+
+  const nonEmptyImages = imageFiles.filter((f) => f.size > 0);
+  if (nonEmptyImages.length === 0) {
+    return { ok: false, error: "Select at least one image to upload." };
+  }
+
+  const existing = await listProductImages(loaded.product.$id);
+  if (existing.length + nonEmptyImages.length > MAX_IMAGES) {
+    return {
+      ok: false,
+      error: `At most ${MAX_IMAGES} images allowed (${existing.length} already uploaded).`,
+    };
+  }
+
+  const imageCheck = validateImageFiles(nonEmptyImages);
+  if (!imageCheck.ok) {
+    return { ok: false, error: imageCheck.error };
+  }
+
+  const uploadedFileIds: string[] = [];
+  const imagePerms = productImagePermissions(auth.userId);
+  const nextSortOrder =
+    existing.reduce((max, image) => Math.max(max, image.sortOrder), -1) + 1;
+
+  try {
+    const { tables } = await createSessionClient();
+    for (let i = 0; i < imageCheck.files.length; i++) {
+      const file = imageCheck.files[i]!;
+      const { fileId } = await uploadProductImage(file);
+      uploadedFileIds.push(fileId);
+
+      await tables.createRow({
+        databaseId: DATABASE_ID,
+        tableId: TABLE_PRODUCT_IMAGES,
+        rowId: ID.unique(),
+        data: {
+          productId: loaded.product.$id,
+          fileId,
+          sortOrder: nextSortOrder + i,
+          alt: loaded.product.title.slice(0, 200),
+        },
+        permissions: imagePerms,
+      });
+    }
+
+    return { ok: true, message: "Images added." };
+  } catch (error) {
+    await cleanupUploadedFiles(uploadedFileIds);
+
+    if (error instanceof Error && !(error instanceof AppwriteException)) {
+      return { ok: false, error: error.message };
+    }
+    return { ok: false, error: "Could not upload images. Please try again." };
+  }
+}
+
+async function loadOwnedProductImage(
+  productId: string,
+  imageRowId: string,
+): Promise<
+  | { ok: true; userId: string; product: Product; image: ProductImage }
+  | { ok: false; error: string }
+> {
+  const loaded = await loadOwnedProductForMutation(productId);
+  if (!loaded.ok) return loaded;
+
+  const imageId = parseProductId(imageRowId);
+  if (!imageId) {
+    return { ok: false, error: "Image not found." };
+  }
+
+  try {
+    const { tables } = await createSessionClient();
+    const row = await tables.getRow({
+      databaseId: DATABASE_ID,
+      tableId: TABLE_PRODUCT_IMAGES,
+      rowId: imageId,
+    });
+    const image = asProductImage(row as unknown as Record<string, unknown>);
+    if (!image || image.productId !== loaded.product.$id) {
+      return { ok: false, error: "Image not found." };
+    }
+
+    return {
+      ok: true,
+      userId: loaded.userId,
+      product: loaded.product,
+      image,
+    };
+  } catch (error) {
+    if (error instanceof AppwriteException && error.code === 404) {
+      return { ok: false, error: "Image not found." };
+    }
+    return { ok: false, error: "Could not load image." };
+  }
+}
+
+/**
+ * Delete one image from an owned listing (row + storage file).
+ */
+export async function deleteOwnProductImageCore(
+  productId: string,
+  imageRowId: string,
+): Promise<SellerListingMutationResult> {
+  const auth = await requireSellerUser();
+  if (!auth.ok) return auth;
+
+  const rate = assertRateLimit({
+    bucket: "listings.images",
+    key: `user:${auth.userId}`,
+    ...RATE_LIMITS.listings,
+  });
+  if (!rate.ok) {
+    return { ok: false, error: RATE_LIMIT_MESSAGE };
+  }
+
+  const loaded = await loadOwnedProductImage(productId, imageRowId);
+  if (!loaded.ok) return loaded;
+
+  if (loaded.product.status === ARCHIVED_STATUS) {
+    return archivedMutationError();
+  }
+
+  try {
+    const { tables } = await createSessionClient();
+    await tables.deleteRow({
+      databaseId: DATABASE_ID,
+      tableId: TABLE_PRODUCT_IMAGES,
+      rowId: loaded.image.$id,
+    });
+  } catch (error) {
+    if (error instanceof AppwriteException && error.code === 404) {
+      return { ok: false, error: "Image not found." };
+    }
+    return { ok: false, error: "Could not delete image." };
+  }
+
+  try {
+    await deleteFile(BUCKET_PRODUCT_IMAGES, loaded.image.fileId);
+  } catch {
+    // Row deleted; storage cleanup is best-effort.
+  }
+
+  return { ok: true, message: "Image removed." };
 }
 
 /**
