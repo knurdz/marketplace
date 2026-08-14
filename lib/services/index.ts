@@ -147,6 +147,25 @@ export {
   type ReportActionState,
   type ReportErrorCode,
 } from "./report-errors";
+export { listReports, parseReportStatusFilter } from "./report-triage";
+export type { AdminReportView, ReportTriageResult } from "./report-triage";
+export {
+  listNotifyLogs,
+  parseNotifyLogCursor,
+  parseNotifyLogView,
+} from "./notify-logs";
+export type {
+  ListNotifyLogsResult,
+  NotifyLogEntry,
+  NotifyLogSource,
+  NotifyLogView,
+} from "./notify-logs";
+export {
+  isNotifyLogIssue,
+  parseNotifyLogText,
+  redactNotifyLogText,
+} from "./notify-log-redact";
+export type { NotifyLogOutcome, ParsedNotifyLog } from "./notify-log-redact";
 export {
   getPublicSellerBySlug,
   getPublicSellerByUserId,

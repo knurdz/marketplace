@@ -278,9 +278,9 @@ Complete payment infrastructure so Members 2–4 only consume APIs / admin UI.
 - [x] Listing moderation (approve/reject/remove inappropriate)
 - [x] Categories CRUD
 - [x] All-orders oversight + payment filters
-- [ ] Dispute handling (orders flagged by buyers/sellers)
+- [x] Dispute handling (orders flagged by buyers/sellers)
 - [x] Bank slip verification UI (approve/reject proofs)
-- [ ] User/listing reports triage
+- [x] User/listing reports triage
 - [x] Audit log viewer
 - [x] Platform settings (sandbox flag, fees, bank copy) — admin write UI
 - [ ] Admin order overrides (cancel/refund) with audit
@@ -289,7 +289,7 @@ Complete payment infrastructure so Members 2–4 only consume APIs / admin UI.
 - [x] Basic fraud flags (e.g. repeated failed pays, multi-account signals) — rules-based, not ML
 - [ ] Featured product / boost tooling (optional — Phase 5; admin-controlled)
 - [ ] Discount coupons admin CRUD (optional — Phase 5)
-- [ ] Read-only view of PayHere/notify failure logs (data produced by Member 1) — optional
+- [x] Read-only view of PayHere/notify failure logs (data produced by Member 1) — optional
 
 ### Step-by-step plan (implement one step at a time)
 
@@ -303,12 +303,12 @@ Complete payment infrastructure so Members 2–4 only consume APIs / admin UI.
 | [x] **4.5**  | Categories CRUD         | Create/update/order                       | Storefront reads them   |
 | [x] **4.6**  | All orders + filters    | By payment method/status                  | Admin access only       |
 | [x] **4.7**  | Bank slip queue         | Approve → `paid` + stock; reject          | Idempotent; audit       |
-| [ ] **4.8**  | Reports / disputes      | Triage workflow                           | Status transitions      |
+| [x] **4.8**  | Reports / disputes      | Triage workflow                           | Status transitions      |
 | [x] **4.9**  | Platform settings UI    | Sandbox, bank copy, fees (admin write)    | Safe public fields only |
 | [x] **4.10** | Audit viewer            | List admin actions                        | Append-only             |
 | [x] **4.11** | Analytics               | Sales + user growth                       | No PII leakage          |
 | [x] **4.12** | Badges + fraud flags    | Verification badge; rule flags            | Rules documented        |
-| [ ] **4.13** | Notify log viewer (opt) | Read-only UI over Member 1 failure logs   | No secrets in UI        |
+| [x] **4.13** | Notify log viewer (opt) | Read-only UI over Member 1 failure logs   | No secrets in UI        |
 | [ ] **4.14** | Optional Phase 5        | Featured listings, coupons                | After E2E               |
 
 
