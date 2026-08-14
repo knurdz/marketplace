@@ -32,8 +32,9 @@ export default async function CheckoutFreePage({
       </h1>
       <p className="mt-4 text-muted-foreground">
         Order <span className="font-mono text-foreground">{order.$id}</span>.
-        Confirmation runs through the Member 1 free-confirm API — payment is
-        marked paid only after server-side verification.
+        Confirmation checks that you own this order and that the stored total is
+        zero, then marks it paid on the server. Card checkout is never used for
+        free orders.
       </p>
       <p className="mt-2 text-sm text-muted-foreground">
         Total: {order.currency} {order.totalAmount.toFixed(2)}

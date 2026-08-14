@@ -114,35 +114,27 @@ export async function confirmFreeOrderAction(
     };
   }
 
-  if (payment.status === "paid") {
-    revalidateCheckoutPaths();
-    return {
-      ok: true,
-      orderStatus: order.status,
-      paymentStatus: payment.status,
-    };
-  }
-
   const confirm = await confirmFreeOrder({ orderId });
   if (!confirm.ok) {
     const isNotConfigured = confirm.error.includes("not configured");
+    const isNotFound = confirm.error === "Order not found.";
     return {
       ok: false,
       error: confirm.error,
       code: isNotConfigured
         ? ORDER_ERROR_CODES.CONFIRM_NOT_CONFIGURED
-        : undefined,
+        : isNotFound
+          ? ORDER_ERROR_CODES.NOT_FOUND
+          : undefined,
     };
   }
 
   const refreshedOrder = await getOwnOrder(orderId);
   const refreshedPayment = await getOwnPaymentForOrder(orderId);
 
-  if (
-    refreshedPayment?.status === "paid" &&
-    refreshedOrder
-  ) {
+  if (refreshedPayment?.status === "paid" && refreshedOrder) {
     revalidateCheckoutPaths();
+    revalidateOrderPaths(orderId);
     return {
       ok: true,
       orderStatus: refreshedOrder.status,
