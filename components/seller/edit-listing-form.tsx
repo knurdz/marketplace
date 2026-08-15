@@ -48,6 +48,7 @@ export function EditListingForm({
 }: EditListingFormProps) {
   const isArchived = product.status === "archived";
   const [showArchiveConfirm, setShowArchiveConfirm] = useState(false);
+  const [isFree, setIsFree] = useState(product.isFree || product.price === 0);
 
   const [updateState, updateAction, updatePending] = useActionState(
     updateOwnListing,
@@ -195,18 +196,34 @@ export function EditListingForm({
           </select>
         </div>
 
+        <div className="flex items-center gap-2">
+          <input
+            id="isFree"
+            name="isFree"
+            type="checkbox"
+            checked={isFree}
+            onChange={(e) => setIsFree(e.target.checked)}
+            disabled={updatePending || isArchived}
+            className="size-4 rounded border border-input"
+          />
+          <Label htmlFor="isFree" className="font-normal">
+            Free listing (buyers checkout at no cost)
+          </Label>
+        </div>
+
         <div className="grid gap-4 sm:grid-cols-2">
           <div className="space-y-2">
             <Label htmlFor="price">Price (LKR)</Label>
+            {isFree ? <input type="hidden" name="price" value="0" /> : null}
             <Input
               id="price"
-              name="price"
+              name={isFree ? undefined : "price"}
               type="number"
-              min={0}
+              min={0.01}
               step="0.01"
-              required
+              required={!isFree}
               defaultValue={product.price}
-              disabled={updatePending || isArchived}
+              disabled={updatePending || isArchived || isFree}
             />
           </div>
           <div className="space-y-2">
@@ -222,26 +239,6 @@ export function EditListingForm({
               disabled={updatePending || isArchived}
             />
           </div>
-        </div>
-
-        <div className="space-y-2">
-          <div className="flex items-center gap-3">
-            <input
-              id="available"
-              name="available"
-              type="checkbox"
-              value="true"
-              defaultChecked={product.available}
-              disabled={updatePending || isArchived}
-              className="size-4 rounded border border-border"
-            />
-            <Label htmlFor="available" className="font-normal">
-              Available for purchase
-            </Label>
-          </div>
-          <p className="text-xs text-muted-foreground">
-            Uncheck to hide the buy button even when stock is greater than zero.
-          </p>
         </div>
 
         {!isArchived ? (
