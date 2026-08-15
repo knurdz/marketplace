@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 import { ProductList } from "@/components/store/product-list";
+import { SellerPolicyBlocks } from "@/components/store/seller-policy-blocks";
 import { getShopBannerPreviewUrl } from "@/lib/appwrite/storage-urls";
 import { getPublicSellerBySlug, listActiveProducts } from "@/lib/services";
 
@@ -44,6 +45,7 @@ export default async function ShopPage({ params }: ShopPageProps) {
             {seller.bio}
           </p>
         ) : null}
+        <SellerPolicyBlocks seller={seller} className="mt-8" />
       </header>
 
       <section aria-labelledby="shop-listings-heading" className="mt-12">

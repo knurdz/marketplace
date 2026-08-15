@@ -2,7 +2,10 @@
  * Runnable checks for shop profile validation + approved-only public gate.
  * Run: npx tsx scripts/verify-shop-profile.ts
  */
-import { parseSellerApplicationInput } from "../lib/services/seller-application";
+import {
+  parseSellerApplicationInput,
+  parseShopPolicyInput,
+} from "../lib/services/seller-application";
 import { isApprovedPublicSellerStatus } from "../lib/services/sellers";
 
 function assert(condition: boolean, message: string): void {
@@ -39,5 +42,24 @@ assert(isApprovedPublicSellerStatus("approved"), "approved is public");
 assert(!isApprovedPublicSellerStatus("pending"), "pending is not public");
 assert(!isApprovedPublicSellerStatus("rejected"), "rejected is not public");
 assert(!isApprovedPublicSellerStatus("invalid"), "invalid status not public");
+
+const policies = parseShopPolicyInput({
+  returnPolicy: "  7-day returns  ",
+  shippingPolicy: "",
+});
+assert(policies.ok, "valid policy input should parse");
+if (policies.ok) {
+  assert(policies.returnPolicy === "7-day returns", "return policy trimmed");
+  assert(policies.shippingPolicy === null, "empty shipping → null");
+}
+
+assert(
+  !parseShopPolicyInput({ returnPolicy: "x".repeat(2001) }).ok,
+  "long return policy rejected",
+);
+assert(
+  !parseShopPolicyInput({ shippingPolicy: "x".repeat(2001) }).ok,
+  "long shipping policy rejected",
+);
 
 console.log("shop-profile validation checks passed");

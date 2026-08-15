@@ -58,6 +58,15 @@ export type UpdateSellerBankDetailsInput = {
   bankName?: string;
 };
 
+export type UpdateShopPoliciesInput = {
+  returnPolicy?: string;
+  shippingPolicy?: string;
+};
+
+export type ParsedShopPoliciesInput =
+  | { ok: true; returnPolicy: string | null; shippingPolicy: string | null }
+  | { ok: false; error: string };
+
 export type ParsedSellerBankDetailsInput =
   | {
       ok: true;
@@ -196,6 +205,33 @@ export function parseSellerBankDetailsInput(
     bankAccountName,
     bankAccountNumber,
     bankName,
+  };
+}
+
+/** Validate shop policy text fields (no I/O). Empty clears; max length enforced. */
+export function parseShopPolicyInput(
+  input: UpdateShopPoliciesInput,
+): ParsedShopPoliciesInput {
+  const returnRaw = input.returnPolicy?.trim() ?? "";
+  const shippingRaw = input.shippingPolicy?.trim() ?? "";
+
+  if (returnRaw.length > MAX_BIO_LENGTH) {
+    return {
+      ok: false,
+      error: `Return policy must be at most ${MAX_BIO_LENGTH} characters.`,
+    };
+  }
+  if (shippingRaw.length > MAX_BIO_LENGTH) {
+    return {
+      ok: false,
+      error: `Shipping policy must be at most ${MAX_BIO_LENGTH} characters.`,
+    };
+  }
+
+  return {
+    ok: true,
+    returnPolicy: returnRaw.length > 0 ? returnRaw : null,
+    shippingPolicy: shippingRaw.length > 0 ? shippingRaw : null,
   };
 }
 
@@ -481,6 +517,68 @@ export async function updateOwnBankDetailsCore(
       }
     }
     return { ok: false, error: "Could not update bank details. Please try again." };
+  }
+}
+
+/**
+ * Update return/shipping policy text for the signed-in approved seller only.
+ * Never mutates slug, status, bank fields, or shop name.
+ */
+export async function updateOwnShopPoliciesCore(
+  input: UpdateShopPoliciesInput,
+): Promise<ShopProfileUpdateResult> {
+  if (!hasAppwritePublicConfig()) {
+    return { ok: false, error: "Marketplace is not configured." };
+  }
+
+  const user = await getLoggedInUser();
+  if (!user) {
+    return { ok: false, error: "You must be signed in to update shop policies." };
+  }
+
+  const parsed = parseShopPolicyInput(input);
+  if (!parsed.ok) {
+    return { ok: false, error: parsed.error };
+  }
+
+  const existing = await getOwnSellerProfile();
+  if (!existing || existing.userId !== user.$id) {
+    return { ok: false, error: "Seller profile not found." };
+  }
+  if (existing.status !== "approved") {
+    return {
+      ok: false,
+      error: "Only approved sellers can edit shop policies.",
+    };
+  }
+
+  try {
+    const { tables } = await createSessionClient();
+    await tables.updateRow({
+      databaseId: DATABASE_ID,
+      tableId: TABLE_SELLER_PROFILES,
+      rowId: existing.$id,
+      data: {
+        returnPolicy: parsed.returnPolicy,
+        shippingPolicy: parsed.shippingPolicy,
+        userId: user.$id,
+      },
+    });
+
+    const cleared = !parsed.returnPolicy && !parsed.shippingPolicy;
+
+    return {
+      ok: true,
+      message: cleared ? "Shop policies cleared." : "Shop policies saved.",
+      slug: existing.slug,
+    };
+  } catch (error) {
+    if (error instanceof AppwriteException) {
+      if (error.code === 401 || error.code === 404) {
+        return { ok: false, error: "Not allowed to update shop policies." };
+      }
+    }
+    return { ok: false, error: "Could not update shop policies. Please try again." };
   }
 }
 

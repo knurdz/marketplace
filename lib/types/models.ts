@@ -116,6 +116,8 @@ export type SellerProfile = {
   bankAccountNumber: string | null;
   bankName: string | null;
   rejectionReason: string | null;
+  returnPolicy: string | null;
+  shippingPolicy: string | null;
 };
 
 export type Order = {

@@ -82,9 +82,11 @@ Server-action rate limits live in [`lib/security/rate-limit.ts`](../../lib/secur
 | `bankAccountNumber` | string(64) | no |
 | `bankName` | string(128) | no |
 | `rejectionReason` | string(500) | no |
+| `returnPolicy` | string(2000) | no |
+| `shippingPolicy` | string(2000) | no |
 
 **Indexes:** `userId_unique`, `slug_unique`, `status_idx`  
-**Intent:** applicant owns row after create; public shop reads only when `approved` (enforce in app / tighter perms later). Never log full bank numbers.
+**Intent:** applicant owns row after create; public shop reads only when `approved` (enforce in app / tighter perms later). Never log full bank numbers. Policy text is public on approved shop/product pages when set.
 
 ---
 
@@ -421,3 +423,4 @@ Uploads are rate-limited in `uploadFile` (see Abuse guards above).
 | 2026-08-11 | Platform settings read helpers + seed keys (step 1.19) |
 | 2026-08-11 | PayHere Function interface freeze — see PAYHERE.md (step 1.20) |
 | 2026-08-14 | `payhere_notify_logs` table for sanitized notify ops rows (step 1.26) |
+| 2026-08-15 | `seller_profiles.returnPolicy` + `shippingPolicy` optional strings (step 3.14) |

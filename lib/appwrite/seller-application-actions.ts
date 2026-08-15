@@ -5,6 +5,7 @@ import {
   submitSellerApplicationCore,
   updateOwnBankDetailsCore,
   updateOwnShopBannerCore,
+  updateOwnShopPoliciesCore,
   updateOwnShopProfileCore,
   type SubmitSellerApplicationInput,
 } from "@/lib/services/seller-application";
@@ -82,6 +83,24 @@ export async function updateOwnBankDetails(
   }
 
   revalidatePath("/seller/shop");
+  return { success: result.message };
+}
+
+export async function updateOwnShopPolicies(
+  _prev: ShopProfileActionState,
+  formData: FormData,
+): Promise<ShopProfileActionState> {
+  const result = await updateOwnShopPoliciesCore({
+    returnPolicy: readString(formData, "returnPolicy"),
+    shippingPolicy: readString(formData, "shippingPolicy"),
+  });
+
+  if (!result.ok) {
+    return { error: result.error };
+  }
+
+  revalidatePath("/seller/settings");
+  revalidateShopPaths(result.slug);
   return { success: result.message };
 }
 
