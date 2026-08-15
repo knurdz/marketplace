@@ -11,7 +11,7 @@ const SELLER_NAV = [
   { href: "/seller", label: "Dashboard" },
   { href: "/seller/shop", label: "Shop" },
   { href: "/seller/listings", label: "Listings" },
-  { href: "/seller#orders", label: "Orders" },
+  { href: "/seller/orders", label: "Orders" },
   { href: "/seller#settings", label: "Settings" },
 ];
 

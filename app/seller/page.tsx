@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { getSellerMetrics } from "@/lib/services";
 
 function formatCount(value: number): string {
@@ -26,12 +27,21 @@ export default async function SellerPage() {
   const metrics = await getSellerMetrics();
 
   const cards = [
-    { label: "Orders", value: formatCount(metrics.orderCount) },
+    {
+      label: "Orders",
+      value: formatCount(metrics.orderCount),
+      href: "/seller/orders",
+    },
     {
       label: "Revenue",
       value: formatRevenue(metrics.revenue, metrics.currency),
+      href: "/seller/orders",
     },
-    { label: "Pending", value: formatCount(metrics.pendingCount) },
+    {
+      label: "Pending",
+      value: formatCount(metrics.pendingCount),
+      href: "/seller/orders?filter=pending",
+    },
   ];
 
   return (
@@ -43,14 +53,15 @@ export default async function SellerPage() {
       </p>
 
       <div className="mt-10 grid gap-4 sm:grid-cols-3">
-        {cards.map(({ label, value }) => (
-          <div
+        {cards.map(({ label, value, href }) => (
+          <Link
             key={label}
-            className="rounded-md border border-border bg-card px-4 py-5"
+            href={href}
+            className="rounded-md border border-border bg-card px-4 py-5 transition hover:border-accent/40"
           >
             <p className="font-mono text-xs text-muted-foreground">{label}</p>
             <p className="mt-2 text-2xl font-bold tracking-tight">{value}</p>
-          </div>
+          </Link>
         ))}
       </div>
     </div>
