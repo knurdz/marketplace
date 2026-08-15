@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import {
   submitSellerApplicationCore,
+  updateOwnBankDetailsCore,
   updateOwnShopBannerCore,
   updateOwnShopProfileCore,
   type SubmitSellerApplicationInput,
@@ -63,6 +64,24 @@ export async function updateOwnShopProfile(
   }
 
   revalidateShopPaths(result.slug);
+  return { success: result.message };
+}
+
+export async function updateOwnBankDetails(
+  _prev: ShopProfileActionState,
+  formData: FormData,
+): Promise<ShopProfileActionState> {
+  const result = await updateOwnBankDetailsCore({
+    bankName: readString(formData, "bankName"),
+    bankAccountName: readString(formData, "bankAccountName"),
+    bankAccountNumber: readString(formData, "bankAccountNumber"),
+  });
+
+  if (!result.ok) {
+    return { error: result.error };
+  }
+
+  revalidatePath("/seller/shop");
   return { success: result.message };
 }
 
