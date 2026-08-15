@@ -126,16 +126,20 @@ export {
   parseSellerApplicationInput,
   resolveUniqueShopSlug,
   submitSellerApplicationCore,
+  updateOwnBankDetailsCore,
   updateOwnShopBannerCore,
   updateOwnShopProfileCore,
+  parseSellerBankDetailsInput,
 } from "./seller-application";
 export type {
   BlockedSellerPortalDestination,
   ParsedSellerApplicationInput,
+  ParsedSellerBankDetailsInput,
   SellerApplicationResult,
   ShopBannerUpdateResult,
   ShopProfileUpdateResult,
   SubmitSellerApplicationInput,
+  UpdateSellerBankDetailsInput,
   UpdateShopProfileInput,
 } from "./seller-application";
 export {

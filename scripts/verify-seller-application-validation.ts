@@ -5,6 +5,7 @@
 import {
   normalizeShopSlug,
   parseSellerApplicationInput,
+  parseSellerBankDetailsInput,
 } from "../lib/services/seller-application";
 
 function assert(condition: boolean, message: string): void {
@@ -45,5 +46,46 @@ assert(
 );
 
 assert(normalizeShopSlug("Hello World") === "hello-world", "slug helper");
+
+const cleared = parseSellerBankDetailsInput({});
+assert(cleared.ok, "empty bank input should clear");
+if (cleared.ok) {
+  assert(cleared.bankName === null, "cleared bank name");
+  assert(cleared.bankAccountName === null, "cleared account name");
+  assert(cleared.bankAccountNumber === null, "cleared account number");
+}
+
+assert(
+  !parseSellerBankDetailsInput({ bankName: "Commercial Bank" }).ok,
+  "partial bank input rejected",
+);
+assert(
+  !parseSellerBankDetailsInput({
+    bankName: "x".repeat(129),
+    bankAccountName: "Seller",
+    bankAccountNumber: "1234567890",
+  }).ok,
+  "long bank name rejected",
+);
+assert(
+  !parseSellerBankDetailsInput({
+    bankName: "Commercial Bank",
+    bankAccountName: "Seller",
+    bankAccountNumber: "ABC123",
+  }).ok,
+  "illegal account chars rejected",
+);
+
+const bankOk = parseSellerBankDetailsInput({
+  bankName: "Commercial Bank",
+  bankAccountName: "Campus Crafts",
+  bankAccountNumber: "1234-5678 90",
+});
+assert(bankOk.ok, "valid bank triple should parse");
+if (bankOk.ok) {
+  assert(bankOk.bankName === "Commercial Bank", "bank name preserved");
+  assert(bankOk.bankAccountName === "Campus Crafts", "account name preserved");
+  assert(bankOk.bankAccountNumber === "1234-5678 90", "account number preserved");
+}
 
 console.log("seller-application validation checks passed");
