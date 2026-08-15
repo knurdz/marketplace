@@ -13,6 +13,8 @@ export type PublicSellerInfo = {
   slug: string;
   bio: string | null;
   bannerFileId: string | null;
+  returnPolicy: string | null;
+  shippingPolicy: string | null;
 };
 
 function asNullableString(value: unknown): string | null {
@@ -41,6 +43,8 @@ function toPublicSellerInfo(
     slug,
     bio: asNullableString(record.bio),
     bannerFileId: asNullableString(record.bannerFileId),
+    returnPolicy: asNullableString(record.returnPolicy),
+    shippingPolicy: asNullableString(record.shippingPolicy),
   };
 }
 
