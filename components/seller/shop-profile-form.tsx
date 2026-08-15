@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useActionState, useEffect, useRef } from "react";
 import {
+  updateOwnBankDetails,
   updateOwnShopBanner,
   updateOwnShopProfile,
   type ShopProfileActionState,
@@ -15,6 +16,7 @@ import { Label } from "@/components/ui/label";
 
 const profileInitial: ShopProfileActionState = {};
 const bannerInitial: ShopProfileActionState = {};
+const bankInitial: ShopProfileActionState = {};
 
 function useActionToasts(state: ShopProfileActionState) {
   const last = useRef<string | null>(null);
@@ -48,9 +50,14 @@ export function ShopProfileForm({
     updateOwnShopBanner,
     bannerInitial,
   );
+  const [bankState, bankAction, bankPending] = useActionState(
+    updateOwnBankDetails,
+    bankInitial,
+  );
 
   useActionToasts(profileState);
   useActionToasts(bannerState);
+  useActionToasts(bankState);
 
   const publicShopHref = `/shop/${profile.slug}`;
 
@@ -151,6 +158,68 @@ export function ShopProfileForm({
 
         <Button type="submit" disabled={profilePending}>
           {profilePending ? "Saving…" : "Save shop details"}
+        </Button>
+      </form>
+
+      <form action={bankAction} className="max-w-lg space-y-5">
+        <p className="font-mono text-sm text-accent">$ ./shop --bank</p>
+        <h2 className="text-xl font-bold tracking-tight">Bank details</h2>
+        <p className="text-sm text-muted-foreground">
+          Shown only to buyers who pay by bank transfer for your orders. Not
+          displayed on your public shop page.
+        </p>
+
+        {bankState.error ? (
+          <p
+            role="alert"
+            className="rounded-md border border-border bg-card px-3 py-2 font-mono text-sm text-accent-bright"
+          >
+            {bankState.error}
+          </p>
+        ) : null}
+
+        <div className="space-y-2">
+          <Label htmlFor="bankName">Bank name</Label>
+          <Input
+            id="bankName"
+            name="bankName"
+            type="text"
+            maxLength={128}
+            autoComplete="off"
+            defaultValue={profile.bankName ?? ""}
+            placeholder="e.g. Commercial Bank"
+          />
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="bankAccountName">Account name</Label>
+          <Input
+            id="bankAccountName"
+            name="bankAccountName"
+            type="text"
+            maxLength={128}
+            autoComplete="off"
+            defaultValue={profile.bankAccountName ?? ""}
+            placeholder="Name on the account"
+          />
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="bankAccountNumber">Account number</Label>
+          <Input
+            id="bankAccountNumber"
+            name="bankAccountNumber"
+            type="text"
+            inputMode="numeric"
+            maxLength={64}
+            autoComplete="off"
+            defaultValue={profile.bankAccountNumber ?? ""}
+            placeholder="Digits only (spaces/hyphens OK)"
+          />
+        </div>
+
+        <Button type="submit" disabled={bankPending}>
+          {bankPending ? "Saving…" : "Save bank details"}
         </Button>
       </form>
     </div>
