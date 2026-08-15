@@ -1,6 +1,13 @@
 export { getAdminMetrics } from "./admin-metrics";
 export type { AdminMetrics } from "./admin-metrics";
 export {
+  aggregateSellerRevenue,
+  getSellerMetrics,
+  SELLER_PENDING_STATUSES,
+  SELLER_REVENUE_STATUSES,
+} from "./seller-metrics";
+export type { SellerMetrics } from "./seller-metrics";
+export {
   getSalesOverTime,
   getUserGrowthOverTime,
   parseAnalyticsRange,
