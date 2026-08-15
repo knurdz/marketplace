@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { SellerFulfillmentActions } from "@/components/seller/seller-fulfillment-actions";
 import { OrderTimeline } from "@/components/store/order-timeline";
 import { Button } from "@/components/ui/button";
 import {
@@ -97,6 +98,11 @@ export default async function SellerOrderDetailPage({
       </section>
 
       <OrderTimeline status={order.status} />
+
+      <SellerFulfillmentActions
+        orderId={order.$id}
+        currentStatus={order.status}
+      />
 
       <div className="mt-12 flex flex-wrap gap-3">
         <Button variant="outline" size="sm" asChild>

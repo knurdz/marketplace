@@ -25,6 +25,8 @@ export const SELLER_REVENUE_STATUSES: readonly OrderStatus[] = [
 export const SELLER_PENDING_STATUSES: readonly OrderStatus[] = [
   "paid",
   "processing",
+  "shipped",
+  "ready_pickup",
 ];
 
 export type SellerMetrics = {
