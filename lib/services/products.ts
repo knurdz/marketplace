@@ -45,14 +45,16 @@ export function asProduct(row: Record<string, unknown>): Product | null {
     return null;
   }
 
+  const price = asNumber(row.price);
+
   return {
     $id,
     sellerId,
     categoryId,
     title,
     description,
-    price: asNumber(row.price),
-    isFree: asBoolean(row.isFree),
+    price,
+    isFree: price === 0,
     status: statusRaw,
     stock: Math.max(0, Math.floor(asNumber(row.stock))),
     available: asBoolean(row.available, true),

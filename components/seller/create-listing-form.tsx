@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useState } from "react";
 import Link from "next/link";
 import {
   createDraftListing,
@@ -18,6 +18,7 @@ type CreateListingFormProps = {
 };
 
 export function CreateListingForm({ categories }: CreateListingFormProps) {
+  const [isFree, setIsFree] = useState(false);
   const [state, formAction, pending] = useActionState(
     createDraftListing,
     initialState,
@@ -84,22 +85,35 @@ export function CreateListingForm({ categories }: CreateListingFormProps) {
         ) : null}
       </div>
 
+      <div className="flex items-center gap-2">
+        <input
+          id="isFree"
+          name="isFree"
+          type="checkbox"
+          checked={isFree}
+          onChange={(e) => setIsFree(e.target.checked)}
+          disabled={pending}
+          className="size-4 rounded border border-input"
+        />
+        <Label htmlFor="isFree" className="font-normal">
+          Free listing (buyers checkout at no cost)
+        </Label>
+      </div>
+
       <div className="grid gap-4 sm:grid-cols-2">
         <div className="space-y-2">
           <Label htmlFor="price">Price (LKR)</Label>
+          {isFree ? <input type="hidden" name="price" value="0" /> : null}
           <Input
             id="price"
-            name="price"
+            name={isFree ? undefined : "price"}
             type="number"
-            min={0}
+            min={0.01}
             step="0.01"
-            required
-            defaultValue={0}
-            disabled={pending}
+            required={!isFree}
+            disabled={pending || isFree}
+            placeholder={isFree ? "Free" : "e.g. 500"}
           />
-          <p className="text-xs text-muted-foreground">
-            Use 0 for a free listing (buyer free path).
-          </p>
         </div>
         <div className="space-y-2">
           <Label htmlFor="stock">Stock</Label>

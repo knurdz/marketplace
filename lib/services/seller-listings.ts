@@ -23,12 +23,13 @@ import {
   RATE_LIMIT_MESSAGE,
   RATE_LIMITS,
 } from "@/lib/security/rate-limit";
-import type { Product, ProductStatus } from "@/lib/types";
-import { asProduct, listProductImages } from "./products";
+import type { Product, ProductImage, ProductStatus } from "@/lib/types";
+import { asProduct, asProductImage, listProductImages } from "./products";
 
 const DRAFT_STATUS = "draft" as const;
 const PENDING_REVIEW_STATUS = "pending_review" as const;
 const REJECTED_STATUS = "rejected" as const;
+const ARCHIVED_STATUS = "archived" as const;
 const DEFAULT_CURRENCY = "LKR";
 const MAX_TITLE_LENGTH = 200;
 const MAX_DESCRIPTION_LENGTH = 10000;
@@ -47,6 +48,10 @@ export type CreateDraftProductResult =
   | { ok: false; error: string };
 
 export type SubmitListingForReviewResult =
+  | { ok: true; message: string }
+  | { ok: false; error: string };
+
+export type SellerListingMutationResult =
   | { ok: true; message: string }
   | { ok: false; error: string };
 

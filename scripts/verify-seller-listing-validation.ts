@@ -37,6 +37,30 @@ if (freeListing.ok) {
   assert(freeListing.isFree === true, "price 0 => isFree");
 }
 
+const freeString = parseCreateDraftProductInput({
+  title: "Free sample",
+  description: "One per buyer.",
+  categoryId: "cat_demo_001",
+  price: "0",
+  stock: 5,
+});
+assert(freeString.ok, "price string 0 should parse");
+if (freeString.ok) {
+  assert(freeString.isFree === true, "price string 0 => isFree");
+}
+
+const freeStringDecimal = parseCreateDraftProductInput({
+  title: "Free sample",
+  description: "One per buyer.",
+  categoryId: "cat_demo_001",
+  price: "0.00",
+  stock: 5,
+});
+assert(freeStringDecimal.ok, "price string 0.00 should parse");
+if (freeStringDecimal.ok) {
+  assert(freeStringDecimal.isFree === true, "price string 0.00 => isFree");
+}
+
 assert(
   !parseCreateDraftProductInput({
     title: "   ",
