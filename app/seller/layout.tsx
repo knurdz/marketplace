@@ -12,6 +12,7 @@ const SELLER_NAV = [
   { href: "/seller/shop", label: "Shop" },
   { href: "/seller/listings", label: "Listings" },
   { href: "/seller/orders", label: "Orders" },
+  { href: "/seller/earnings", label: "Earnings" },
   { href: "/seller#settings", label: "Settings" },
 ];
 
