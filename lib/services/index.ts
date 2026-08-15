@@ -8,6 +8,11 @@ export {
 } from "./seller-metrics";
 export type { SellerMetrics } from "./seller-metrics";
 export {
+  aggregatePaidEarnings,
+  getSellerEarnings,
+} from "./seller-earnings";
+export type { SellerEarnings, SellerEarningsLine } from "./seller-earnings";
+export {
   fulfillSellerOrder,
   getSellerOrder,
   getSellerOrderItems,

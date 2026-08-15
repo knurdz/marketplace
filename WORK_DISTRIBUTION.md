@@ -227,7 +227,7 @@ Complete payment infrastructure so Members 2–4 only consume APIs / admin UI.
 - [x] Seller dashboard: sales analytics (basic), orders summary, revenue overview
 - [x] Order inbox + status updates (`processing` / `shipped` / `completed` + pickup if used)
 - [x] Seller bank details for buyer transfers
-- [ ] Earnings / completed payments list + bank payout tracking (manual OK)
+- [x] Earnings / completed payments list + bank payout tracking (manual OK)
 - [ ] Seller settings / policy text
 - [ ] Buyer ↔ seller messaging (optional / Phase 5 — basic threads only if started)
 - [ ] Optional: own-order bank verify (only if policy updated)
@@ -251,7 +251,7 @@ Complete payment infrastructure so Members 2–4 only consume APIs / admin UI.
 | [x] **3.10** | Order inbox    | List seller’s orders                                | Filter by sellerId                |
 | [x] **3.11** | Fulfillment    | `processing` → `shipped`/`ready_pickup` → completed | Invalid transitions rejected      |
 | [x] **3.12** | Bank details   | Fields for buyer bank checkout                      | Least exposure                    |
-| [ ] **3.13** | Earnings       | Paid orders; manual payout note                     | Matches `paid` payments           |
+| [x] **3.13** | Earnings       | Paid orders; manual payout note                     | Matches `paid` payments           |
 | [ ] **3.14** | Settings       | Policy text                                         | Visible on shop/product           |
 | [ ] **3.15** | Optional       | Messaging / own bank verify                         | Only if policy updated            |
 

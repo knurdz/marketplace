@@ -35,7 +35,7 @@ export default async function SellerPage() {
     {
       label: "Revenue",
       value: formatRevenue(metrics.revenue, metrics.currency),
-      href: "/seller/orders",
+      href: "/seller/earnings",
     },
     {
       label: "Pending",
