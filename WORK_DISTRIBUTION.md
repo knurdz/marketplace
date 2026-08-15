@@ -1,4 +1,4 @@
-# Work Distribution — Knurdz Marketplace
+# xWork Distribution — Knurdz Marketplace
 
 > Living document. Update when ownership or MVP scope changes.  
 > Agents: after each implementation, check off every **relevant** box below for your change.  
@@ -245,7 +245,7 @@ Complete payment infrastructure so Members 2–4 only consume APIs / admin UI.
 | [x] **3.4**  | Create product | Draft + images                                      | Own `sellerId` only               |
 | [x] **3.5**  | Edit / archive | Update / archive                                    | Cannot edit others’ products      |
 | [x] **3.6**  | Publish flow   | `draft` → `pending_review` / `active` per policy    | Align with Member 4 moderation    |
-| [ ] **3.7**  | Inventory      | Stock + availability toggle                         | Unavailable hides buy CTA         |
+| [x] **3.7**  | Inventory      | Stock + availability toggle                         | Unavailable hides buy CTA         |
 | [x] **3.8**  | Free listing   | `price=0` / `isFree`                                | Buyer free path works             |
 | [ ] **3.9**  | Dashboard KPIs | Orders, revenue, pending                            | Own data only                     |
 | [ ] **3.10** | Order inbox    | List seller’s orders                                | Filter by sellerId                |
