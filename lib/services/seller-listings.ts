@@ -41,18 +41,17 @@ export type CreateDraftProductInput = {
   categoryId: string;
   price: unknown;
   stock: unknown;
-  available?: unknown;
 };
-
-export type SellerListingMutationResult =
-  | { ok: true; message: string }
-  | { ok: false; error: string };
 
 export type CreateDraftProductResult =
   | { ok: true; message: string; productId: string }
   | { ok: false; error: string };
 
 export type SubmitListingForReviewResult =
+  | { ok: true; message: string }
+  | { ok: false; error: string };
+
+export type SellerListingMutationResult =
   | { ok: true; message: string }
   | { ok: false; error: string };
 
@@ -65,7 +64,6 @@ export type ParsedCreateDraftProductInput =
       price: number;
       stock: number;
       isFree: boolean;
-      available: boolean;
     }
   | { ok: false; error: string };
 
@@ -127,14 +125,6 @@ function parseStock(raw: unknown): number | FieldParseError {
   return { ok: false, error: "Stock is required." };
 }
 
-function parseAvailable(raw: unknown): boolean | FieldParseError {
-  if (raw === undefined) return true;
-  if (typeof raw === "boolean") return raw;
-  if (raw === "true") return true;
-  if (raw === "false") return false;
-  return { ok: false, error: "Availability must be true or false." };
-}
-
 /** Validate create-listing fields (no I/O). Ignores sellerId/status — set server-side only. */
 export function parseCreateDraftProductInput(
   input: CreateDraftProductInput & {
@@ -182,9 +172,6 @@ export function parseCreateDraftProductInput(
   const stock = parseStock(input.stock);
   if (typeof stock !== "number") return stock;
 
-  const available = parseAvailable(input.available);
-  if (typeof available !== "boolean") return available;
-
   return {
     ok: true,
     title,
@@ -193,7 +180,6 @@ export function parseCreateDraftProductInput(
     price,
     stock,
     isFree: price === 0,
-    available,
   };
 }
 
@@ -384,7 +370,6 @@ export async function updateOwnProductCore(
         price: parsed.price,
         isFree: parsed.isFree,
         stock: parsed.stock,
-        available: parsed.available,
       },
     });
 
@@ -674,7 +659,7 @@ export async function createDraftProductCore(
         isFree: parsed.isFree,
         status: DRAFT_STATUS,
         stock: parsed.stock,
-        available: parsed.available,
+        available: true,
         currency: DEFAULT_CURRENCY,
       },
       permissions,

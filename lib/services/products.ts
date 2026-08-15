@@ -45,14 +45,16 @@ export function asProduct(row: Record<string, unknown>): Product | null {
     return null;
   }
 
+  const price = asNumber(row.price);
+
   return {
     $id,
     sellerId,
     categoryId,
     title,
     description,
-    price: asNumber(row.price),
-    isFree: asBoolean(row.isFree),
+    price,
+    isFree: price === 0,
     status: statusRaw,
     stock: Math.max(0, Math.floor(asNumber(row.stock))),
     available: asBoolean(row.available, true),
@@ -62,10 +64,6 @@ export function asProduct(row: Record<string, unknown>): Product | null {
 
 function isPubliclyListed(product: Product): boolean {
   return product.status === ACTIVE_PRODUCT_STATUS && product.available;
-}
-
-function isActiveProduct(product: Product): boolean {
-  return product.status === ACTIVE_PRODUCT_STATUS;
 }
 
 export type ProductCatalogSort = "newest" | "price_asc" | "price_desc";
@@ -267,10 +265,8 @@ export async function searchActiveProducts(
 }
 
 /**
- * Public product by id. Returns null if missing or not active
+ * Public product by id. Returns null if missing or not publicly listed
  * (avoids leaking draft/pending/rejected/archived listings).
- * Active but unavailable products are returned so the detail page can show
- * "currently unavailable" without the buy CTA.
  */
 export async function getProduct(id: string): Promise<Product | null> {
   const trimmed = id?.trim();
@@ -284,7 +280,7 @@ export async function getProduct(id: string): Promise<Product | null> {
       rowId: trimmed,
     });
     const product = asProduct(row as unknown as Record<string, unknown>);
-    if (!product || !isActiveProduct(product)) return null;
+    if (!product || !isPubliclyListed(product)) return null;
     return product;
   } catch (error) {
     if (error instanceof AppwriteException && error.code === 404) {
