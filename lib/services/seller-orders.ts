@@ -6,14 +6,29 @@ import {
   TABLE_PAYMENTS,
   hasAppwritePublicConfig,
 } from "@/lib/appwrite/config";
-import { createSessionClient } from "@/lib/appwrite/server";
+import { ROLE_LABELS, userHasLabel } from "@/lib/appwrite/roles";
+import { createAdminClient, createSessionClient } from "@/lib/appwrite/server";
 import { getLoggedInUser } from "@/lib/appwrite/session";
+import {
+  assertRateLimit,
+  getClientIp,
+  RATE_LIMIT_MESSAGE,
+  RATE_LIMITS,
+} from "@/lib/security/rate-limit";
 import type { Order, OrderItem, OrderStatus, Payment } from "@/lib/types";
+import {
+  canSellerFulfillmentTransition,
+  isOrderStatus,
+} from "@/lib/types";
 import {
   asOrder,
   asOrderItem,
   asPayment,
 } from "./orders";
+
+export type FulfillSellerOrderResult =
+  | { ok: true; orderStatus: OrderStatus }
+  | { ok: false; error: string };
 
 /** IDOR predicate: order belongs to the given seller. */
 export function ownedBySeller(order: Order, sellerId: string): boolean {
@@ -143,4 +158,72 @@ export async function getSellerPaymentForOrder(
   } catch {
     return null;
   }
+}
+
+/** Advance order status on the seller fulfillment track (IDOR + FSM + admin write). */
+export async function fulfillSellerOrder(
+  orderId: string,
+  nextStatus: OrderStatus,
+): Promise<FulfillSellerOrderResult> {
+  if (!hasAppwritePublicConfig()) {
+    return { ok: false, error: "Orders are not configured yet." };
+  }
+
+  const user = await getLoggedInUser();
+  if (!user) {
+    return { ok: false, error: "You must be signed in." };
+  }
+
+  if (!userHasLabel(user, ROLE_LABELS.seller)) {
+    return { ok: false, error: "Seller access is required." };
+  }
+
+  const trimmed = orderId?.trim();
+  if (!trimmed) {
+    return { ok: false, error: "Order not found." };
+  }
+
+  if (!isOrderStatus(nextStatus)) {
+    return { ok: false, error: "Invalid order status." };
+  }
+
+  const order = await getSellerOrder(trimmed);
+  if (!order) {
+    return { ok: false, error: "Order not found." };
+  }
+
+  if (!canSellerFulfillmentTransition(order.status, nextStatus)) {
+    return { ok: false, error: "This status change is not allowed." };
+  }
+
+  if (order.status === nextStatus) {
+    return { ok: true, orderStatus: nextStatus };
+  }
+
+  const ip = await getClientIp();
+  const rate = assertRateLimit({
+    bucket: "fulfillment",
+    key: `${user.$id}:${ip}`,
+    ...RATE_LIMITS.fulfillment,
+  });
+  if (!rate.ok) {
+    return { ok: false, error: RATE_LIMIT_MESSAGE };
+  }
+
+  try {
+    const { tables } = await createAdminClient();
+    await tables.updateRow({
+      databaseId: DATABASE_ID,
+      tableId: TABLE_ORDERS,
+      rowId: order.$id,
+      data: { status: nextStatus },
+    });
+  } catch {
+    return {
+      ok: false,
+      error: "Could not update order status. Please try again.",
+    };
+  }
+
+  return { ok: true, orderStatus: nextStatus };
 }

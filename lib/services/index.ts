@@ -8,12 +8,14 @@ export {
 } from "./seller-metrics";
 export type { SellerMetrics } from "./seller-metrics";
 export {
+  fulfillSellerOrder,
   getSellerOrder,
   getSellerOrderItems,
   getSellerPaymentForOrder,
   listSellerOrders,
   ownedBySeller,
 } from "./seller-orders";
+export type { FulfillSellerOrderResult } from "./seller-orders";
 export {
   getSalesOverTime,
   getUserGrowthOverTime,
