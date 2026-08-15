@@ -248,7 +248,7 @@ Complete payment infrastructure so Members 2–4 only consume APIs / admin UI.
 | [x] **3.7**  | Inventory      | Stock + availability toggle                         | Unavailable hides buy CTA         |
 | [x] **3.8**  | Free listing   | `price=0` / `isFree`                                | Buyer free path works             |
 | [x] **3.9**  | Dashboard KPIs | Orders, revenue, pending                            | Own data only                     |
-| [ ] **3.10** | Order inbox    | List seller’s orders                                | Filter by sellerId                |
+| [x] **3.10** | Order inbox    | List seller’s orders                                | Filter by sellerId                |
 | [ ] **3.11** | Fulfillment    | `processing` → `shipped`/`ready_pickup` → completed | Invalid transitions rejected      |
 | [ ] **3.12** | Bank details   | Fields for buyer bank checkout                      | Least exposure                    |
 | [ ] **3.13** | Earnings       | Paid orders; manual payout note                     | Matches `paid` payments           |
