@@ -49,7 +49,7 @@ export function SellerApplicationStatus({
           </p>
         )}
         <p className="mt-4 text-sm text-muted-foreground">
-          Re-application will be available in a later update.{" "}
+          Only one application is allowed per account.{" "}
           <Link href="/" className="text-accent hover:underline">
             Back to storefront
           </Link>

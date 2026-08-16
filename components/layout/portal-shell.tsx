@@ -125,10 +125,7 @@ export function PortalShell({
               {title}
             </h1>
           </div>
-          <p className="hidden font-mono text-xs text-muted-foreground md:block">
-            Empty shell — features arrive in later steps
-          </p>
-          <div className="ml-auto flex items-center gap-2 md:ml-0">
+          <div className="ml-auto flex items-center gap-2">
             <NotificationBell className="size-10" />
             <Button variant="ghost" size="sm" asChild>
               <Link href="/account">Account</Link>
