@@ -241,6 +241,20 @@ export function EditListingForm({
           </div>
         </div>
 
+        <div className="flex items-center gap-2">
+          <input
+            id="available"
+            name="available"
+            type="checkbox"
+            defaultChecked={product.available}
+            disabled={updatePending || isArchived}
+            className="size-4 rounded border border-input"
+          />
+          <Label htmlFor="available" className="font-normal">
+            Available for purchase
+          </Label>
+        </div>
+
         {!isArchived ? (
           <div className="flex flex-wrap gap-3 pt-2">
             <Button type="submit" disabled={updatePending}>

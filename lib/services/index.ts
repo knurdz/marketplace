@@ -71,7 +71,9 @@ export type { CategoryTreeNode } from "./categories";
 export {
   asProduct,
   asProductImage,
+  clampedStockDecrement,
   getProduct,
+  isProductPurchasable,
   listActiveProducts,
   listProductImages,
   normalizeProductSearchQuery,
@@ -149,6 +151,7 @@ export {
   deleteOwnProductImageCore,
   getOwnProduct,
   listOwnProducts,
+  parseAvailableFlag,
   parseCreateDraftProductInput,
   submitListingForReviewCore,
 } from "./seller-listings";
@@ -157,6 +160,7 @@ export type {
   CreateDraftProductResult,
   ParsedCreateDraftProductInput,
   SubmitListingForReviewResult,
+  UpdateOwnProductInput,
 } from "./seller-listings";
 export {
   listPendingModerationQueue,

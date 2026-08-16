@@ -43,6 +43,10 @@ export type CreateDraftProductInput = {
   stock: unknown;
 };
 
+export type UpdateOwnProductInput = CreateDraftProductInput & {
+  available?: unknown;
+};
+
 export type CreateDraftProductResult =
   | { ok: true; message: string; productId: string }
   | { ok: false; error: string };
@@ -106,6 +110,10 @@ function parsePrice(raw: unknown): number | FieldParseError {
     return n;
   }
   return { ok: false, error: "Price is required." };
+}
+
+export function parseAvailableFlag(raw: unknown): boolean {
+  return raw === true || raw === "on" || raw === "true" || raw === "1";
 }
 
 function parseStock(raw: unknown): number | FieldParseError {
@@ -327,7 +335,7 @@ function archivedMutationError(): SellerListingMutationResult {
  */
 export async function updateOwnProductCore(
   productId: string,
-  input: CreateDraftProductInput,
+  input: UpdateOwnProductInput,
 ): Promise<SellerListingMutationResult> {
   const auth = await requireSellerUser();
   if (!auth.ok) return auth;
@@ -370,6 +378,7 @@ export async function updateOwnProductCore(
         price: parsed.price,
         isFree: parsed.isFree,
         stock: parsed.stock,
+        available: parseAvailableFlag(input.available),
       },
     });
 
