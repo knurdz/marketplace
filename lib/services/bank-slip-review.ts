@@ -12,7 +12,7 @@ import {
 import { requireLabel } from "@/lib/appwrite/roles";
 import { createAdminClient } from "@/lib/appwrite/server";
 import type { BankSlip, OrderItem } from "@/lib/types";
-import { asProduct } from "./products";
+import { asProduct, clampedStockDecrement } from "./products";
 import {
   asBankSlip,
   asOrder,
@@ -137,7 +137,7 @@ async function planStockDecrements(
       stockBefore = 0;
     }
 
-    const actualDecrement = Math.min(stockBefore, item.quantity);
+    const actualDecrement = clampedStockDecrement(stockBefore, item.quantity);
     plans.push({
       productId: item.productId,
       title: item.title,

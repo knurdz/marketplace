@@ -22,7 +22,7 @@ import type {
   Product,
 } from "@/lib/types";
 import { ACTIVE_PRODUCT_STATUS } from "@/lib/types";
-import { getProduct } from "./products";
+import { getProduct, isProductPurchasable } from "./products";
 import {
   CART_ERROR_CODES,
   type CartActionState,
@@ -94,14 +94,6 @@ function parseQuantity(raw: unknown): number | null {
   const qty = Math.floor(n);
   if (qty < 1) return null;
   return qty;
-}
-
-function isPurchasableProduct(product: Product): boolean {
-  return (
-    product.status === ACTIVE_PRODUCT_STATUS &&
-    product.available &&
-    product.stock > 0
-  );
 }
 
 function resolveLineIssue(
@@ -354,7 +346,7 @@ export async function addToCart(params: {
     }
 
     const product = await getProduct(productId);
-    if (!product || !isPurchasableProduct(product)) {
+    if (!product || !isProductPurchasable(product)) {
       return {
         error: "This product is not available to buy right now.",
         errorCode: CART_ERROR_CODES.PRODUCT_UNAVAILABLE,
@@ -473,7 +465,7 @@ export async function updateCartItemQuantity(params: {
 
     const { item } = await resolveOwnedCartItem(params.itemId);
     const product = await getProduct(item.productId);
-    if (!product || !isPurchasableProduct(product)) {
+    if (!product || !isProductPurchasable(product)) {
       return {
         error: "This item is no longer available. Remove it from your cart.",
         errorCode: CART_ERROR_CODES.PRODUCT_UNAVAILABLE,

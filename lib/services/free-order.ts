@@ -35,7 +35,7 @@ import {
   freeConfirmIdempotencyKey,
 } from "./free-order-rules";
 import { asOrder, asOrderItem, asPayment, getOwnOrder } from "./orders";
-import { asProduct } from "./products";
+import { asProduct, clampedStockDecrement } from "./products";
 
 const ORDER_ID_MAX = 36;
 const NOT_CONFIGURED =
@@ -140,7 +140,10 @@ async function planStockDecrements(
         return { ok: false, error: FREE_CONFIRM_STOCK };
       }
 
-      plans.push({ productId: product.$id, decrement: quantity });
+      plans.push({
+        productId: product.$id,
+        decrement: clampedStockDecrement(product.stock, quantity),
+      });
     }
 
     return { ok: true, plans };

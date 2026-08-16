@@ -259,8 +259,8 @@ Complete payment infrastructure so Members 2–4 only consume APIs / admin UI.
 
 - [x] Sellers only mutate **own** products/orders (create draft + edit/archive: server-forced `sellerId` + ownership checks)
 - [x] Unpublished / rejected listings not publicly buyable (draft hidden from storefront reads)
-- [ ] Stock cannot go negative on confirm
-- [ ] Availability off hides buy CTA even if stock > 0
+- [x] Stock cannot go negative on confirm
+- [x] Availability off hides buy CTA even if stock > 0
 
 ---
 

@@ -51,10 +51,18 @@ function readListingFields(formData: FormData) {
   };
 }
 
+function readEditListingFields(formData: FormData) {
+  return {
+    ...readListingFields(formData),
+    available: formData.get("available"),
+  };
+}
+
 function revalidateListingPaths(productId: string): void {
   revalidatePath("/seller/listings");
   revalidatePath(`/seller/listings/${productId}`);
   revalidatePath(`/products/${productId}`);
+  revalidatePath("/shop", "layout");
 }
 
 export async function createDraftListing(
@@ -102,7 +110,7 @@ export async function updateOwnListing(
     return { error: "Missing listing." };
   }
 
-  const result = await updateOwnProductCore(productId, readListingFields(formData));
+  const result = await updateOwnProductCore(productId, readEditListingFields(formData));
   if (!result.ok) {
     return { error: result.error };
   }

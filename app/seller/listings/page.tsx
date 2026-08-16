@@ -66,6 +66,10 @@ export default async function SellerListingsPage() {
                 <p className="mt-1 text-sm text-muted-foreground">
                   {formatPrice(product.price, product.currency, product.isFree)}
                   {" · "}
+                  {product.stock} in stock
+                  {" · "}
+                  {product.available ? "Available" : "Unavailable"}
+                  {" · "}
                   {imageCounts.get(product.$id) ?? 0} image
                   {(imageCounts.get(product.$id) ?? 0) === 1 ? "" : "s"}
                 </p>
