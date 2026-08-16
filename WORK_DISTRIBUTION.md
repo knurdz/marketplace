@@ -221,7 +221,7 @@ Complete payment infrastructure so Members 2–4 only consume APIs / admin UI.
 - [x] Pending / rejected / approved status screens
 - [x] Shop profile + public storefront (mini shop)
 - [x] Product CRUD + multi-image gallery (Appwrite Storage) — create draft + images (3.4); edit/archive in 3.5
-- [ ] Draft / publish / archive + category selection
+- [x] Draft / publish / archive + category selection
 - [x] Inventory / stock + availability toggle
 - [x] Free vs paid listing toggle
 - [x] Seller dashboard: sales analytics (basic), orders summary, revenue overview
@@ -229,8 +229,8 @@ Complete payment infrastructure so Members 2–4 only consume APIs / admin UI.
 - [x] Seller bank details for buyer transfers
 - [x] Earnings / completed payments list + bank payout tracking (manual OK)
 - [x] Seller settings / policy text
-- [ ] Buyer ↔ seller messaging (optional / Phase 5 — basic threads only if started)
-- [ ] Optional: own-order bank verify (only if policy updated)
+- [ ] Buyer ↔ seller messaging (optional / Phase 5 — **deferred step 3.15:** not started; no `messages`/`threads` schema; pick up via backlog **X06** when claimed)
+- [ ] Optional: own-order bank verify (optional / Phase 5 — **deferred step 3.15:** policy unchanged — principle 6 admin verifies slips; sellers do not approve)
 
 ### Step-by-step plan (implement one step at a time)
 
@@ -253,7 +253,7 @@ Complete payment infrastructure so Members 2–4 only consume APIs / admin UI.
 | [x] **3.12** | Bank details   | Fields for buyer bank checkout                      | Least exposure                    |
 | [x] **3.13** | Earnings       | Paid orders; manual payout note                     | Matches `paid` payments           |
 | [x] **3.14** | Settings       | Policy text                                         | Visible on shop/product           |
-| [ ] **3.15** | Optional       | Messaging / own bank verify                         | Only if policy updated            |
+| [x] **3.15** | Optional       | Document deferral — messaging + own bank verify not started; policy unchanged | Deferred; documented in tasks above |
 
 ### Member 3 — verification extras
 

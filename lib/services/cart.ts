@@ -75,13 +75,11 @@ export function asCartItem(row: Record<string, unknown>): CartItem | null {
 }
 
 function cartPermissions(userId: string): string[] {
+  // Session users cannot grant label:admin on create (Appwrite rejects it).
   return [
     Permission.read(Role.user(userId)),
     Permission.update(Role.user(userId)),
     Permission.delete(Role.user(userId)),
-    Permission.read(Role.label("admin")),
-    Permission.update(Role.label("admin")),
-    Permission.delete(Role.label("admin")),
   ];
 }
 
@@ -244,7 +242,6 @@ export async function getOrCreateCart(): Promise<Cart | null> {
       rowId: ID.unique(),
       data: {
         userId: user.$id,
-        sellerId: null,
       },
       permissions: cartPermissions(user.$id),
     });
