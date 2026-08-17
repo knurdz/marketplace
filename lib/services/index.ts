@@ -117,6 +117,20 @@ export type {
   UpdateShopProfileInput,
 } from "./seller-application";
 export {
+  archiveOwnProductCore,
+  createDraftProductCore,
+  getOwnSellerProduct,
+  listOwnSellerProducts,
+  parseCreateDraftProductInput,
+  parseUpdateOwnProductInput,
+  updateOwnProductCore,
+} from "./seller-products";
+export type {
+  CreateDraftProductInput,
+  SellerProductMutationResult,
+  UpdateOwnProductInput,
+} from "./seller-products";
+export {
   listPendingModerationQueue,
   listProductsByStatus,
 } from "./listing-moderation";

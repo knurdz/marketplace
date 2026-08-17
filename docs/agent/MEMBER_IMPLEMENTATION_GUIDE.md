@@ -177,13 +177,15 @@ None (you start first). Own **payment setup** (PayHere Functions + free confirm)
 | **1.12** | Seed script                   | Admin, seller, buyer, categories, sample product                          | One command seeds                          | “Document demo passwords in README only locally — not production secrets.”  |
 | **1.13** | Done gate                     | Teammates can auth, open shells, upload, read products                    | Member 1 “done when”                       | Announce unblock to team                                                    |
 
-**Phase 1 (after unblock, interleaved):** **1.14–1.21** shared infra (done). **Payment setup (Member 1):** **1.22** hash Function; **1.23** notify Function; **1.24** free confirm; **1.25** wire stub→live; **1.26** notify failure logging; **1.27** sandbox notes; **1.28** payment done gate.
+**Phase 1 (after unblock, interleaved):** **1.14–1.21** shared infra (done). **Payment setup (Member 1):** **1.22–1.28** (done). **Phase 6 (Member 1 claimed):** remaining seller + leftover admin + E2E + optionals — see `WORK_DISTRIBUTION.md` **6.1–6.22**. Next: **6.1** create product. Do not rebuild **3.1–3.3** or Member 2/4 completed steps.
 
 ### Member 1 — Definition of done
 
 Others can: register/login → hit role shell → upload a file → list seeded `active` products.
 
 **Payment setup (1.22–1.28):** others can complete **free** checkout via `confirmFreeOrder` (seeded `seed_demo_free_product`) and **PayHere sandbox** via `requestPayHereCheckout` + Member 2 UX, once Function merchant env + `PAYHERE_NOTIFY_URL` are set in the console. See [`PAYHERE.md`](./PAYHERE.md) consumer contract.
+
+**Phase 6:** Member 1 closes remaining MVP (seller listings through fulfillment, leftover admin, E2E). Canonical steps **6.1–6.22** in `WORK_DISTRIBUTION.md`.
 
 ---
 
@@ -245,6 +247,7 @@ Seller apply → wait for admin → shop + product CRUD + inventory + fulfill or
 - Member 1 Phase 0
 - Member 4 seller **approval** (you show pending/rejected/approved UI)
 - Buyer orders from Member 2 for inbox data
+- **Remaining 3.4–3.15 claimed by Member 1 in Phase 6** (`WORK_DISTRIBUTION.md` **6.1–6.11**, **6.21**)
 
 ### Step-by-step plan
 
@@ -282,6 +285,7 @@ Governance UI + bank slip verification **UI** + moderation + audit/reports. **No
 
 - Member 1 Phase 0 (schema, admin shell, labels) + Member 1 payment setup for accurate statuses
 - Integrates with Member 2 orders/payments and Member 3 seller applications/products
+- **Leftover admin (performance, order overrides, 4.14, bank-slip verify extra) claimed by Member 1 in Phase 6** (`WORK_DISTRIBUTION.md` **6.12–6.14**, **6.20**)
 
 ### Step-by-step plan
 
@@ -324,6 +328,7 @@ Member 4 seller approve ──► Member 3 can publish for real
 Member 2 creates orders ──► Member 3 inbox + Member 4 oversight
 Member 3 listings ──► Member 2 browse
 Member 2/3 reports ──► Member 4 triage
+Member 1 Phase 6 (6.1–6.18) ──► close remaining seller/admin + E2E (claimed)
 ```
 
 ### Weekly sync suggestion
@@ -335,12 +340,13 @@ Member 2/3 reports ──► Member 4 triage
 | 2–3   | Portals (2–4) + Member 1 payment setup |
 | 3     | Payment E2E (free + bank + PayHere)   |
 | 4     | Hardening + demo                      |
+| Now   | Member 1 Phase 6: start **6.1**       |
 
 ---
 
 ## 10. Cross-member E2E test script (Playwright MCP)
 
-Run after Phase 4:
+Run after Phase 4 **and after Phase 6.8** (seller fulfillment). This is distribution step **6.18**.
 
 1. Register buyer · apply seller · admin approves seller
 2. Seller creates paid + free products · admin approves if required
@@ -356,7 +362,7 @@ Run after Phase 4:
 
 | Area                                                          | Member         |
 | ------------------------------------------------------------- | -------------- |
-| Auth, schema, UI kit, seeds, guards, **payment setup**        | **1**          |
+| Auth, schema, UI kit, seeds, guards, **payment setup**, **Phase 6 remaining MVP** | **1** |
 | Browse, cart, checkout UX, buyer orders, wishlist, reviews UI | **2**          |
 | Seller onboarding, products, inventory, fulfillment, shop     | **3**          |
 | Admin, bank verify UI, moderation, audit                      | **4**          |

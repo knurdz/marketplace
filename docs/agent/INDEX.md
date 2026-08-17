@@ -16,10 +16,10 @@ All documents coding agents should read for Knurdz Marketplace live here (except
 
 | Member | Focus                    | Guide section                 | Distribution section |
 | ------ | ------------------------ | ----------------------------- | -------------------- |
-| 1      | Foundation + **payments** | Guide §5 · Steps **1.1–1.28** | Member 1             |
+| 1      | Foundation + **payments** + **Phase 6** (remaining seller/admin/E2E) | Guide §5 · Steps **1.1–1.28** then **6.1–6.22** | Member 1 · Phase 6 |
 | 2      | Buyer (checkout UX)      | Guide §6 · Steps **2.1–2.16** | Member 2             |
-| 3      | Seller                   | Guide §7 · Steps **3.1–3.15** | Member 3             |
-| 4      | Admin / moderation       | Guide §8 · Steps **4.1–4.14** | Member 4             |
+| 3      | Seller                   | Guide §7 · Steps **3.1–3.15** | Member 3 (3.4+ claimed in Phase 6) |
+| 4      | Admin / moderation       | Guide §8 · Steps **4.1–4.14** | Member 4 (leftovers in Phase 6) |
 
 ## Non-negotiables
 
@@ -35,4 +35,8 @@ All documents coding agents should read for Knurdz Marketplace live here (except
 
 ## Payment setup status
 
-**Complete (Member 1 steps 1.22–1.28).** Members 2 and 4 consume Member 1 APIs only: `requestPayHereCheckout`, `confirmFreeOrder`, and `/admin/payments/notify-logs`. Click-path: [`PAYHERE.md`](./PAYHERE.md) (sandbox demo + 1.28 consumer contract). Seeded SKUs: `seed_demo_product` (PayHere) and `seed_demo_free_product` (free). Sandbox **card** E2E still needs merchant env + notify domain on the hash Function in the Appwrite console (never git).
+**Complete (Member 1 steps 1.22–1.28).** Members 2 and 4 consume Member 1 APIs only: `requestPayHereCheckout`, `confirmFreeOrder`, and `/admin/payments/notify-logs`. Click-path: [`PAYHERE.md`](./PAYHERE.md) (sandbox demo + 1.28 consumer contract). Seeded SKUs: `seed_demo_product` (PayHere) and `seed_demo_free_product` (free). Sandbox **card** E2E still needs merchant env + notify domain on the hash Function in the Appwrite console (never git) — **Phase 6.17**.
+
+## Phase 6 status
+
+**In progress — claimed by Member 1.** Remaining seller (**3.6–3.15**), leftover admin, integration/E2E, then optionals. Canonical plan: [`WORK_DISTRIBUTION.md`](../../WORK_DISTRIBUTION.md) **Phase 6**. Next implementable step: **6.3** (publish flow). Do one **6.x** at a time; tick **6.x** and the mapped **3.x/4.x/2.x** together.
