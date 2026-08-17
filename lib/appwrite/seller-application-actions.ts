@@ -3,7 +3,9 @@
 import { revalidatePath } from "next/cache";
 import {
   submitSellerApplicationCore,
+  updateOwnBankDetailsCore,
   updateOwnShopBannerCore,
+  updateOwnShopPoliciesCore,
   updateOwnShopProfileCore,
   type SubmitSellerApplicationInput,
 } from "@/lib/services/seller-application";
@@ -62,6 +64,42 @@ export async function updateOwnShopProfile(
     return { error: result.error };
   }
 
+  revalidateShopPaths(result.slug);
+  return { success: result.message };
+}
+
+export async function updateOwnBankDetails(
+  _prev: ShopProfileActionState,
+  formData: FormData,
+): Promise<ShopProfileActionState> {
+  const result = await updateOwnBankDetailsCore({
+    bankName: readString(formData, "bankName"),
+    bankAccountName: readString(formData, "bankAccountName"),
+    bankAccountNumber: readString(formData, "bankAccountNumber"),
+  });
+
+  if (!result.ok) {
+    return { error: result.error };
+  }
+
+  revalidatePath("/seller/shop");
+  return { success: result.message };
+}
+
+export async function updateOwnShopPolicies(
+  _prev: ShopProfileActionState,
+  formData: FormData,
+): Promise<ShopProfileActionState> {
+  const result = await updateOwnShopPoliciesCore({
+    returnPolicy: readString(formData, "returnPolicy"),
+    shippingPolicy: readString(formData, "shippingPolicy"),
+  });
+
+  if (!result.ok) {
+    return { error: result.error };
+  }
+
+  revalidatePath("/seller/settings");
   revalidateShopPaths(result.slug);
   return { success: result.message };
 }

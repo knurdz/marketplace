@@ -1,29 +1,27 @@
 import Link from "next/link";
-import { CreateProductForm } from "@/components/seller/create-product-form";
-import { listCategories } from "@/lib/services";
+import { CreateListingForm } from "@/components/seller/create-listing-form";
+import { Button } from "@/components/ui/button";
+import { listCategories } from "@/lib/services/categories";
 
-export default async function SellerNewListingPage() {
-  const categories = await listCategories({ limit: 100 });
+export default async function NewListingPage() {
+  const categories = await listCategories();
 
   return (
     <div className="mx-auto max-w-3xl">
-      <p className="font-mono text-sm text-accent">$ ./seller --listings --new</p>
-      <h2 className="mt-3 text-3xl font-bold tracking-tight">Create listing</h2>
+      <p className="font-mono text-sm text-accent">$ ./seller --listings new</p>
+      <h2 className="mt-3 text-3xl font-bold tracking-tight">New listing</h2>
       <p className="mt-2 max-w-xl text-sm text-muted-foreground">
-        Add a draft product with images. It will not appear on the storefront until
-        you publish it in a later step.
+        Saves as a draft. Submit it for admin review from your listings page
+        before buyers can see it on the storefront.
       </p>
 
-      <CreateProductForm categories={categories} />
+      <CreateListingForm categories={categories} />
 
-      <p className="mt-8">
-        <Link
-          href="/seller/listings"
-          className="text-sm text-accent hover:underline"
-        >
-          ← Back to listings
-        </Link>
-      </p>
+      <div className="mt-6">
+        <Button variant="outline" size="sm" asChild>
+          <Link href="/seller/listings">Back to listings</Link>
+        </Button>
+      </div>
     </div>
   );
 }

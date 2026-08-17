@@ -22,10 +22,8 @@ import type {
   OrderItem,
   Payment,
   PaymentMethod,
-  Product,
 } from "@/lib/types";
 import {
-  ACTIVE_PRODUCT_STATUS,
   isBankSlipStatus,
   isOrderCancelable,
   isOrderStatus,
@@ -33,7 +31,7 @@ import {
   isPaymentStatus,
 } from "@/lib/types";
 import { clearCart, getCart } from "./cart";
-import { getProduct } from "./products";
+import { getProduct, isProductPurchasable } from "./products";
 import {
   ORDER_ERROR_CODES,
   type CreateOrderInput,
@@ -249,14 +247,6 @@ export function serializeShippingAddress(input: {
   const joined = parts.join("\n");
   if (joined.length > 2000) return null;
   return joined;
-}
-
-function isPurchasableProduct(product: Product): boolean {
-  return (
-    product.status === ACTIVE_PRODUCT_STATUS &&
-    product.available &&
-    product.stock > 0
-  );
 }
 
 type PreparedLine = {
@@ -616,7 +606,7 @@ export async function createOrder(
     }
 
     const product = await getProduct(line.item.productId);
-    if (!product || !isPurchasableProduct(product)) {
+    if (!product || !isProductPurchasable(product)) {
       return fail<CreateOrderResult>(
         "Some products are no longer available.",
         ORDER_ERROR_CODES.PRODUCT_UNAVAILABLE,

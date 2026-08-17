@@ -13,6 +13,7 @@ import {
   getProduct,
   getPublicSellerByUserId,
   isProductInOwnWishlist,
+  isProductPurchasable,
   listProductImages,
   listProductReviews,
 } from "@/lib/services";
@@ -38,7 +39,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
     ? "free"
     : `${product.currency} ${product.price.toFixed(2)}`;
 
-  const canBuy = product.available && product.stock > 0;
+  const canBuy = isProductPurchasable(product);
   const loginHref = `/login?next=${encodeURIComponent(`/products/${product.$id}`)}`;
 
   return (

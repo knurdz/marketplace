@@ -45,6 +45,8 @@ export function asSellerProfile(
     bankAccountNumber: asNullableString(row.bankAccountNumber),
     bankName: asNullableString(row.bankName),
     rejectionReason: asNullableString(row.rejectionReason),
+    returnPolicy: asNullableString(row.returnPolicy),
+    shippingPolicy: asNullableString(row.shippingPolicy),
   };
 }
 

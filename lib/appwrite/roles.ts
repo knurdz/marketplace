@@ -11,11 +11,60 @@ export const ROLE_LABELS = {
 
 export type RoleLabel = (typeof ROLE_LABELS)[keyof typeof ROLE_LABELS];
 
-export function userHasLabel(
-  user: Models.User<Models.Preferences>,
-  label: RoleLabel,
-): boolean {
+type LabeledUser = { labels?: string[] };
+
+export function userHasLabel(user: LabeledUser, label: RoleLabel): boolean {
   return Array.isArray(user.labels) && user.labels.includes(label);
+}
+
+/** Only allow same-origin relative paths (blocks open redirects). */
+export function safeNextPath(raw: string | undefined): string | null {
+  if (!raw) return null;
+  if (!raw.startsWith("/") || raw.startsWith("//") || raw.includes("://")) {
+    return null;
+  }
+  return raw;
+}
+
+function pathnameOf(path: string): string {
+  return path.split("?")[0]?.split("#")[0] ?? path;
+}
+
+function pathIsPortal(path: string, portal: "/admin" | "/seller"): boolean {
+  const pathname = pathnameOf(path);
+  return pathname === portal || pathname.startsWith(`${portal}/`);
+}
+
+/**
+ * Default destination after login/register. Admin wins if the user also has
+ * seller. Buyers (and anyone without a portal label) go to the storefront.
+ */
+export function homePathForUser(user: LabeledUser): string {
+  if (userHasLabel(user, "admin")) {
+    return "/admin";
+  }
+  if (userHasLabel(user, "seller")) {
+    return "/seller";
+  }
+  return "/";
+}
+
+/**
+ * Post-login destination: honor a safe `next` only when the user may visit it.
+ * `/admin*` requires the admin label; `/seller*` requires seller.
+ */
+export function postLoginPath(user: LabeledUser, next?: string | null): string {
+  const roleHome = homePathForUser(user);
+  const safe = safeNextPath(next ?? undefined);
+  if (!safe) return roleHome;
+
+  if (pathIsPortal(safe, "/admin") && !userHasLabel(user, "admin")) {
+    return roleHome;
+  }
+  if (pathIsPortal(safe, "/seller") && !userHasLabel(user, "seller")) {
+    return roleHome;
+  }
+  return safe;
 }
 
 /** Require a signed-in user; redirect to login otherwise. */

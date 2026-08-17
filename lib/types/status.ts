@@ -103,6 +103,32 @@ export function isOrderCancelable(status: OrderStatus): boolean {
   return (ORDER_CANCELABLE_STATUSES as readonly OrderStatus[]).includes(status);
 }
 
+/** Seller fulfillment hops (Member 3 step 3.11). */
+export const SELLER_FULFILLMENT_TRANSITIONS: Partial<
+  Record<OrderStatus, readonly OrderStatus[]>
+> = {
+  paid: ["processing"],
+  processing: ["shipped", "ready_pickup"],
+  shipped: ["completed"],
+  ready_pickup: ["completed"],
+};
+
+/** Same status is idempotent success; invalid hops return false. */
+export function canSellerFulfillmentTransition(
+  from: OrderStatus,
+  to: OrderStatus,
+): boolean {
+  if (from === to) return true;
+  const allowed = SELLER_FULFILLMENT_TRANSITIONS[from];
+  return allowed?.includes(to) ?? false;
+}
+
+/** Allowed next statuses for seller UI (excludes idempotent same-status). */
+export function sellerFulfillmentNextStatuses(from: OrderStatus): OrderStatus[] {
+  const allowed = SELLER_FULFILLMENT_TRANSITIONS[from];
+  return allowed ? [...allowed] : [];
+}
+
 /** Fulfillment track excluding terminal cancel/refund branches. */
 export const ORDER_HAPPY_PATH_STATUSES = [
   "pending_payment",

@@ -45,14 +45,16 @@ export function asProduct(row: Record<string, unknown>): Product | null {
     return null;
   }
 
+  const price = asNumber(row.price);
+
   return {
     $id,
     sellerId,
     categoryId,
     title,
     description,
-    price: asNumber(row.price),
-    isFree: asBoolean(row.isFree),
+    price,
+    isFree: price === 0,
     status: statusRaw,
     stock: Math.max(0, Math.floor(asNumber(row.stock))),
     available: asBoolean(row.available, true),
@@ -60,8 +62,30 @@ export function asProduct(row: Record<string, unknown>): Product | null {
   };
 }
 
+function isActiveProduct(product: Product): boolean {
+  return product.status === ACTIVE_PRODUCT_STATUS;
+}
+
 function isPubliclyListed(product: Product): boolean {
-  return product.status === ACTIVE_PRODUCT_STATUS && product.available;
+  return isActiveProduct(product) && product.available;
+}
+
+/** Buy CTA / cart: active + available, even when stock > 0 is not enough. */
+export function isProductPurchasable(
+  product: Pick<Product, "status" | "available" | "stock">,
+): boolean {
+  return (
+    product.status === ACTIVE_PRODUCT_STATUS &&
+    product.available &&
+    product.stock > 0
+  );
+}
+
+/** Amount to subtract on payment confirm; never drives stock below 0. */
+export function clampedStockDecrement(stock: number, quantity: number): number {
+  const s = Math.max(0, Math.floor(stock));
+  const q = Math.max(0, Math.floor(quantity));
+  return Math.min(s, q);
 }
 
 export type ProductCatalogSort = "newest" | "price_asc" | "price_desc";
@@ -263,8 +287,8 @@ export async function searchActiveProducts(
 }
 
 /**
- * Public product by id. Returns null if missing or not publicly listed
- * (avoids leaking draft/pending/rejected/archived listings).
+ * Public product by id. Returns active rows even when `available=false`
+ * so the detail page can hide the buy CTA. Draft/pending/rejected/archived stay hidden.
  */
 export async function getProduct(id: string): Promise<Product | null> {
   const trimmed = id?.trim();
@@ -278,7 +302,7 @@ export async function getProduct(id: string): Promise<Product | null> {
       rowId: trimmed,
     });
     const product = asProduct(row as unknown as Record<string, unknown>);
-    if (!product || !isPubliclyListed(product)) return null;
+    if (!product || !isActiveProduct(product)) return null;
     return product;
   } catch (error) {
     if (error instanceof AppwriteException && error.code === 404) {

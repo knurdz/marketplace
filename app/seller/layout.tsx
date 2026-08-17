@@ -11,8 +11,9 @@ const SELLER_NAV = [
   { href: "/seller", label: "Dashboard" },
   { href: "/seller/shop", label: "Shop" },
   { href: "/seller/listings", label: "Listings" },
-  { href: "/seller#orders", label: "Orders" },
-  { href: "/seller#settings", label: "Settings" },
+  { href: "/seller/orders", label: "Orders" },
+  { href: "/seller/earnings", label: "Earnings" },
+  { href: "/seller/settings", label: "Settings" },
 ];
 
 export default async function SellerLayout({

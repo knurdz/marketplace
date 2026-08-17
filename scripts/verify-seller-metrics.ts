@@ -1,0 +1,52 @@
+/**
+ * Runnable checks for seller revenue aggregation (no Appwrite).
+ * Run: npx tsx scripts/verify-seller-metrics.ts
+ */
+import { aggregateSellerRevenue } from "../lib/services/seller-metrics";
+import type { Order } from "../lib/types";
+
+function assert(condition: boolean, message: string): void {
+  if (!condition) throw new Error(message);
+}
+
+function order(
+  status: Order["status"],
+  totalAmount: number,
+  currency = "LKR",
+): Order {
+  return {
+    $id: `ord_${status}_${totalAmount}`,
+    buyerId: "buyer_1",
+    sellerId: "seller_1",
+    status,
+    totalAmount,
+    currency,
+    shippingAddress: "addr",
+    paymentMethod: "payhere",
+  };
+}
+
+const mixed = aggregateSellerRevenue([
+  order("paid", 100),
+  order("processing", 50),
+  order("shipped", 25),
+  order("completed", 200),
+  order("pending_payment", 999),
+  order("payment_review", 888),
+  order("cancelled", 777),
+  order("refunded", 666),
+]);
+assert(mixed.revenue === 375, "paid-or-later summed");
+assert(mixed.currency === "LKR", "currency from orders");
+
+const empty = aggregateSellerRevenue([]);
+assert(empty.revenue === 0, "empty => 0 revenue");
+assert(empty.currency === "LKR", "empty => default currency");
+
+const onlyUnpaid = aggregateSellerRevenue([
+  order("pending_payment", 100),
+  order("cancelled", 50),
+]);
+assert(onlyUnpaid.revenue === 0, "unpaid/cancelled excluded");
+
+console.log("verify-seller-metrics: OK");

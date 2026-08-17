@@ -43,3 +43,6 @@ functions/**/node_modules
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# graphify
+**/graphify-out/

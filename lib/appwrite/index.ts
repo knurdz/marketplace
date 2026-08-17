@@ -55,8 +55,11 @@ export {
 export type { NotificationActionState } from "./notifications";
 export {
   ROLE_LABELS,
+  homePathForUser,
+  postLoginPath,
   requireLabel,
   requireUser,
+  safeNextPath,
   userHasLabel,
 } from "./roles";
 export type { RoleLabel } from "./roles";

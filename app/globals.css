@@ -193,6 +193,12 @@ html[data-theme="light"] {
     min-height: 100vh;
     overflow-x: clip;
   }
+  /* Native <select> popups ignore transparent backgrounds (Windows: white-on-white). */
+  select,
+  select option {
+    background-color: var(--background);
+    color: var(--foreground);
+  }
   html {
     @apply font-sans;
   }

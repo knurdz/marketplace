@@ -1,5 +1,6 @@
 import Link from "next/link";
 import type { PublicSellerInfo } from "@/lib/services/sellers";
+import { SellerPolicyBlocks } from "@/components/store/seller-policy-blocks";
 
 type SellerInfoCardProps = {
   seller: PublicSellerInfo | null;
@@ -26,6 +27,7 @@ export function SellerInfoCard({ seller }: SellerInfoCardProps) {
           {seller.bio ? (
             <p className="max-w-prose text-sm text-muted-foreground">{seller.bio}</p>
           ) : null}
+          <SellerPolicyBlocks seller={seller} className="mt-4" />
         </div>
       ) : (
         <p className="mt-4 font-mono text-sm text-muted-foreground">

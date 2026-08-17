@@ -1,4 +1,4 @@
-# Work Distribution — Knurdz Marketplace
+# xWork Distribution — Knurdz Marketplace
 
 > Living document. Update when ownership or MVP scope changes.  
 > Agents: after each implementation, check off every **relevant** box below for your change.  
@@ -58,7 +58,7 @@ Use after every change that touches code or schema:
 
 ## Member 1 — Foundation (must-dos first)
 
-**Owns:** repo bootstrap, Appwrite clients, auth, schema, storage helpers, design system, seeds, route guards, shared types, service/API consistency, **payment setup** (PayHere Functions, secrets, free confirm, payment contract implementation). **Also owns Phase 6** (remaining seller + leftover admin + E2E + optionals) — implement **6.3** next.
+**Owns:** repo bootstrap, Appwrite clients, auth, schema, storage helpers, design system, seeds, route guards, shared types, service/API consistency, **payment setup** (PayHere Functions, secrets, free confirm, payment contract implementation). **Also owns Phase 6** (remaining seller + leftover admin + E2E + optionals) — implement **6.12** next.
 
 ### Phase 0 — blockers (do before others ship against APIs)
 
@@ -118,6 +118,7 @@ Use after every change that touches code or schema:
 - [ ] Schema changelog when others request fields — **Phase 6.15** (only if 6.x needs new fields)
 - [x] PayHere Function **interfaces** (`PAYHERE.md` + types + stub) — implementation is Member 1 payment setup below
 - [x] Accessibility / responsive baseline pass
+- [x] Role-based post-login redirects (admin → `/admin`, seller → `/seller`, buyer → `/`); single `/login`
 - [ ] Fix cross-member integration issues; keep API contracts consistent — **Phase 6.16**
 
 ### Payment setup (Member 1 — was formerly Members 2 + 4)
@@ -223,17 +224,17 @@ Complete payment infrastructure so Members 2–4 only consume APIs / admin UI.
 - [x] Seller application form
 - [x] Pending / rejected / approved status screens
 - [x] Shop profile + public storefront (mini shop)
-- [x] Product CRUD + multi-image gallery (Appwrite Storage)
-- [ ] Draft / publish / archive + category selection
-- [ ] Inventory / stock + availability toggle
-- [ ] Free vs paid listing toggle
-- [ ] Seller dashboard: sales analytics (basic), orders summary, revenue overview
-- [ ] Order inbox + status updates (`processing` / `shipped` / `completed` + pickup if used)
-- [ ] Seller bank details for buyer transfers
-- [ ] Earnings / completed payments list + bank payout tracking (manual OK)
-- [ ] Seller settings / policy text
-- [ ] Buyer ↔ seller messaging (optional / Phase 5 — basic threads only if started)
-- [ ] Optional: own-order bank verify (only if policy updated)
+- [x] Product CRUD + multi-image gallery (Appwrite Storage) — create draft + images (3.4); edit/archive in 3.5
+- [x] Draft / publish / archive + category selection
+- [x] Inventory / stock + availability toggle
+- [x] Free vs paid listing toggle
+- [x] Seller dashboard: sales analytics (basic), orders summary, revenue overview
+- [x] Order inbox + status updates (`processing` / `shipped` / `completed` + pickup if used)
+- [x] Seller bank details for buyer transfers
+- [x] Earnings / completed payments list + bank payout tracking (manual OK)
+- [x] Seller settings / policy text
+- [ ] Buyer ↔ seller messaging (optional / Phase 5 — **deferred step 3.15:** not started; no `messages`/`threads` schema; pick up via backlog **X06** when claimed)
+- [ ] Optional: own-order bank verify (optional / Phase 5 — **deferred step 3.15:** policy unchanged — principle 6 admin verifies slips; sellers do not approve)
 
 ### Step-by-step plan (implement one step at a time)
 
@@ -247,23 +248,23 @@ Complete payment infrastructure so Members 2–4 only consume APIs / admin UI.
 | [x] **3.3**  | Shop profile   | Name, bio, banner; public shop page                 | Approved shops only public        |
 | [x] **3.4**  | Create product | Draft + images                                      | Own `sellerId` only — **6.1**     |
 | [x] **3.5**  | Edit / archive | Update / archive                                    | Cannot edit others’ products — **6.2** |
-| [ ] **3.6**  | Publish flow   | `draft` → `pending_review` / `active` per policy    | Align with Member 4 moderation — **6.3** |
-| [ ] **3.7**  | Inventory      | Stock + availability toggle                         | Unavailable hides buy CTA — **6.4** |
-| [ ] **3.8**  | Free listing   | `price=0` / `isFree`                                | Buyer free path works — **6.5**   |
-| [ ] **3.9**  | Dashboard KPIs | Orders, revenue, pending                            | Own data only — **6.9**           |
-| [ ] **3.10** | Order inbox    | List seller’s orders                                | Filter by sellerId — **6.7**      |
-| [ ] **3.11** | Fulfillment    | `processing` → `shipped`/`ready_pickup` → completed | Invalid transitions rejected — **6.8** |
-| [ ] **3.12** | Bank details   | Fields for buyer bank checkout                      | Least exposure — **6.6**          |
-| [ ] **3.13** | Earnings       | Paid orders; manual payout note                     | Matches `paid` payments — **6.10** |
-| [ ] **3.14** | Settings       | Policy text                                         | Visible on shop/product — **6.11** |
-| [ ] **3.15** | Optional       | Messaging / own bank verify                         | Only if policy updated — **6.21** |
+| [x] **3.6**  | Publish flow   | `draft` → `pending_review` / `active` per policy    | Align with Member 4 moderation — **6.3** |
+| [x] **3.7**  | Inventory      | Stock + availability toggle                         | Unavailable hides buy CTA — **6.4** |
+| [x] **3.8**  | Free listing   | `price=0` / `isFree`                                | Buyer free path works — **6.5**   |
+| [x] **3.9**  | Dashboard KPIs | Orders, revenue, pending                            | Own data only — **6.9**           |
+| [x] **3.10** | Order inbox    | List seller’s orders                                | Filter by sellerId — **6.7**      |
+| [x] **3.11** | Fulfillment    | `processing` → `shipped`/`ready_pickup` → completed | Invalid transitions rejected — **6.8** |
+| [x] **3.12** | Bank details   | Fields for buyer bank checkout                      | Least exposure — **6.6**          |
+| [x] **3.13** | Earnings       | Paid orders; manual payout note                     | Matches `paid` payments — **6.10** |
+| [x] **3.14** | Settings       | Policy text                                         | Visible on shop/product — **6.11** |
+| [x] **3.15** | Optional       | Document deferral — messaging + own bank verify not started; policy unchanged | Deferred; documented in tasks above — **6.21** |
 
 ### Member 3 — verification extras
 
-- [ ] Sellers only mutate **own** products/orders
-- [ ] Unpublished / rejected listings not publicly buyable
-- [ ] Stock cannot go negative on confirm
-- [ ] Availability off hides buy CTA even if stock > 0
+- [x] Sellers only mutate **own** products/orders (create draft + edit/archive: server-forced `sellerId` + ownership checks)
+- [x] Unpublished / rejected listings not publicly buyable (draft hidden from storefront reads)
+- [x] Stock cannot go negative on confirm
+- [x] Availability off hides buy CTA even if stock > 0
 
 ---
 
@@ -343,15 +344,15 @@ Implement **one numbered 6.x step at a time**. Start at **6.1**.
 | ---- | ------- | ---- | -- | ------ |
 | [x] **6.1** | **3.4** | Create product | Draft + multi-image gallery (Appwrite Storage); own `sellerId` only | IDOR: cannot create as another seller |
 | [x] **6.2** | **3.5** | Edit / archive | Update fields; archive | Cannot edit others’ products |
-| [ ] **6.3** | **3.6** | Publish flow | `draft` → `pending_review` / `active` per policy | Align with existing Member 4 listing moderation |
-| [ ] **6.4** | **3.7** | Inventory | Stock qty + availability toggle | Unavailable hides buy CTA even if stock > 0 |
-| [ ] **6.5** | **3.8** | Free listing | `price=0` / `isFree` | Buyer free-confirm works on a seller-created SKU |
-| [ ] **6.6** | **3.12** | Bank details | Seller account fields for buyer bank checkout | Least exposure (not public beyond need) |
-| [ ] **6.7** | **3.10** | Order inbox | List this seller’s orders | Filter by `sellerId`; no other sellers’ orders |
-| [ ] **6.8** | **3.11** | Fulfillment | `processing` → `shipped` / `ready_pickup` → `completed` | Invalid transitions rejected |
-| [ ] **6.9** | **3.9** | Dashboard KPIs | Orders, revenue, pending | Own data only (after inbox exists) |
-| [ ] **6.10** | **3.13** | Earnings | Paid orders list; manual payout note | Matches `payments` `paid` |
-| [ ] **6.11** | **3.14** | Settings | Return/shipping policy text | Visible on public shop / product |
+| [x] **6.3** | **3.6** | Publish flow | `draft` → `pending_review` / `active` per policy | Align with existing Member 4 listing moderation |
+| [x] **6.4** | **3.7** | Inventory | Stock qty + availability toggle | Unavailable hides buy CTA even if stock > 0 |
+| [x] **6.5** | **3.8** | Free listing | `price=0` / `isFree` | Buyer free-confirm works on a seller-created SKU |
+| [x] **6.6** | **3.12** | Bank details | Seller account fields for buyer bank checkout | Least exposure (not public beyond need) |
+| [x] **6.7** | **3.10** | Order inbox | List this seller’s orders | Filter by `sellerId`; no other sellers’ orders |
+| [x] **6.8** | **3.11** | Fulfillment | `processing` → `shipped` / `ready_pickup` → `completed` | Invalid transitions rejected |
+| [x] **6.9** | **3.9** | Dashboard KPIs | Orders, revenue, pending | Own data only (after inbox exists) |
+| [x] **6.10** | **3.13** | Earnings | Paid orders list; manual payout note | Matches `payments` `paid` |
+| [x] **6.11** | **3.14** | Settings | Return/shipping policy text | Visible on public shop / product |
 
 After **6.8**, tick Member 3 verification extras: own-only mutations, unpublished/rejected not buyable, stock cannot go negative on confirm, availability-off hides buy CTA.
 
@@ -436,7 +437,7 @@ Pick up only after Phases 1–4 **and Phase 6 A–C** are solid (**6.18**). Assi
 | Weeks 2–3  | Members 2–4 implement portals (Phases 2–3)                        |
 | Week 3     | E2E payments: Member 1 setup + Member 2 UX + Member 4 bank verify |
 | Week 4     | Hardening, demo, Phase 5 extras if ahead                          |
-| **Now**    | **Phase 6 (Member 1):** **6.1–6.2** done; next **6.3** publish flow |
+| **Now**    | **Phase 6 (Member 1):** **6.1–6.11** done (seller portal on `dev`); next **6.12** admin seller performance |
 
 
 ---

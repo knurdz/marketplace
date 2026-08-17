@@ -25,6 +25,8 @@ function profile(status: SellerProfile["status"]): SellerProfile {
     bankAccountNumber: null,
     bankName: null,
     rejectionReason: status === "rejected" ? "Incomplete details" : null,
+    returnPolicy: null,
+    shippingPolicy: null,
   };
 }
 

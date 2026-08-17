@@ -227,6 +227,8 @@ async function setupSellerProfiles() {
   await ensureString("seller_profiles", "bankAccountNumber", 64, false);
   await ensureString("seller_profiles", "bankName", 128, false);
   await ensureString("seller_profiles", "rejectionReason", 500, false);
+  await ensureString("seller_profiles", "returnPolicy", 2000, false);
+  await ensureString("seller_profiles", "shippingPolicy", 2000, false);
   const keys = [
     "userId",
     "shopName",
@@ -238,6 +240,8 @@ async function setupSellerProfiles() {
     "bankAccountNumber",
     "bankName",
     "rejectionReason",
+    "returnPolicy",
+    "shippingPolicy",
   ];
   await waitColumnsAvailable("seller_profiles", keys);
   await ensureIndex(
