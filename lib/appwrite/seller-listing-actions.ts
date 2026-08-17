@@ -48,6 +48,7 @@ function readListingFields(formData: FormData) {
     categoryId: readString(formData, "categoryId"),
     price: isFree ? "0" : readString(formData, "price"),
     stock: readString(formData, "stock"),
+    available: formData.get("available"),
   };
 }
 
@@ -97,6 +98,7 @@ export async function submitListingForReview(
   }
 
   revalidatePath("/seller/listings");
+  revalidatePath(`/seller/listings/${productId}`);
   revalidatePath("/admin/listings");
   return { success: result.message };
 }
