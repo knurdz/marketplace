@@ -41,6 +41,7 @@ export type CreateDraftProductInput = {
   categoryId: string;
   price: unknown;
   stock: unknown;
+  available?: unknown;
 };
 
 export type UpdateOwnProductInput = CreateDraftProductInput & {
@@ -668,7 +669,10 @@ export async function createDraftProductCore(
         isFree: parsed.isFree,
         status: DRAFT_STATUS,
         stock: parsed.stock,
-        available: true,
+        available:
+          input.available === undefined
+            ? true
+            : parseAvailableFlag(input.available),
         currency: DEFAULT_CURRENCY,
       },
       permissions,

@@ -130,6 +130,20 @@ export function CreateListingForm({ categories }: CreateListingFormProps) {
         </div>
       </div>
 
+      <div className="flex items-center gap-2">
+        <input
+          id="available"
+          name="available"
+          type="checkbox"
+          defaultChecked
+          disabled={pending}
+          className="size-4 rounded border border-input"
+        />
+        <Label htmlFor="available" className="font-normal">
+          Available for purchase
+        </Label>
+      </div>
+
       <div className="space-y-2">
         <Label htmlFor="images">Images (optional, up to 8)</Label>
         <Input
