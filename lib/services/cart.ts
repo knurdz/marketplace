@@ -110,13 +110,14 @@ function resolveLineIssue(
 function buildCartLine(item: CartItem, product: Product | null): CartLine {
   const issue = resolveLineIssue(product, item.quantity);
   const productCurrency = product?.currency ?? "LKR";
+  const unitPrice = product ? product.price : item.unitPrice;
   return {
-    item,
+    item: { ...item, unitPrice },
     productTitle: product?.title ?? null,
     productStock: product?.stock ?? 0,
     productAvailable: product?.available ?? false,
     productCurrency,
-    lineTotal: item.unitPrice * item.quantity,
+    lineTotal: unitPrice * item.quantity,
     issue,
     purchasable: issue === "ok",
   };
@@ -399,7 +400,7 @@ export async function addToCart(params: {
           cartId: existing.cartId,
           productId: existing.productId,
           quantity: newQty,
-          unitPrice: existing.unitPrice,
+          unitPrice: product.price,
         },
       });
       return { success: "Cart updated." };
@@ -487,7 +488,7 @@ export async function updateCartItemQuantity(params: {
         cartId: item.cartId,
         productId: item.productId,
         quantity,
-        unitPrice: item.unitPrice,
+        unitPrice: product.price,
       },
     });
 

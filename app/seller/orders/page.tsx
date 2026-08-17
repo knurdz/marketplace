@@ -7,18 +7,34 @@ import {
 } from "@/lib/services";
 
 type SellerOrdersPageProps = {
-  searchParams: Promise<{ filter?: string }>;
+  searchParams: Promise<{ filter?: string; cursor?: string }>;
 };
+
+const INBOX_PAGE_SIZE = 50;
 
 export default async function SellerOrdersPage({
   searchParams,
 }: SellerOrdersPageProps) {
-  const { filter } = await searchParams;
+  const { filter, cursor } = await searchParams;
   const pendingOnly = filter === "pending";
+  const pageCursor = cursor?.trim() || undefined;
 
   const orders = pendingOnly
-    ? await listSellerOrders({ status: SELLER_PENDING_STATUSES })
-    : await listSellerOrders();
+    ? await listSellerOrders({
+        status: SELLER_PENDING_STATUSES,
+        cursor: pageCursor,
+      })
+    : await listSellerOrders({ cursor: pageCursor });
+
+  const last = orders.at(-1);
+  const nextCursor =
+    orders.length === INBOX_PAGE_SIZE && last ? last.$id : null;
+  const nextHref = nextCursor
+    ? `/seller/orders?${new URLSearchParams({
+        ...(pendingOnly ? { filter: "pending" } : {}),
+        cursor: nextCursor,
+      }).toString()}`
+    : null;
 
   return (
     <div className="mx-auto max-w-3xl">
@@ -58,6 +74,17 @@ export default async function SellerOrdersPage({
           ))}
         </ul>
       )}
+
+      {nextHref ? (
+        <div className="mt-8">
+          <Link
+            href={nextHref}
+            className="inline-flex rounded-md border border-border px-4 py-2 font-mono text-sm hover:bg-muted"
+          >
+            Load more
+          </Link>
+        </div>
+      ) : null}
 
       <p className="mt-12">
         <Button variant="outline" size="sm" asChild>

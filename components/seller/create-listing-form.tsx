@@ -15,9 +15,13 @@ const initialState: CreateListingActionState = {};
 
 type CreateListingFormProps = {
   categories: Category[];
+  freeListingsEnabled?: boolean;
 };
 
-export function CreateListingForm({ categories }: CreateListingFormProps) {
+export function CreateListingForm({
+  categories,
+  freeListingsEnabled = true,
+}: CreateListingFormProps) {
   const [isFree, setIsFree] = useState(false);
   const [state, formAction, pending] = useActionState(
     createDraftListing,
@@ -85,20 +89,22 @@ export function CreateListingForm({ categories }: CreateListingFormProps) {
         ) : null}
       </div>
 
-      <div className="flex items-center gap-2">
-        <input
-          id="isFree"
-          name="isFree"
-          type="checkbox"
-          checked={isFree}
-          onChange={(e) => setIsFree(e.target.checked)}
-          disabled={pending}
-          className="size-4 rounded border border-input"
-        />
-        <Label htmlFor="isFree" className="font-normal">
-          Free listing (buyers checkout at no cost)
-        </Label>
-      </div>
+      {freeListingsEnabled ? (
+        <div className="flex items-center gap-2">
+          <input
+            id="isFree"
+            name="isFree"
+            type="checkbox"
+            checked={isFree}
+            onChange={(e) => setIsFree(e.target.checked)}
+            disabled={pending}
+            className="size-4 rounded border border-input"
+          />
+          <Label htmlFor="isFree" className="font-normal">
+            Free listing (buyers checkout at no cost)
+          </Label>
+        </div>
+      ) : null}
 
       <div className="grid gap-4 sm:grid-cols-2">
         <div className="space-y-2">

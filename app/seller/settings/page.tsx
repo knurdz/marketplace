@@ -21,7 +21,13 @@ export default async function SellerSettingsPage() {
         Return and shipping policies buyers see on your shop and listings.
       </p>
 
-      <ShopPolicyForm profile={profile} />
+      <ShopPolicyForm
+        profile={{
+          returnPolicy: profile.returnPolicy,
+          shippingPolicy: profile.shippingPolicy,
+          slug: profile.slug,
+        }}
+      />
     </div>
   );
 }

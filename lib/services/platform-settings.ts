@@ -4,6 +4,7 @@ import {
   TABLE_PLATFORM_SETTINGS,
   hasAppwritePublicConfig,
 } from "@/lib/appwrite/config";
+import { PLATFORM_SETTING_KEYS } from "@/lib/platform-settings/keys";
 import { createSessionClient } from "@/lib/appwrite/server";
 import type { PlatformSetting } from "@/lib/types";
 
@@ -94,6 +95,17 @@ export async function getPlatformSetting(
   } catch {
     return null;
   }
+}
+
+/**
+ * Whether sellers may create/update listings with price = 0.
+ * Missing setting or any value other than "false" → enabled (MVP default).
+ */
+export async function areFreeListingsEnabled(): Promise<boolean> {
+  const setting = await getPlatformSetting(
+    PLATFORM_SETTING_KEYS.featuresFreeListings,
+  );
+  return setting?.value.trim() !== "false";
 }
 
 /**

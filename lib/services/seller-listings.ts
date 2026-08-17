@@ -25,6 +25,7 @@ import {
 } from "@/lib/security/rate-limit";
 import type { Product, ProductImage, ProductStatus } from "@/lib/types";
 import { asProduct, asProductImage, listProductImages } from "./products";
+import { areFreeListingsEnabled } from "./platform-settings";
 
 const DRAFT_STATUS = "draft" as const;
 const PENDING_REVIEW_STATUS = "pending_review" as const;
@@ -34,6 +35,8 @@ const DEFAULT_CURRENCY = "LKR";
 const MAX_TITLE_LENGTH = 200;
 const MAX_DESCRIPTION_LENGTH = 10000;
 const MAX_IMAGES = 8;
+const FREE_LISTINGS_DISABLED =
+  "Free listings are currently disabled." as const;
 
 export type CreateDraftProductInput = {
   title: string;
@@ -362,6 +365,10 @@ export async function updateOwnProductCore(
     return { ok: false, error: parsed.error };
   }
 
+  if (parsed.isFree && !(await areFreeListingsEnabled())) {
+    return { ok: false, error: FREE_LISTINGS_DISABLED };
+  }
+
   if (!(await categoryExists(parsed.categoryId))) {
     return { ok: false, error: "Selected category was not found." };
   }
@@ -638,6 +645,10 @@ export async function createDraftProductCore(
   const parsed = parseCreateDraftProductInput(input);
   if (!parsed.ok) {
     return { ok: false, error: parsed.error };
+  }
+
+  if (parsed.isFree && !(await areFreeListingsEnabled())) {
+    return { ok: false, error: FREE_LISTINGS_DISABLED };
   }
 
   const nonEmptyImages = imageFiles.filter((f) => f.size > 0);

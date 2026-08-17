@@ -7,10 +7,9 @@ import {
 import { createSessionClient } from "@/lib/appwrite/server";
 import { getLoggedInUser } from "@/lib/appwrite/session";
 import type { Order, OrderStatus } from "@/lib/types";
-import { asOrder } from "./orders";
+import { getSellerEarnings } from "./seller-earnings";
 
 const DEFAULT_CURRENCY = "LKR";
-const PAGE_SIZE = 100;
 
 /** Order statuses that count toward seller revenue (paid or later fulfillment). */
 export const SELLER_REVENUE_STATUSES: readonly OrderStatus[] = [
@@ -45,11 +44,6 @@ function asNumber(value: unknown, fallback = 0): number {
   return fallback;
 }
 
-function asNullableString(value: unknown): string | null {
-  if (typeof value !== "string") return null;
-  return value.length > 0 ? value : null;
-}
-
 function safeCount(value: unknown): number {
   const n = asNumber(value, 0);
   return Number.isFinite(n) && n >= 0 ? Math.floor(n) : 0;
@@ -69,7 +63,7 @@ function isRevenueStatus(status: OrderStatus): boolean {
 }
 
 /**
- * Pure revenue sum from order rows (no I/O). Used by verify script and paging loop.
+ * Pure order-status revenue helper (verify script). Dashboard KPIs use paid payments.
  */
 export function aggregateSellerRevenue(orders: Order[]): {
   revenue: number;
@@ -112,54 +106,9 @@ async function countSellerOrders(
   return safeCount(result.total);
 }
 
-async function sumSellerRevenue(sellerId: string): Promise<{
-  revenue: number;
-  currency: string;
-}> {
-  const { tables } = await createSessionClient();
-  const orders: Order[] = [];
-  let cursor: string | undefined;
-
-  for (;;) {
-    const queries = [
-      Query.equal("sellerId", sellerId),
-      Query.equal("status", [...SELLER_REVENUE_STATUSES]),
-      Query.limit(PAGE_SIZE),
-    ];
-    if (cursor) {
-      queries.push(Query.cursorAfter(cursor));
-    }
-
-    const result = await tables.listRows({
-      databaseId: DATABASE_ID,
-      tableId: TABLE_ORDERS,
-      queries,
-      total: false,
-    });
-
-    if (result.rows.length === 0) break;
-
-    for (const row of result.rows) {
-      const order = asOrder(row as unknown as Record<string, unknown>);
-      if (order && order.sellerId === sellerId) {
-        orders.push(order);
-      }
-    }
-
-    if (result.rows.length < PAGE_SIZE) break;
-    const lastId = asNullableString(
-      (result.rows[result.rows.length - 1] as unknown as Record<string, unknown>)
-        .$id,
-    );
-    if (!lastId) break;
-    cursor = lastId;
-  }
-
-  return aggregateSellerRevenue(orders);
-}
-
 /**
  * Read-only seller dashboard KPIs (session client; own sellerId only).
+ * Revenue matches earnings: sum of payments with status paid.
  * Returns zeros on empty data or Appwrite errors — never throws to callers.
  */
 export async function getSellerMetrics(): Promise<SellerMetrics> {
@@ -171,17 +120,17 @@ export async function getSellerMetrics(): Promise<SellerMetrics> {
   const sellerId = user.$id;
 
   try {
-    const [orderCount, pendingCount, revenueResult] = await Promise.all([
+    const [orderCount, pendingCount, earnings] = await Promise.all([
       countSellerOrders(sellerId),
       countSellerOrders(sellerId, SELLER_PENDING_STATUSES),
-      sumSellerRevenue(sellerId),
+      getSellerEarnings(),
     ]);
 
     return {
       orderCount,
       pendingCount,
-      revenue: revenueResult.revenue,
-      currency: revenueResult.currency,
+      revenue: earnings.total,
+      currency: earnings.currency,
     };
   } catch {
     return emptyMetrics();

@@ -46,7 +46,19 @@ export default async function SellerEarningsPage() {
           No paid payments yet.
         </p>
       ) : (
-        <ul className="mt-10" aria-label="Paid earnings">
+        <>
+          {earnings.lineCount > earnings.lines.length ? (
+            <p className="mt-10 text-sm text-muted-foreground">
+              Showing {earnings.lines.length} of {earnings.lineCount} paid
+              payments.
+            </p>
+          ) : null}
+          <ul
+            className={
+              earnings.lineCount > earnings.lines.length ? "mt-4" : "mt-10"
+            }
+            aria-label="Paid earnings"
+          >
           {earnings.lines.map(({ order, payment }) => (
             <li
               key={payment.$id}
@@ -71,7 +83,8 @@ export default async function SellerEarningsPage() {
               </Link>
             </li>
           ))}
-        </ul>
+          </ul>
+        </>
       )}
 
       <p className="mt-12">

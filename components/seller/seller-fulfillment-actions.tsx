@@ -77,12 +77,26 @@ function SellerFulfillmentButton({
 type SellerFulfillmentActionsProps = {
   orderId: string;
   currentStatus: OrderStatus;
+  paymentPaid: boolean;
 };
 
 export function SellerFulfillmentActions({
   orderId,
   currentStatus,
+  paymentPaid,
 }: SellerFulfillmentActionsProps) {
+  if (!paymentPaid) {
+    return (
+      <section className="mt-10 space-y-4">
+        <p className="font-mono text-sm text-accent">$ ./order --fulfill</p>
+        <h3 className="text-xl font-bold tracking-tight">Fulfillment</h3>
+        <p className="text-sm text-muted-foreground">
+          Fulfillment starts after this order is marked paid.
+        </p>
+      </section>
+    );
+  }
+
   const nextStatuses = sellerFulfillmentNextStatuses(currentStatus);
   if (nextStatuses.length === 0) return null;
 

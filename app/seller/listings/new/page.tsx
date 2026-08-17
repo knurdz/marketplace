@@ -2,9 +2,13 @@ import Link from "next/link";
 import { CreateListingForm } from "@/components/seller/create-listing-form";
 import { Button } from "@/components/ui/button";
 import { listCategories } from "@/lib/services/categories";
+import { areFreeListingsEnabled } from "@/lib/services/platform-settings";
 
 export default async function NewListingPage() {
-  const categories = await listCategories();
+  const [categories, freeListingsEnabled] = await Promise.all([
+    listCategories(),
+    areFreeListingsEnabled(),
+  ]);
 
   return (
     <div className="mx-auto max-w-3xl">
@@ -15,7 +19,10 @@ export default async function NewListingPage() {
         before buyers can see it on the storefront.
       </p>
 
-      <CreateListingForm categories={categories} />
+      <CreateListingForm
+        categories={categories}
+        freeListingsEnabled={freeListingsEnabled}
+      />
 
       <div className="mt-6">
         <Button variant="outline" size="sm" asChild>

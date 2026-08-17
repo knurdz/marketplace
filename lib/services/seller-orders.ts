@@ -40,7 +40,7 @@ export async function getSellerOrder(orderId: string): Promise<Order | null> {
   if (!hasAppwritePublicConfig()) return null;
 
   const user = await getLoggedInUser();
-  if (!user) return null;
+  if (!user || !userHasLabel(user, ROLE_LABELS.seller)) return null;
 
   const trimmed = orderId?.trim();
   if (!trimmed) return null;
@@ -60,18 +60,22 @@ export async function getSellerOrder(orderId: string): Promise<Order | null> {
   }
 }
 
+const INBOX_PAGE_SIZE = 50;
+
 /** Newest-first list for the signed-in seller only. */
 export async function listSellerOrders(opts?: {
   limit?: number;
   status?: readonly OrderStatus[];
+  cursor?: string;
 }): Promise<Order[]> {
   if (!hasAppwritePublicConfig()) return [];
 
   const user = await getLoggedInUser();
-  if (!user) return [];
+  if (!user || !userHasLabel(user, ROLE_LABELS.seller)) return [];
 
-  const limit = Math.min(Math.max(opts?.limit ?? 50, 1), 50);
+  const limit = Math.min(Math.max(opts?.limit ?? INBOX_PAGE_SIZE, 1), INBOX_PAGE_SIZE);
   const statusFilter = opts?.status;
+  const cursor = opts?.cursor?.trim() || undefined;
 
   try {
     const { tables } = await createSessionClient();
@@ -82,6 +86,9 @@ export async function listSellerOrders(opts?: {
     ];
     if (statusFilter && statusFilter.length > 0) {
       queries.splice(1, 0, Query.equal("status", [...statusFilter]));
+    }
+    if (cursor) {
+      queries.push(Query.cursorAfter(cursor));
     }
 
     const result = await tables.listRows({
@@ -200,6 +207,11 @@ export async function fulfillSellerOrder(
     return { ok: true, orderStatus: nextStatus };
   }
 
+  const payment = await getSellerPaymentForOrder(order.$id);
+  if (!payment || payment.status !== "paid") {
+    return { ok: false, error: "Order is not paid yet." };
+  }
+
   const ip = await getClientIp();
   const rate = assertRateLimit({
     bucket: "fulfillment",
@@ -210,8 +222,23 @@ export async function fulfillSellerOrder(
     return { ok: false, error: RATE_LIMIT_MESSAGE };
   }
 
+  const expectedFrom = order.status;
+
   try {
     const { tables } = await createAdminClient();
+    const freshRow = await tables.getRow({
+      databaseId: DATABASE_ID,
+      tableId: TABLE_ORDERS,
+      rowId: order.$id,
+    });
+    const fresh = asOrder(freshRow as unknown as Record<string, unknown>);
+    if (!fresh || fresh.status !== expectedFrom) {
+      return {
+        ok: false,
+        error: "This order was updated. Refresh and try again.",
+      };
+    }
+
     await tables.updateRow({
       databaseId: DATABASE_ID,
       tableId: TABLE_ORDERS,
