@@ -27,8 +27,6 @@ export const RATE_LIMITS = {
   reviews: { limit: 20, windowMs: MS_MINUTE },
   reports: { limit: 10, windowMs: MS_MINUTE },
   checkout: { limit: 10, windowMs: MS_MINUTE },
-  sellerProductCreate: { limit: 10, windowMs: MS_MINUTE },
-  sellerProductUpdate: { limit: 20, windowMs: MS_MINUTE },
   listings: { limit: 20, windowMs: MS_HOUR },
   fulfillment: { limit: 30, windowMs: MS_MINUTE },
 } as const;
