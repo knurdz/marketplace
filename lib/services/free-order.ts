@@ -31,6 +31,7 @@ import type {
 import {
   evaluateFreeConfirm,
   FREE_CONFIRM_NOT_FOUND,
+  FREE_CONFIRM_NOT_FREE,
   FREE_CONFIRM_STOCK,
   freeConfirmIdempotencyKey,
 } from "./free-order-rules";
@@ -138,6 +139,9 @@ async function planStockDecrements(
 
       if (!product || product.stock < quantity) {
         return { ok: false, error: FREE_CONFIRM_STOCK };
+      }
+      if (product.price !== 0 || !product.available) {
+        return { ok: false, error: FREE_CONFIRM_NOT_FREE };
       }
 
       plans.push({

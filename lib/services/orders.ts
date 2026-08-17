@@ -7,7 +7,7 @@ import {
   TABLE_PAYMENTS,
   hasAppwritePublicConfig,
 } from "@/lib/appwrite/config";
-import { createSessionClient } from "@/lib/appwrite/server";
+import { createAdminClient, createSessionClient } from "@/lib/appwrite/server";
 import { getLoggedInUser } from "@/lib/appwrite/session";
 import { uploadBankSlip } from "./uploads";
 import {
@@ -193,7 +193,6 @@ const BANK_SLIP_ALLOWED_PAYMENT_STATUSES = ["pending", "awaiting_verification"] 
 function orderRowPermissions(buyerId: string, sellerId: string): string[] {
   return [
     Permission.read(Role.user(buyerId)),
-    Permission.update(Role.user(buyerId)),
     Permission.read(Role.user(sellerId)),
     Permission.read(Role.label("admin")),
     Permission.update(Role.label("admin")),
@@ -266,7 +265,7 @@ async function rollbackOrderRows(params: {
   if (!hasAppwritePublicConfig()) return;
 
   try {
-    const { tables } = await createSessionClient();
+    const { tables } = await createAdminClient();
     for (const itemId of params.orderItemIds) {
       try {
         await tables.deleteRow({
@@ -501,14 +500,15 @@ export async function submitBankSlip(
       permissions: bankSlipRowPermissions(),
     });
 
-    await tables.updateRow({
+    const { tables: adminTables } = await createAdminClient();
+    await adminTables.updateRow({
       databaseId: DATABASE_ID,
       tableId: TABLE_PAYMENTS,
       rowId: payment.$id,
       data: { status: "awaiting_verification" },
     });
 
-    await tables.updateRow({
+    await adminTables.updateRow({
       databaseId: DATABASE_ID,
       tableId: TABLE_ORDERS,
       rowId: order.$id,
@@ -780,7 +780,7 @@ export async function cancelOrder(orderId: string): Promise<CancelOrderResult> {
   }
 
   try {
-    const { tables } = await createSessionClient();
+    const { tables } = await createAdminClient();
     await tables.updateRow({
       databaseId: DATABASE_ID,
       tableId: TABLE_ORDERS,

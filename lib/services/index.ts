@@ -220,6 +220,7 @@ export {
   getPublicSellerByUserId,
   getSellerBankDetailsForCheckout,
   isApprovedPublicSellerStatus,
+  toPublicSellerInfo,
 } from "./sellers";
 export type {
   CheckoutSellerBankDetails,
@@ -239,6 +240,7 @@ export {
 export type { NotificationActionState } from "./notifications";
 export {
   asPlatformSetting,
+  areFreeListingsEnabled,
   getPlatformSetting,
   getPlatformSettings,
   normalizePlatformSettingKey,

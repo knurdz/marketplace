@@ -2,8 +2,9 @@
  * Runnable checks for seller revenue aggregation (no Appwrite).
  * Run: npx tsx scripts/verify-seller-metrics.ts
  */
+import { aggregatePaidEarnings } from "../lib/services/seller-earnings";
 import { aggregateSellerRevenue } from "../lib/services/seller-metrics";
-import type { Order } from "../lib/types";
+import type { Order, Payment } from "../lib/types";
 
 function assert(condition: boolean, message: string): void {
   if (!condition) throw new Error(message);
@@ -48,5 +49,31 @@ const onlyUnpaid = aggregateSellerRevenue([
   order("cancelled", 50),
 ]);
 assert(onlyUnpaid.revenue === 0, "unpaid/cancelled excluded");
+
+function payment(
+  status: Payment["status"],
+  amount: number,
+): Payment {
+  return {
+    $id: `pay_${status}_${amount}`,
+    orderId: `ord_${status}_${amount}`,
+    method: "payhere",
+    status,
+    amount,
+    currency: "LKR",
+    payherePaymentId: null,
+    idempotencyKey: null,
+  };
+}
+
+const dashboardRevenue = aggregatePaidEarnings([
+  payment("paid", 100),
+  payment("refunded", 50),
+  payment("pending", 25),
+]);
+assert(
+  dashboardRevenue.total === 100,
+  "dashboard revenue matches paid payments only",
+);
 
 console.log("verify-seller-metrics: OK");

@@ -13,12 +13,15 @@ type CheckoutContinuationPageProps = {
 export default async function CheckoutBankPage({
   searchParams,
 }: CheckoutContinuationPageProps) {
+  const { orderId } = await searchParams;
   const user = await getLoggedInUser();
   if (!user) {
-    redirect("/login?next=/checkout/bank");
+    const next = orderId?.trim()
+      ? `/checkout/bank?orderId=${encodeURIComponent(orderId.trim())}`
+      : "/checkout/bank";
+    redirect(`/login?next=${encodeURIComponent(next)}`);
   }
 
-  const { orderId } = await searchParams;
   if (!orderId?.trim()) notFound();
 
   const order = await getOwnOrder(orderId);
@@ -27,9 +30,14 @@ export default async function CheckoutBankPage({
   const payment = await getOwnPaymentForOrder(orderId);
   if (!payment || payment.method !== "bank_transfer") notFound();
 
+  const canShowSellerBank =
+    payment.status === "pending" || payment.status === "awaiting_verification";
+
   const [bankInstructionsSetting, sellerBank] = await Promise.all([
     getPlatformSetting(PLATFORM_SETTING_KEYS.checkoutBankInstructions),
-    getSellerBankDetailsForCheckout(order.sellerId),
+    canShowSellerBank
+      ? getSellerBankDetailsForCheckout(order.$id)
+      : Promise.resolve(null),
   ]);
 
   const bankInstructions =
@@ -55,40 +63,46 @@ export default async function CheckoutBankPage({
         </p>
       </section>
 
-      {sellerBank &&
-      (sellerBank.bankAccountName ||
-        sellerBank.bankAccountNumber ||
-        sellerBank.bankName) ? (
-        <section className="mt-10 space-y-3">
-          <p className="font-mono text-sm text-accent">$ ./checkout --seller-bank</p>
-          <h2 className="text-xl font-bold tracking-tight">Seller bank details</h2>
-          <dl className="space-y-2 text-sm">
-            {sellerBank.bankName ? (
-              <div>
-                <dt className="text-muted-foreground">Bank</dt>
-                <dd className="font-medium">{sellerBank.bankName}</dd>
-              </div>
-            ) : null}
-            {sellerBank.bankAccountName ? (
-              <div>
-                <dt className="text-muted-foreground">Account name</dt>
-                <dd className="font-medium">{sellerBank.bankAccountName}</dd>
-              </div>
-            ) : null}
-            {sellerBank.bankAccountNumber ? (
-              <div>
-                <dt className="text-muted-foreground">Account number</dt>
-                <dd className="font-mono font-medium">
-                  {sellerBank.bankAccountNumber}
-                </dd>
-              </div>
-            ) : null}
-          </dl>
-        </section>
+      {canShowSellerBank ? (
+        sellerBank &&
+        (sellerBank.bankAccountName ||
+          sellerBank.bankAccountNumber ||
+          sellerBank.bankName) ? (
+          <section className="mt-10 space-y-3">
+            <p className="font-mono text-sm text-accent">$ ./checkout --seller-bank</p>
+            <h2 className="text-xl font-bold tracking-tight">Seller bank details</h2>
+            <dl className="space-y-2 text-sm">
+              {sellerBank.bankName ? (
+                <div>
+                  <dt className="text-muted-foreground">Bank</dt>
+                  <dd className="font-medium">{sellerBank.bankName}</dd>
+                </div>
+              ) : null}
+              {sellerBank.bankAccountName ? (
+                <div>
+                  <dt className="text-muted-foreground">Account name</dt>
+                  <dd className="font-medium">{sellerBank.bankAccountName}</dd>
+                </div>
+              ) : null}
+              {sellerBank.bankAccountNumber ? (
+                <div>
+                  <dt className="text-muted-foreground">Account number</dt>
+                  <dd className="font-mono font-medium">
+                    {sellerBank.bankAccountNumber}
+                  </dd>
+                </div>
+              ) : null}
+            </dl>
+          </section>
+        ) : (
+          <p className="mt-10 text-sm text-muted-foreground" role="status">
+            Seller bank details are not available yet. Contact support if you need
+            help completing this transfer.
+          </p>
+        )
       ) : (
         <p className="mt-10 text-sm text-muted-foreground" role="status">
-          Seller bank details are not available yet. Contact support if you need
-          help completing this transfer.
+          Bank details are only shown while this transfer is awaiting payment.
         </p>
       )}
 

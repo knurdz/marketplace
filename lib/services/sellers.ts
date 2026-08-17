@@ -5,6 +5,7 @@ import {
 } from "@/lib/appwrite/config";
 import { createAdminClient } from "@/lib/appwrite/server";
 import { isSellerStatus } from "@/lib/types";
+import { getOwnOrder, getOwnPaymentForOrder } from "./orders";
 
 /** Public storefront seller card — never includes bank or rejection fields. */
 export type PublicSellerInfo = {
@@ -27,7 +28,7 @@ export function isApprovedPublicSellerStatus(status: unknown): boolean {
   return isSellerStatus(status) && status === "approved";
 }
 
-function toPublicSellerInfo(
+export function toPublicSellerInfo(
   record: Record<string, unknown>,
 ): PublicSellerInfo | null {
   if (!isApprovedPublicSellerStatus(record.status)) return null;
@@ -103,6 +104,11 @@ export async function getPublicSellerBySlug(
   }
 }
 
+const CHECKOUT_BANK_PAYMENT_STATUSES = [
+  "pending",
+  "awaiting_verification",
+] as const;
+
 /** Bank details for an owned bank-transfer checkout — server-only, never on public seller cards. */
 export type CheckoutSellerBankDetails = {
   bankAccountName: string | null;
@@ -111,22 +117,36 @@ export type CheckoutSellerBankDetails = {
 };
 
 /**
- * Seller bank account fields for buyer bank-transfer instructions.
- * Admin client only; call only after verifying the buyer owns a bank_transfer order
- * for this seller. Returns null when missing, non-approved, or on error.
+ * Seller bank account fields for an owned bank-transfer order that still needs payment.
+ * Verifies the signed-in buyer owns the order, method is bank_transfer, and payment
+ * is pending or awaiting_verification. Returns null otherwise.
  */
 export async function getSellerBankDetailsForCheckout(
-  sellerUserId: string,
+  orderId: string,
 ): Promise<CheckoutSellerBankDetails | null> {
-  const trimmed = sellerUserId?.trim();
+  const trimmed = orderId?.trim();
   if (!trimmed) return null;
+
+  const order = await getOwnOrder(trimmed);
+  if (!order || order.paymentMethod !== "bank_transfer") return null;
+
+  const payment = await getOwnPaymentForOrder(trimmed);
+  if (
+    !payment ||
+    payment.method !== "bank_transfer" ||
+    !(CHECKOUT_BANK_PAYMENT_STATUSES as readonly string[]).includes(
+      payment.status,
+    )
+  ) {
+    return null;
+  }
 
   try {
     const { tables } = await createAdminClient();
     const result = await tables.listRows({
       databaseId: DATABASE_ID,
       tableId: TABLE_SELLER_PROFILES,
-      queries: [Query.equal("userId", trimmed), Query.limit(1)],
+      queries: [Query.equal("userId", order.sellerId), Query.limit(1)],
     });
 
     const row = result.rows[0];

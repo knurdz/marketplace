@@ -217,7 +217,6 @@ async function ensureSellerProfile(sellerUserId) {
     Permission.read(Role.label("admin")),
     Permission.update(Role.label("admin")),
     Permission.delete(Role.label("admin")),
-    Permission.read(Role.any()),
   ];
 
   try {

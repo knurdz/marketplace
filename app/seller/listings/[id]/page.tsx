@@ -5,6 +5,7 @@ import { SubmitListingButton } from "@/components/seller/submit-listing-button";
 import { Button } from "@/components/ui/button";
 import { listCategories } from "@/lib/services/categories";
 import { listProductImages } from "@/lib/services/products";
+import { areFreeListingsEnabled } from "@/lib/services/platform-settings";
 import {
   canSubmitListingForReview,
   getOwnProduct,
@@ -34,9 +35,10 @@ type EditListingPageProps = {
 
 export default async function EditListingPage({ params }: EditListingPageProps) {
   const { id } = await params;
-  const [product, categories] = await Promise.all([
+  const [product, categories, freeListingsEnabled] = await Promise.all([
     getOwnProduct(id),
     listCategories(),
+    areFreeListingsEnabled(),
   ]);
 
   if (!product) {
@@ -59,7 +61,12 @@ export default async function EditListingPage({ params }: EditListingPageProps) 
         </div>
       ) : null}
 
-      <EditListingForm product={product} categories={categories} images={images} />
+      <EditListingForm
+        product={product}
+        categories={categories}
+        images={images}
+        freeListingsEnabled={freeListingsEnabled}
+      />
 
       <div className="mt-6">
         <Button variant="outline" size="sm" asChild>

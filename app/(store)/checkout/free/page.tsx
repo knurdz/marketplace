@@ -10,12 +10,15 @@ type CheckoutContinuationPageProps = {
 export default async function CheckoutFreePage({
   searchParams,
 }: CheckoutContinuationPageProps) {
+  const { orderId } = await searchParams;
   const user = await getLoggedInUser();
   if (!user) {
-    redirect("/login?next=/checkout/free");
+    const next = orderId?.trim()
+      ? `/checkout/free?orderId=${encodeURIComponent(orderId.trim())}`
+      : "/checkout/free";
+    redirect(`/login?next=${encodeURIComponent(next)}`);
   }
 
-  const { orderId } = await searchParams;
   if (!orderId?.trim()) notFound();
 
   const order = await getOwnOrder(orderId);

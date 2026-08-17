@@ -102,6 +102,7 @@ export default async function SellerOrderDetailPage({
       <SellerFulfillmentActions
         orderId={order.$id}
         currentStatus={order.status}
+        paymentPaid={payment?.status === "paid"}
       />
 
       <div className="mt-12 flex flex-wrap gap-3">

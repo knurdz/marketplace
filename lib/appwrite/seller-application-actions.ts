@@ -28,6 +28,7 @@ function readString(formData: FormData, key: string): string {
 function revalidateShopPaths(slug: string): void {
   revalidatePath("/seller/shop");
   revalidatePath(`/shop/${slug}`);
+  revalidatePath("/shop", "layout");
 }
 
 export async function submitSellerApplication(

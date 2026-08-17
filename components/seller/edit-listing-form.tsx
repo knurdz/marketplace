@@ -39,16 +39,20 @@ type EditListingFormProps = {
   product: Product;
   categories: Category[];
   images: ProductImage[];
+  freeListingsEnabled?: boolean;
 };
 
 export function EditListingForm({
   product,
   categories,
   images,
+  freeListingsEnabled = true,
 }: EditListingFormProps) {
   const isArchived = product.status === "archived";
   const [showArchiveConfirm, setShowArchiveConfirm] = useState(false);
-  const [isFree, setIsFree] = useState(product.isFree || product.price === 0);
+  const [isFree, setIsFree] = useState(
+    freeListingsEnabled && (product.isFree || product.price === 0),
+  );
 
   const [updateState, updateAction, updatePending] = useActionState(
     updateOwnListing,
@@ -196,20 +200,22 @@ export function EditListingForm({
           </select>
         </div>
 
-        <div className="flex items-center gap-2">
-          <input
-            id="isFree"
-            name="isFree"
-            type="checkbox"
-            checked={isFree}
-            onChange={(e) => setIsFree(e.target.checked)}
-            disabled={updatePending || isArchived}
-            className="size-4 rounded border border-input"
-          />
-          <Label htmlFor="isFree" className="font-normal">
-            Free listing (buyers checkout at no cost)
-          </Label>
-        </div>
+        {freeListingsEnabled ? (
+          <div className="flex items-center gap-2">
+            <input
+              id="isFree"
+              name="isFree"
+              type="checkbox"
+              checked={isFree}
+              onChange={(e) => setIsFree(e.target.checked)}
+              disabled={updatePending || isArchived}
+              className="size-4 rounded border border-input"
+            />
+            <Label htmlFor="isFree" className="font-normal">
+              Free listing (buyers checkout at no cost)
+            </Label>
+          </div>
+        ) : null}
 
         <div className="grid gap-4 sm:grid-cols-2">
           <div className="space-y-2">

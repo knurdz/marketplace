@@ -6,7 +6,10 @@ import {
   parseSellerApplicationInput,
   parseShopPolicyInput,
 } from "../lib/services/seller-application";
-import { isApprovedPublicSellerStatus } from "../lib/services/sellers";
+import {
+  isApprovedPublicSellerStatus,
+  toPublicSellerInfo,
+} from "../lib/services/sellers";
 
 function assert(condition: boolean, message: string): void {
   if (!condition) throw new Error(message);
@@ -42,6 +45,37 @@ assert(isApprovedPublicSellerStatus("approved"), "approved is public");
 assert(!isApprovedPublicSellerStatus("pending"), "pending is not public");
 assert(!isApprovedPublicSellerStatus("rejected"), "rejected is not public");
 assert(!isApprovedPublicSellerStatus("invalid"), "invalid status not public");
+
+const publicSeller = toPublicSellerInfo({
+  status: "approved",
+  userId: "seller_1",
+  shopName: "Demo Shop",
+  slug: "demo-shop",
+  bio: "Hello",
+  bannerFileId: null,
+  returnPolicy: "Returns ok",
+  shippingPolicy: "Ships fast",
+  bankAccountName: "Secret Name",
+  bankAccountNumber: "1234567890",
+  bankName: "Secret Bank",
+  rejectionReason: "should not leak",
+});
+assert(publicSeller !== null, "approved seller projects");
+if (publicSeller) {
+  assert(
+    !("bankAccountNumber" in publicSeller),
+    "public seller omits bankAccountNumber",
+  );
+  assert(!("bankName" in publicSeller), "public seller omits bankName");
+  assert(
+    !("bankAccountName" in publicSeller),
+    "public seller omits bankAccountName",
+  );
+  assert(
+    !("rejectionReason" in publicSeller),
+    "public seller omits rejectionReason",
+  );
+}
 
 const policies = parseShopPolicyInput({
   returnPolicy: "  7-day returns  ",

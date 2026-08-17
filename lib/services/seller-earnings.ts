@@ -24,6 +24,7 @@ export type SellerEarnings = {
   total: number;
   currency: string;
   lines: SellerEarningsLine[];
+  lineCount: number;
 };
 
 function asNullableString(value: unknown): string | null {
@@ -32,7 +33,7 @@ function asNullableString(value: unknown): string | null {
 }
 
 function emptyEarnings(): SellerEarnings {
-  return { total: 0, currency: DEFAULT_CURRENCY, lines: [] };
+  return { total: 0, currency: DEFAULT_CURRENCY, lines: [], lineCount: 0 };
 }
 
 /**
@@ -114,25 +115,46 @@ async function fetchPaidPaymentsForOrders(
 
   for (let i = 0; i < orderIds.length; i += PAGE_SIZE) {
     const chunk = orderIds.slice(i, i + PAGE_SIZE);
-    const result = await tables.listRows({
-      databaseId: DATABASE_ID,
-      tableId: TABLE_PAYMENTS,
-      queries: [
+    let cursor: string | undefined;
+
+    for (;;) {
+      const queries = [
         Query.equal("orderId", chunk),
         Query.equal("status", "paid"),
-        Query.limit(Math.min(chunk.length, PAGE_SIZE)),
-      ],
-    });
-
-    for (const row of result.rows) {
-      const payment = asPayment(row as unknown as Record<string, unknown>);
-      if (
-        payment &&
-        payment.status === "paid" &&
-        ownedOrderIds.has(payment.orderId)
-      ) {
-        payments.push(payment);
+        Query.limit(PAGE_SIZE),
+      ];
+      if (cursor) {
+        queries.push(Query.cursorAfter(cursor));
       }
+
+      const result = await tables.listRows({
+        databaseId: DATABASE_ID,
+        tableId: TABLE_PAYMENTS,
+        queries,
+      });
+
+      if (result.rows.length === 0) break;
+
+      for (const row of result.rows) {
+        const payment = asPayment(row as unknown as Record<string, unknown>);
+        if (
+          payment &&
+          payment.status === "paid" &&
+          ownedOrderIds.has(payment.orderId)
+        ) {
+          payments.push(payment);
+        }
+      }
+
+      if (result.rows.length < PAGE_SIZE) break;
+      const lastId = asNullableString(
+        (result.rows[result.rows.length - 1] as unknown as Record<
+          string,
+          unknown
+        >).$id,
+      );
+      if (!lastId) break;
+      cursor = lastId;
     }
   }
 
@@ -188,6 +210,7 @@ export async function getSellerEarnings(): Promise<SellerEarnings> {
     return {
       total,
       currency,
+      lineCount: lines.length,
       lines: lines.slice(0, LIST_DISPLAY_LIMIT),
     };
   } catch {
