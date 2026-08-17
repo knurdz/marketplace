@@ -154,6 +154,8 @@ export {
   parseAvailableFlag,
   parseCreateDraftProductInput,
   submitListingForReviewCore,
+  archiveOwnProductCore,
+  updateOwnProductCore,
 } from "./seller-listings";
 export type {
   CreateDraftProductInput,
@@ -161,6 +163,7 @@ export type {
   ParsedCreateDraftProductInput,
   SubmitListingForReviewResult,
   UpdateOwnProductInput,
+  SellerListingMutationResult,
 } from "./seller-listings";
 export {
   listPendingModerationQueue,
