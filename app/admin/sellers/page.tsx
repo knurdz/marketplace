@@ -1,3 +1,4 @@
+import Link from "next/link";
 import {
   SellerApproveButton,
   SellerRejectForm,
@@ -27,7 +28,13 @@ export default async function AdminSellersPage() {
       </h2>
       <p className="mt-2 max-w-xl text-sm text-muted-foreground">
         Review pending applications. Approving grants the seller label and
-        unlocks the seller portal.
+        unlocks the seller portal.{" "}
+        <Link
+          href="/admin/sellers/performance"
+          className="text-accent underline-offset-2 hover:underline"
+        >
+          Approved seller performance
+        </Link>
       </p>
 
       {pending.length === 0 ? (

@@ -41,6 +41,15 @@ export {
 } from "./admin-orders";
 export type { AdminOrderView, ListAllOrdersResult } from "./admin-orders";
 export {
+  aggregateSellerPerformanceRows,
+  listApprovedSellerPerformance,
+} from "./admin-seller-performance";
+export type {
+  ListApprovedSellerPerformanceResult,
+  SellerPerformanceInput,
+  SellerPerformanceRow,
+} from "./admin-seller-performance";
+export {
   asAuditLogEntry,
   getAuditLogsForResource,
   listAuditLogs,
