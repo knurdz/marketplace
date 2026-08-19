@@ -167,9 +167,20 @@ Missing Function env or TablesDB settle errors → HTTP 500 so PayHere retries.
 | `0` | Pending | Leave pending / log |
 | `-1` | Canceled | May set `failed` / leave pending per Member 4 policy |
 | `-2` | Failed | `payments.status = failed` |
-| `-3` | Chargeback | `refunded` path (coordinate with Member 4) |
+| `-3` | Chargeback | `refunded` path (order + payment; already-`refunded` is a no-op) |
 
 Use shared enums from [`lib/types/status.ts`](../../lib/types/status.ts) — do not invent parallel strings.
+
+### Admin refund / cancel (step **6.13**)
+
+Admin overrides on `/admin/orders` write the **platform ledger only** (`cancelAdminOrder` / `refundAdminOrder`). They do **not** call PayHere and never use `PAYHERE_MERCHANT_SECRET` in Next.js.
+
+| Admin action | Order | Payment | Notes |
+|--------------|-------|---------|-------|
+| Cancel | `pending_payment` / `payment_review` → `cancelled` | not `paid`/`refunded` → `failed` | Unpaid only |
+| Refund | `paid` … `completed` → `refunded` | `paid` → `refunded` | Same statuses as notify `-3` |
+
+A later PayHere chargeback notify (`-3`) is idempotent when `payments.status` is already `refunded`. Captured card funds, if they must go back to the buyer, are returned in the **PayHere merchant dashboard** (sandbox), not by this app. No stock restore.
 
 ### Idempotency
 

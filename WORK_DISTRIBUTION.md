@@ -58,7 +58,7 @@ Use after every change that touches code or schema:
 
 ## Member 1 — Foundation (must-dos first)
 
-**Owns:** repo bootstrap, Appwrite clients, auth, schema, storage helpers, design system, seeds, route guards, shared types, service/API consistency, **payment setup** (PayHere Functions, secrets, free confirm, payment contract implementation). **Also owns Phase 6** (remaining seller + leftover admin + E2E + optionals) — implement **6.13** next.
+**Owns:** repo bootstrap, Appwrite clients, auth, schema, storage helpers, design system, seeds, route guards, shared types, service/API consistency, **payment setup** (PayHere Functions, secrets, free confirm, payment contract implementation). **Also owns Phase 6** (remaining seller + leftover admin + E2E + optionals) — implement **6.14** next.
 
 ### Phase 0 — blockers (do before others ship against APIs)
 
@@ -290,7 +290,7 @@ Complete payment infrastructure so Members 2–4 only consume APIs / admin UI.
 - [x] User/listing reports triage
 - [x] Audit log viewer
 - [x] Platform settings (sandbox flag, fees, bank copy) — admin write UI
-- [ ] Admin order overrides (cancel/refund) with audit — **Phase 6.13**
+- [x] Admin order overrides (cancel/refund) with audit — **Phase 6.13**
 - [x] Sales reports + user growth analytics (basic charts OK)
 - [x] Seller verification badge controls
 - [x] Basic fraud flags (e.g. repeated failed pays, multi-account signals) — rules-based, not ML
@@ -361,7 +361,7 @@ After **6.8**, tick Member 3 verification extras: own-only mutations, unpublishe
 | Step | Maps to | Goal | Do | Verify |
 | ---- | ------- | ---- | -- | ------ |
 | [x] **6.12** | Member 4 task (no 4.x id) | Seller performance | Basic metrics on approved sellers | Admin-only; depends on **6.9–6.11** data |
-| [ ] **6.13** | Admin order overrides | Cancel/refund + audit | Coordinate PayHere chargeback / `refunded` (`PAYHERE.md`) | Audited; valid status enums only |
+| [x] **6.13** | Admin order overrides | Cancel/refund + audit | Coordinate PayHere chargeback / `refunded` (`PAYHERE.md`) | Audited; valid status enums only |
 | [ ] **6.14** | Member 4 verify extra | Bank-slip idempotency | Re-verify **4.7**; patch only if a gap remains | Idempotent approve/reject + audit; do not rebuild the queue |
 
 ### C — Integration (not new features)
@@ -390,7 +390,7 @@ Same IDs as the table below. Suggested order if capacity remains: **X02** → **
 
 - [ ] Approved seller publishes a listing; buyer can purchase it (not only seed SKUs)
 - [ ] Seller sees paid order, ships / completes; earnings match `paid`
-- [ ] Admin seller-performance + order override paths exist (or explicitly deferred with a note)
+- [x] Admin seller-performance + order override paths exist (or explicitly deferred with a note)
 - [ ] Guide §10 E2E run documented (free + bank + PayHere sandbox)
 
 ---
@@ -437,7 +437,7 @@ Pick up only after Phases 1–4 **and Phase 6 A–C** are solid (**6.18**). Assi
 | Weeks 2–3  | Members 2–4 implement portals (Phases 2–3)                        |
 | Week 3     | E2E payments: Member 1 setup + Member 2 UX + Member 4 bank verify |
 | Week 4     | Hardening, demo, Phase 5 extras if ahead                          |
-| **Now**    | **Phase 6 (Member 1):** **6.1–6.12** done; next **6.13** admin order overrides |
+| **Now**    | **Phase 6 (Member 1):** **6.1–6.13** done; next **6.14** bank-slip idempotency re-verify |
 
 
 ---
