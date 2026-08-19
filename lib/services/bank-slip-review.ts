@@ -11,7 +11,13 @@ import {
 } from "@/lib/appwrite/config";
 import { requireLabel } from "@/lib/appwrite/roles";
 import { createAdminClient } from "@/lib/appwrite/server";
-import type { BankSlip, OrderItem } from "@/lib/types";
+import type { BankSlip, Order, OrderItem, Payment } from "@/lib/types";
+import {
+  bankConfirmIdempotencyKey,
+  evaluateBankSlipApprove,
+  evaluateBankSlipReject,
+  shouldListPendingBankSlip,
+} from "./bank-slip-review-rules";
 import { asProduct, clampedStockDecrement } from "./products";
 import {
   asBankSlip,
@@ -21,10 +27,18 @@ import {
 } from "./orders";
 
 export { asBankSlip } from "./orders";
+export {
+  bankConfirmIdempotencyKey,
+  evaluateBankSlipApprove,
+  evaluateBankSlipReject,
+  shouldListPendingBankSlip,
+} from "./bank-slip-review-rules";
 
 const MAX_REVIEW_NOTE_LENGTH = 500;
 const DEFAULT_PAGE_SIZE = 25;
 const MAX_PAGE_SIZE = 100;
+const SUPERSEDED_REVIEW_NOTE =
+  "Superseded: another slip for this payment was approved.";
 
 export type PendingBankSlipView = {
   slip: BankSlip;
@@ -55,6 +69,12 @@ type StockDecrementPlan = {
   stockBefore: number;
   actualDecrement: number;
   clamped: boolean;
+};
+
+type ReviewContext = {
+  slip: BankSlip;
+  payment: Payment;
+  order: Order;
 };
 
 function adminSdkAvailable(): boolean {
@@ -99,6 +119,57 @@ async function loadBankSlip(bankSlipId: string): Promise<BankSlip | null> {
   } catch {
     return null;
   }
+}
+
+async function loadPayment(paymentId: string): Promise<Payment | null> {
+  try {
+    const { tables } = await createAdminClient();
+    const row = await tables.getRow({
+      databaseId: DATABASE_ID,
+      tableId: TABLE_PAYMENTS,
+      rowId: paymentId,
+    });
+    return asPayment(row as unknown as Record<string, unknown>);
+  } catch {
+    return null;
+  }
+}
+
+async function loadOrder(orderId: string): Promise<Order | null> {
+  try {
+    const { tables } = await createAdminClient();
+    const row = await tables.getRow({
+      databaseId: DATABASE_ID,
+      tableId: TABLE_ORDERS,
+      rowId: orderId,
+    });
+    return asOrder(row as unknown as Record<string, unknown>);
+  } catch {
+    return null;
+  }
+}
+
+async function loadReviewContext(
+  bankSlipId: string,
+): Promise<{ ok: true; ctx: ReviewContext } | { ok: false; error: string }> {
+  const slip = await loadBankSlip(bankSlipId);
+  if (!slip) {
+    return { ok: false, error: "Bank slip not found." };
+  }
+
+  const [payment, order] = await Promise.all([
+    loadPayment(slip.paymentId),
+    loadOrder(slip.orderId),
+  ]);
+
+  if (!payment) {
+    return { ok: false, error: "Payment not found." };
+  }
+  if (!order) {
+    return { ok: false, error: "Order not found." };
+  }
+
+  return { ok: true, ctx: { slip, payment, order } };
 }
 
 async function loadOrderItems(orderId: string): Promise<OrderItem[]> {
@@ -160,43 +231,64 @@ function oversoldWarningsFromPlans(plans: StockDecrementPlan[]): string[] {
     );
 }
 
-async function isAlreadyProcessed(
-  bankSlipId: string,
-): Promise<{ already: true; message: string } | { already: false }> {
-  const slip = await loadBankSlip(bankSlipId);
-  if (!slip) {
-    return { already: false };
-  }
-
-  if (slip.status !== "pending") {
-    return {
-      already: true,
-      message:
-        slip.status === "approved"
-          ? "This bank slip was already approved."
-          : "This bank slip was already rejected.",
-    };
-  }
-
+async function listSiblingPendingSlipIds(
+  paymentId: string,
+  exceptSlipId: string,
+): Promise<string[]> {
   try {
     const { tables } = await createAdminClient();
-    const paymentRow = await tables.getRow({
+    const result = await tables.listRows({
       databaseId: DATABASE_ID,
-      tableId: TABLE_PAYMENTS,
-      rowId: slip.paymentId,
+      tableId: TABLE_BANK_SLIPS,
+      queries: [
+        Query.equal("paymentId", paymentId),
+        Query.equal("status", "pending"),
+        Query.limit(100),
+      ],
     });
-    const payment = asPayment(paymentRow as unknown as Record<string, unknown>);
-    if (payment?.status === "paid") {
-      return {
-        already: true,
-        message: "Payment was already marked paid.",
-      };
-    }
-  } catch {
-    // fall through to process
-  }
 
-  return { already: false };
+    const ids: string[] = [];
+    for (const row of result.rows) {
+      const id = typeof row.$id === "string" ? row.$id : "";
+      if (id && id !== exceptSlipId) ids.push(id);
+    }
+    return ids;
+  } catch {
+    return [];
+  }
+}
+
+function approveConflictResult(
+  loaded: { ok: true; ctx: ReviewContext } | { ok: false; error: string },
+): BankSlipReviewResult | null {
+  if (!loaded.ok) return null;
+  const decision = evaluateBankSlipApprove(loaded.ctx);
+  if (decision.action === "noop") {
+    return {
+      ok: true,
+      message: decision.message,
+      alreadyReviewed: true,
+    };
+  }
+  return null;
+}
+
+function rejectConflictResult(
+  loaded: { ok: true; ctx: ReviewContext } | { ok: false; error: string },
+): BankSlipReviewResult | null {
+  if (!loaded.ok) return null;
+  const decision = evaluateBankSlipReject(loaded.ctx);
+  if (decision.action === "noop") {
+    return {
+      ok: true,
+      message: decision.message,
+      alreadyReviewed: true,
+    };
+  }
+  if (decision.action === "refuse") {
+    return { ok: false, error: decision.error };
+  }
+  return null;
 }
 
 /** Relative admin-only URL for slip image (proxy re-checks auth). */
@@ -246,6 +338,8 @@ export async function listPendingBankSlips(opts?: {
 
       const uploadedAt = asNullableString(row.$createdAt) ?? "";
 
+      let payment: Payment | null = null;
+      let order: Order | null = null;
       let paymentAmount = 0;
       let paymentCurrency = "LKR";
       let buyerId = slip.uploadedBy;
@@ -264,18 +358,22 @@ export async function listPendingBankSlips(opts?: {
           }),
         ]);
 
-        const payment = asPayment(paymentRow as unknown as Record<string, unknown>);
+        payment = asPayment(paymentRow as unknown as Record<string, unknown>);
         if (payment) {
           paymentAmount = payment.amount;
           paymentCurrency = payment.currency;
         }
 
-        const order = asOrder(orderRow as unknown as Record<string, unknown>);
+        order = asOrder(orderRow as unknown as Record<string, unknown>);
         if (order) {
           buyerId = order.buyerId;
         }
       } catch {
-        // keep defaults
+        // skip unverifiable leftovers
+      }
+
+      if (!shouldListPendingBankSlip({ slip, payment, order })) {
+        continue;
       }
 
       slips.push({
@@ -316,58 +414,22 @@ export async function approveBankSlipCore(
     return { ok: false, error: "Missing bank slip." };
   }
 
-  const already = await isAlreadyProcessed(trimmedId);
-  if (already.already) {
+  const loaded = await loadReviewContext(trimmedId);
+  if (!loaded.ok) return loaded;
+
+  const decision = evaluateBankSlipApprove(loaded.ctx);
+  if (decision.action === "refuse") {
+    return { ok: false, error: decision.error };
+  }
+  if (decision.action === "noop") {
     return {
       ok: true,
-      message: already.message,
+      message: decision.message,
       alreadyReviewed: true,
     };
   }
 
-  const slip = await loadBankSlip(trimmedId);
-  if (!slip) {
-    return { ok: false, error: "Bank slip not found." };
-  }
-
-  if (slip.status !== "pending") {
-    return {
-      ok: true,
-      message: "This bank slip was already reviewed.",
-      alreadyReviewed: true,
-    };
-  }
-
-  const { tables } = await createAdminClient();
-
-  let payment;
-  try {
-    const paymentRow = await tables.getRow({
-      databaseId: DATABASE_ID,
-      tableId: TABLE_PAYMENTS,
-      rowId: slip.paymentId,
-    });
-    payment = asPayment(paymentRow as unknown as Record<string, unknown>);
-  } catch {
-    return { ok: false, error: "Payment not found." };
-  }
-
-  if (!payment) {
-    return { ok: false, error: "Payment not found." };
-  }
-
-  if (payment.status === "paid") {
-    return {
-      ok: true,
-      message: "Payment was already marked paid.",
-      alreadyReviewed: true,
-    };
-  }
-
-  if (payment.method !== "bank_transfer") {
-    return { ok: false, error: "Payment is not a bank transfer." };
-  }
-
+  const { slip, payment, order } = loaded.ctx;
   const items = await loadOrderItems(slip.orderId);
   if (items.length === 0) {
     return { ok: false, error: "Order has no items." };
@@ -375,7 +437,9 @@ export async function approveBankSlipCore(
 
   const stockPlans = await planStockDecrements(items);
   const oversoldWarnings = oversoldWarningsFromPlans(stockPlans);
+  const siblingIds = await listSiblingPendingSlipIds(payment.$id, slip.$id);
 
+  const { tables } = await createAdminClient();
   const auditRowId = ID.unique();
   const productsDecrementedMeta = JSON.stringify(
     stockPlans.map((p) => ({
@@ -402,6 +466,20 @@ export async function approveBankSlipCore(
       transactionId,
     });
 
+    for (const siblingId of siblingIds) {
+      await tables.updateRow({
+        databaseId: DATABASE_ID,
+        tableId: TABLE_BANK_SLIPS,
+        rowId: siblingId,
+        data: {
+          status: "rejected",
+          reviewedBy: adminUserId,
+          reviewNote: SUPERSEDED_REVIEW_NOTE,
+        },
+        transactionId,
+      });
+    }
+
     for (const plan of stockPlans) {
       if (plan.actualDecrement <= 0) continue;
       await tables.decrementRowColumn({
@@ -418,7 +496,7 @@ export async function approveBankSlipCore(
     await tables.updateRow({
       databaseId: DATABASE_ID,
       tableId: TABLE_ORDERS,
-      rowId: slip.orderId,
+      rowId: order.$id,
       data: { status: "paid" },
       transactionId,
     });
@@ -426,8 +504,11 @@ export async function approveBankSlipCore(
     await tables.updateRow({
       databaseId: DATABASE_ID,
       tableId: TABLE_PAYMENTS,
-      rowId: slip.paymentId,
-      data: { status: "paid" },
+      rowId: payment.$id,
+      data: {
+        status: "paid",
+        idempotencyKey: bankConfirmIdempotencyKey(order.$id),
+      },
       transactionId,
     });
 
@@ -439,12 +520,13 @@ export async function approveBankSlipCore(
         actorId: adminUserId,
         event: "bank_slip.approved",
         resourceType: "order",
-        resourceId: slip.orderId,
+        resourceId: order.$id,
         meta: JSON.stringify({
           bankSlipId: slip.$id,
-          paymentId: slip.paymentId,
+          paymentId: payment.$id,
           productsDecremented: productsDecrementedMeta,
           oversoldCount: String(oversoldWarnings.length),
+          supersededSlipCount: String(siblingIds.length),
         }).slice(0, 4000),
       },
       permissions: [],
@@ -456,14 +538,8 @@ export async function approveBankSlipCore(
       commit: true,
     });
   } catch (error) {
-    const retry = await isAlreadyProcessed(trimmedId);
-    if (retry.already) {
-      return {
-        ok: true,
-        message: retry.message,
-        alreadyReviewed: true,
-      };
-    }
+    const retry = approveConflictResult(await loadReviewContext(trimmedId));
+    if (retry) return retry;
 
     const message =
       error instanceof AppwriteException
@@ -487,7 +563,7 @@ export async function approveBankSlipCore(
 
 /**
  * Reject a pending bank slip: payment failed; no order/stock changes.
- * Idempotent: already-rejected → safe no-op.
+ * Idempotent: already-rejected → safe no-op. Never overwrites paid/refunded.
  */
 export async function rejectBankSlipCore(
   adminUserId: string,
@@ -506,35 +582,23 @@ export async function rejectBankSlipCore(
     return { ok: false, error: "Missing bank slip." };
   }
 
-  const slip = await loadBankSlip(trimmedId);
-  if (!slip) {
-    return { ok: false, error: "Bank slip not found." };
-  }
+  const loaded = await loadReviewContext(trimmedId);
+  if (!loaded.ok) return loaded;
 
-  if (slip.status === "rejected") {
+  const decision = evaluateBankSlipReject(loaded.ctx);
+  if (decision.action === "refuse") {
+    return { ok: false, error: decision.error };
+  }
+  if (decision.action === "noop") {
     return {
       ok: true,
-      message: "This bank slip was already rejected.",
+      message: decision.message,
       alreadyReviewed: true,
     };
   }
 
-  if (slip.status === "approved") {
-    return {
-      ok: true,
-      message: "This bank slip was already approved.",
-      alreadyReviewed: true,
-    };
-  }
-
-  if (slip.status !== "pending") {
-    return {
-      ok: true,
-      message: "This bank slip was already reviewed.",
-      alreadyReviewed: true,
-    };
-  }
-
+  const { slip, payment, order } = loaded.ctx;
+  const updatePayment = decision.action === "settle";
   const { tables } = await createAdminClient();
   const auditRowId = ID.unique();
 
@@ -554,13 +618,15 @@ export async function rejectBankSlipCore(
       transactionId,
     });
 
-    await tables.updateRow({
-      databaseId: DATABASE_ID,
-      tableId: TABLE_PAYMENTS,
-      rowId: slip.paymentId,
-      data: { status: "failed" },
-      transactionId,
-    });
+    if (updatePayment) {
+      await tables.updateRow({
+        databaseId: DATABASE_ID,
+        tableId: TABLE_PAYMENTS,
+        rowId: payment.$id,
+        data: { status: "failed" },
+        transactionId,
+      });
+    }
 
     await tables.createRow({
       databaseId: DATABASE_ID,
@@ -570,11 +636,12 @@ export async function rejectBankSlipCore(
         actorId: adminUserId,
         event: "bank_slip.rejected",
         resourceType: "order",
-        resourceId: slip.orderId,
+        resourceId: order.$id,
         meta: JSON.stringify({
           bankSlipId: slip.$id,
-          paymentId: slip.paymentId,
+          paymentId: payment.$id,
           reviewNote: parsedNote,
+          paymentUpdated: String(updatePayment),
         }).slice(0, 4000),
       },
       permissions: [],
@@ -586,17 +653,8 @@ export async function rejectBankSlipCore(
       commit: true,
     });
   } catch (error) {
-    const retrySlip = await loadBankSlip(trimmedId);
-    if (retrySlip && retrySlip.status !== "pending") {
-      return {
-        ok: true,
-        message:
-          retrySlip.status === "rejected"
-            ? "This bank slip was already rejected."
-            : "This bank slip was already reviewed.",
-        alreadyReviewed: true,
-      };
-    }
+    const retry = rejectConflictResult(await loadReviewContext(trimmedId));
+    if (retry) return retry;
 
     const message =
       error instanceof AppwriteException
@@ -605,7 +663,12 @@ export async function rejectBankSlipCore(
     return { ok: false, error: message };
   }
 
-  return { ok: true, message: "Bank slip rejected. Payment marked failed." };
+  return {
+    ok: true,
+    message: updatePayment
+      ? "Bank slip rejected. Payment marked failed."
+      : "Bank slip rejected.",
+  };
 }
 
 /** Confirm a bank_slips row references this fileId (defense-in-depth for proxy). */

@@ -182,6 +182,8 @@ Admin overrides on `/admin/orders` write the **platform ledger only** (`cancelAd
 
 A later PayHere chargeback notify (`-3`) is idempotent when `payments.status` is already `refunded`. Captured card funds, if they must go back to the buyer, are returned in the **PayHere merchant dashboard** (sandbox), not by this app. No stock restore.
 
+Bank-slip leftovers after cancel (step **6.14**): a pending `bank_slips` row must not re-settle a `cancelled` order. Approve refuses; reject closes the slip only and never writes `failed` over `paid` / `refunded`. First bank approve sets `payments.idempotencyKey = bank:<orderId>`.
+
 ### Idempotency
 
 - Prefer `payments.idempotencyKey` = `payhere:<PayHere payment_id>` and `payherePaymentId`.
