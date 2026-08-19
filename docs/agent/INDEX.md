@@ -39,4 +39,4 @@ All documents coding agents should read for Knurdz Marketplace live here (except
 
 ## Phase 6 status
 
-**In progress — claimed by Member 1.** Seller portal **6.1–6.11** landed via `dev` merge (`seller-listings`, orders, earnings, settings). Next: **6.12** (admin seller performance), then integration **6.14–6.18**. Canonical plan: [`WORK_DISTRIBUTION.md`](../../WORK_DISTRIBUTION.md) **Phase 6**.
+**In progress — claimed by Member 1.** Seller portal **6.1–6.11** and admin seller performance **6.12** landed. Next: **6.13** (admin order overrides), then integration **6.14–6.18**. Canonical plan: [`WORK_DISTRIBUTION.md`](../../WORK_DISTRIBUTION.md) **Phase 6**.

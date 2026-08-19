@@ -5,6 +5,7 @@ import { requireLabel } from "@/lib/appwrite/roles";
 const ADMIN_NAV = [
   { href: "/admin", label: "Dashboard" },
   { href: "/admin/sellers", label: "Sellers" },
+  { href: "/admin/sellers/performance", label: "Performance" },
   { href: "/admin/users", label: "Users" },
   { href: "/admin/listings", label: "Listings" },
   { href: "/admin/categories", label: "Categories" },
