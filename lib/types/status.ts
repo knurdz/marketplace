@@ -103,6 +103,59 @@ export function isOrderCancelable(status: OrderStatus): boolean {
   return (ORDER_CANCELABLE_STATUSES as readonly OrderStatus[]).includes(status);
 }
 
+/**
+ * Admin cancel (6.13): unpaid early orders only. Same order statuses as buyer
+ * cancel; payment must not already be paid or refunded.
+ */
+export const ADMIN_ORDER_CANCELABLE_STATUSES = [
+  "pending_payment",
+  "payment_review",
+] as const satisfies readonly OrderStatus[];
+export type AdminOrderCancelableStatus =
+  (typeof ADMIN_ORDER_CANCELABLE_STATUSES)[number];
+
+/**
+ * Admin refund (6.13): paid through completed. Payment must be `paid`.
+ * Chargeback notify (`status_code -3`) converges on the same `refunded` rows.
+ */
+export const ADMIN_ORDER_REFUNDABLE_STATUSES = [
+  "paid",
+  "processing",
+  "shipped",
+  "ready_pickup",
+  "completed",
+] as const satisfies readonly OrderStatus[];
+export type AdminOrderRefundableStatus =
+  (typeof ADMIN_ORDER_REFUNDABLE_STATUSES)[number];
+
+export function canAdminCancelOrder(
+  orderStatus: OrderStatus,
+  paymentStatus: PaymentStatus,
+): boolean {
+  if (
+    !(ADMIN_ORDER_CANCELABLE_STATUSES as readonly OrderStatus[]).includes(
+      orderStatus,
+    )
+  ) {
+    return false;
+  }
+  return paymentStatus !== "paid" && paymentStatus !== "refunded";
+}
+
+export function canAdminRefundOrder(
+  orderStatus: OrderStatus,
+  paymentStatus: PaymentStatus,
+): boolean {
+  if (
+    !(ADMIN_ORDER_REFUNDABLE_STATUSES as readonly OrderStatus[]).includes(
+      orderStatus,
+    )
+  ) {
+    return false;
+  }
+  return paymentStatus === "paid";
+}
+
 /** Seller fulfillment hops (Member 3 step 3.11). */
 export const SELLER_FULFILLMENT_TRANSITIONS: Partial<
   Record<OrderStatus, readonly OrderStatus[]>

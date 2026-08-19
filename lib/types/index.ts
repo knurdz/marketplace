@@ -46,6 +46,8 @@ export type {
 } from "./payhere";
 export {
   ACTIVE_PRODUCT_STATUS,
+  ADMIN_ORDER_CANCELABLE_STATUSES,
+  ADMIN_ORDER_REFUNDABLE_STATUSES,
   BANK_SLIP_STATUSES,
   ORDER_CANCELABLE_STATUSES,
   ORDER_HAPPY_PATH_STATUSES,
@@ -56,6 +58,8 @@ export {
   PRODUCT_STATUSES,
   REPORT_STATUSES,
   SELLER_STATUSES,
+  canAdminCancelOrder,
+  canAdminRefundOrder,
   canSellerFulfillmentTransition,
   deriveOrderTimeline,
   isBankSlipStatus,
@@ -69,6 +73,8 @@ export {
   isSellerStatus,
 } from "./status";
 export type {
+  AdminOrderCancelableStatus,
+  AdminOrderRefundableStatus,
   BankSlipStatus,
   OrderCancelableStatus,
   OrderStatus,

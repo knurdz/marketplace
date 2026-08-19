@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { AdminOrderOverrideActions } from "@/components/admin/admin-order-override-actions";
 import { Button } from "@/components/ui/button";
 import {
   formatOrderStatus,
@@ -118,8 +119,9 @@ export default async function AdminOrdersPage({ searchParams }: PageProps) {
       <p className="font-mono text-sm text-accent">$ ./admin --orders</p>
       <h2 className="mt-3 text-3xl font-bold tracking-tight">All orders</h2>
       <p className="mt-2 max-w-xl text-sm text-muted-foreground">
-        Read-only platform-wide order oversight. Filter by order status,
-        payment method, or payment status.
+        Platform-wide order oversight. Cancel unpaid orders or refund paid
+        ones — both write canonical statuses and an audit log. Captured
+        PayHere money is returned in the merchant dashboard, not here.
       </p>
 
       <form method="get" className="mt-8 flex flex-wrap items-end gap-3">
@@ -237,6 +239,12 @@ export default async function AdminOrdersPage({ searchParams }: PageProps) {
                 >
                   Ship to: {truncateAddress(order.shippingAddress)}
                 </p>
+
+                <AdminOrderOverrideActions
+                  orderId={order.$id}
+                  orderStatus={order.status}
+                  paymentStatus={order.paymentStatus}
+                />
               </li>
             );
           })}

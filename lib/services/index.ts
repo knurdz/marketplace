@@ -41,6 +41,11 @@ export {
 } from "./admin-orders";
 export type { AdminOrderView, ListAllOrdersResult } from "./admin-orders";
 export {
+  cancelAdminOrder,
+  refundAdminOrder,
+} from "./admin-order-overrides";
+export type { AdminOrderOverrideResult } from "./admin-order-overrides";
+export {
   aggregateSellerPerformanceRows,
   listApprovedSellerPerformance,
 } from "./admin-seller-performance";
