@@ -39,4 +39,4 @@ All documents coding agents should read for Knurdz Marketplace live here (except
 
 ## Phase 6 status
 
-**In progress — claimed by Member 1.** Seller portal **6.1–6.11**, admin seller performance **6.12**, and admin order overrides **6.13** landed. Next: **6.14** (bank-slip idempotency re-verify), then integration **6.15–6.18**. Canonical plan: [`WORK_DISTRIBUTION.md`](../../WORK_DISTRIBUTION.md) **Phase 6**.
+**In progress — claimed by Member 1.** Seller portal **6.1–6.11**, admin seller performance **6.12**, admin order overrides **6.13**, and bank-slip idempotency **6.14** landed. Next: **6.15** (schema changelog only if new fields), then integration **6.16–6.18**. Canonical plan: [`WORK_DISTRIBUTION.md`](../../WORK_DISTRIBUTION.md) **Phase 6**.

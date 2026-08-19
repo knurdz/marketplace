@@ -64,16 +64,24 @@ export type { ListAuditLogsResult } from "./audit-logs";
 export {
   approveBankSlipCore,
   asBankSlip,
+  bankConfirmIdempotencyKey,
   bankSlipFileExists,
+  evaluateBankSlipApprove,
+  evaluateBankSlipReject,
   getBankSlipReviewUrl,
   listPendingBankSlips,
   rejectBankSlipCore,
+  shouldListPendingBankSlip,
 } from "./bank-slip-review";
 export type {
   BankSlipReviewResult,
   ListPendingBankSlipsResult,
   PendingBankSlipView,
 } from "./bank-slip-review";
+export type {
+  BankSlipApproveDecision,
+  BankSlipRejectDecision,
+} from "./bank-slip-review-rules";
 export {
   asCategory,
   generateSlug,

@@ -58,7 +58,7 @@ Use after every change that touches code or schema:
 
 ## Member 1 — Foundation (must-dos first)
 
-**Owns:** repo bootstrap, Appwrite clients, auth, schema, storage helpers, design system, seeds, route guards, shared types, service/API consistency, **payment setup** (PayHere Functions, secrets, free confirm, payment contract implementation). **Also owns Phase 6** (remaining seller + leftover admin + E2E + optionals) — implement **6.14** next.
+**Owns:** repo bootstrap, Appwrite clients, auth, schema, storage helpers, design system, seeds, route guards, shared types, service/API consistency, **payment setup** (PayHere Functions, secrets, free confirm, payment contract implementation). **Also owns Phase 6** (remaining seller + leftover admin + E2E + optionals) — implement **6.15** next.
 
 ### Phase 0 — blockers (do before others ship against APIs)
 
@@ -323,7 +323,7 @@ Complete payment infrastructure so Members 2–4 only consume APIs / admin UI.
 
 - [x] Admin actions audited
 - [x] Suspended users cannot checkout or publish
-- [ ] Bank slip approve/reject is idempotent and audited — **Phase 6.14** (re-verify **4.7**; patch only if a gap remains)
+- [x] Bank slip approve/reject is idempotent and audited — **Phase 6.14** (re-verify **4.7**; patch only if a gap remains)
 - [x] Does **not** implement PayHere Functions (Member 1)
 
 ---
@@ -362,7 +362,7 @@ After **6.8**, tick Member 3 verification extras: own-only mutations, unpublishe
 | ---- | ------- | ---- | -- | ------ |
 | [x] **6.12** | Member 4 task (no 4.x id) | Seller performance | Basic metrics on approved sellers | Admin-only; depends on **6.9–6.11** data |
 | [x] **6.13** | Admin order overrides | Cancel/refund + audit | Coordinate PayHere chargeback / `refunded` (`PAYHERE.md`) | Audited; valid status enums only |
-| [ ] **6.14** | Member 4 verify extra | Bank-slip idempotency | Re-verify **4.7**; patch only if a gap remains | Idempotent approve/reject + audit; do not rebuild the queue |
+| [x] **6.14** | Member 4 verify extra | Bank-slip idempotency | Re-verify **4.7**; patch only if a gap remains | Idempotent approve/reject + audit; do not rebuild the queue |
 
 ### C — Integration (not new features)
 
@@ -437,7 +437,7 @@ Pick up only after Phases 1–4 **and Phase 6 A–C** are solid (**6.18**). Assi
 | Weeks 2–3  | Members 2–4 implement portals (Phases 2–3)                        |
 | Week 3     | E2E payments: Member 1 setup + Member 2 UX + Member 4 bank verify |
 | Week 4     | Hardening, demo, Phase 5 extras if ahead                          |
-| **Now**    | **Phase 6 (Member 1):** **6.1–6.13** done; next **6.14** bank-slip idempotency re-verify |
+| **Now**    | **Phase 6 (Member 1):** **6.1–6.14** done; next **6.15** schema changelog only if needed |
 
 
 ---
