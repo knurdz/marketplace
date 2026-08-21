@@ -18,6 +18,7 @@ const initial: PlatformSettingActionState = {};
 const BOOLEAN_KEYS = new Set<string>([
   PLATFORM_SETTING_KEYS.featuresFreeListings,
   PLATFORM_SETTING_KEYS.checkoutSandboxModeDisplay,
+  PLATFORM_SETTING_KEYS.checkoutPayhereEnabled,
 ]);
 
 const KEY_LABELS: Record<string, string> = {
@@ -28,6 +29,7 @@ const KEY_LABELS: Record<string, string> = {
   [PLATFORM_SETTING_KEYS.checkoutSandboxModeDisplay]: "Sandbox mode banner",
   [PLATFORM_SETTING_KEYS.checkoutFeePercent]: "Platform fee (%)",
   [PLATFORM_SETTING_KEYS.featuresFreeListings]: "Free listings enabled",
+  [PLATFORM_SETTING_KEYS.checkoutPayhereEnabled]: "PayHere checkout enabled",
 };
 
 const KEY_HELP: Record<string, string> = {
@@ -37,6 +39,8 @@ const KEY_HELP: Record<string, string> = {
     "Platform fee percentage (0–100). Stored as a numeric string.",
   [PLATFORM_SETTING_KEYS.checkoutBankInstructions]:
     "Buyer-facing bank transfer copy shown at checkout.",
+  [PLATFORM_SETTING_KEYS.checkoutPayhereEnabled]:
+    "Shows PayHere at checkout and allows createOrder with payhere. Keep false until merchant authorization.",
 };
 
 function useSettingToast(state: PlatformSettingActionState) {

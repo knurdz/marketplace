@@ -36,6 +36,7 @@ import {
   recordCouponRedemption,
   validateCouponForCheckout,
 } from "./coupons";
+import { isPayHereCheckoutEnabled } from "./platform-settings";
 import { getProduct, isProductPurchasable } from "./products";
 import {
   ORDER_ERROR_CODES,
@@ -682,9 +683,20 @@ export async function createOrder(
     );
   }
 
+  if (input.paymentMethod === "payhere") {
+    const payhereEnabled = await isPayHereCheckoutEnabled();
+    if (!payhereEnabled) {
+      return fail<CreateOrderResult>(
+        "Online card checkout is not available yet.",
+        ORDER_ERROR_CODES.PAYMENT_METHOD_INVALID,
+      );
+    }
+  }
+
   if (
     (input.paymentMethod === "payhere" ||
-      input.paymentMethod === "bank_transfer") &&
+      input.paymentMethod === "bank_transfer" ||
+      input.paymentMethod === "cod") &&
     payableTotal <= 0
   ) {
     return fail<CreateOrderResult>(
@@ -925,6 +937,8 @@ export function checkoutContinuationPath(
   switch (method) {
     case "free":
       return `/checkout/free?orderId=${id}`;
+    case "cod":
+      return `/checkout/cod?orderId=${id}`;
     case "bank_transfer":
       return `/checkout/bank?orderId=${id}`;
     case "payhere":

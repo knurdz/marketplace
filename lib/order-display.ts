@@ -16,6 +16,7 @@ const PAYMENT_METHOD_LABELS: Record<PaymentMethod, string> = {
   payhere: "PayHere",
   bank_transfer: "Bank transfer",
   free: "Free",
+  cod: "Cash on delivery",
 };
 
 export function formatOrderStatus(status: OrderStatus): string {

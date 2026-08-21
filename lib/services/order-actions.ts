@@ -7,9 +7,11 @@
 import { revalidatePath } from "next/cache";
 import { isPaymentMethod } from "@/lib/types";
 import { confirmFreeOrder } from "./free-order";
+import { confirmCodOrder } from "./cod-order";
 import {
   ORDER_ERROR_CODES,
   type CancelOrderActionState,
+  type ConfirmCodOrderActionState,
   type ConfirmFreeOrderActionState,
   type CreateOrderActionState,
   type PollPayHerePaymentStatusActionState,
@@ -30,6 +32,7 @@ function revalidateCheckoutPaths() {
   revalidatePath("/cart");
   revalidatePath("/checkout");
   revalidatePath("/checkout/free");
+  revalidatePath("/checkout/cod");
   revalidatePath("/checkout/bank");
   revalidatePath("/checkout/payhere");
   revalidatePath("/checkout/payhere/return");
@@ -122,6 +125,71 @@ export async function confirmFreeOrderAction(
   }
 
   const confirm = await confirmFreeOrder({ orderId });
+  if (!confirm.ok) {
+    const isNotConfigured = confirm.error.includes("not configured");
+    const isNotFound = confirm.error === "Order not found.";
+    return {
+      ok: false,
+      error: confirm.error,
+      code: isNotConfigured
+        ? ORDER_ERROR_CODES.CONFIRM_NOT_CONFIGURED
+        : isNotFound
+          ? ORDER_ERROR_CODES.NOT_FOUND
+          : undefined,
+    };
+  }
+
+  const refreshedOrder = await getOwnOrder(orderId);
+  const refreshedPayment = await getOwnPaymentForOrder(orderId);
+
+  if (refreshedPayment?.status === "paid" && refreshedOrder) {
+    revalidateCheckoutPaths();
+    revalidateOrderPaths(orderId);
+    return {
+      ok: true,
+      orderStatus: refreshedOrder.status,
+      paymentStatus: refreshedPayment.status,
+    };
+  }
+
+  return {
+    ok: false,
+    pendingConfirmation: true,
+    error:
+      "Confirmation is processing. Refresh in a moment to see your order status.",
+    orderStatus: refreshedOrder?.status ?? order.status,
+    paymentStatus: refreshedPayment?.status ?? payment.status,
+  };
+}
+
+export async function confirmCodOrderAction(
+  _prev: ConfirmCodOrderActionState,
+  formData: FormData,
+): Promise<ConfirmCodOrderActionState> {
+  const orderId = String(formData.get("orderId") ?? "").trim();
+  if (!orderId) {
+    return { ok: false, error: "Invalid order id." };
+  }
+
+  const order = await getOwnOrder(orderId);
+  if (!order || order.paymentMethod !== "cod") {
+    return {
+      ok: false,
+      error: "Order not found.",
+      code: ORDER_ERROR_CODES.NOT_FOUND,
+    };
+  }
+
+  const payment = await getOwnPaymentForOrder(orderId);
+  if (!payment || payment.method !== "cod") {
+    return {
+      ok: false,
+      error: "Payment not found.",
+      code: ORDER_ERROR_CODES.NOT_FOUND,
+    };
+  }
+
+  const confirm = await confirmCodOrder({ orderId });
   if (!confirm.ok) {
     const isNotConfigured = confirm.error.includes("not configured");
     const isNotFound = confirm.error === "Order not found.";
@@ -282,6 +350,7 @@ export { checkoutContinuationPath };
 
 export type {
   CancelOrderActionState,
+  ConfirmCodOrderActionState,
   ConfirmFreeOrderActionState,
   CreateOrderActionState,
   PollPayHerePaymentStatusActionState,

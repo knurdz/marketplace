@@ -19,15 +19,17 @@ const initialState: CreateOrderActionState = {};
 
 type CheckoutFormProps = {
   cartView: CartView;
+  payhereEnabled: boolean;
 };
 
 const METHOD_LABELS: Record<(typeof PAYMENT_METHODS)[number], string> = {
   payhere: "PayHere (sandbox — test only)",
   bank_transfer: "Bank transfer",
   free: "Free checkout",
+  cod: "Cash on delivery",
 };
 
-export function CheckoutForm({ cartView }: CheckoutFormProps) {
+export function CheckoutForm({ cartView, payhereEnabled }: CheckoutFormProps) {
   const router = useRouter();
   const [state, formAction, pending] = useActionState(createOrder, initialState);
   const lastToast = useRef<string | null>(null);
@@ -58,10 +60,12 @@ export function CheckoutForm({ cartView }: CheckoutFormProps) {
   }, [state, router]);
 
   const defaultMethod = isFreeOrder ? "free" : "bank_transfer";
-  const paidMethods = ["bank_transfer", "payhere"] as const;
-  const availableMethods = isFreeOrder
-    ? (["free"] as const)
-    : paidMethods;
+  const paidMethods = (
+    payhereEnabled
+      ? (["bank_transfer", "cod", "payhere"] as const)
+      : (["bank_transfer", "cod"] as const)
+  );
+  const availableMethods = isFreeOrder ? (["free"] as const) : paidMethods;
 
   return (
     <div className="mt-10 grid gap-12 lg:grid-cols-[minmax(0,1fr)_minmax(0,20rem)] lg:gap-16">
@@ -188,6 +192,12 @@ export function CheckoutForm({ cartView }: CheckoutFormProps) {
                   {method === "free" ? (
                     <span className="mt-1 block text-sm text-muted-foreground">
                       All items in this order are free.
+                    </span>
+                  ) : null}
+                  {method === "cod" ? (
+                    <span className="mt-1 block text-sm text-muted-foreground">
+                      Pay cash when your order is delivered. Confirm here to
+                      accept the order; the seller can fulfill once accepted.
                     </span>
                   ) : null}
                   {method === "payhere" ? (

@@ -90,7 +90,7 @@ WORK_DISTRIBUTION.md          # Root — checklists + step plans
 ### Status enums
 
 - **Product:** `draft` | `pending_review` | `active` | `rejected` | `archived`
-- **Payment method:** `payhere` | `bank_transfer` | `free`
+- **Payment method:** `payhere` | `bank_transfer` | `free` | `cod` (PayHere gated by `checkout.payhere_enabled`)
 - **Payment status:** `pending` | `awaiting_verification` | `paid` | `failed` | `refunded`
 - **Order:** `pending_payment` → `payment_review` → `paid` → `processing` → `shipped` / `ready_pickup` → `completed` | `cancelled` / `refunded`
 

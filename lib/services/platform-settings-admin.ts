@@ -34,6 +34,7 @@ const KEY_DENYLIST_SUBSTRINGS = [
 const BOOLEAN_KEYS: readonly PlatformSettingKey[] = [
   PLATFORM_SETTING_KEYS.featuresFreeListings,
   PLATFORM_SETTING_KEYS.checkoutSandboxModeDisplay,
+  PLATFORM_SETTING_KEYS.checkoutPayhereEnabled,
 ];
 
 export type PlatformSettingMutationResult =

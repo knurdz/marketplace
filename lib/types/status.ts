@@ -25,7 +25,12 @@ export const ORDER_STATUSES = [
 ] as const;
 export type OrderStatus = (typeof ORDER_STATUSES)[number];
 
-export const PAYMENT_METHODS = ["payhere", "bank_transfer", "free"] as const;
+export const PAYMENT_METHODS = [
+  "payhere",
+  "bank_transfer",
+  "free",
+  "cod",
+] as const;
 export type PaymentMethod = (typeof PAYMENT_METHODS)[number];
 
 export const PAYMENT_STATUSES = [

@@ -41,7 +41,9 @@ Constants: `FUNCTION_PAYHERE_CHECKOUT_HASH`, `FUNCTION_PAYHERE_NOTIFY` in `lib/t
 | Sandbox (step **1.25**, current) | `https://sandbox.payhere.lk/pay/checkout` |
 | Live (not authorized yet) | `https://www.payhere.lk/pay/checkout` |
 
-Until merchant authorization, hash Function env `PAYHERE_SANDBOX=false` / `live` returns **501** (same user message as missing env). The Next parser and checkout form refuse any non-sandbox `actionUrl`. Bank transfer and free checkout do **not** call this Function.
+Until merchant authorization, hash Function env `PAYHERE_SANDBOX=false` / `live` returns **501** (same user message as missing env). The Next parser and checkout form refuse any non-sandbox `actionUrl`. Bank transfer, cash on delivery, and free checkout do **not** call this Function.
+
+**Platform gate:** `checkout.payhere_enabled` in `platform_settings` must be `"true"` for PayHere to appear at checkout and for `createOrder` / `requestPayHereCheckout` to accept `payhere`. Seed defaults to `"false"` until merchant authorization.
 
 Live URL helper `checkoutActionUrl(false)` remains in Function source for a later authorized-live step — it is not used by `payhere-checkout-hash` today.
 

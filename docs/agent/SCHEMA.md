@@ -38,7 +38,7 @@ Server-action rate limits live in [`lib/security/rate-limit.ts`](../../lib/secur
 |--------|--------|
 | Product `status` | `draft` \| `pending_review` \| `active` \| `rejected` \| `archived` |
 | Order `status` | `pending_payment` \| `payment_review` \| `paid` \| `processing` \| `shipped` \| `ready_pickup` \| `completed` \| `cancelled` \| `refunded` |
-| Payment `method` | `payhere` \| `bank_transfer` \| `free` |
+| Payment `method` | `payhere` \| `bank_transfer` \| `free` \| `cod` |
 | Payment `status` | `pending` \| `awaiting_verification` \| `paid` \| `failed` \| `refunded` |
 | Seller profile `status` | `pending` \| `rejected` \| `approved` |
 | Bank slip `status` | `pending` \| `approved` \| `rejected` |
@@ -55,7 +55,7 @@ Cross-member rules enforced in services — do not fork status strings or parall
 | **Stock on confirm** | Free confirm **rejects** if stock &lt; qty (`FREE_CONFIRM_STOCK`). Bank approve + PayHere notify **settle and clamp** at 0 (money already in flight). Admin cancel/refund does **not** restore stock (ledger-only — see PAYHERE.md 6.13). |
 | **Bank details** | Public shop omits account numbers (`PublicSellerInfo` in `lib/services/sellers.ts`). Full number on owned bank checkout + owner profile only. Admin seller queue shows masked last-4. |
 | **Storefront buyable** | `status=active` AND `available=true` AND `stock > 0` (`isProductPurchasable`). |
-| **Idempotency keys** | `free:<orderId>`, `bank:<orderId>`, `payhere:<payment_id>` on first successful settle. |
+| **Idempotency keys** | `free:<orderId>`, `bank:<orderId>`, `cod:<orderId>`, `payhere:<payment_id>` on first successful settle. |
 
 ## Tables (22)
 
