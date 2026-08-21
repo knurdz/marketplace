@@ -218,7 +218,7 @@ export function ShopProfileForm({
           />
         </div>
 
-        <Button type="submit" disabled={bankPending}>
+      <Button type="submit" disabled={bankPending} data-testid="seller-bank-save">
           {bankPending ? "Saving…" : "Save bank details"}
         </Button>
       </form>

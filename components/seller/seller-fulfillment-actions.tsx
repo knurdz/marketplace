@@ -67,7 +67,7 @@ function SellerFulfillmentButton({
     <form action={formAction}>
       <input type="hidden" name="orderId" value={orderId} />
       <input type="hidden" name="nextStatus" value={nextStatus} />
-      <Button type="submit" size="sm" disabled={pending}>
+      <Button type="submit" size="sm" disabled={pending} data-testid={`fulfill-${nextStatus}`}>
         {pending ? "Updating…" : STATUS_LABELS[nextStatus]}
       </Button>
     </form>

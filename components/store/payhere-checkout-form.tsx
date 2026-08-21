@@ -91,7 +91,7 @@ export function PayHereCheckoutForm({ order, payment }: PayHereCheckoutFormProps
       ) : null}
 
       <div className="flex flex-wrap gap-3">
-        <Button type="button" onClick={handleContinue} disabled={isPending}>
+        <Button type="button" onClick={handleContinue} disabled={isPending} data-testid="payhere-continue">
           {isPending ? "Redirecting to PayHere…" : "Continue to PayHere"}
         </Button>
         <Button type="button" variant="outline" size="sm" asChild>

@@ -90,7 +90,7 @@ export function FreeOrderConfirmForm({
 
       <form action={formAction} className="flex flex-wrap gap-3">
         <input type="hidden" name="orderId" value={order.$id} />
-        <Button type="submit" disabled={!canConfirm}>
+        <Button type="submit" disabled={!canConfirm} data-testid="free-confirm">
           {pending ? "Confirming…" : "Confirm free order"}
         </Button>
         <Button type="button" variant="outline" size="sm" asChild>

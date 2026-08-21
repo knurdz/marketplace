@@ -108,7 +108,7 @@ export function BankSlipUploadForm({ order, payment }: BankSlipUploadFormProps) 
         </div>
 
         <div className="flex flex-wrap gap-3">
-          <Button type="submit" disabled={!canUpload}>
+          <Button type="submit" disabled={!canUpload} data-testid="bank-slip-upload">
             {pending ? "Uploading…" : "Upload bank slip"}
           </Button>
           <Button type="button" variant="outline" size="sm" asChild>

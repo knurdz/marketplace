@@ -8,12 +8,14 @@ import {
 import { createAdminClient } from "@/lib/appwrite/server";
 import type { Product } from "@/lib/types";
 import type { ProductStatus } from "@/lib/types";
+import {
+  ACTIVE_PRODUCT_STATUS,
+  ARCHIVED_PRODUCT_STATUS,
+  PENDING_REVIEW_PRODUCT_STATUS,
+  REJECTED_PRODUCT_STATUS,
+} from "@/lib/types/status";
 import { asProduct } from "./products";
 
-const PENDING_REVIEW_STATUS = "pending_review" as const;
-const ACTIVE_STATUS = "active" as const;
-const REJECTED_STATUS = "rejected" as const;
-const ARCHIVED_STATUS = "archived" as const;
 const MAX_REASON_LENGTH = 500;
 const DEFAULT_PAGE_SIZE = 24;
 const MAX_PAGE_SIZE = 100;
@@ -131,7 +133,7 @@ export async function listPendingModerationQueue(opts?: {
   limit?: number;
   cursor?: string;
 }): Promise<Product[]> {
-  return listProductsByStatus(PENDING_REVIEW_STATUS, opts);
+  return listProductsByStatus(PENDING_REVIEW_PRODUCT_STATUS, opts);
 }
 
 /**
@@ -147,11 +149,11 @@ export async function approveListingCore(
     return { ok: false, error: "Listing not found." };
   }
 
-  if (product.status === ACTIVE_STATUS) {
+  if (product.status === ACTIVE_PRODUCT_STATUS) {
     return { ok: true, message: `"${product.title}" is already active.` };
   }
 
-  if (product.status !== PENDING_REVIEW_STATUS) {
+  if (product.status !== PENDING_REVIEW_PRODUCT_STATUS) {
     return {
       ok: false,
       error: `Listing is ${product.status}. Only pending_review listings can be approved.`,
@@ -164,7 +166,7 @@ export async function approveListingCore(
       databaseId: DATABASE_ID,
       tableId: TABLE_PRODUCTS,
       rowId: product.$id,
-      data: { status: ACTIVE_STATUS },
+      data: { status: ACTIVE_PRODUCT_STATUS },
     });
   } catch {
     return { ok: false, error: "Failed to approve listing." };
@@ -211,11 +213,11 @@ export async function rejectListingCore(
     return { ok: false, error: "Listing not found." };
   }
 
-  if (product.status === REJECTED_STATUS) {
+  if (product.status === REJECTED_PRODUCT_STATUS) {
     return { ok: true, message: `"${product.title}" is already rejected.` };
   }
 
-  if (product.status !== PENDING_REVIEW_STATUS) {
+  if (product.status !== PENDING_REVIEW_PRODUCT_STATUS) {
     return {
       ok: false,
       error: `Listing is ${product.status}. Only pending_review listings can be rejected.`,
@@ -228,7 +230,7 @@ export async function rejectListingCore(
       databaseId: DATABASE_ID,
       tableId: TABLE_PRODUCTS,
       rowId: product.$id,
-      data: { status: REJECTED_STATUS },
+      data: { status: REJECTED_PRODUCT_STATUS },
     });
   } catch {
     return { ok: false, error: "Failed to reject listing." };
@@ -277,11 +279,11 @@ export async function removeListingCore(
     return { ok: false, error: "Listing not found." };
   }
 
-  if (product.status === ARCHIVED_STATUS) {
+  if (product.status === ARCHIVED_PRODUCT_STATUS) {
     return { ok: true, message: `"${product.title}" is already removed.` };
   }
 
-  if (product.status !== ACTIVE_STATUS) {
+  if (product.status !== ACTIVE_PRODUCT_STATUS) {
     return {
       ok: false,
       error: `Listing is ${product.status}. Only active listings can be removed.`,
@@ -294,7 +296,7 @@ export async function removeListingCore(
       databaseId: DATABASE_ID,
       tableId: TABLE_PRODUCTS,
       rowId: product.$id,
-      data: { status: ARCHIVED_STATUS },
+      data: { status: ARCHIVED_PRODUCT_STATUS },
     });
   } catch {
     return { ok: false, error: "Failed to remove listing." };

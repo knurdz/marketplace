@@ -58,7 +58,7 @@ Use after every change that touches code or schema:
 
 ## Member 1 — Foundation (must-dos first)
 
-**Owns:** repo bootstrap, Appwrite clients, auth, schema, storage helpers, design system, seeds, route guards, shared types, service/API consistency, **payment setup** (PayHere Functions, secrets, free confirm, payment contract implementation). **Also owns Phase 6** (remaining seller + leftover admin + E2E + optionals) — implement **6.15** next.
+**Owns:** repo bootstrap, Appwrite clients, auth, schema, storage helpers, design system, seeds, route guards, shared types, service/API consistency, **payment setup** (PayHere Functions, secrets, free confirm, payment contract implementation). **Also owns Phase 6** (remaining seller + leftover admin + E2E + optionals) — **6.15–6.18 complete**; next optional **6.19**.
 
 ### Phase 0 — blockers (do before others ship against APIs)
 
@@ -115,11 +115,11 @@ Use after every change that touches code or schema:
 - [x] Legal / FAQ static pages
 - [x] Toasts + error boundary + loading-state patterns
 - [x] Platform settings read helper
-- [ ] Schema changelog when others request fields — **Phase 6.15** (only if 6.x needs new fields)
+- [x] Schema changelog when others request fields — **Phase 6.15** (only if 6.x needs new fields)
 - [x] PayHere Function **interfaces** (`PAYHERE.md` + types + stub) — implementation is Member 1 payment setup below
 - [x] Accessibility / responsive baseline pass
 - [x] Role-based post-login redirects (admin → `/admin`, seller → `/seller`, buyer → `/`); single `/login`
-- [ ] Fix cross-member integration issues; keep API contracts consistent — **Phase 6.16**
+- [x] Fix cross-member integration issues; keep API contracts consistent — **Phase 6.16**
 
 ### Payment setup (Member 1 — was formerly Members 2 + 4)
 
@@ -150,7 +150,7 @@ Complete payment infrastructure so Members 2–4 only consume APIs / admin UI.
 
 - [x] Others can auth, hit empty role dashboards, upload a file, and read seeded products
 - [x] Payment setup (1.22–1.28): others can complete free + PayHere sandbox via Member 1 Functions
-- [ ] Phase 6: remaining seller + leftover admin + E2E (see **6.1–6.18** done-when)
+- [x] Phase 6: remaining seller + leftover admin + E2E (see **6.1–6.18** done-when)
 
 ---
 
@@ -368,10 +368,10 @@ After **6.8**, tick Member 3 verification extras: own-only mutations, unpublishe
 
 | Step | Maps to | Goal | Do | Verify |
 | ---- | ------- | ---- | -- | ------ |
-| [ ] **6.15** | Member 1 ongoing | Schema changelog | Only if **6.1–6.14** or **6.13** need new fields | Update `docs/agent/SCHEMA.md` + console |
-| [ ] **6.16** | Member 1 ongoing | Contract pass | Status enums, publish policy, stock-on-confirm, bank-detail exposure | No forked status strings |
-| [ ] **6.17** | Console only | PayHere sandbox E2E | Merchant env + `PAYHERE_NOTIFY_URL` on hash Function | Never git secrets |
-| [ ] **6.18** | Guide §10 | Full E2E script | Register → admin approve seller → create paid+free → moderate if required → free / bank+slip / PayHere → ship → suspend blocks checkout | Playwright after **6.8** |
+| [x] **6.15** | Member 1 ongoing | Schema changelog | Only if **6.1–6.14** or **6.13** need new fields | Update `docs/agent/SCHEMA.md` + console |
+| [x] **6.16** | Member 1 ongoing | Contract pass | Status enums, publish policy, stock-on-confirm, bank-detail exposure | No forked status strings |
+| [x] **6.17** | Console only | PayHere sandbox E2E | Merchant env + `PAYHERE_NOTIFY_URL` on hash Function | Never git secrets |
+| [x] **6.18** | Guide §10 | Full E2E script | Register → admin approve seller → create paid+free → moderate if required → free / bank+slip / PayHere → ship → suspend blocks checkout | Playwright after **6.8** |
 
 ### D — After MVP E2E (numbered optionals)
 
@@ -388,10 +388,10 @@ Same IDs as the table below. Suggested order if capacity remains: **X02** → **
 
 ### Phase 6 — done when
 
-- [ ] Approved seller publishes a listing; buyer can purchase it (not only seed SKUs)
-- [ ] Seller sees paid order, ships / completes; earnings match `paid`
+- [x] Approved seller publishes a listing; buyer can purchase it (not only seed SKUs)
+- [x] Seller sees paid order, ships / completes; earnings match `paid`
 - [x] Admin seller-performance + order override paths exist (or explicitly deferred with a note)
-- [ ] Guide §10 E2E run documented (free + bank + PayHere sandbox)
+- [x] Guide §10 E2E run documented (free + bank + PayHere sandbox)
 
 ---
 
@@ -437,7 +437,7 @@ Pick up only after Phases 1–4 **and Phase 6 A–C** are solid (**6.18**). Assi
 | Weeks 2–3  | Members 2–4 implement portals (Phases 2–3)                        |
 | Week 3     | E2E payments: Member 1 setup + Member 2 UX + Member 4 bank verify |
 | Week 4     | Hardening, demo, Phase 5 extras if ahead                          |
-| **Now**    | **Phase 6 (Member 1):** **6.1–6.14** done; next **6.15** schema changelog only if needed |
+| **Now**    | **Phase 6 (Member 1):** **6.1–6.18** done; next optional **6.19** |
 
 
 ---

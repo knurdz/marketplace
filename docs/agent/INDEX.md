@@ -35,8 +35,8 @@ All documents coding agents should read for Knurdz Marketplace live here (except
 
 ## Payment setup status
 
-**Complete (Member 1 steps 1.22–1.28).** Members 2 and 4 consume Member 1 APIs only: `requestPayHereCheckout`, `confirmFreeOrder`, and `/admin/payments/notify-logs`. Click-path: [`PAYHERE.md`](./PAYHERE.md) (sandbox demo + 1.28 consumer contract). Seeded SKUs: `seed_demo_product` (PayHere) and `seed_demo_free_product` (free). Sandbox **card** E2E still needs merchant env + notify domain on the hash Function in the Appwrite console (never git) — **Phase 6.17**.
+**Complete (Member 1 steps 1.22–1.28).** Members 2 and 4 consume Member 1 APIs only: `requestPayHereCheckout`, `confirmFreeOrder`, and `/admin/payments/notify-logs`. Click-path: [`PAYHERE.md`](./PAYHERE.md) (sandbox demo + 1.28 consumer contract). Seeded SKUs: `seed_demo_product` (PayHere) and `seed_demo_free_product` (free). PayHere sandbox card E2E: human console checklist in [`README.md`](../../README.md) **Phase 6.17** + optional `npm run test:e2e:payhere` after env is set (never git secrets).
 
 ## Phase 6 status
 
-**In progress — claimed by Member 1.** Seller portal **6.1–6.11**, admin seller performance **6.12**, admin order overrides **6.13**, and bank-slip idempotency **6.14** landed. Next: **6.15** (schema changelog only if new fields), then integration **6.16–6.18**. Canonical plan: [`WORK_DISTRIBUTION.md`](../../WORK_DISTRIBUTION.md) **Phase 6**.
+**Phase 6 C complete (6.15–6.18).** Schema freeze, contract pass, PayHere console checklist (6.17), and Playwright Guide §10 suite landed. Next optional: **6.19** (trending/reorder). Canonical plan: [`WORK_DISTRIBUTION.md`](../../WORK_DISTRIBUTION.md) **Phase 6**.

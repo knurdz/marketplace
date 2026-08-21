@@ -86,7 +86,7 @@ export function AddToCartButton({
           className="h-9 w-20 font-mono text-sm"
           disabled={pending}
         />
-        <Button type="button" size="sm" onClick={onAdd} disabled={pending}>
+        <Button type="button" size="sm" onClick={onAdd} disabled={pending} data-testid="add-to-cart">
           {pending ? "Adding…" : "Add to cart"}
         </Button>
         <Button variant="outline" size="sm" asChild>

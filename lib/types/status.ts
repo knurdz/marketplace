@@ -54,6 +54,33 @@ export type ReportStatus = (typeof REPORT_STATUSES)[number];
 /** Storefront / public listing status. */
 export const ACTIVE_PRODUCT_STATUS: ProductStatus = "active";
 
+/** Seller listing workflow statuses (6.16 contract pass). */
+export const DRAFT_PRODUCT_STATUS: ProductStatus = "draft";
+export const PENDING_REVIEW_PRODUCT_STATUS: ProductStatus = "pending_review";
+export const REJECTED_PRODUCT_STATUS: ProductStatus = "rejected";
+export const ARCHIVED_PRODUCT_STATUS: ProductStatus = "archived";
+
+/** Order statuses after successful payment settlement (free / bank / PayHere). */
+export const SETTLED_ORDER_STATUSES = [
+  "paid",
+  "processing",
+  "shipped",
+  "ready_pickup",
+  "completed",
+] as const satisfies readonly OrderStatus[];
+
+/** Unpaid order statuses eligible for bank-slip approve. */
+export const EARLY_PAYMENT_ORDER_STATUSES = [
+  "pending_payment",
+  "payment_review",
+] as const satisfies readonly OrderStatus[];
+
+/** Payment statuses shown on the admin bank-slip queue. */
+export const BANK_SLIP_QUEUE_PAYMENT_STATUSES = [
+  "pending",
+  "awaiting_verification",
+] as const satisfies readonly PaymentStatus[];
+
 /**
  * Buyer cancel allowed only in early statuses (Member 2 step 2.11).
  * Not a full FSM — later members enforce transitions in services.

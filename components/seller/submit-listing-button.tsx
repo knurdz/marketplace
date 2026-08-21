@@ -50,7 +50,7 @@ export function SubmitListingButton({
   return (
     <form action={formAction}>
       <input type="hidden" name="productId" value={productId} />
-      <Button type="submit" size="sm" variant="outline" disabled={pending}>
+      <Button type="submit" size="sm" variant="outline" disabled={pending} data-testid="listing-submit-review">
         {pending ? "Submitting…" : label}
       </Button>
     </form>

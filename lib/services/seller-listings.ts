@@ -24,13 +24,15 @@ import {
   RATE_LIMITS,
 } from "@/lib/security/rate-limit";
 import type { Product, ProductImage, ProductStatus } from "@/lib/types";
+import {
+  ARCHIVED_PRODUCT_STATUS,
+  DRAFT_PRODUCT_STATUS,
+  PENDING_REVIEW_PRODUCT_STATUS,
+  REJECTED_PRODUCT_STATUS,
+} from "@/lib/types/status";
 import { asProduct, asProductImage, listProductImages } from "./products";
 import { areFreeListingsEnabled } from "./platform-settings";
 
-const DRAFT_STATUS = "draft" as const;
-const PENDING_REVIEW_STATUS = "pending_review" as const;
-const REJECTED_STATUS = "rejected" as const;
-const ARCHIVED_STATUS = "archived" as const;
 const DEFAULT_CURRENCY = "LKR";
 const MAX_TITLE_LENGTH = 200;
 const MAX_DESCRIPTION_LENGTH = 10000;
@@ -356,7 +358,7 @@ export async function updateOwnProductCore(
   const loaded = await loadOwnedProductForMutation(productId);
   if (!loaded.ok) return loaded;
 
-  if (loaded.product.status === ARCHIVED_STATUS) {
+  if (loaded.product.status === ARCHIVED_PRODUCT_STATUS) {
     return archivedMutationError();
   }
 
@@ -421,7 +423,7 @@ export async function archiveOwnProductCore(
   const loaded = await loadOwnedProductForMutation(productId);
   if (!loaded.ok) return loaded;
 
-  if (loaded.product.status === ARCHIVED_STATUS) {
+  if (loaded.product.status === ARCHIVED_PRODUCT_STATUS) {
     return { ok: true, message: "Listing is already archived." };
   }
 
@@ -431,7 +433,7 @@ export async function archiveOwnProductCore(
       databaseId: DATABASE_ID,
       tableId: TABLE_PRODUCTS,
       rowId: loaded.product.$id,
-      data: { status: ARCHIVED_STATUS },
+      data: { status: ARCHIVED_PRODUCT_STATUS },
     });
 
     return { ok: true, message: "Listing archived." };
@@ -465,7 +467,7 @@ export async function addOwnProductImagesCore(
   const loaded = await loadOwnedProductForMutation(productId);
   if (!loaded.ok) return loaded;
 
-  if (loaded.product.status === ARCHIVED_STATUS) {
+  if (loaded.product.status === ARCHIVED_PRODUCT_STATUS) {
     return archivedMutationError();
   }
 
@@ -587,7 +589,7 @@ export async function deleteOwnProductImageCore(
   const loaded = await loadOwnedProductImage(productId, imageRowId);
   if (!loaded.ok) return loaded;
 
-  if (loaded.product.status === ARCHIVED_STATUS) {
+  if (loaded.product.status === ARCHIVED_PRODUCT_STATUS) {
     return archivedMutationError();
   }
 
@@ -678,7 +680,7 @@ export async function createDraftProductCore(
         description: parsed.description,
         price: parsed.price,
         isFree: parsed.isFree,
-        status: DRAFT_STATUS,
+        status: DRAFT_PRODUCT_STATUS,
         stock: parsed.stock,
         available:
           input.available === undefined
@@ -693,7 +695,7 @@ export async function createDraftProductCore(
     if (
       !product ||
       product.sellerId !== sellerId ||
-      product.status !== DRAFT_STATUS
+      product.status !== DRAFT_PRODUCT_STATUS
     ) {
       return {
         ok: false,
@@ -800,7 +802,7 @@ export async function countProductImagesForOwnProducts(
 
 /** Whether a seller may submit this listing for admin review. */
 export function canSubmitListingForReview(status: ProductStatus): boolean {
-  return status === DRAFT_STATUS || status === REJECTED_STATUS;
+  return status === DRAFT_PRODUCT_STATUS || status === REJECTED_PRODUCT_STATUS;
 }
 
 async function loadOwnProduct(
@@ -858,7 +860,7 @@ export async function submitListingForReviewCore(
     return { ok: false, error: "Listing not found." };
   }
 
-  if (product.status === PENDING_REVIEW_STATUS) {
+  if (product.status === PENDING_REVIEW_PRODUCT_STATUS) {
     return {
       ok: true,
       message: `"${product.title}" is already awaiting review.`,
@@ -878,7 +880,7 @@ export async function submitListingForReviewCore(
       databaseId: DATABASE_ID,
       tableId: TABLE_PRODUCTS,
       rowId: product.$id,
-      data: { status: PENDING_REVIEW_STATUS },
+      data: { status: PENDING_REVIEW_PRODUCT_STATUS },
     });
   } catch {
     return { ok: false, error: "Could not submit listing. Please try again." };
