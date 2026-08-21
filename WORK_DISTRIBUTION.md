@@ -58,14 +58,14 @@ Use after every change that touches code or schema:
 
 ## Member 1 — Foundation (must-dos first)
 
-**Owns:** repo bootstrap, Appwrite clients, auth, schema, storage helpers, design system, seeds, route guards, shared types, service/API consistency, **payment setup** (PayHere Functions, secrets, free confirm, payment contract implementation). **Also owns Phase 6** (remaining seller + leftover admin + E2E + optionals) — **6.15–6.18 complete**; next optional **6.19**.
+**Owns:** repo bootstrap, Appwrite clients, auth, schema, storage helpers, design system, seeds, route guards, shared types, service/API consistency, **payment setup** (PayHere Functions, secrets, free confirm, payment contract implementation). **Also owns Phase 6** (remaining seller + leftover admin + E2E + optionals) — **6.1–6.22 complete**; creative backlog optional next.
 
 ### Phase 0 — blockers (do before others ship against APIs)
 
 - [x] Next.js (App Router) + TypeScript + lint/format + `.env.example`
 - [x] Appwrite project wiring (browser + server clients)
 - [x] Auth: register, login, logout, session, password reset, email verify
-- [ ] Optional phone field on profile / registration (not required for MVP login) — **Phase 6.22** (profile already has phone; register still optional)
+- [x] Optional phone field on profile / registration (not required for MVP login) — **Phase 6.22**
 - [x] Role model (labels/teams) + middleware guards for `/seller`, `/admin`
 - [x] Database collections + indexes + permissions documented (`docs/agent/SCHEMA.md` when created) — include at least: profiles/users, products, orders, order_items, payments, reviews (+ seller_profiles, categories, notifications, audit as needed)
 - [x] Storage buckets + shared upload helper
@@ -150,7 +150,7 @@ Complete payment infrastructure so Members 2–4 only consume APIs / admin UI.
 
 - [x] Others can auth, hit empty role dashboards, upload a file, and read seeded products
 - [x] Payment setup (1.22–1.28): others can complete free + PayHere sandbox via Member 1 Functions
-- [x] Phase 6: remaining seller + leftover admin + E2E (see **6.1–6.18** done-when)
+- [ ] Phase 6: remaining seller + leftover admin + E2E (see **6.1–6.18** done-when)
 
 ---
 
@@ -176,8 +176,8 @@ Complete payment infrastructure so Members 2–4 only consume APIs / admin UI.
 - [x] Wishlist full page CRUD (dashboard preview → step 2.12)
 - [x] Product reviews & ratings (after completed order)
 - [x] Seller ratings (from buyer after order; distinct from product review if schema allows)
-- [ ] Trending / recently viewed (optional — Phase 5 / **6.19**)
-- [ ] One-click reorder (optional — Phase 5 / **6.19**)
+- [x] Trending / recently viewed (optional — Phase 5 / **6.19**)
+- [x] One-click reorder (optional — Phase 5 / **6.19**)
 
 ### Step-by-step plan (implement one step at a time)
 
@@ -199,7 +199,7 @@ Complete payment infrastructure so Members 2–4 only consume APIs / admin UI.
 | [x] **2.13** | Wishlist         | Full page CRUD                                           | Own wishlist only             |
 | [x] **2.14** | Reviews          | After `completed`; product + seller rating               | Policy enforced               |
 | [x] **2.15** | Report listing   | Create `reports`                                         | Feeds admin queue             |
-| [ ] **2.16** | Optional Phase 5 | Trending / recently viewed / reorder                     | After MVP E2E — **Phase 6.19** |
+| [x] **2.16** | Optional Phase 5 | Trending / recently viewed / reorder                     | After MVP E2E — **Phase 6.19** |
 
 
 ### Member 2 — verification extras
@@ -233,8 +233,8 @@ Complete payment infrastructure so Members 2–4 only consume APIs / admin UI.
 - [x] Seller bank details for buyer transfers
 - [x] Earnings / completed payments list + bank payout tracking (manual OK)
 - [x] Seller settings / policy text
-- [ ] Buyer ↔ seller messaging (optional / Phase 5 — **deferred step 3.15:** not started; no `messages`/`threads` schema; pick up via backlog **X06** when claimed)
-- [ ] Optional: own-order bank verify (optional / Phase 5 — **deferred step 3.15:** policy unchanged — principle 6 admin verifies slips; sellers do not approve)
+- [x] Buyer ↔ seller messaging (optional / Phase 5 — **6.21** basic order threads; bank-verify policy unchanged)
+- [ ] Optional: own-order bank verify (optional / Phase 5 — **deferred:** policy unchanged — principle 6 admin verifies slips; sellers do not approve)
 
 ### Step-by-step plan (implement one step at a time)
 
@@ -294,8 +294,8 @@ Complete payment infrastructure so Members 2–4 only consume APIs / admin UI.
 - [x] Sales reports + user growth analytics (basic charts OK)
 - [x] Seller verification badge controls
 - [x] Basic fraud flags (e.g. repeated failed pays, multi-account signals) — rules-based, not ML
-- [ ] Featured product / boost tooling (optional — Phase 5 / **6.20**; admin-controlled)
-- [ ] Discount coupons admin CRUD (optional — Phase 5 / **6.20**)
+- [x] Featured product / boost tooling (optional — Phase 5 / **6.20**; admin-controlled)
+- [x] Discount coupons admin CRUD (optional — Phase 5 / **6.20**)
 - [x] Read-only view of PayHere/notify failure logs (data produced by Member 1) — optional
 
 ### Step-by-step plan (implement one step at a time)
@@ -316,7 +316,7 @@ Complete payment infrastructure so Members 2–4 only consume APIs / admin UI.
 | [x] **4.11** | Analytics               | Sales + user growth                       | No PII leakage          |
 | [x] **4.12** | Badges + fraud flags    | Verification badge; rule flags            | Rules documented        |
 | [x] **4.13** | Notify log viewer (opt) | Read-only UI over Member 1 failure logs   | No secrets in UI        |
-| [ ] **4.14** | Optional Phase 5        | Featured listings, coupons                | After E2E — **Phase 6.20** |
+| [x] **4.14** | Optional Phase 5        | Featured listings, coupons                | After E2E — **Phase 6.20** |
 
 
 ### Member 4 — verification extras
@@ -377,10 +377,10 @@ After **6.8**, tick Member 3 verification extras: own-only mutations, unpublishe
 
 | Step | Maps to | Goal | Do | Verify |
 | ---- | ------- | ---- | -- | ------ |
-| [ ] **6.19** | **2.16** | Trending / recently viewed / reorder | After **6.18**; needs completed orders + browse | Guest-safe; own-only history |
-| [ ] **6.20** | **4.14** | Featured listings + coupons | Admin-controlled; needs **6.3** `active` products | After E2E |
-| [ ] **6.21** | **3.15** | Messaging or seller bank-verify | Basic threads only if started. **Own-order bank verify only if default policy is updated** (admin verifies slips) | Document policy change in this file if taken |
-| [ ] **6.22** | Member 1 Phase 0 optional | Phone on registration | Profile already has phone; register copy still says later | Optional field; not required for login |
+| [x] **6.19** | **2.16** | Trending / recently viewed / reorder | After **6.18**; needs completed orders + browse | Guest-safe; own-only history |
+| [x] **6.20** | **4.14** | Featured listings + coupons | Admin-controlled; needs **6.3** `active` products | After E2E |
+| [x] **6.21** | **3.15** | Messaging or seller bank-verify | Basic order threads (6.21). **Own-order bank verify only if default policy is updated** (admin verifies slips) | Messaging landed; bank-verify deferred |
+| [x] **6.22** | Member 1 Phase 0 optional | Phone on registration | Profile already has phone; register copy still says later | Optional field; not required for login |
 
 ### E — Creative backlog last (after Phase 6 E2E)
 
@@ -388,8 +388,8 @@ Same IDs as the table below. Suggested order if capacity remains: **X02** → **
 
 ### Phase 6 — done when
 
-- [x] Approved seller publishes a listing; buyer can purchase it (not only seed SKUs)
-- [x] Seller sees paid order, ships / completes; earnings match `paid`
+- [ ] Approved seller publishes a listing; buyer can purchase it (not only seed SKUs)
+- [ ] Seller sees paid order, ships / completes; earnings match `paid`
 - [x] Admin seller-performance + order override paths exist (or explicitly deferred with a note)
 - [x] Guide §10 E2E run documented (free + bank + PayHere sandbox)
 
@@ -403,7 +403,8 @@ Pick up only after Phases 1–4 **and Phase 6 A–C** are solid (**6.18**). Assi
 | ID  | Item                                        | Suggested owner |
 | --- | ------------------------------------------- | --------------- |
 | X01 | CAPTCHA on register/login (optional)        | Member 1        |
-| X02 | Dark/light mode                             | Member 1        |
+| X02 | Dark/light mode     
+                        | Member 1        |
 | X03 | Realtime notifications (vs polling)         | Member 1        |
 | X04 | AI product recommendations                  | Later           |
 | X05 | Referral system                             | Later           |
@@ -437,7 +438,7 @@ Pick up only after Phases 1–4 **and Phase 6 A–C** are solid (**6.18**). Assi
 | Weeks 2–3  | Members 2–4 implement portals (Phases 2–3)                        |
 | Week 3     | E2E payments: Member 1 setup + Member 2 UX + Member 4 bank verify |
 | Week 4     | Hardening, demo, Phase 5 extras if ahead                          |
-| **Now**    | **Phase 6 (Member 1):** **6.1–6.18** done; next optional **6.19** |
+| **Now**    | **Phase 6 (Member 1):** **6.1–6.22** complete; creative backlog **X01–X07** optional next |
 
 
 ---

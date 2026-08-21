@@ -2,9 +2,12 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { ProductCatalogFilters } from "@/components/store/product-catalog-filters";
 import { ProductList } from "@/components/store/product-list";
+import { RecentlyViewedSection } from "@/components/store/recently-viewed-section";
 import {
   getSessionUser,
   listActiveProducts,
+  listFeaturedProducts,
+  listTrendingProducts,
   parseProductCatalogParams,
 } from "@/lib/services";
 
@@ -20,13 +23,17 @@ export default async function Home({ searchParams }: HomeProps) {
   const user = await getSessionUser();
   const params = await searchParams;
   const catalogParams = parseProductCatalogParams(params);
-  const products = await listActiveProducts({
-    limit: 24,
-    minPrice: catalogParams.minPrice,
-    maxPrice: catalogParams.maxPrice,
-    sort: catalogParams.sort,
-    invalidPriceRange: catalogParams.invalidPriceRange,
-  });
+  const [products, trending, featured] = await Promise.all([
+    listActiveProducts({
+      limit: 24,
+      minPrice: catalogParams.minPrice,
+      maxPrice: catalogParams.maxPrice,
+      sort: catalogParams.sort,
+      invalidPriceRange: catalogParams.invalidPriceRange,
+    }),
+    listTrendingProducts({ limit: 8 }),
+    listFeaturedProducts({ limit: 8 }),
+  ]);
 
   const hasActiveFilters =
     catalogParams.minPrice != null ||
@@ -74,6 +81,34 @@ export default async function Home({ searchParams }: HomeProps) {
           )}
         </div>
       </div>
+
+      {featured.length > 0 ? (
+        <section className="relative mx-auto w-full max-w-5xl border-t border-border px-6 py-12 sm:px-10">
+          <p className="font-mono text-sm text-accent">$ ./products --featured</p>
+          <h2 className="mt-3 text-2xl font-bold tracking-tight">Featured</h2>
+          <p className="mt-2 text-sm text-muted-foreground">
+            Hand-picked by the Knurdz team.
+          </p>
+          <div className="mt-6">
+            <ProductList products={featured} />
+          </div>
+        </section>
+      ) : null}
+
+      {trending.length > 0 ? (
+        <section className="relative mx-auto w-full max-w-5xl border-t border-border px-6 py-12 sm:px-10">
+          <p className="font-mono text-sm text-accent">$ ./products --trending</p>
+          <h2 className="mt-3 text-2xl font-bold tracking-tight">Trending</h2>
+          <p className="mt-2 text-sm text-muted-foreground">
+            Popular picks from recent completed orders.
+          </p>
+          <div className="mt-6">
+            <ProductList products={trending} />
+          </div>
+        </section>
+      ) : null}
+
+      <RecentlyViewedSection />
 
       <section
         id="active-listings"

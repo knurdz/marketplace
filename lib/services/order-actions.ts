@@ -13,6 +13,7 @@ import {
   type ConfirmFreeOrderActionState,
   type CreateOrderActionState,
   type PollPayHerePaymentStatusActionState,
+  type ReorderActionState,
   type SubmitBankSlipActionState,
 } from "./order-errors";
 import {
@@ -21,6 +22,7 @@ import {
   createOrder as createOrderImpl,
   getOwnOrder,
   getOwnPaymentForOrder,
+  reorderOwnOrder,
   submitBankSlip as submitBankSlipImpl,
 } from "./orders";
 
@@ -59,6 +61,7 @@ export async function createOrder(
   }
 
   const line2Raw = formData.get("line2");
+  const couponRaw = formData.get("couponCode");
   const result = await createOrderImpl({
     line1: String(formData.get("line1") ?? ""),
     line2:
@@ -69,6 +72,10 @@ export async function createOrder(
     district: String(formData.get("district") ?? ""),
     postalCode: String(formData.get("postalCode") ?? ""),
     paymentMethod,
+    couponCode:
+      typeof couponRaw === "string" && couponRaw.trim().length > 0
+        ? couponRaw
+        : undefined,
   });
 
   if (result.ok) {
@@ -248,6 +255,29 @@ export async function cancelOrderAction(
   };
 }
 
+export async function reorderOrderAction(
+  orderId: string,
+): Promise<ReorderActionState> {
+  const trimmed = orderId?.trim();
+  if (!trimmed) {
+    return { ok: false, error: "Invalid order id." };
+  }
+
+  const result = await reorderOwnOrder(trimmed);
+
+  if (result.ok) {
+    revalidatePath("/cart");
+    revalidatePath("/", "layout");
+    return { ok: true, message: result.message };
+  }
+
+  return {
+    ok: false,
+    error: result.error,
+    code: result.code,
+  };
+}
+
 export { checkoutContinuationPath };
 
 export type {
@@ -255,5 +285,6 @@ export type {
   ConfirmFreeOrderActionState,
   CreateOrderActionState,
   PollPayHerePaymentStatusActionState,
+  ReorderActionState,
   SubmitBankSlipActionState,
 } from "./order-errors";

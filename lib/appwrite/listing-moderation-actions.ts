@@ -12,6 +12,7 @@ import {
   approveListingCore,
   rejectListingCore,
   removeListingCore,
+  setFeaturedListingCore,
 } from "@/lib/services/listing-moderation";
 
 export type ListingModerationActionState = {
@@ -106,6 +107,29 @@ export async function removeListing(
   return { success: result.message };
 }
 
+export async function setFeaturedListing(
+  productId: string,
+  featured: boolean,
+): Promise<ListingModerationActionState> {
+  const auth = await assertAdmin();
+  if (!auth.ok) return { error: auth.error };
+
+  if (typeof productId !== "string" || !productId.trim()) {
+    return { error: "Missing listing." };
+  }
+
+  const result = await setFeaturedListingCore(
+    auth.userId,
+    productId.trim(),
+    featured,
+  );
+  if (!result.ok) return { error: result.error };
+
+  revalidateListingPaths();
+  revalidatePath("/");
+  return { success: result.message };
+}
+
 /** Form action wrapper for approve (useActionState). */
 export async function approveListingFormAction(
   _prev: ListingModerationActionState,
@@ -148,4 +172,17 @@ export async function removeListingFormAction(
     return { error: "Reason is required." };
   }
   return removeListing(productId.trim(), reason);
+}
+
+export async function setFeaturedListingFormAction(
+  _prev: ListingModerationActionState,
+  formData: FormData,
+): Promise<ListingModerationActionState> {
+  const productId = formData.get("productId");
+  const featuredRaw = formData.get("featured");
+  if (typeof productId !== "string" || !productId.trim()) {
+    return { error: "Missing listing." };
+  }
+  const featured = featuredRaw === "true" || featuredRaw === "1";
+  return setFeaturedListing(productId.trim(), featured);
 }

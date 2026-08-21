@@ -2,6 +2,8 @@ import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { OrderCancelForm } from "@/components/store/order-cancel-form";
 import { OrderTimeline } from "@/components/store/order-timeline";
+import { ReorderButton } from "@/components/store/reorder-button";
+import { OpenBuyerThreadButton } from "@/components/messaging/open-buyer-thread-button";
 import { Button } from "@/components/ui/button";
 import { getLoggedInUser } from "@/lib/appwrite/session";
 import {
@@ -13,6 +15,7 @@ import {
   getOwnOrderItems,
   getOwnPaymentForOrder,
 } from "@/lib/services/orders";
+import { isMessagingAllowedForOrder } from "@/lib/services/threads";
 import { isOrderCancelable } from "@/lib/types";
 
 type OrderDetailPageProps = {
@@ -38,6 +41,8 @@ export default async function OrderDetailPage({ params }: OrderDetailPageProps) 
   ]);
 
   const canCancel = isOrderCancelable(order.status);
+  const canReorder = order.status === "completed";
+  const canMessage = isMessagingAllowedForOrder(order);
 
   return (
     <main className="relative mx-auto w-full max-w-3xl px-6 py-16 sm:px-10">
@@ -105,6 +110,25 @@ export default async function OrderDetailPage({ params }: OrderDetailPageProps) 
       </section>
 
       <OrderTimeline status={order.status} />
+
+      {canMessage ? (
+        <section className="mt-10 space-y-4">
+          <p className="font-mono text-sm text-accent">$ ./order --message</p>
+          <h2 className="text-xl font-bold tracking-tight">Contact seller</h2>
+          <OpenBuyerThreadButton orderId={order.$id} />
+        </section>
+      ) : null}
+
+      {canReorder ? (
+        <section className="mt-10 space-y-4">
+          <p className="font-mono text-sm text-accent">$ ./order --reorder</p>
+          <h2 className="text-xl font-bold tracking-tight">Buy again</h2>
+          <p className="text-sm text-muted-foreground">
+            Add available items from this order back to your cart.
+          </p>
+          <ReorderButton orderId={order.$id} variant="detail" />
+        </section>
+      ) : null}
 
       {canCancel ? (
         <section className="mt-10 space-y-4">

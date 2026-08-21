@@ -24,6 +24,7 @@ export const ORDER_ERROR_CODES = {
   SLIP_UPLOAD_FAILED: "ORDER_SLIP_UPLOAD_FAILED",
   UPDATE_FAILED: "ORDER_UPDATE_FAILED",
   NOT_CANCELABLE: "ORDER_NOT_CANCELABLE",
+  COUPON_INVALID: "ORDER_COUPON_INVALID",
 } as const;
 
 export type OrderErrorCode =
@@ -36,6 +37,7 @@ export type CreateOrderInput = {
   district: string;
   postalCode: string;
   paymentMethod: PaymentMethod;
+  couponCode?: string;
 };
 
 export type CreateOrderResult =
@@ -98,4 +100,11 @@ export type CancelOrderActionState = {
   error?: string;
   code?: OrderErrorCode;
   orderStatus?: OrderStatus;
+};
+
+export type ReorderActionState = {
+  ok?: boolean;
+  error?: string;
+  message?: string;
+  code?: OrderErrorCode;
 };

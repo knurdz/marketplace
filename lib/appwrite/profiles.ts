@@ -56,8 +56,13 @@ export async function createProfileForUser(params: {
   userId: string;
   email: string;
   name?: string;
+  phone?: string;
 }): Promise<Profile> {
   const { tables } = await createAdminClient();
+  const phone =
+    typeof params.phone === "string" && params.phone.trim().length > 0
+      ? params.phone.trim().slice(0, 32)
+      : null;
   const row = await tables.createRow({
     databaseId: DATABASE_ID,
     tableId: TABLE_PROFILES,
@@ -65,6 +70,7 @@ export async function createProfileForUser(params: {
     data: {
       userId: params.userId,
       displayName: defaultDisplayName(params.name, params.email),
+      ...(phone ? { phone } : {}),
     },
     permissions: [
       Permission.read(Role.user(params.userId)),

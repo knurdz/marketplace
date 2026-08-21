@@ -67,6 +67,14 @@ function NavLinks({
       ) : null}
       {user ? (
         <Link
+          href="/messages"
+          className="text-sm text-muted-foreground transition hover:text-foreground"
+        >
+          Messages
+        </Link>
+      ) : null}
+      {user ? (
+        <Link
           href="/wishlist"
           className="text-sm text-muted-foreground transition hover:text-foreground"
         >
@@ -163,6 +171,9 @@ export function StoreNavbar({ user, cartItemCount = 0 }: StoreNavbarProps) {
                 <Link href="/orders">Orders</Link>
               </Button>
               <Button variant="outline" size="sm" asChild>
+                <Link href="/messages">Messages</Link>
+              </Button>
+              <Button variant="outline" size="sm" asChild>
                 <Link href="/wishlist">Wishlist</Link>
               </Button>
               <Button variant="outline" size="sm" asChild>
@@ -216,6 +227,11 @@ export function StoreNavbar({ user, cartItemCount = 0 }: StoreNavbarProps) {
                 {user ? (
                   <Button variant="outline" asChild>
                     <Link href="/orders">Orders</Link>
+                  </Button>
+                ) : null}
+                {user ? (
+                  <Button variant="outline" asChild>
+                    <Link href="/messages">Messages</Link>
                   </Button>
                 ) : null}
                 {user ? (

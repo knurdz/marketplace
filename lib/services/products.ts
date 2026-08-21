@@ -1,11 +1,13 @@
 import { AppwriteException, Query } from "node-appwrite";
 import {
   DATABASE_ID,
+  TABLE_ORDER_ITEMS,
+  TABLE_ORDERS,
   TABLE_PRODUCT_IMAGES,
   TABLE_PRODUCTS,
   hasAppwritePublicConfig,
 } from "@/lib/appwrite/config";
-import { createPublicClient } from "@/lib/appwrite/server";
+import { createAdminClient, createPublicClient } from "@/lib/appwrite/server";
 import type { Product, ProductImage } from "@/lib/types";
 import {
   ACTIVE_PRODUCT_STATUS,
@@ -59,6 +61,7 @@ export function asProduct(row: Record<string, unknown>): Product | null {
     stock: Math.max(0, Math.floor(asNumber(row.stock))),
     available: asBoolean(row.available, true),
     currency: asNullableString(row.currency) || "LKR",
+    featured: asBoolean(row.featured, false),
   };
 }
 
@@ -229,6 +232,36 @@ export async function listActiveProducts(opts?: {
   }
 }
 
+/** Admin-curated featured listings (active + available). */
+export async function listFeaturedProducts(opts?: {
+  limit?: number;
+}): Promise<Product[]> {
+  if (!hasAppwritePublicConfig()) return [];
+
+  const limit = Math.min(Math.max(opts?.limit ?? 8, 1), 24);
+
+  try {
+    const { tables } = await createPublicClient();
+    const result = await tables.listRows({
+      databaseId: DATABASE_ID,
+      tableId: TABLE_PRODUCTS,
+      queries: [
+        Query.equal("status", ACTIVE_PRODUCT_STATUS),
+        Query.equal("available", true),
+        Query.equal("featured", true),
+        Query.orderDesc("$createdAt"),
+        Query.limit(limit),
+      ],
+    });
+
+    return mapPublicProductRows(result.rows).filter((product) =>
+      isProductPurchasable(product),
+    );
+  } catch {
+    return [];
+  }
+}
+
 /** Normalize search query: trim, collapse whitespace, cap length. Empty → null. */
 export function normalizeProductSearchQuery(
   raw: string | null | undefined,
@@ -363,4 +396,98 @@ export async function listProductImages(
   } catch {
     return [];
   }
+}
+
+/**
+ * Top sellers from recent completed orders (admin read; no soldCount column).
+ * Returns active + available + in-stock products only.
+ */
+export async function listTrendingProducts(opts?: {
+  limit?: number;
+}): Promise<Product[]> {
+  if (!hasAppwritePublicConfig() || !process.env.APPWRITE_API_KEY?.trim()) {
+    return [];
+  }
+
+  const limit = Math.min(Math.max(opts?.limit ?? 8, 1), 24);
+
+  try {
+    const { tables } = await createAdminClient();
+    const ordersResult = await tables.listRows({
+      databaseId: DATABASE_ID,
+      tableId: TABLE_ORDERS,
+      queries: [
+        Query.equal("status", "completed"),
+        Query.orderDesc("$createdAt"),
+        Query.limit(100),
+      ],
+    });
+
+    const counts = new Map<string, number>();
+
+    for (const orderRow of ordersResult.rows) {
+      const orderId = asNullableString(
+        (orderRow as Record<string, unknown>).$id,
+      );
+      if (!orderId) continue;
+
+      const itemsResult = await tables.listRows({
+        databaseId: DATABASE_ID,
+        tableId: TABLE_ORDER_ITEMS,
+        queries: [Query.equal("orderId", orderId), Query.limit(50)],
+      });
+
+      for (const itemRow of itemsResult.rows) {
+        const row = itemRow as Record<string, unknown>;
+        const productId = asNullableString(row.productId);
+        const quantity = Math.max(1, Math.floor(asNumber(row.quantity)));
+        if (productId) {
+          counts.set(productId, (counts.get(productId) ?? 0) + quantity);
+        }
+      }
+    }
+
+    if (counts.size === 0) return [];
+
+    const ranked = [...counts.entries()]
+      .sort((a, b) => b[1] - a[1])
+      .map(([productId]) => productId);
+
+    const products: Product[] = [];
+    for (const productId of ranked) {
+      if (products.length >= limit) break;
+      const product = await getProduct(productId);
+      if (product && isProductPurchasable(product)) {
+        products.push(product);
+      }
+    }
+
+    return products;
+  } catch {
+    return [];
+  }
+}
+
+/**
+ * Hydrate active, publicly listed products by id (preserves caller order).
+ * Drops inactive, unavailable, or missing ids.
+ */
+export async function listPublicProductsByIds(ids: string[]): Promise<Product[]> {
+  const unique = [
+    ...new Set(ids.map((id) => id.trim()).filter((id) => id.length > 0)),
+  ].slice(0, 12);
+
+  if (unique.length === 0 || !hasAppwritePublicConfig()) return [];
+
+  const byId = new Map<string, Product>();
+  for (const id of unique) {
+    const product = await getProduct(id);
+    if (product && isPubliclyListed(product)) {
+      byId.set(id, product);
+    }
+  }
+
+  return unique
+    .map((id) => byId.get(id))
+    .filter((product): product is Product => product != null);
 }

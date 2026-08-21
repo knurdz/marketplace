@@ -3,6 +3,8 @@ import { notFound } from "next/navigation";
 import { AddToCartButton } from "@/components/store/add-to-cart-button";
 import { ProductImageGallery } from "@/components/store/product-image-gallery";
 import { ProductReviewsPlaceholder } from "@/components/store/product-reviews-placeholder";
+import { RecordRecentlyViewed } from "@/components/store/record-recently-viewed";
+import { RecentlyViewedSection } from "@/components/store/recently-viewed-section";
 import { ReportListingButton } from "@/components/store/report-listing-button";
 import { SellerInfoCard } from "@/components/store/seller-info-card";
 import { WishlistToggleButton } from "@/components/store/wishlist-toggle-button";
@@ -44,6 +46,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
 
   return (
     <main className="relative mx-auto w-full max-w-5xl px-6 py-16 sm:px-10">
+      <RecordRecentlyViewed productId={product.$id} />
       <p className="font-mono text-sm text-accent">$ ./products --id={product.$id}</p>
 
       <div className="mt-8 grid gap-10 lg:grid-cols-2 lg:gap-12">
@@ -125,6 +128,8 @@ export default async function ProductPage({ params }: ProductPageProps) {
           <Link href="/#active-listings">Back to listings</Link>
         </Button>
       </p>
+
+      <RecentlyViewedSection excludeProductId={product.$id} />
     </main>
   );
 }

@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { formatOrderStatus, formatPaymentMethod } from "@/lib/order-display";
+import { ReorderButton } from "@/components/store/reorder-button";
 import type { Order } from "@/lib/types";
 
 type OrderListRowProps = {
@@ -7,6 +8,8 @@ type OrderListRowProps = {
 };
 
 export function OrderListRow({ order }: OrderListRowProps) {
+  const canReorder = order.status === "completed";
+
   return (
     <li className="border-b border-border py-4 last:border-b-0">
       <Link
@@ -21,9 +24,12 @@ export function OrderListRow({ order }: OrderListRowProps) {
             {order.currency} {order.totalAmount.toFixed(2)}
           </span>
         </div>
-        <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-sm text-muted-foreground">
+        <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-muted-foreground">
           <span>{formatOrderStatus(order.status)}</span>
           <span>{formatPaymentMethod(order.paymentMethod)}</span>
+          {canReorder ? (
+            <ReorderButton orderId={order.$id} variant="row" />
+          ) : null}
         </div>
       </Link>
     </li>

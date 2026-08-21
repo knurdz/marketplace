@@ -33,6 +33,7 @@ export type Product = {
   stock: number;
   available: boolean;
   currency: string;
+  featured: boolean;
 };
 
 export type ProductImage = {
@@ -129,6 +130,8 @@ export type Order = {
   currency: string;
   shippingAddress: string;
   paymentMethod: PaymentMethod;
+  couponCode: string | null;
+  discountAmount: number;
 };
 
 export type OrderItem = {

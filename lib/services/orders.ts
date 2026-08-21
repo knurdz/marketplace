@@ -30,7 +30,12 @@ import {
   isPaymentMethod,
   isPaymentStatus,
 } from "@/lib/types";
-import { clearCart, getCart } from "./cart";
+import { clearCart, getCart, addToCart } from "./cart";
+import { CART_ERROR_CODES } from "./cart-errors";
+import {
+  recordCouponRedemption,
+  validateCouponForCheckout,
+} from "./coupons";
 import { getProduct, isProductPurchasable } from "./products";
 import {
   ORDER_ERROR_CODES,
@@ -97,6 +102,8 @@ export function asOrder(row: Record<string, unknown>): Order | null {
     currency,
     shippingAddress,
     paymentMethod: paymentMethodRaw,
+    couponCode: asNullableString(row.couponCode),
+    discountAmount: Math.max(0, asNumber(row.discountAmount)),
   };
 }
 
@@ -642,10 +649,33 @@ export async function createOrder(
     });
   }
 
-  const totalAmount = prepared.reduce((sum, line) => sum + line.lineTotal, 0);
+  const subtotal = prepared.reduce((sum, line) => sum + line.lineTotal, 0);
   const resolvedCurrency = currency ?? "LKR";
 
-  if (input.paymentMethod === "free" && totalAmount !== 0) {
+  let payableTotal = subtotal;
+  let discountAmount = 0;
+  let appliedCouponCode: string | null = null;
+  let appliedCouponId: string | null = null;
+
+  const couponRaw = input.couponCode?.trim();
+  if (couponRaw) {
+    const couponResult = await validateCouponForCheckout({
+      code: couponRaw,
+      subtotal,
+    });
+    if (!couponResult.ok) {
+      return fail<CreateOrderResult>(
+        couponResult.error,
+        ORDER_ERROR_CODES.COUPON_INVALID,
+      );
+    }
+    discountAmount = couponResult.discountAmount;
+    payableTotal = couponResult.payableTotal;
+    appliedCouponCode = couponResult.code;
+    appliedCouponId = couponResult.coupon.$id;
+  }
+
+  if (input.paymentMethod === "free" && payableTotal !== 0) {
     return fail<CreateOrderResult>(
       "Free checkout is only available when the order total is zero.",
       ORDER_ERROR_CODES.PAYMENT_METHOD_MISMATCH,
@@ -655,7 +685,7 @@ export async function createOrder(
   if (
     (input.paymentMethod === "payhere" ||
       input.paymentMethod === "bank_transfer") &&
-    totalAmount <= 0
+    payableTotal <= 0
   ) {
     return fail<CreateOrderResult>(
       "Choose free checkout for zero-total orders.",
@@ -683,10 +713,12 @@ export async function createOrder(
         buyerId,
         sellerId,
         status: "pending_payment",
-        totalAmount,
+        totalAmount: payableTotal,
         currency: resolvedCurrency,
         shippingAddress,
         paymentMethod: input.paymentMethod,
+        couponCode: appliedCouponCode,
+        discountAmount,
       },
       permissions,
     });
@@ -719,7 +751,7 @@ export async function createOrder(
         orderId,
         method: input.paymentMethod,
         status: "pending",
-        amount: totalAmount,
+        amount: payableTotal,
         currency: resolvedCurrency,
       },
       permissions: childPermissions,
@@ -731,6 +763,15 @@ export async function createOrder(
       "Could not place your order. Please try again.",
       ORDER_ERROR_CODES.CREATE_FAILED,
     );
+  }
+
+  if (appliedCouponId && orderId && discountAmount > 0) {
+    await recordCouponRedemption({
+      couponId: appliedCouponId,
+      orderId,
+      buyerId,
+      discountAmount,
+    });
   }
 
   const cleared = await clearCart();
@@ -795,6 +836,85 @@ export async function cancelOrder(orderId: string): Promise<CancelOrderResult> {
   }
 
   return { ok: true, orderStatus: "cancelled" };
+}
+
+export type ReorderResult =
+  | { ok: true; addedCount: number; skippedCount: number; message: string }
+  | { ok: false; error: string; code?: OrderErrorCode };
+
+/** Re-add purchasable lines from a completed order into the buyer's cart (IDOR-safe). */
+export async function reorderOwnOrder(orderId: string): Promise<ReorderResult> {
+  const order = await getOwnOrder(orderId);
+  if (!order) {
+    return {
+      ok: false,
+      error: "Order not found.",
+      code: ORDER_ERROR_CODES.NOT_FOUND,
+    };
+  }
+
+  if (order.status !== "completed") {
+    return {
+      ok: false,
+      error: "You can only reorder completed orders.",
+      code: ORDER_ERROR_CODES.NOT_ALLOWED,
+    };
+  }
+
+  const items = await getOwnOrderItems(orderId);
+  if (items.length === 0) {
+    return {
+      ok: false,
+      error: "No items to reorder.",
+      code: ORDER_ERROR_CODES.NOT_FOUND,
+    };
+  }
+
+  let addedCount = 0;
+  let skippedCount = 0;
+
+  for (const item of items) {
+    const result = await addToCart({
+      productId: item.productId,
+      quantity: item.quantity,
+    });
+
+    if (result.success) {
+      addedCount += 1;
+      continue;
+    }
+
+    if (
+      result.errorCode === CART_ERROR_CODES.SELLER_MISMATCH &&
+      addedCount === 0 &&
+      skippedCount === 0
+    ) {
+      return {
+        ok: false,
+        error:
+          result.error ??
+          "Your cart has items from another seller. Clear your cart first.",
+        code: ORDER_ERROR_CODES.NOT_ALLOWED,
+      };
+    }
+
+    skippedCount += 1;
+  }
+
+  if (addedCount === 0) {
+    return {
+      ok: false,
+      error: "None of the items from this order are available to buy right now.",
+      code: ORDER_ERROR_CODES.PRODUCT_UNAVAILABLE,
+    };
+  }
+
+  const message =
+    skippedCount > 0
+      ? `Added ${addedCount} item(s) to cart. ${skippedCount} unavailable and skipped.`
+      : `Added ${addedCount} item(s) to cart.`;
+
+  return { ok: true, addedCount, skippedCount, message };
 }
 
 export function checkoutContinuationPath(

@@ -8,6 +8,7 @@ const ADMIN_NAV = [
   { href: "/admin/sellers/performance", label: "Performance" },
   { href: "/admin/users", label: "Users" },
   { href: "/admin/listings", label: "Listings" },
+  { href: "/admin/coupons", label: "Coupons" },
   { href: "/admin/categories", label: "Categories" },
   { href: "/admin/orders", label: "Orders" },
   { href: "/admin/payments/bank-slips", label: "Bank slips" },

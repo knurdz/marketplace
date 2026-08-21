@@ -39,4 +39,4 @@ All documents coding agents should read for Knurdz Marketplace live here (except
 
 ## Phase 6 status
 
-**Phase 6 C complete (6.15–6.18).** Schema freeze, contract pass, PayHere console checklist (6.17), and Playwright Guide §10 suite landed. Next optional: **6.19** (trending/reorder). Canonical plan: [`WORK_DISTRIBUTION.md`](../../WORK_DISTRIBUTION.md) **Phase 6**.
+**Phase 6 C complete (6.15–6.18).** Schema freeze, contract pass, PayHere console checklist (6.17), and Playwright Guide §10 suite landed. **Phase 6 D complete (6.19–6.22).** Next optional: creative backlog **X01–X07**. Canonical plan: [`WORK_DISTRIBUTION.md`](../../WORK_DISTRIBUTION.md) **Phase 6**.

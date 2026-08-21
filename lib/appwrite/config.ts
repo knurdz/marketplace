@@ -30,6 +30,10 @@ export const TABLE_NOTIFICATIONS = "notifications";
 export const TABLE_PLATFORM_SETTINGS = "platform_settings";
 export const TABLE_AUDIT_LOGS = "audit_logs";
 export const TABLE_PAYHERE_NOTIFY_LOGS = "payhere_notify_logs";
+export const TABLE_COUPONS = "coupons";
+export const TABLE_COUPON_REDEMPTIONS = "coupon_redemptions";
+export const TABLE_THREADS = "threads";
+export const TABLE_MESSAGES = "messages";
 
 /** All MVP table ids (for docs / sanity checks). */
 export const ALL_TABLE_IDS = [
@@ -51,6 +55,10 @@ export const ALL_TABLE_IDS = [
   TABLE_PLATFORM_SETTINGS,
   TABLE_AUDIT_LOGS,
   TABLE_PAYHERE_NOTIFY_LOGS,
+  TABLE_COUPONS,
+  TABLE_COUPON_REDEMPTIONS,
+  TABLE_THREADS,
+  TABLE_MESSAGES,
 ] as const;
 
 /** Storage bucket IDs — must match Appwrite console / docs/agent/SCHEMA.md. */

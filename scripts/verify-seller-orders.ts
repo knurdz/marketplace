@@ -19,6 +19,8 @@ function order(sellerId: string): Order {
     currency: "LKR",
     shippingAddress: "addr",
     paymentMethod: "payhere",
+    couponCode: null,
+    discountAmount: 0,
   };
 }
 

@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { OrderListRow } from "@/components/store/order-list-row";
+import { RecentlyViewedSection } from "@/components/store/recently-viewed-section";
 import { Button } from "@/components/ui/button";
 import { getLoggedInUser } from "@/lib/appwrite/session";
 import { getOwnWishlistView, listOwnOrders } from "@/lib/services";
@@ -225,6 +226,8 @@ export default async function DashboardPage() {
           </>
         )}
       </section>
+
+      <RecentlyViewedSection />
     </main>
   );
 }

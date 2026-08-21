@@ -141,6 +141,7 @@ export default async function AdminListingsPage({ searchParams }: PageProps) {
                   {product.available ? "Available" : "Unavailable"}
                   {" · "}
                   Stock: {product.stock}
+                  {product.featured ? " · Featured" : ""}
                 </p>
 
                 <ListingDescription description={product.description} />
@@ -150,6 +151,7 @@ export default async function AdminListingsPage({ searchParams }: PageProps) {
                     productId={product.$id}
                     title={product.title}
                     view={view}
+                    featured={product.featured}
                   />
                 </div>
               </li>
