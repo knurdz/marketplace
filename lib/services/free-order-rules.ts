@@ -5,6 +5,7 @@
  */
 
 import type { Order, OrderItem, Payment } from "@/lib/types";
+import { SETTLED_ORDER_STATUSES } from "@/lib/types/status";
 
 export const FREE_CONFIRM_NOT_FOUND = "Order not found.";
 export const FREE_CONFIRM_NOT_FREE =
@@ -14,14 +15,6 @@ export const FREE_CONFIRM_CLOSED = "This order can no longer be confirmed.";
 export const FREE_CONFIRM_WRONG_STATE = "This payment cannot be confirmed.";
 export const FREE_CONFIRM_STOCK =
   "One or more items are out of stock and cannot be confirmed.";
-
-const SETTLED_ORDER_STATUSES = new Set([
-  "paid",
-  "processing",
-  "shipped",
-  "ready_pickup",
-  "completed",
-]);
 
 /** Idempotency key written on first successful free settlement. */
 export function freeConfirmIdempotencyKey(orderId: string): string {
@@ -86,7 +79,9 @@ export function evaluateFreeConfirm(params: {
   }
 
   const paymentPaid = payment.status === "paid";
-  const orderSettled = SETTLED_ORDER_STATUSES.has(order.status);
+  const orderSettled = (SETTLED_ORDER_STATUSES as readonly string[]).includes(
+    order.status,
+  );
 
   if (paymentPaid && orderSettled) {
     return { action: "noop" };

@@ -44,6 +44,19 @@ Server-action rate limits live in [`lib/security/rate-limit.ts`](../../lib/secur
 | Bank slip `status` | `pending` \| `approved` \| `rejected` |
 | Report `status` | `open` \| `reviewing` \| `resolved` \| `dismissed` |
 
+## MVP contract freeze (step 6.16)
+
+Cross-member rules enforced in services — do not fork status strings or parallel policies.
+
+| Area | Rule |
+|------|------|
+| **Publish** | Seller create → `draft`; submit for review → `pending_review` only; **sellers never write `active`**; admin approve → `active`. |
+| **Live edits** | `updateOwnProductCore` may change title/price/stock/available on non-`archived` rows without forcing re-review (current behavior). |
+| **Stock on confirm** | Free confirm **rejects** if stock &lt; qty (`FREE_CONFIRM_STOCK`). Bank approve + PayHere notify **settle and clamp** at 0 (money already in flight). Admin cancel/refund does **not** restore stock (ledger-only — see PAYHERE.md 6.13). |
+| **Bank details** | Public shop omits account numbers (`PublicSellerInfo` in `lib/services/sellers.ts`). Full number on owned bank checkout + owner profile only. Admin seller queue shows masked last-4. |
+| **Storefront buyable** | `status=active` AND `available=true` AND `stock > 0` (`isProductPurchasable`). |
+| **Idempotency keys** | `free:<orderId>`, `bank:<orderId>`, `payhere:<payment_id>` on first successful settle. |
+
 ## Tables (18)
 
 ### `profiles`
@@ -424,3 +437,5 @@ Uploads are rate-limited in `uploadFile` (see Abuse guards above).
 | 2026-08-11 | PayHere Function interface freeze — see PAYHERE.md (step 1.20) |
 | 2026-08-14 | `payhere_notify_logs` table for sanitized notify ops rows (step 1.26) |
 | 2026-08-15 | `seller_profiles.returnPolicy` + `shippingPolicy` optional strings (step 3.14) |
+| 2026-08-19 | Phase 6.1–6.14 reused frozen columns — **no console migration** (step 6.15). Idempotency keys: `free:<orderId>`, `bank:<orderId>`, `payhere:<payment_id>`. `audit_logs.ip` reserved; writers omit it today. |
+| 2026-08-19 | MVP contract freeze subsection (step 6.16) — publish, stock-on-confirm, bank exposure, buyable rules. |

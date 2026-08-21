@@ -156,6 +156,7 @@ export function CheckoutForm({ cartView }: CheckoutFormProps) {
                   value={method}
                   defaultChecked={method === defaultMethod}
                   required
+                  data-testid={`checkout-method-${method}`}
                   className="mt-1"
                 />
                 <span>
@@ -178,7 +179,7 @@ export function CheckoutForm({ cartView }: CheckoutFormProps) {
         </section>
 
         <div className="flex flex-wrap gap-3">
-          <Button type="submit" disabled={!canSubmit}>
+          <Button type="submit" disabled={!canSubmit} data-testid="checkout-place-order">
             {pending ? "Placing order…" : "Place order"}
           </Button>
           <Button type="button" variant="outline" size="sm" asChild>

@@ -67,7 +67,7 @@ export function BankSlipApproveButton({ bankSlipId }: { bankSlipId: string }) {
       }}
     >
       <input type="hidden" name="bankSlipId" value={bankSlipId} />
-      <Button type="submit" disabled={pending} size="sm">
+      <Button type="submit" disabled={pending} size="sm" data-testid="admin-approve-bank-slip">
         {pending ? "Approving…" : "Approve"}
       </Button>
     </form>

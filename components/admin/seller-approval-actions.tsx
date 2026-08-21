@@ -63,7 +63,7 @@ export function SellerApproveButton({
   return (
     <form action={formAction}>
       <input type="hidden" name="sellerProfileId" value={sellerProfileId} />
-      <Button type="submit" disabled={pending} size="sm">
+      <Button type="submit" disabled={pending} size="sm" data-testid="admin-approve-seller">
         {pending ? "Approving…" : "Approve"}
       </Button>
     </form>

@@ -197,6 +197,7 @@ export function CartContents({ cartView }: CartContentsProps) {
           size="sm"
           onClick={onClear}
           disabled={pending}
+          data-testid="clear-cart"
         >
           {pending ? "Clearing…" : "Clear cart"}
         </Button>

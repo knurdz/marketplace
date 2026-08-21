@@ -50,6 +50,8 @@ Open [http://localhost:3000](http://localhost:3000). The UI theme matches [knurd
 | `npm run format`       | Prettier write                 |
 | `npm run format:check` | Prettier check                 |
 | `npm run build`        | Production build               |
+| `npm run test:e2e`     | Playwright Guide §10 MVP suite (live Appwrite) |
+| `npm run test:e2e:payhere` | Same + PayHere sandbox path (`PAYHERE_E2E=1`; requires **6.17** console setup) |
 
 Fill `.env.local` with Appwrite values (see below). Do not commit secrets; only endpoint, project id, and public app URL may use `NEXT_PUBLIC_*`.
 
@@ -115,3 +117,23 @@ Shared storefront `/` is the landing page for every role. There is a single `/lo
 **Payment setup complete (steps 1.22–1.28).** Member 2 checkout UX calls `requestPayHereCheckout` and `confirmFreeOrder`; Member 4 reads notify logs. Sandbox test cards and the consume contract: [`docs/agent/PAYHERE.md`](./docs/agent/PAYHERE.md). Card E2E still needs merchant id/secret + notify domain on Function env in the console (never `NEXT_PUBLIC_*`).
 
 Setup order for a fresh clone: env → `setup-mvp-schema.mjs` → `setup-storage-buckets.mjs` → `npm run seed` → `npm run dev`.
+
+### Phase 6.17 — PayHere sandbox console (human, once)
+
+Code paths are complete (steps 1.22–1.28). Before `npm run test:e2e:payhere`, a human must set **Function env in the Appwrite console only** (never git / `NEXT_PUBLIC_*`):
+
+1. Deploy `payhere-checkout-hash` (execute **users**) and `payhere-notify` (execute **any**, timeout ≥ 15s, databases read/write).
+2. On **both** Functions: `PAYHERE_MERCHANT_ID`, `PAYHERE_MERCHANT_SECRET`.
+3. On hash Function: `PAYHERE_SANDBOX=true`, `APP_URL=http://localhost:3000`, `PAYHERE_NOTIFY_URL=` public `payhere-notify` HTTP URL.
+4. Manual click-path: [`docs/agent/PAYHERE.md`](./docs/agent/PAYHERE.md#sandbox-demo-step-127) (buyer → seed PayHere SKU → sandbox card → admin notify logs).
+
+### E2E tests (Phase 6.18)
+
+Requires `.env.local`, seeded categories, and a running dev server (Playwright starts one locally unless `CI` is set).
+
+```bash
+npx playwright install chromium
+npm run test:e2e
+```
+
+Uses unique `@knurdz.demo` emails per run. Default password matches demo seed: `DemoPass123!` (override with `E2E_PASSWORD`). PayHere spec is skipped unless `PAYHERE_E2E=1` after **6.17** console setup.

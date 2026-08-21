@@ -63,6 +63,7 @@ export function UserSuspendForm({ userId, displayLabel }: UserSuspendFormProps) 
         variant="outline"
         size="sm"
         onClick={() => setShowReason(true)}
+        data-testid="admin-suspend-user"
       >
         Suspend
       </Button>
@@ -84,7 +85,7 @@ export function UserSuspendForm({ userId, displayLabel }: UserSuspendFormProps) 
         />
       </label>
       <div className="flex gap-2">
-        <Button type="submit" variant="outline" size="sm" disabled={pending}>
+        <Button type="submit" variant="outline" size="sm" disabled={pending} data-testid="admin-suspend-confirm">
           {pending ? "Suspending…" : "Confirm suspend"}
         </Button>
         <Button

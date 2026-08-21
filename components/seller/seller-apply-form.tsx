@@ -83,7 +83,7 @@ export function SellerApplyForm() {
         />
       </div>
 
-      <Button type="submit" disabled={pending || Boolean(state.success)}>
+      <Button type="submit" disabled={pending || Boolean(state.success)} data-testid="seller-apply-submit">
         {pending ? "Submitting…" : "Submit application"}
       </Button>
     </form>

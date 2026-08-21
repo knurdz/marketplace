@@ -4,6 +4,11 @@
  */
 
 import type { BankSlip, Order, OrderStatus, Payment } from "@/lib/types";
+import {
+  BANK_SLIP_QUEUE_PAYMENT_STATUSES,
+  EARLY_PAYMENT_ORDER_STATUSES,
+  SETTLED_ORDER_STATUSES,
+} from "@/lib/types/status";
 
 export const BANK_SLIP_ALREADY_APPROVED = "This bank slip was already approved.";
 export const BANK_SLIP_ALREADY_REJECTED = "This bank slip was already rejected.";
@@ -18,20 +23,13 @@ export const BANK_SLIP_REJECT_PAID = "This payment was already marked paid.";
 export const BANK_SLIP_REJECT_REFUNDED =
   "This payment was already refunded.";
 
-const APPROVABLE_ORDER_STATUSES = new Set<OrderStatus>([
-  "pending_payment",
-  "payment_review",
-]);
+const APPROVABLE_ORDER_STATUSES = new Set<OrderStatus>(
+  EARLY_PAYMENT_ORDER_STATUSES,
+);
 
-const QUEUE_PAYMENT_STATUSES = new Set(["pending", "awaiting_verification"]);
+const QUEUE_PAYMENT_STATUSES = new Set(BANK_SLIP_QUEUE_PAYMENT_STATUSES);
 
-const SETTLED_ORDER_STATUSES = new Set<OrderStatus>([
-  "paid",
-  "processing",
-  "shipped",
-  "ready_pickup",
-  "completed",
-]);
+const SETTLED_ORDER_STATUSES_SET = new Set<OrderStatus>(SETTLED_ORDER_STATUSES);
 
 /** Idempotency key written on first successful bank-slip approval. */
 export function bankConfirmIdempotencyKey(orderId: string): string {
@@ -187,11 +185,11 @@ export function shouldListPendingBankSlip(params: {
   })) {
     return false;
   }
-  if (!QUEUE_PAYMENT_STATUSES.has(params.payment.status)) return false;
+  if (!(BANK_SLIP_QUEUE_PAYMENT_STATUSES as readonly string[]).includes(params.payment.status)) return false;
   if (
     params.order.status === "cancelled" ||
     params.order.status === "refunded" ||
-    SETTLED_ORDER_STATUSES.has(params.order.status)
+    SETTLED_ORDER_STATUSES_SET.has(params.order.status)
   ) {
     return false;
   }

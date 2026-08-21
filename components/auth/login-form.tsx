@@ -65,6 +65,7 @@ export function LoginForm({ nextPath }: { nextPath?: string }) {
       <button
         type="submit"
         disabled={pending}
+        data-testid="login-submit"
         className="inline-flex w-full items-center justify-center rounded-md bg-foreground px-5 py-2.5 text-sm font-medium text-background transition hover:opacity-90 disabled:opacity-60"
       >
         {pending ? "Signing in…" : "Sign in"}

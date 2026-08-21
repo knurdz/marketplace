@@ -68,6 +68,7 @@ export function RegisterForm() {
       <button
         type="submit"
         disabled={pending}
+        data-testid="register-submit"
         className="inline-flex w-full items-center justify-center rounded-md bg-foreground px-5 py-2.5 text-sm font-medium text-background transition hover:opacity-90 disabled:opacity-60"
       >
         {pending ? "Creating account…" : "Create account"}

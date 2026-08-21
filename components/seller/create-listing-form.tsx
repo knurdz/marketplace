@@ -166,7 +166,7 @@ export function CreateListingForm({
       </div>
 
       <div className="flex flex-wrap gap-3 pt-2">
-        <Button type="submit" disabled={pending || categories.length === 0}>
+        <Button type="submit" disabled={pending || categories.length === 0} data-testid="listing-save-draft">
           {pending ? "Saving draft…" : "Save draft"}
         </Button>
         <Button variant="outline" type="button" disabled={pending} asChild>
