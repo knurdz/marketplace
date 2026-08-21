@@ -9,6 +9,8 @@ export const PLATFORM_SETTING_KEYS = {
   checkoutBankInstructions: "checkout.bank_instructions",
   checkoutSandboxModeDisplay: "checkout.sandbox_mode_display",
   checkoutFeePercent: "checkout.fee_percent",
+  /** When `"true"`, PayHere appears at checkout and createOrder accepts `payhere`. */
+  checkoutPayhereEnabled: "checkout.payhere_enabled",
   featuresFreeListings: "features.free_listings",
 } as const;
 

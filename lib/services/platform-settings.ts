@@ -109,6 +109,17 @@ export async function areFreeListingsEnabled(): Promise<boolean> {
 }
 
 /**
+ * Whether PayHere card checkout is offered. Missing setting or any value other
+ * than `"true"` → disabled (online card gated until merchant authorization).
+ */
+export async function isPayHereCheckoutEnabled(): Promise<boolean> {
+  const setting = await getPlatformSetting(
+    PLATFORM_SETTING_KEYS.checkoutPayhereEnabled,
+  );
+  return setting?.value.trim() === "true";
+}
+
+/**
  * Read settings as `key → value`.
  * - With `keys`: fetch those keys only (parallel / OR query).
  * - Without: list up to LIST_CAP rows for the signed-in user.

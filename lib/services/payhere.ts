@@ -13,6 +13,7 @@ import {
 } from "@/lib/appwrite/config";
 import { createSessionClient } from "@/lib/appwrite/server";
 import { getLoggedInUser } from "@/lib/appwrite/session";
+import { isPayHereCheckoutEnabled } from "@/lib/services/platform-settings";
 import {
   assertRateLimit,
   getClientIp,
@@ -76,6 +77,11 @@ export async function requestPayHereCheckout(
   }
 
   if (!hasAppwritePublicConfig()) {
+    return { ok: false, error: NOT_CONFIGURED };
+  }
+
+  const payhereEnabled = await isPayHereCheckoutEnabled();
+  if (!payhereEnabled) {
     return { ok: false, error: NOT_CONFIGURED };
   }
 

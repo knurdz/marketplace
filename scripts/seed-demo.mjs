@@ -3,9 +3,9 @@
  * Usage: npm run seed
  *      → node --env-file=.env.local scripts/seed-demo.mjs
  *
- * Creates: admin / seller / buyer users + profiles, approved seller shop,
- * two categories, paid + free active sample products, one buyer welcome
- * notification, MVP platform_settings rows.
+ * Creates: admin / seller / seller2 / buyer users + profiles, two approved seller
+ * shops with bank details, two categories, paid + free + multi-seller products,
+ * one buyer welcome notification, MVP platform_settings rows.
  */
 import {
   Client,
@@ -36,6 +36,13 @@ const DEMO_USERS = [
     displayName: "Demo Seller",
   },
   {
+    key: "seller2",
+    email: "seller2@knurdz.demo",
+    name: "Paper Trail Seller",
+    labels: ["buyer", "seller"],
+    displayName: "Paper Trail Seller",
+  },
+  {
     key: "buyer",
     email: "buyer@knurdz.demo",
     name: "Demo Buyer",
@@ -62,24 +69,86 @@ const CATEGORIES = [
 const PRODUCTS = [
   {
     rowId: "seed_demo_product",
+    sellerKey: "seller",
+    categorySlug: "digital",
     title: "Demo Sticker Pack",
     description:
       "Seeded sample product for Knurdz Marketplace. Active listing used by listActiveProducts.",
     price: 500,
     isFree: false,
     stock: 25,
+    featured: false,
   },
   {
     rowId: "seed_demo_free_product",
+    sellerKey: "seller",
+    categorySlug: "digital",
     title: "Demo Free Sticker",
     description:
       "Seeded free listing for confirmFreeOrder (price=0). Active; used by the free checkout path.",
     price: 0,
     isFree: true,
     stock: 25,
+    featured: false,
+  },
+  {
+    rowId: "seed_demo_tote",
+    sellerKey: "seller",
+    categorySlug: "goods",
+    title: "Demo Canvas Tote",
+    description: "Seeded goods SKU for bank transfer and COD checkout testing.",
+    price: 1200,
+    isFree: false,
+    stock: 15,
+    featured: true,
+  },
+  {
+    rowId: "seed_seller2_digital",
+    sellerKey: "seller2",
+    categorySlug: "digital",
+    title: "Paper Trail Digital Pack",
+    description:
+      "Second seller digital SKU — use to test cart seller mismatch vs Demo Shop.",
+    price: 750,
+    isFree: false,
+    stock: 20,
+    featured: false,
+  },
+  {
+    rowId: "seed_seller2_goods",
+    sellerKey: "seller2",
+    categorySlug: "goods",
+    title: "Paper Trail Notebook",
+    description: "Second seller goods SKU for bank/COD checkout.",
+    price: 950,
+    isFree: false,
+    stock: 18,
+    featured: false,
   },
 ];
-const SELLER_PROFILE_ID = "seed_seller_profile";
+
+const SELLER_PROFILES = [
+  {
+    rowId: "seed_seller_profile",
+    userKey: "seller",
+    shopName: "Demo Shop",
+    slug: "demo-shop",
+    bio: "Seeded seller shop for local development.",
+    bankAccountName: "Demo Shop (Pvt) Ltd",
+    bankAccountNumber: "1234567890",
+    bankName: "Demo Bank",
+  },
+  {
+    rowId: "seed_seller2_profile",
+    userKey: "seller2",
+    shopName: "Paper Trail",
+    slug: "paper-trail",
+    bio: "Second seeded seller for multi-seller cart and checkout testing.",
+    bankAccountName: "Paper Trail Books",
+    bankAccountNumber: "9876543210",
+    bankName: "Seed Savings Bank",
+  },
+];
 const BUYER_WELCOME_NOTIFICATION_ID = "seed_buyer_welcome_notification";
 
 const PLATFORM_SETTINGS = [
@@ -113,6 +182,13 @@ const PLATFORM_SETTINGS = [
     key: "features.free_listings",
     value: "true",
     description: "Feature flag: allow free (price=0) listings",
+  },
+  {
+    rowId: "seed_set_payhere_enabled",
+    key: "checkout.payhere_enabled",
+    value: "false",
+    description:
+      "Enable PayHere online card checkout (requires merchant authorization)",
   },
 ];
 
@@ -199,16 +275,16 @@ async function ensureProfile(userId, displayName) {
   }
 }
 
-async function ensureSellerProfile(sellerUserId) {
+async function ensureSellerProfile(spec, sellerUserId) {
   const data = {
     userId: sellerUserId,
-    shopName: "Demo Shop",
-    slug: "demo-shop",
-    bio: "Seeded seller shop for local development.",
+    shopName: spec.shopName,
+    slug: spec.slug,
+    bio: spec.bio,
     status: "approved",
-    bankAccountName: null,
-    bankAccountNumber: null,
-    bankName: null,
+    bankAccountName: spec.bankAccountName,
+    bankAccountNumber: spec.bankAccountNumber,
+    bankName: spec.bankName,
     rejectionReason: null,
   };
   const permissions = [
@@ -223,30 +299,30 @@ async function ensureSellerProfile(sellerUserId) {
     await db.getRow({
       databaseId: DATABASE_ID,
       tableId: "seller_profiles",
-      rowId: SELLER_PROFILE_ID,
+      rowId: spec.rowId,
     });
     await db.updateRow({
       databaseId: DATABASE_ID,
       tableId: "seller_profiles",
-      rowId: SELLER_PROFILE_ID,
+      rowId: spec.rowId,
       data,
       permissions,
     });
-    console.log(`= seller_profiles: ${SELLER_PROFILE_ID}`);
+    console.log(`= seller_profiles: ${spec.rowId} (${spec.slug})`);
   } catch (error) {
     if (!isNotFound(error)) throw error;
     try {
       await db.createRow({
         databaseId: DATABASE_ID,
         tableId: "seller_profiles",
-        rowId: SELLER_PROFILE_ID,
+        rowId: spec.rowId,
         data,
         permissions,
       });
-      console.log(`+ seller_profiles: ${SELLER_PROFILE_ID}`);
+      console.log(`+ seller_profiles: ${spec.rowId} (${spec.slug})`);
     } catch (createErr) {
       if (!isConflict(createErr)) throw createErr;
-      console.log(`= seller_profiles (conflict ok): ${SELLER_PROFILE_ID}`);
+      console.log(`= seller_profiles (conflict ok): ${spec.rowId}`);
     }
   }
 }
@@ -303,6 +379,7 @@ async function ensureProduct(sellerUserId, categoryId, spec) {
     stock: spec.stock,
     available: true,
     currency: "LKR",
+    featured: Boolean(spec.featured),
   };
   const permissions = [
     Permission.read(Role.any()),
@@ -449,14 +526,29 @@ async function main() {
     await ensureProfile(user.$id, spec.displayName);
   }
 
-  await ensureSellerProfile(created.seller.$id);
+  const categoryBySlug = Object.fromEntries(
+    CATEGORIES.map((cat) => [cat.slug, cat.rowId]),
+  );
 
   for (const cat of CATEGORIES) {
     await ensureCategory(cat);
   }
 
+  for (const profile of SELLER_PROFILES) {
+    const sellerUser = created[profile.userKey];
+    if (!sellerUser) {
+      throw new Error(`Missing demo user for seller profile: ${profile.userKey}`);
+    }
+    await ensureSellerProfile(profile, sellerUser.$id);
+  }
+
   for (const product of PRODUCTS) {
-    await ensureProduct(created.seller.$id, CATEGORIES[0].rowId, product);
+    const sellerUser = created[product.sellerKey];
+    const categoryId = categoryBySlug[product.categorySlug];
+    if (!sellerUser || !categoryId) {
+      throw new Error(`Invalid product seed: ${product.rowId}`);
+    }
+    await ensureProduct(sellerUser.$id, categoryId, product);
   }
   await ensureBuyerWelcomeNotification(created.buyer.$id);
 
@@ -468,16 +560,22 @@ async function main() {
   console.log(`  password (all): ${DEMO_PASSWORD}`);
   for (const spec of DEMO_USERS) {
     console.log(
-      `  ${spec.key.padEnd(6)} ${spec.email}  labels=[${spec.labels.join(",")}]`,
+      `  ${spec.key.padEnd(7)} ${spec.email}  labels=[${spec.labels.join(",")}]`,
+    );
+  }
+  for (const profile of SELLER_PROFILES) {
+    console.log(
+      `  shop    ${profile.slug} (${profile.shopName}) — bank: ${profile.bankName}`,
     );
   }
   for (const product of PRODUCTS) {
     console.log(
-      `  product ${product.rowId} (status=active, isFree=${product.isFree})`,
+      `  product ${product.rowId} seller=${product.sellerKey} ${product.price} LKR featured=${Boolean(product.featured)}`,
     );
   }
   console.log(`  notification ${BUYER_WELCOME_NOTIFICATION_ID} (buyer)`);
   console.log(`  platform_settings (${PLATFORM_SETTINGS.length} keys)`);
+  console.log("  checkout: bank_transfer + cod + free (payhere disabled)");
 }
 
 main().catch((err) => {

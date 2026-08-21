@@ -111,6 +111,25 @@ async function ensureEnum(tableId, key, elements, required, opts = {}) {
   }
 }
 
+async function ensureEnumElements(tableId, key, elements) {
+  try {
+    await db.updateEnumColumn({
+      databaseId: DATABASE_ID,
+      tableId,
+      key,
+      elements,
+    });
+    console.log(`  ~ enum elements ${tableId}.${key}`);
+  } catch (e) {
+    const msg = String(e?.message || e);
+    if (msg.includes("not found") || msg.includes("could not be found")) {
+      console.log(`  ! skip enum update ${tableId}.${key} (column missing)`);
+      return;
+    }
+    throw e;
+  }
+}
+
 async function ensureFloat(tableId, key, required, opts = {}) {
   try {
     await db.createFloatColumn({
@@ -193,7 +212,7 @@ const ORDER_STATUS = [
   "cancelled",
   "refunded",
 ];
-const PAYMENT_METHOD = ["payhere", "bank_transfer", "free"];
+const PAYMENT_METHOD = ["payhere", "bank_transfer", "free", "cod"];
 const PAYMENT_STATUS = [
   "pending",
   "awaiting_verification",
@@ -412,6 +431,7 @@ async function setupOrders() {
   await ensureString("orders", "currency", 8, true);
   await ensureString("orders", "shippingAddress", 2000, true);
   await ensureEnum("orders", "paymentMethod", PAYMENT_METHOD, true);
+  await ensureEnumElements("orders", "paymentMethod", PAYMENT_METHOD);
   await ensureString("orders", "couponCode", 32, false);
   await ensureFloat("orders", "discountAmount", false, { min: 0 });
   await waitColumnsAvailable("orders", [
@@ -467,6 +487,7 @@ async function setupPayments() {
   );
   await ensureString("payments", "orderId", 36, true);
   await ensureEnum("payments", "method", PAYMENT_METHOD, true);
+  await ensureEnumElements("payments", "method", PAYMENT_METHOD);
   await ensureEnum("payments", "status", PAYMENT_STATUS, true);
   await ensureFloat("payments", "amount", true, { min: 0 });
   await ensureString("payments", "currency", 8, true);

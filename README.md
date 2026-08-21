@@ -12,8 +12,9 @@ Multi-role marketplace web app built with **Next.js** (frontend) and **Appwrite*
 
 ## Payments (MVP)
 
-- **PayHere** — sandbox card checkout (server-side hash + notify verification). Test cards and a click-path demo: [`docs/agent/PAYHERE.md`](./docs/agent/PAYHERE.md#sandbox-demo-step-127).
+- **PayHere** — sandbox card checkout (server-side hash + notify verification). **Disabled in the app by default** (`checkout.payhere_enabled=false`) until merchant authorization; admin can enable later. Test cards and click-path demo: [`docs/agent/PAYHERE.md`](./docs/agent/PAYHERE.md#sandbox-demo-step-127).
 - **Bank transfer** — instructions + slip upload, then verification
+- **Cash on delivery (COD)** — buyer confirms on `/checkout/cod`; order marked paid for fulfillment (cash collected on delivery)
 - **Free** — zero-price listings / checkout without a gateway
 
 ## Team & agent docs
@@ -82,13 +83,16 @@ After schema + buckets are applied:
 npm run seed
 ```
 
-Creates idempotent demo users, profiles, an approved seller shop, two categories, and two **active** sample products: `seed_demo_product` (500 LKR, PayHere) and `seed_demo_free_product` (price 0, free checkout). PayHere sandbox + free click-paths: [`docs/agent/PAYHERE.md`](./docs/agent/PAYHERE.md#sandbox-demo-step-127).
+Creates idempotent demo users, profiles, **two** approved seller shops with bank details, two categories, and **five** active sample products (paid bank/COD, free, multi-seller). PayHere is off by default; bank + COD + free paths are demoable after seed.
 
-| Role   | Email                | Labels            |
-| ------ | -------------------- | ----------------- |
-| Admin  | `admin@knurdz.demo`  | `buyer`, `admin`  |
-| Seller | `seller@knurdz.demo` | `buyer`, `seller` |
-| Buyer  | `buyer@knurdz.demo`  | `buyer`           |
+| Role    | Email                  | Labels            | Shop slug      |
+| ------- | ---------------------- | ----------------- | -------------- |
+| Admin   | `admin@knurdz.demo`    | `buyer`, `admin`  | —              |
+| Seller  | `seller@knurdz.demo`   | `buyer`, `seller` | `demo-shop`    |
+| Seller  | `seller2@knurdz.demo`  | `buyer`, `seller` | `paper-trail`  |
+| Buyer   | `buyer@knurdz.demo`    | `buyer`           | —              |
+
+Sample SKUs: `seed_demo_product` (500 LKR), `seed_demo_free_product` (free), `seed_demo_tote` (goods), `seed_seller2_digital`, `seed_seller2_goods`.
 
 Password for all demo accounts: `DemoPass123!`  
 **Sandbox only** — never reuse in production. Not a merchant/Appwrite secret; do not put in `NEXT_PUBLIC_*`.

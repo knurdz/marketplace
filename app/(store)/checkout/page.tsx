@@ -4,6 +4,7 @@ import { CheckoutForm } from "@/components/store/checkout-form";
 import { Button } from "@/components/ui/button";
 import { getLoggedInUser } from "@/lib/appwrite/session";
 import { getCart } from "@/lib/services";
+import { isPayHereCheckoutEnabled } from "@/lib/services/platform-settings";
 
 export default async function CheckoutPage() {
   const user = await getLoggedInUser();
@@ -12,6 +13,7 @@ export default async function CheckoutPage() {
   }
 
   const cartView = await getCart();
+  const payhereEnabled = await isPayHereCheckoutEnabled();
 
   if (cartView.lines.length === 0) {
     return (
@@ -37,7 +39,7 @@ export default async function CheckoutPage() {
         confirmed on the server when your order is placed.
       </p>
 
-      <CheckoutForm cartView={cartView} />
+      <CheckoutForm cartView={cartView} payhereEnabled={payhereEnabled} />
     </main>
   );
 }

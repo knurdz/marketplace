@@ -62,6 +62,8 @@ export type ConfirmFreeOrderActionState = {
   pendingConfirmation?: boolean;
 };
 
+export type ConfirmCodOrderActionState = ConfirmFreeOrderActionState;
+
 export type SubmitBankSlipActionState = {
   ok?: boolean;
   error?: string;

@@ -150,7 +150,7 @@ Complete payment infrastructure so Members 2–4 only consume APIs / admin UI.
 
 - [x] Others can auth, hit empty role dashboards, upload a file, and read seeded products
 - [x] Payment setup (1.22–1.28): others can complete free + PayHere sandbox via Member 1 Functions
-- [ ] Phase 6: remaining seller + leftover admin + E2E (see **6.1–6.18** done-when)
+- [x] Phase 6: remaining seller + leftover admin + E2E (see **6.1–6.18** done-when)
 
 ---
 
@@ -388,8 +388,8 @@ Same IDs as the table below. Suggested order if capacity remains: **X02** → **
 
 ### Phase 6 — done when
 
-- [ ] Approved seller publishes a listing; buyer can purchase it (not only seed SKUs)
-- [ ] Seller sees paid order, ships / completes; earnings match `paid`
+- [x] Approved seller publishes a listing; buyer can purchase it (not only seed SKUs)
+- [x] Seller sees paid order, ships / completes; earnings match `paid`
 - [x] Admin seller-performance + order override paths exist (or explicitly deferred with a note)
 - [x] Guide §10 E2E run documented (free + bank + PayHere sandbox)
 
@@ -446,7 +446,7 @@ Pick up only after Phases 1–4 **and Phase 6 A–C** are solid (**6.18**). Assi
 ## Status enums (do not fork)
 
 **Product:** `draft`  `pending_review`  `active`  `rejected`  `archived`  
-**Payment method:** `payhere`  `bank_transfer`  `free`  
+**Payment method:** `payhere`  `bank_transfer`  `free`  `cod` (PayHere gated by `checkout.payhere_enabled`)  
 **Payment status:** `pending`  `awaiting_verification`  `paid`  `failed`  `refunded`  
 **Order (simplified):** `pending_payment` → `payment_review` → `paid` → `processing` → `shipped` / `ready_pickup` → `completed`  `cancelled` / `refunded`
 
