@@ -51,6 +51,20 @@ export function RegisterForm() {
       </div>
 
       <div className="space-y-2">
+        <label htmlFor="phone" className="block text-sm text-muted-foreground">
+          Phone <span className="text-muted-foreground">(optional)</span>
+        </label>
+        <input
+          id="phone"
+          name="phone"
+          type="tel"
+          autoComplete="tel"
+          maxLength={32}
+          className="w-full rounded-md border border-border bg-card px-3 py-2.5 text-foreground outline-none ring-accent focus:ring-2"
+        />
+      </div>
+
+      <div className="space-y-2">
         <label htmlFor="password" className="block text-sm text-muted-foreground">
           Password
         </label>

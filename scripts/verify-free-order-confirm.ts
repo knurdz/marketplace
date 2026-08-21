@@ -23,6 +23,8 @@ function order(overrides: Partial<Order> = {}): Order {
     currency: "LKR",
     shippingAddress: "1 Main St",
     paymentMethod: "free",
+    couponCode: null,
+    discountAmount: 0,
     ...overrides,
   };
 }

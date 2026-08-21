@@ -230,7 +230,7 @@ export async function rejectListingCore(
       databaseId: DATABASE_ID,
       tableId: TABLE_PRODUCTS,
       rowId: product.$id,
-      data: { status: REJECTED_PRODUCT_STATUS },
+      data: { status: REJECTED_PRODUCT_STATUS, featured: false },
     });
   } catch {
     return { ok: false, error: "Failed to reject listing." };
@@ -296,7 +296,7 @@ export async function removeListingCore(
       databaseId: DATABASE_ID,
       tableId: TABLE_PRODUCTS,
       rowId: product.$id,
-      data: { status: ARCHIVED_PRODUCT_STATUS },
+      data: { status: ARCHIVED_PRODUCT_STATUS, featured: false },
     });
   } catch {
     return { ok: false, error: "Failed to remove listing." };
@@ -324,4 +324,71 @@ export async function removeListingCore(
   }
 
   return { ok: true, message: `"${product.title}" removed from the storefront.` };
+}
+
+/** Toggle featured flag on an active listing (admin only). */
+export async function setFeaturedListingCore(
+  adminUserId: string,
+  productId: string,
+  featured: boolean,
+): Promise<ListingModerationResult> {
+  const product = await loadProduct(productId);
+  if (!product) {
+    return { ok: false, error: "Listing not found." };
+  }
+
+  if (product.status !== ACTIVE_PRODUCT_STATUS) {
+    return {
+      ok: false,
+      error: "Only active listings can be featured.",
+    };
+  }
+
+  if (product.featured === featured) {
+    return {
+      ok: true,
+      message: featured
+        ? `"${product.title}" is already featured.`
+        : `"${product.title}" is not featured.`,
+    };
+  }
+
+  const { tables } = await createAdminClient();
+  try {
+    await tables.updateRow({
+      databaseId: DATABASE_ID,
+      tableId: TABLE_PRODUCTS,
+      rowId: product.$id,
+      data: { featured },
+    });
+  } catch {
+    return { ok: false, error: "Failed to update featured status." };
+  }
+
+  try {
+    await writeAuditLog({
+      actorId: adminUserId,
+      event: featured ? "listing.featured" : "listing.unfeatured",
+      resourceType: "product",
+      resourceId: product.$id,
+      meta: {
+        title: product.title,
+        sellerId: product.sellerId,
+        featured: featured ? "true" : "false",
+      },
+    });
+  } catch {
+    return {
+      ok: false,
+      error:
+        "Featured status updated but audit log failed. Please notify an operator.",
+    };
+  }
+
+  return {
+    ok: true,
+    message: featured
+      ? `"${product.title}" is now featured.`
+      : `"${product.title}" removed from featured.`,
+  };
 }

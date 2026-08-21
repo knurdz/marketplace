@@ -32,6 +32,8 @@ function order(
     currency: "LKR",
     shippingAddress: "addr",
     paymentMethod: "payhere",
+    couponCode: null,
+    discountAmount: 0,
   };
 }
 

@@ -57,7 +57,7 @@ Cross-member rules enforced in services — do not fork status strings or parall
 | **Storefront buyable** | `status=active` AND `available=true` AND `stock > 0` (`isProductPurchasable`). |
 | **Idempotency keys** | `free:<orderId>`, `bank:<orderId>`, `payhere:<payment_id>` on first successful settle. |
 
-## Tables (18)
+## Tables (22)
 
 ### `profiles`
 
@@ -136,8 +136,9 @@ Cross-member rules enforced in services — do not fork status strings or parall
 | `stock` | integer | yes (≥0) |
 | `available` | boolean | yes |
 | `currency` | string(8) | yes (e.g. `LKR`) |
+| `featured` | boolean | yes | default `false`; admin-only toggle on `active` listings (step 6.20) |
 
-**Indexes:** `sellerId_idx`, `categoryId_idx`, `status_idx`, `status_category_idx`, `price_idx`, `title_fulltext` (fulltext on `title` for `searchActiveProducts`, step 1.16)  
+**Indexes:** `sellerId_idx`, `categoryId_idx`, `status_idx`, `status_category_idx`, `price_idx`, `title_fulltext` (fulltext on `title` for `searchActiveProducts`, step 1.16), `featured_idx` (`featured`, `status`)  
 **Row permissions:** seller owner `read/update/delete`; public reads rely on table `read(any)` + app filter.
 
 ---
@@ -219,6 +220,8 @@ Cross-member rules enforced in services — do not fork status strings or parall
 | `currency` | string(8) | yes |
 | `shippingAddress` | string(2000) | yes |
 | `paymentMethod` | enum (payment method) | yes |
+| `couponCode` | string(32) | no | Applied code snapshot (step 6.20) |
+| `discountAmount` | float | no | default `0`; pre-tax line discount |
 
 **Indexes:** `buyerId_idx`, `sellerId_idx`, `status_idx`  
 **Intent:** buyer + seller (+ admin) access via row permissions; IDOR checks in services.
@@ -374,6 +377,76 @@ Cross-member rules enforced in services — do not fork status strings or parall
 
 ---
 
+### `coupons`
+
+- **Row security:** no  
+- **Table permissions:** none (admin SDK only — step **6.20**)
+
+| Column | Type | Required | Notes |
+|--------|------|----------|-------|
+| `code` | string(32) | yes | Unique; stored uppercase |
+| `type` | enum | yes | `percent` \| `fixed` |
+| `value` | float | yes | Percent 0–100 or fixed LKR amount |
+| `active` | boolean | yes | Admin deactivate instead of delete when redeemed |
+| `maxRedemptions` | integer | yes | `0` = unlimited |
+| `redemptionCount` | integer | yes | Incremented on successful checkout |
+| `minOrderAmount` | float | yes | Pre-discount cart subtotal minimum |
+| `expiresAt` | string(64) | no | ISO datetime |
+| `createdBy` | string(36) | yes | Admin user id |
+
+**Indexes:** `code_unique` (unique: `code`)
+
+---
+
+### `coupon_redemptions`
+
+- **Row security:** no  
+- **Table permissions:** none (admin SDK only)
+
+| Column | Type | Required |
+|--------|------|----------|
+| `couponId` | string(36) | yes |
+| `orderId` | string(36) | yes |
+| `buyerId` | string(36) | yes |
+| `discountAmount` | float | yes |
+
+**Indexes:** `orderId_unique` (unique: `orderId`), `couponId_idx`
+
+---
+
+### `threads`
+
+- **Row security:** yes  
+- **Table permissions:** `create(users)`
+
+| Column | Type | Required | Notes |
+|--------|------|----------|-------|
+| `buyerId` | string(36) | yes | Order buyer |
+| `sellerId` | string(36) | yes | Order seller |
+| `orderId` | string(36) | yes | Unique — one thread per order (step 6.21) |
+| `lastMessageAt` | string(64) | no | ISO timestamp for inbox sort |
+
+**Indexes:** `orderId_unique`, `buyerId_idx`, `sellerId_idx`  
+**Intent:** buyer + seller (+ admin) read/update via row permissions; no pre-purchase shop chat.
+
+---
+
+### `messages`
+
+- **Row security:** yes  
+- **Table permissions:** `create(users)`
+
+| Column | Type | Required |
+|--------|------|----------|
+| `threadId` | string(36) | yes |
+| `senderId` | string(36) | yes |
+| `body` | string(2000) | yes |
+
+**Indexes:** `threadId_idx`  
+**Intent:** participants read; sender may update/delete own row. Plain text only (MVP).
+
+---
+
 ### `payhere_notify_logs`
 
 - **Row security:** no  
@@ -414,7 +487,7 @@ Uploads are rate-limited in `uploadFile` (see Abuse guards above).
 ## Console match checklist
 
 - [x] Database `marketplace` exists (TablesDB)
-- [x] All 18 table ids present and enabled
+- [x] All 22 table ids present and enabled
 - [x] Columns/indexes available (verified via SDK list)
 - [x] Enum values match this document
 - [x] Code constants in `lib/appwrite/config.ts` match table ids
@@ -439,3 +512,5 @@ Uploads are rate-limited in `uploadFile` (see Abuse guards above).
 | 2026-08-15 | `seller_profiles.returnPolicy` + `shippingPolicy` optional strings (step 3.14) |
 | 2026-08-19 | Phase 6.1–6.14 reused frozen columns — **no console migration** (step 6.15). Idempotency keys: `free:<orderId>`, `bank:<orderId>`, `payhere:<payment_id>`. `audit_logs.ip` reserved; writers omit it today. |
 | 2026-08-19 | MVP contract freeze subsection (step 6.16) — publish, stock-on-confirm, bank exposure, buyable rules. |
+| 2026-08-21 | Phase 6.20 — `products.featured`, `orders.couponCode`/`discountAmount`, tables `coupons` + `coupon_redemptions`. |
+| 2026-08-21 | Phase 6.21 — order-scoped `threads` + `messages` (buyer↔seller; admin still verifies bank slips). |

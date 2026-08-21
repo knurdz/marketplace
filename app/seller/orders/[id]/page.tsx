@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { SellerFulfillmentActions } from "@/components/seller/seller-fulfillment-actions";
+import { OpenSellerThreadButton } from "@/components/messaging/open-seller-thread-button";
 import { OrderTimeline } from "@/components/store/order-timeline";
 import { Button } from "@/components/ui/button";
 import {
@@ -12,6 +13,7 @@ import {
   getSellerOrderItems,
   getSellerPaymentForOrder,
 } from "@/lib/services";
+import { isMessagingAllowedForOrder } from "@/lib/services/threads";
 
 type SellerOrderDetailPageProps = {
   params: Promise<{ id: string }>;
@@ -98,6 +100,14 @@ export default async function SellerOrderDetailPage({
       </section>
 
       <OrderTimeline status={order.status} />
+
+      {isMessagingAllowedForOrder(order) ? (
+        <section className="mt-10 space-y-4">
+          <p className="font-mono text-sm text-accent">$ ./order --message</p>
+          <h3 className="text-xl font-bold tracking-tight">Contact buyer</h3>
+          <OpenSellerThreadButton orderId={order.$id} />
+        </section>
+      ) : null}
 
       <SellerFulfillmentActions
         orderId={order.$id}

@@ -275,6 +275,7 @@ async function setupProducts() {
   await ensureInt("products", "stock", true, { min: 0 });
   await ensureBool("products", "available", true);
   await ensureString("products", "currency", 8, true);
+  await ensureBool("products", "featured", false);
   const keys = [
     "sellerId",
     "categoryId",
@@ -286,6 +287,7 @@ async function setupProducts() {
     "stock",
     "available",
     "currency",
+    "featured",
   ];
   await waitColumnsAvailable("products", keys);
   await ensureIndex("products", "sellerId_idx", TablesDBIndexType.Key, [
@@ -302,6 +304,10 @@ async function setupProducts() {
   await ensureIndex("products", "price_idx", TablesDBIndexType.Key, ["price"]);
   await ensureIndex("products", "title_fulltext", TablesDBIndexType.Fulltext, [
     "title",
+  ]);
+  await ensureIndex("products", "featured_idx", TablesDBIndexType.Key, [
+    "featured",
+    "status",
   ]);
 }
 
@@ -406,6 +412,8 @@ async function setupOrders() {
   await ensureString("orders", "currency", 8, true);
   await ensureString("orders", "shippingAddress", 2000, true);
   await ensureEnum("orders", "paymentMethod", PAYMENT_METHOD, true);
+  await ensureString("orders", "couponCode", 32, false);
+  await ensureFloat("orders", "discountAmount", false, { min: 0 });
   await waitColumnsAvailable("orders", [
     "buyerId",
     "sellerId",
@@ -414,6 +422,8 @@ async function setupOrders() {
     "currency",
     "shippingAddress",
     "paymentMethod",
+    "couponCode",
+    "discountAmount",
   ]);
   await ensureIndex("orders", "buyerId_idx", TablesDBIndexType.Key, ["buyerId"]);
   await ensureIndex("orders", "sellerId_idx", TablesDBIndexType.Key, [
@@ -665,6 +675,103 @@ async function setupAuditLogs() {
   ]);
 }
 
+async function setupCoupons() {
+  await ensureTable("coupons", "Coupons", [], false);
+  await ensureString("coupons", "code", 32, true);
+  await ensureEnum("coupons", "type", ["percent", "fixed"], true);
+  await ensureFloat("coupons", "value", true, { min: 0 });
+  await ensureBool("coupons", "active", true);
+  await ensureInt("coupons", "maxRedemptions", true, { min: 0 });
+  await ensureInt("coupons", "redemptionCount", true, { min: 0 });
+  await ensureFloat("coupons", "minOrderAmount", true, { min: 0 });
+  await ensureString("coupons", "expiresAt", 64, false);
+  await ensureString("coupons", "createdBy", 36, true);
+  await waitColumnsAvailable("coupons", [
+    "code",
+    "type",
+    "value",
+    "active",
+    "maxRedemptions",
+    "redemptionCount",
+    "minOrderAmount",
+    "expiresAt",
+    "createdBy",
+  ]);
+  await ensureIndex("coupons", "code_unique", TablesDBIndexType.Unique, [
+    "code",
+  ]);
+}
+
+async function setupCouponRedemptions() {
+  await ensureTable("coupon_redemptions", "Coupon Redemptions", [], false);
+  await ensureString("coupon_redemptions", "couponId", 36, true);
+  await ensureString("coupon_redemptions", "orderId", 36, true);
+  await ensureString("coupon_redemptions", "buyerId", 36, true);
+  await ensureFloat("coupon_redemptions", "discountAmount", true, { min: 0 });
+  await waitColumnsAvailable("coupon_redemptions", [
+    "couponId",
+    "orderId",
+    "buyerId",
+    "discountAmount",
+  ]);
+  await ensureIndex(
+    "coupon_redemptions",
+    "orderId_unique",
+    TablesDBIndexType.Unique,
+    ["orderId"],
+  );
+  await ensureIndex(
+    "coupon_redemptions",
+    "couponId_idx",
+    TablesDBIndexType.Key,
+    ["couponId"],
+  );
+}
+
+async function setupThreads() {
+  await ensureTable(
+    "threads",
+    "Threads",
+    [Permission.create(Role.users())],
+    true,
+  );
+  await ensureString("threads", "buyerId", 36, true);
+  await ensureString("threads", "sellerId", 36, true);
+  await ensureString("threads", "orderId", 36, true);
+  await ensureString("threads", "lastMessageAt", 64, false);
+  await waitColumnsAvailable("threads", [
+    "buyerId",
+    "sellerId",
+    "orderId",
+    "lastMessageAt",
+  ]);
+  await ensureIndex("threads", "orderId_unique", TablesDBIndexType.Unique, [
+    "orderId",
+  ]);
+  await ensureIndex("threads", "buyerId_idx", TablesDBIndexType.Key, [
+    "buyerId",
+  ]);
+  await ensureIndex("threads", "sellerId_idx", TablesDBIndexType.Key, [
+    "sellerId",
+  ]);
+}
+
+async function setupMessages() {
+  await ensureTable(
+    "messages",
+    "Messages",
+    [Permission.create(Role.users())],
+    true,
+  );
+  await ensureString("messages", "threadId", 36, true);
+  await ensureString("messages", "senderId", 36, true);
+  await ensureString("messages", "body", 2000, true);
+  await waitColumnsAvailable("messages", ["threadId", "senderId", "body"]);
+  await ensureIndex("messages", "threadId_idx", TablesDBIndexType.Key, [
+    "threadId",
+  ]);
+}
+
 async function setupPayhereNotifyLogs() {
   // Function + admin SDK only — empty client permissions (same as audit_logs).
   await ensureTable("payhere_notify_logs", "PayHere Notify Logs", [], false);
@@ -710,6 +817,10 @@ async function main() {
   await setupNotifications();
   await setupPlatformSettings();
   await setupAuditLogs();
+  await setupCoupons();
+  await setupCouponRedemptions();
+  await setupThreads();
+  await setupMessages();
   await setupPayhereNotifyLogs();
   console.log("Done.");
 }

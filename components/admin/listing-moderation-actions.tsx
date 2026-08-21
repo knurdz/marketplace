@@ -7,6 +7,7 @@ import {
   approveListingFormAction,
   rejectListingFormAction,
   removeListingFormAction,
+  setFeaturedListingFormAction,
   type ListingModerationActionState,
 } from "@/lib/appwrite/listing-moderation-actions";
 import { toast } from "@/lib/ui/toast";
@@ -46,6 +47,7 @@ type ListingRowActionsProps = {
   productId: string;
   title: string;
   view: "pending" | "active";
+  featured?: boolean;
 };
 
 export function ListingApproveButton({ productId }: { productId: string }) {
@@ -179,7 +181,46 @@ export function ListingRemoveForm({
   );
 }
 
-export function ListingRowActions({ productId, title, view }: ListingRowActionsProps) {
+export function ListingFeaturedToggle({
+  productId,
+  featured,
+}: {
+  productId: string;
+  featured: boolean;
+}) {
+  const [state, formAction, pending] = useActionState(
+    setFeaturedListingFormAction,
+    initial,
+  );
+  useModerationToast(state);
+
+  return (
+    <form action={formAction}>
+      <input type="hidden" name="productId" value={productId} />
+      <input type="hidden" name="featured" value={featured ? "0" : "1"} />
+      <Button
+        type="submit"
+        variant="outline"
+        size="sm"
+        disabled={pending}
+        data-testid={featured ? "admin-unfeature-listing" : "admin-feature-listing"}
+      >
+        {pending
+          ? "Saving…"
+          : featured
+            ? "Remove featured"
+            : "Feature on home"}
+      </Button>
+    </form>
+  );
+}
+
+export function ListingRowActions({
+  productId,
+  title,
+  view,
+  featured = false,
+}: ListingRowActionsProps) {
   if (view === "pending") {
     return (
       <div className="flex flex-wrap items-start gap-3">
@@ -189,7 +230,12 @@ export function ListingRowActions({ productId, title, view }: ListingRowActionsP
     );
   }
 
-  return <ListingRemoveForm productId={productId} title={title} />;
+  return (
+    <div className="flex flex-wrap items-start gap-3">
+      <ListingFeaturedToggle productId={productId} featured={featured} />
+      <ListingRemoveForm productId={productId} title={title} />
+    </div>
+  );
 }
 
 const DESCRIPTION_PREVIEW = 280;

@@ -24,6 +24,8 @@ function order(
     currency,
     shippingAddress: "addr",
     paymentMethod: "payhere",
+    couponCode: null,
+    discountAmount: 0,
   };
 }
 

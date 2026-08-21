@@ -139,6 +139,30 @@ export function CheckoutForm({ cartView }: CheckoutFormProps) {
           </div>
         </section>
 
+        {!isFreeOrder ? (
+          <section className="space-y-5">
+            <p className="font-mono text-sm text-accent">$ ./checkout --coupon</p>
+            <h2 className="text-xl font-bold tracking-tight">Coupon code</h2>
+            <div className="space-y-2">
+              <Label htmlFor="couponCode">
+                Code <span className="text-muted-foreground">(optional)</span>
+              </Label>
+              <Input
+                id="couponCode"
+                name="couponCode"
+                autoComplete="off"
+                maxLength={32}
+                placeholder="SAVE10"
+                disabled={!canSubmit}
+                className="font-mono uppercase"
+              />
+              <p className="text-xs text-muted-foreground">
+                Discount is calculated on the server when you place the order.
+              </p>
+            </div>
+          </section>
+        ) : null}
+
         <section className="space-y-5">
           <p className="font-mono text-sm text-accent">$ ./checkout --method</p>
           <h2 className="text-xl font-bold tracking-tight">Payment method</h2>

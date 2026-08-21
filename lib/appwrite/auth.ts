@@ -96,12 +96,16 @@ export async function signUpWithEmail(
   const email = readString(formData, "email");
   const password = readString(formData, "password");
   const name = readString(formData, "name");
+  const phone = readString(formData, "phone");
 
   if (!email || !password) {
     return { error: "Email and password are required." };
   }
   if (password.length < 8) {
     return { error: "Password must be at least 8 characters." };
+  }
+  if (phone.length > 32) {
+    return { error: "Phone number is too long." };
   }
 
   const ip = await getClientIp();
@@ -137,6 +141,7 @@ export async function signUpWithEmail(
         userId: user.$id,
         email,
         name: name || undefined,
+        phone: phone || undefined,
       });
     } catch (profileError) {
       await rollbackSignup(user.$id);
