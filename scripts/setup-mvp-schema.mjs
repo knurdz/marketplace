@@ -820,8 +820,34 @@ async function setupPayhereNotifyLogs() {
   ]);
 }
 
+async function setupViewStats() {
+  await ensureTable("view_stats", "View Stats", [], false);
+  await ensureString("view_stats", "sellerId", 36, true);
+  await ensureEnum("view_stats", "kind", ["product", "shop"], true);
+  await ensureString("view_stats", "targetId", 36, true);
+  await ensureString("view_stats", "day", 10, true);
+  await ensureInt("view_stats", "count", true, { min: 0 });
+  await waitColumnsAvailable("view_stats", [
+    "sellerId",
+    "kind",
+    "targetId",
+    "day",
+    "count",
+  ]);
+  await ensureIndex(
+    "view_stats",
+    "seller_kind_target_day_unique",
+    TablesDBIndexType.Unique,
+    ["sellerId", "kind", "targetId", "day"],
+  );
+  await ensureIndex("view_stats", "sellerId_idx", TablesDBIndexType.Key, [
+    "sellerId",
+  ]);
+}
+
 async function main() {
   console.log(`Setting up schema in database=${DATABASE_ID}`);
+  await setupViewStats();
   // profiles + categories already created via MCP; keep idempotent helpers unused for them.
   await setupSellerProfiles();
   await setupProducts();
@@ -843,6 +869,7 @@ async function main() {
   await setupThreads();
   await setupMessages();
   await setupPayhereNotifyLogs();
+  await setupViewStats();
   console.log("Done.");
 }
 

@@ -48,7 +48,7 @@ export default async function AdminLayout({
   await requireLabel("admin");
 
   return (
-    <PortalShell title="Admin" homeHref="/market" nav={ADMIN_NAV}>
+    <PortalShell title="Admin" homeHref="/admin" nav={ADMIN_NAV}>
       {children}
     </PortalShell>
   );

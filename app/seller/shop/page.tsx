@@ -8,11 +8,11 @@ export default async function SellerShopPage() {
   const profile = await getOwnSellerProfile();
 
   if (!profile) {
-    redirect("/become-seller");
+    redirect("/seller/pending");
   }
 
   if (profile.status !== "approved") {
-    redirect("/become-seller");
+    redirect("/seller/pending");
   }
 
   const bannerPreviewUrl = getShopBannerPreviewUrl(profile.bannerFileId);

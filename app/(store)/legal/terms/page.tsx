@@ -15,9 +15,10 @@ export default function TermsPage() {
 
       <LegalSection title="2. Roles">
         <p>
-          Users may act as buyers (default), sellers (after approval), or
-          admins (platform operators). Access to seller and admin areas is
-          restricted by role labels enforced on the server.
+          Users register as a buyer or a seller. Sellers wait for admin
+          approval before opening a shop. Admins are created by the team in
+          Appwrite. Access to seller and admin areas is restricted by role
+          labels enforced on the server.
         </p>
       </LegalSection>
 

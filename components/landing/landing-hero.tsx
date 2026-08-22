@@ -1,5 +1,4 @@
 import Link from "next/link";
-import { userHasLabel } from "@/lib/appwrite/roles";
 import type { SessionUserView } from "@/lib/appwrite/session-user";
 import { Button } from "@/components/ui/button";
 
@@ -8,9 +7,6 @@ type LandingHeroProps = {
 };
 
 export function LandingHero({ user }: LandingHeroProps) {
-  const isSeller = Boolean(user && userHasLabel(user, "seller"));
-  const isAdmin = Boolean(user && userHasLabel(user, "admin"));
-
   return (
     <section className="relative overflow-hidden">
       <div aria-hidden className="pointer-events-none absolute inset-0 bg-grid-faint opacity-40" />
@@ -30,15 +26,15 @@ export function LandingHero({ user }: LandingHeroProps) {
           className="animate-fade-up mt-5 max-w-3xl text-5xl font-bold tracking-tight sm:text-7xl"
           style={{ animationDelay: "120ms" }}
         >
-          Trade what you build
+          Find what makers ship
           <span className="text-accent">.</span>
         </h1>
         <p
           className="animate-fade-up mt-5 max-w-xl text-lg leading-relaxed text-muted-foreground sm:text-xl"
           style={{ animationDelay: "200ms" }}
         >
-          A quiet market for makers. Browse listings, sell to the community, and
-          check out with PayHere, bank transfer, or free.
+          Browse listings and check out with PayHere, bank transfer, or free
+          when the price is zero.
         </p>
 
         <div
@@ -53,16 +49,6 @@ export function LandingHero({ user }: LandingHeroProps) {
               <Button size="lg" variant="secondary" asChild>
                 <Link href="/dashboard">Dashboard</Link>
               </Button>
-              {isSeller ? (
-                <Button size="lg" variant="secondary" asChild>
-                  <Link href="/seller">Seller portal</Link>
-                </Button>
-              ) : null}
-              {isAdmin ? (
-                <Button size="lg" variant="secondary" asChild>
-                  <Link href="/admin">Admin portal</Link>
-                </Button>
-              ) : null}
             </>
           ) : (
             <>

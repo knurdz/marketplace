@@ -3,7 +3,6 @@
 import Link from "next/link";
 import { LayoutDashboard, LogOut, MessageSquare, Package, UserRound } from "lucide-react";
 import { signOut } from "@/lib/appwrite/auth";
-import { userHasLabel } from "@/lib/appwrite/roles";
 import type { SessionUserView } from "@/lib/appwrite/session-user";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -33,8 +32,6 @@ function initialsFrom(name: string, email: string): string {
 export function AccountMenu({ user, displayName, avatarUrl }: AccountMenuProps) {
   const label = displayName?.trim() || user.name.trim() || user.email;
   const initials = initialsFrom(label, user.email);
-  const isSeller = userHasLabel(user, "seller");
-  const isAdmin = userHasLabel(user, "admin");
 
   return (
     <DropdownMenu>
@@ -86,28 +83,6 @@ export function AccountMenu({ user, displayName, avatarUrl }: AccountMenuProps) 
             </Link>
           </DropdownMenuItem>
         </DropdownMenuGroup>
-        {isSeller || isAdmin ? (
-          <>
-            <DropdownMenuSeparator />
-            {isSeller ? (
-              <DropdownMenuItem asChild>
-                <Link href="/seller">Seller portal</Link>
-              </DropdownMenuItem>
-            ) : null}
-            {isAdmin ? (
-              <DropdownMenuItem asChild>
-                <Link href="/admin">Admin portal</Link>
-              </DropdownMenuItem>
-            ) : null}
-          </>
-        ) : (
-          <>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem asChild>
-              <Link href="/become-seller">Sell on Knurdz</Link>
-            </DropdownMenuItem>
-          </>
-        )}
         <DropdownMenuSeparator />
         <form action={signOut}>
           <DropdownMenuItem asChild>

@@ -136,6 +136,41 @@ export async function getSellerOrderItems(orderId: string): Promise<OrderItem[]>
   }
 }
 
+/** Line items for many orders owned by the signed-in seller. */
+export async function listSellerOrderItemsForOrderIds(
+  orderIds: string[],
+): Promise<OrderItem[]> {
+  const user = await getLoggedInUser();
+  if (!user || !userHasLabel(user, ROLE_LABELS.seller)) return [];
+
+  const unique = [...new Set(orderIds.map((id) => id.trim()).filter(Boolean))];
+  if (unique.length === 0) return [];
+
+  try {
+    const { tables } = await createSessionClient();
+    const out: OrderItem[] = [];
+    const owned = new Set(unique);
+
+    for (let i = 0; i < unique.length; i += 100) {
+      const chunk = unique.slice(i, i + 100);
+      const result = await tables.listRows({
+        databaseId: DATABASE_ID,
+        tableId: TABLE_ORDER_ITEMS,
+        queries: [Query.equal("orderId", chunk), Query.limit(100)],
+      });
+      for (const row of result.rows) {
+        const item = asOrderItem(row as unknown as Record<string, unknown>);
+        if (item && owned.has(item.orderId)) {
+          out.push(item);
+        }
+      }
+    }
+    return out;
+  } catch {
+    return [];
+  }
+}
+
 /** Payment row for an order owned by the signed-in seller (IDOR-safe). */
 export async function getSellerPaymentForOrder(
   orderId: string,

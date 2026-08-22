@@ -5,6 +5,7 @@ import {
   DEMO_PASSWORD,
   loginAs,
   registerBuyer,
+  registerSeller,
 } from "./fixtures/auth";
 import {
   fillCheckoutAddress,
@@ -17,6 +18,7 @@ test.describe.configure({ mode: "serial" });
 test.describe("Guide §10 — MVP close (Phase 6.18)", () => {
   const runId = Date.now();
   const buyerEmail = `e2e-buyer-${runId}@knurdz.demo`;
+  const sellerEmail = `e2e-seller-${runId}@knurdz.demo`;
   const shopSlug = `e2e-shop-${runId}`;
   const freeTitle = `E2E Free ${runId}`;
   const paidTitle = `E2E Paid ${runId}`;
@@ -25,18 +27,14 @@ test.describe("Guide §10 — MVP close (Phase 6.18)", () => {
   let paidProductId = "";
   let bankOrderId = "";
 
-  test("register buyer, apply seller, admin approves seller", async ({ page }) => {
-    await registerBuyer(page, {
-      email: buyerEmail,
-      name: `E2E Buyer ${runId}`,
+  test("register seller, admin approves seller, register buyer", async ({ page }) => {
+    await registerSeller(page, {
+      email: sellerEmail,
+      name: `E2E Seller ${runId}`,
+      shopName: `E2E Shop ${runId}`,
+      slug: shopSlug,
     });
-
-    await page.goto("/become-seller");
-    await page.locator("#shopName").fill(`E2E Shop ${runId}`);
-    await page.locator("#slug").fill(shopSlug);
-    await page.locator("#bio").fill("Automated E2E seller shop.");
-    await page.getByTestId("seller-apply-submit").click();
-    await expect(page.getByText(/application|pending|submitted/i)).toBeVisible({
+    await expect(page.getByText(/pending|under review/i)).toBeVisible({
       timeout: 15_000,
     });
 
@@ -47,13 +45,19 @@ test.describe("Guide §10 — MVP close (Phase 6.18)", () => {
     await expect(row).toBeVisible({ timeout: 15_000 });
     await row.getByTestId("admin-approve-seller").click();
     await expect(page.getByText(/approved/i)).toBeVisible({ timeout: 15_000 });
+
+    await clearSession(page);
+    await registerBuyer(page, {
+      email: buyerEmail,
+      name: `E2E Buyer ${runId}`,
+    });
   });
 
   test("seller bank details + publish free and paid listings", async ({
     page,
   }) => {
     await clearSession(page);
-    await loginAs(page, buyerEmail);
+    await loginAs(page, sellerEmail);
 
     await page.goto("/seller/shop");
     await page.locator("#bankName").fill("E2E Test Bank");
@@ -221,7 +225,7 @@ test.describe("Guide §10 — MVP close (Phase 6.18)", () => {
 
   test("seller fulfills bank order", async ({ page }) => {
     await clearSession(page);
-    await loginAs(page, buyerEmail);
+    await loginAs(page, sellerEmail);
     await page.goto(`/seller/orders/${bankOrderId}`);
 
     await page.getByTestId("fulfill-processing").click();

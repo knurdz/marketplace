@@ -10,11 +10,10 @@ const FOOTER_COLUMNS = [
     ],
   },
   {
-    title: "Sell",
+    title: "Help",
     links: [
-      { href: "/become-seller", label: "Become a seller" },
-      { href: "/seller", label: "Seller dashboard" },
       { href: "/faq", label: "FAQ" },
+      { href: "/legal/terms", label: "Terms" },
     ],
   },
   {

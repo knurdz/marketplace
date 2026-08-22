@@ -23,7 +23,7 @@ const MAX_BANK_ACCOUNT_NUMBER_LENGTH = 64;
 /** Digits, spaces, hyphens — Sri Lankan copy-paste friendly. */
 const BANK_ACCOUNT_NUMBER_PATTERN = /^[\d\s-]+$/;
 
-export type BlockedSellerPortalDestination = "/become-seller" | "/" | null;
+export type BlockedSellerPortalDestination = "/seller/pending" | "/" | null;
 
 export type SubmitSellerApplicationInput = {
   shopName: string;
@@ -86,7 +86,7 @@ export function blockedSellerPortalDestination(
 ): BlockedSellerPortalDestination {
   if (hasSellerLabel) return null;
   if (profile?.status === "pending" || profile?.status === "rejected") {
-    return "/become-seller";
+    return "/seller/pending";
   }
   return "/";
 }
@@ -391,6 +391,84 @@ export async function submitSellerApplicationCore(
       if (error.code === 401) {
         return { ok: false, error: "You must be signed in to apply." };
       }
+    }
+    return { ok: false, error: "Could not submit application. Please try again." };
+  }
+}
+
+/**
+ * Create a pending seller_profiles row for a newly registered user (admin SDK).
+ * Does not grant the seller label — admin approval does that.
+ */
+export async function createPendingSellerProfileForUser(
+  userId: string,
+  input: SubmitSellerApplicationInput,
+): Promise<SellerApplicationResult> {
+  if (!hasAppwritePublicConfig() || !process.env.APPWRITE_API_KEY?.trim()) {
+    return { ok: false, error: "Marketplace is not configured." };
+  }
+
+  const trimmedUserId = userId.trim();
+  if (!trimmedUserId) {
+    return { ok: false, error: "Account could not be created." };
+  }
+
+  const parsed = parseSellerApplicationInput(input);
+  if (!parsed.ok) {
+    return { ok: false, error: parsed.error };
+  }
+
+  const slug = await resolveUniqueShopSlug(parsed.slug);
+
+  try {
+    const { tables } = await createAdminClient();
+    const existing = await tables.listRows({
+      databaseId: DATABASE_ID,
+      tableId: TABLE_SELLER_PROFILES,
+      queries: [Query.equal("userId", trimmedUserId), Query.limit(1)],
+    });
+    if (existing.rows.length > 0) {
+      return {
+        ok: false,
+        error: "You already have a seller application under review.",
+      };
+    }
+
+    const row = await tables.createRow({
+      databaseId: DATABASE_ID,
+      tableId: TABLE_SELLER_PROFILES,
+      rowId: ID.unique(),
+      data: {
+        userId: trimmedUserId,
+        shopName: parsed.shopName,
+        slug,
+        bio: parsed.bio,
+        status: PENDING_STATUS,
+        bannerFileId: null,
+        bankAccountName: null,
+        bankAccountNumber: null,
+        bankName: null,
+        rejectionReason: null,
+      },
+      permissions: sellerProfilePermissions(trimmedUserId),
+    });
+
+    const profile = asSellerProfile(row as unknown as Record<string, unknown>);
+    if (!profile || profile.userId !== trimmedUserId) {
+      return { ok: false, error: "Application was created but could not be verified." };
+    }
+
+    return {
+      ok: true,
+      message: "Application submitted. An admin will review your shop details.",
+      profileId: profile.$id,
+    };
+  } catch (error) {
+    if (error instanceof AppwriteException && error.code === 409) {
+      return {
+        ok: false,
+        error: "You already have a seller application or this shop URL is taken.",
+      };
     }
     return { ok: false, error: "Could not submit application. Please try again." };
   }

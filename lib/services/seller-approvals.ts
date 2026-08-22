@@ -90,8 +90,9 @@ function toAdminApplication(
   };
 }
 
-function mergeSellerLabel(existing: string[]): string[] {
-  return [...new Set([...existing, ROLE_LABELS.seller])];
+/** Exclusive seller role — never keep a buyer label on an approved shop. */
+function exclusiveSellerLabels(): string[] {
+  return [ROLE_LABELS.seller];
 }
 
 async function writeAuditLog(params: {
@@ -179,7 +180,7 @@ export async function listPendingSellerApplications(): Promise<
 }
 
 /**
- * Approve a pending seller application: status → approved, merge seller label, audit.
+ * Approve a pending seller application: status → approved, set seller-only label, audit.
  * ponytail: status update + label update are not atomic; compensating revert on label failure.
  */
 export async function approveSellerApplicationCore(
@@ -216,12 +217,10 @@ export async function approveSellerApplicationCore(
   }
 
   try {
-    const user = await users.get({ userId: profile.userId });
-    const existingLabels = Array.isArray(user.labels) ? user.labels : [];
-    const mergedLabels = mergeSellerLabel(existingLabels);
+    await users.get({ userId: profile.userId });
     await users.updateLabels({
       userId: profile.userId,
-      labels: mergedLabels,
+      labels: exclusiveSellerLabels(),
     });
   } catch {
     try {

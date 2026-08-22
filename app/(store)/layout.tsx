@@ -1,8 +1,16 @@
 import type { ReactNode } from "react";
+import { headers } from "next/headers";
+import { redirect } from "next/navigation";
 import { SkipToContent } from "@/components/layout/skip-to-content";
 import { StoreFooter } from "@/components/layout/store-footer";
 import { StoreNavbar } from "@/components/layout/store-navbar";
+import { loadSellerStatus } from "@/lib/appwrite/home-path";
 import { getOwnProfile } from "@/lib/appwrite/profiles";
+import {
+  homePathForUser,
+  pathIsPublicStoreException,
+  shouldLeaveBuyerStorefront,
+} from "@/lib/appwrite/roles";
 import { getLoggedInUser } from "@/lib/appwrite/session";
 import { toSessionUserView } from "@/lib/appwrite/session-user";
 import { getAvatarPreviewUrl } from "@/lib/appwrite/storage-urls";
@@ -14,6 +22,15 @@ export default async function StoreLayout({
   children: ReactNode;
 }) {
   const authUser = await getLoggedInUser();
+  const pathname = (await headers()).get("x-knurdz-pathname") ?? "";
+
+  if (authUser && !pathIsPublicStoreException(pathname)) {
+    const sellerStatus = await loadSellerStatus(authUser);
+    if (shouldLeaveBuyerStorefront(authUser, sellerStatus)) {
+      redirect(homePathForUser(authUser, sellerStatus));
+    }
+  }
+
   const [cartItemCount, profile] = authUser
     ? await Promise.all([getCartItemCount(), getOwnProfile()])
     : [0, null];

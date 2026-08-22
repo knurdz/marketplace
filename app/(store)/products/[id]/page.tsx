@@ -28,6 +28,7 @@ import {
   listCategories,
   listProductImages,
   listProductReviews,
+  recordMarketplaceView,
 } from "@/lib/services";
 
 type ProductPageProps = {
@@ -42,6 +43,12 @@ export default async function ProductPage({ params }: ProductPageProps) {
     listCategories(),
   ]);
   if (!product) notFound();
+
+  await recordMarketplaceView({
+    sellerId: product.sellerId,
+    kind: "product",
+    targetId: product.$id,
+  });
 
   const [images, seller, saved, reviews, reviewEligibility] = await Promise.all([
     listProductImages(product.$id),

@@ -30,6 +30,7 @@ export const RATE_LIMITS = {
   listings: { limit: 20, windowMs: MS_HOUR },
   fulfillment: { limit: 30, windowMs: MS_MINUTE },
   messages: { limit: 30, windowMs: MS_MINUTE },
+  views: { limit: 1, windowMs: 24 * MS_HOUR },
 } as const;
 
 type BucketHits = number[];

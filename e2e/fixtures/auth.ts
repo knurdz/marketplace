@@ -22,6 +22,7 @@ export async function registerBuyer(
   params: { email: string; name: string; password?: string },
 ): Promise<void> {
   await page.goto("/register");
+  await page.getByTestId("register-account-buyer").check();
   await page.locator("#name").fill(params.name);
   await page.locator("#email").fill(params.email);
   await page.locator("#password").fill(params.password ?? DEMO_PASSWORD);
@@ -29,6 +30,30 @@ export async function registerBuyer(
   await page.waitForURL((url) => !url.pathname.startsWith("/register"), {
     timeout: 30_000,
   });
+}
+
+export async function registerSeller(
+  page: Page,
+  params: {
+    email: string;
+    name: string;
+    shopName: string;
+    slug?: string;
+    password?: string;
+  },
+): Promise<void> {
+  await page.goto("/register");
+  await page.getByTestId("register-account-seller").check();
+  await page.locator("#shopName").waitFor({ state: "visible" });
+  await page.locator("#name").fill(params.name);
+  await page.locator("#email").fill(params.email);
+  await page.locator("#shopName").fill(params.shopName);
+  if (params.slug) {
+    await page.locator("#slug").fill(params.slug);
+  }
+  await page.locator("#password").fill(params.password ?? DEMO_PASSWORD);
+  await page.getByTestId("register-submit").click();
+  await page.waitForURL(/\/seller\/pending/, { timeout: 30_000 });
 }
 
 export async function clearSession(page: Page): Promise<void> {

@@ -8,6 +8,7 @@ import {
   getPublicSellerBySlug,
   listActiveProducts,
   listCoverImagesByProductIds,
+  recordMarketplaceView,
 } from "@/lib/services";
 
 type ShopPageProps = {
@@ -18,6 +19,12 @@ export default async function ShopPage({ params }: ShopPageProps) {
   const { slug } = await params;
   const seller = await getPublicSellerBySlug(slug);
   if (!seller) notFound();
+
+  await recordMarketplaceView({
+    sellerId: seller.userId,
+    kind: "shop",
+    targetId: seller.userId,
+  });
 
   const products = await listActiveProducts({
     sellerId: seller.userId,

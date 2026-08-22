@@ -118,7 +118,7 @@ Use after every change that touches code or schema:
 - [x] Schema changelog when others request fields — **Phase 6.15** (only if 6.x needs new fields)
 - [x] PayHere Function **interfaces** (`PAYHERE.md` + types + stub) — implementation is Member 1 payment setup below
 - [x] Accessibility / responsive baseline pass
-- [x] Role-based post-login redirects (admin → `/admin`, seller → `/seller`, buyer → `/`); single `/login`
+- [x] Role-based post-login redirects (admin → `/admin`, seller → `/seller`, pending seller → `/seller/pending`, buyer → `/market`); exclusive shells; single `/login`
 - [x] Fix cross-member integration issues; keep API contracts consistent — **Phase 6.16**
 
 ### Payment setup (Member 1 — was formerly Members 2 + 4)
@@ -229,6 +229,7 @@ Complete payment infrastructure so Members 2–4 only consume APIs / admin UI.
 - [x] Inventory / stock + availability toggle
 - [x] Free vs paid listing toggle
 - [x] Seller dashboard: sales analytics (basic), orders summary, revenue overview
+- [x] Seller dashboard: earnings charts, per-product earnings, shop/product view graphs
 - [x] Order inbox + status updates (`processing` / `shipped` / `completed` + pickup if used)
 - [x] Seller bank details for buyer transfers
 - [x] Earnings / completed payments list + bank payout tracking (manual OK)
@@ -403,6 +404,7 @@ Pick up only after Phases 1–4 **and Phase 6 A–C** are solid (**6.18**). Assi
 | ID  | Item                                        | Suggested owner |
 | --- | ------------------------------------------- | --------------- |
 | [x] **UX-1** | Storefront / portal UI polish (landing, `/market`, shared chrome) | Member 1 |
+| [x] **UX-2** | Exclusive buyer / seller / admin shells + seller dashboard analytics | Member 1 |
 | X01 | CAPTCHA on register/login (optional)        | Member 1        |
 | X02 | Dark/light mode                             | Member 1        |
 | X03 | Realtime notifications (vs polling)         | Member 1        |
