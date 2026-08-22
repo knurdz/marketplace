@@ -78,8 +78,12 @@ assert(
   "buyer home",
 );
 assert(
-  homePathForUser({ labels: [] }) === "/account",
-  "unlabeled account without seller profile → account (not pending loop)",
+  homePathForUser({ labels: [] }) === "/market",
+  "unlabeled account without seller profile → market (default buyer)",
+);
+assert(
+  homePathForUser({ labels: ["user"] }) === "/market",
+  "legacy user label is treated as buyer home",
 );
 assert(
   homePathForUser({ labels: [] }, "pending") === "/seller/pending",
@@ -101,6 +105,14 @@ assert(
 assert(
   postLoginPath({ labels: ["buyer"] }, "/cart") === "/cart",
   "buyer may next into cart",
+);
+assert(
+  postLoginPath({ labels: ["user"] }, "/cart") === "/cart",
+  "legacy user label may next into cart",
+);
+assert(
+  postLoginPath({ labels: [] }, "/market") === "/market",
+  "unlabeled may open market",
 );
 
 const ok = parseSellerApplicationInput({ shopName: "Campus Crafts" });

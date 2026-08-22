@@ -14,6 +14,7 @@ import {
 import { getLoggedInUser } from "@/lib/appwrite/session";
 import { toSessionUserView } from "@/lib/appwrite/session-user";
 import { getAvatarPreviewUrl } from "@/lib/appwrite/storage-urls";
+import { debugLog9145e1 } from "@/lib/debug-9145e1";
 import { getCartItemCount } from "@/lib/services";
 
 export default async function StoreLayout({
@@ -26,8 +27,26 @@ export default async function StoreLayout({
 
   if (authUser && !pathIsPublicStoreException(pathname)) {
     const sellerStatus = await loadSellerStatus(authUser);
-    if (shouldLeaveBuyerStorefront(authUser, sellerStatus)) {
-      redirect(homePathForUser(authUser, sellerStatus));
+    const leave = shouldLeaveBuyerStorefront(authUser, sellerStatus);
+    const home = homePathForUser(authUser, sellerStatus);
+    // #region agent log
+    debugLog9145e1({
+      hypothesisId: "C",
+      runId: "post-fix",
+      location: "app/(store)/layout.tsx:store-gate",
+      message: "storefront exclusive-shell gate",
+      data: {
+        pathname,
+        publicException: false,
+        labels: Array.isArray(authUser.labels) ? authUser.labels : null,
+        sellerStatus: sellerStatus ?? null,
+        shouldLeave: leave,
+        home,
+      },
+    });
+    // #endregion
+    if (leave) {
+      redirect(home);
     }
   }
 

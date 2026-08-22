@@ -22,6 +22,7 @@ import {
   parseSellerApplicationInput,
 } from "@/lib/services/seller-application";
 import { logError } from "@/lib/observability/log-error";
+import { debugLog9145e1 } from "@/lib/debug-9145e1";
 
 async function rollbackSignup(userId: string) {
   try {
@@ -288,6 +289,15 @@ export async function signInWithEmail(
     return { error: mapAuthError(error) };
   }
 
+  // #region agent log
+  debugLog9145e1({
+    hypothesisId: "D",
+    runId: "post-fix",
+    location: "lib/appwrite/auth.ts:signInWithEmail",
+    message: "sign-in redirect destination",
+    data: { nextRaw: nextRaw || null, destination },
+  });
+  // #endregion
   redirect(destination);
 }
 
