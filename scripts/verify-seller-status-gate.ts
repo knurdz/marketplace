@@ -39,6 +39,12 @@ assert(
   blockedSellerPortalDestination(true, profile("pending")) === null,
   "seller label allows even with pending row",
 );
+// Shop/settings pages must not redirect labeled sellers to /seller/pending
+// (pending page bounces them back to /seller — redirect loop).
+assert(
+  blockedSellerPortalDestination(true, profile("pending")) !== "/seller/pending",
+  "labeled seller shop/settings must not redirect to pending",
+);
 assert(
   blockedSellerPortalDestination(false, profile("pending")) ===
     "/seller/pending",

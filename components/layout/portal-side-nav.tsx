@@ -54,10 +54,10 @@ export function PortalSideNav({
                   key={item.href}
                   href={item.href}
                   className={cn(
-                    "rounded-md px-3 py-2 text-sm transition",
+                    "rounded-md border-l-2 py-2 pl-[10px] pr-3 text-sm transition",
                     active
-                      ? "bg-card text-foreground"
-                      : "text-muted-foreground hover:bg-card hover:text-foreground",
+                      ? "border-accent bg-accent/10 font-medium text-foreground"
+                      : "border-transparent text-muted-foreground hover:bg-card hover:text-foreground",
                   )}
                   aria-current={active ? "page" : undefined}
                 >
