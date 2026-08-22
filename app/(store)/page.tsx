@@ -6,6 +6,7 @@ import { ProductGrid } from "@/components/store/product-grid";
 import { Reveal } from "@/components/motion/reveal";
 import { Button } from "@/components/ui/button";
 import { userHasLabel } from "@/lib/appwrite/roles";
+import { toSessionUserView } from "@/lib/appwrite/session-user";
 import {
   getSessionUser,
   listCategories,
@@ -16,7 +17,8 @@ import {
 import Link from "next/link";
 
 export default async function Home() {
-  const user = await getSessionUser();
+  const authUser = await getSessionUser();
+  const user = authUser ? toSessionUserView(authUser) : null;
   const [categories, featured, trending] = await Promise.all([
     listCategories(),
     listFeaturedProducts({ limit: 8 }),

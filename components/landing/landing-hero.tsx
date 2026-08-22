@@ -1,10 +1,10 @@
 import Link from "next/link";
 import { userHasLabel } from "@/lib/appwrite/roles";
+import type { SessionUserView } from "@/lib/appwrite/session-user";
 import { Button } from "@/components/ui/button";
-import type { Models } from "node-appwrite";
 
 type LandingHeroProps = {
-  user: Models.User<Models.Preferences> | null;
+  user: SessionUserView | null;
 };
 
 export function LandingHero({ user }: LandingHeroProps) {

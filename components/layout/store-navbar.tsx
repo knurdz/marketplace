@@ -1,7 +1,7 @@
 import Link from "next/link";
-import type { Models } from "node-appwrite";
 import { Heart, Menu, Search, ShoppingBag } from "lucide-react";
 import { userHasLabel } from "@/lib/appwrite/roles";
+import type { SessionUserView } from "@/lib/appwrite/session-user";
 import { AccountMenu } from "@/components/layout/account-menu";
 import { NotificationBell } from "@/components/notifications/notification-bell";
 import { Button } from "@/components/ui/button";
@@ -16,7 +16,7 @@ import {
 } from "@/components/ui/sheet";
 
 type StoreNavbarProps = {
-  user: Models.User<Models.Preferences> | null;
+  user: SessionUserView | null;
   cartItemCount?: number;
   displayName?: string | null;
   avatarUrl?: string | null;
@@ -26,7 +26,7 @@ function NavLinks({
   user,
   className,
 }: {
-  user: Models.User<Models.Preferences> | null;
+  user: SessionUserView | null;
   className?: string;
 }) {
   const isSeller = Boolean(user && userHasLabel(user, "seller"));

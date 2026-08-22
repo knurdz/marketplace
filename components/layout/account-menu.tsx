@@ -1,10 +1,10 @@
 "use client";
 
 import Link from "next/link";
-import type { Models } from "node-appwrite";
 import { LayoutDashboard, LogOut, MessageSquare, Package, UserRound } from "lucide-react";
 import { signOut } from "@/lib/appwrite/auth";
 import { userHasLabel } from "@/lib/appwrite/roles";
+import type { SessionUserView } from "@/lib/appwrite/session-user";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import {
@@ -18,7 +18,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 
 type AccountMenuProps = {
-  user: Models.User<Models.Preferences>;
+  user: SessionUserView;
   displayName?: string | null;
   avatarUrl?: string | null;
 };
@@ -31,7 +31,7 @@ function initialsFrom(name: string, email: string): string {
 }
 
 export function AccountMenu({ user, displayName, avatarUrl }: AccountMenuProps) {
-  const label = displayName?.trim() || user.name?.trim() || user.email;
+  const label = displayName?.trim() || user.name.trim() || user.email;
   const initials = initialsFrom(label, user.email);
   const isSeller = userHasLabel(user, "seller");
   const isAdmin = userHasLabel(user, "admin");
