@@ -1,0 +1,22 @@
+---
+description: Quality first — verify code, never ship unsure work
+alwaysApply: true
+---
+
+# Quality & Certainty
+
+Quality and security outrank speed, token savings, and “good enough” shortcuts.
+
+## After every implementation
+
+1. Re-read the changed code end-to-end (not only the diff hunk).
+2. Trace happy path, failure path, empty/null input, and unauthorized access.
+3. If anything is unclear (Appwrite permissions, PayHere flow, race conditions), **stop and verify** via docs, schema, or a safe test — do not leave TODOs that hide uncertainty.
+4. Fix issues found in the same turn before marking the task done.
+5. Prefer a correct, smaller change over a large incomplete one.
+
+## Certainty bar
+
+- Do not claim “should work” without checking types, permissions, and edge cases.
+- Do not invent APIs, env vars, or collection fields — confirm they exist.
+- When blocked by missing info, ask once with a concrete question; do not guess secrets or payment behavior.

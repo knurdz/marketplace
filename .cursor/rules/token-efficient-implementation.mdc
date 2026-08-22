@@ -1,0 +1,22 @@
+---
+description: Efficient agent token use without cutting quality or security
+alwaysApply: true
+---
+
+# Efficient Token Use (Quality Preserved)
+
+Save tokens by focusing work — never by skipping verification or security.
+
+## Do
+
+- Read only files needed for the task; use graphify queries before wide searches.
+- Prefer small, targeted diffs; match existing patterns.
+- Batch related tool calls; avoid re-reading files you already have.
+- Summarize outcomes briefly; put detail in code/comments only when needed.
+
+## Do not
+
+- Skip security or certainty checks to “save a turn.”
+- Dump large unrelated files into context.
+- Rewrite working modules for style-only churn.
+- Generate docs the user did not ask for (except required project files).

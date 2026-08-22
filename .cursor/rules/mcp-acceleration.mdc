@@ -1,0 +1,26 @@
+---
+description: Approved MCP tools for Knurdz — no GitHub MCP
+alwaysApply: true
+---
+
+# Approved MCP Tools
+
+Use **only** these MCP servers for implementation acceleration. Do **not** add or rely on GitHub MCP.
+
+## Preferred stack
+
+1. **Appwrite MCP** — project ops, Auth, DB, Storage, Functions, Appwrite docs
+2. **PayHere docs MCP** — checkout, hash, notify_url, SDK guides
+3. **PayHere Merchant MCP** (optional) — signed checkout payloads, hash verify, payment lookup; sandbox credentials only; never commit secrets
+4. **Context7** — up-to-date Next.js / React / library docs
+5. **next-devtools-mcp** — live Next.js routes, errors, logs (when dev server runs)
+6. **shadcn MCP** — browse/search/install UI components
+7. **Playwright MCP** — browser E2E for buyer/seller/admin flows
+
+## Rules
+
+- Prefer these MCPs over guessing APIs or scraping docs.
+- Do not use GitHub MCP (or equivalent) for commits, PRs, issues, or merges.
+- Do not use Supabase MCP for this app’s data plane (Appwrite is backend).
+- MCP speed never overrides security review or `WORK_DISTRIBUTION.md` checklist ticks.
+- Mutating Appwrite/PayHere tools need clear user intent; keep merchant secrets out of client code and git.

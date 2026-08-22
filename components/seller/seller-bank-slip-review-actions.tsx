@@ -1,0 +1,202 @@
+"use client";
+
+import { useRouter } from "next/navigation";
+import { useActionState, useEffect, useRef, useState } from "react";
+import { Button } from "@/components/ui/button";
+import {
+  approveBankSlipFormAction,
+  rejectAndCancelBankSlipFormAction,
+  rejectBankSlipFormAction,
+  type BankSlipActionState,
+} from "@/lib/appwrite/seller-bank-slip-actions";
+import { toast } from "@/lib/ui/toast";
+
+const initial: BankSlipActionState = {};
+
+function useBankSlipToast(
+  state: BankSlipActionState,
+  onSuccess?: () => void,
+) {
+  const lastToast = useRef<string | null>(null);
+  const router = useRouter();
+
+  useEffect(() => {
+    if (state.error) {
+      const key = `e:${state.error}`;
+      if (key !== lastToast.current) {
+        lastToast.current = key;
+        toast.error(state.error);
+      }
+      return;
+    }
+
+    if (state.success) {
+      const key = `s:${state.success}`;
+      if (key !== lastToast.current) {
+        lastToast.current = key;
+        toast.success(state.success);
+        onSuccess?.();
+        router.refresh();
+      }
+    }
+  }, [state, onSuccess, router]);
+}
+
+function SellerBankSlipApproveButton({ bankSlipId }: { bankSlipId: string }) {
+  const [state, formAction, pending] = useActionState(
+    approveBankSlipFormAction,
+    initial,
+  );
+  useBankSlipToast(state);
+
+  return (
+    <form
+      action={formAction}
+      onSubmit={(e) => {
+        if (
+          !window.confirm(
+            "Approve this bank slip? This marks the payment paid so you can fulfill. This cannot be undone.",
+          )
+        ) {
+          e.preventDefault();
+        }
+      }}
+    >
+      <input type="hidden" name="bankSlipId" value={bankSlipId} />
+      <Button
+        type="submit"
+        disabled={pending}
+        size="sm"
+        data-testid="seller-approve-bank-slip"
+      >
+        {pending ? "Approving…" : "Approve"}
+      </Button>
+    </form>
+  );
+}
+
+function SellerBankSlipRejectForm({ bankSlipId }: { bankSlipId: string }) {
+  const [showNote, setShowNote] = useState(false);
+  const [state, formAction, pending] = useActionState(
+    rejectBankSlipFormAction,
+    initial,
+  );
+
+  useBankSlipToast(state, () => setShowNote(false));
+
+  if (!showNote) {
+    return (
+      <Button
+        type="button"
+        variant="outline"
+        size="sm"
+        onClick={() => setShowNote(true)}
+      >
+        Reject — allow retry
+      </Button>
+    );
+  }
+
+  return (
+    <form action={formAction} className="mt-3 space-y-2">
+      <input type="hidden" name="bankSlipId" value={bankSlipId} />
+      <label className="block font-mono text-xs text-muted-foreground">
+        Rejection note (required)
+        <textarea
+          name="reviewNote"
+          required
+          maxLength={500}
+          rows={3}
+          placeholder="Why this slip is rejected — stored on the slip and in audit log"
+          className="mt-1 w-full rounded-md border border-border bg-background px-3 py-2 text-sm"
+        />
+      </label>
+      <div className="flex gap-2">
+        <Button type="submit" variant="outline" size="sm" disabled={pending}>
+          {pending ? "Rejecting…" : "Reject — allow retry"}
+        </Button>
+        <Button
+          type="button"
+          variant="ghost"
+          size="sm"
+          disabled={pending}
+          onClick={() => setShowNote(false)}
+        >
+          Cancel
+        </Button>
+      </div>
+    </form>
+  );
+}
+
+function SellerBankSlipRejectAndCancelForm({
+  bankSlipId,
+}: {
+  bankSlipId: string;
+}) {
+  const [showNote, setShowNote] = useState(false);
+  const [state, formAction, pending] = useActionState(
+    rejectAndCancelBankSlipFormAction,
+    initial,
+  );
+
+  useBankSlipToast(state, () => setShowNote(false));
+
+  if (!showNote) {
+    return (
+      <Button
+        type="button"
+        variant="outline"
+        size="sm"
+        onClick={() => setShowNote(true)}
+      >
+        Reject and cancel order
+      </Button>
+    );
+  }
+
+  return (
+    <form action={formAction} className="mt-3 space-y-2">
+      <input type="hidden" name="bankSlipId" value={bankSlipId} />
+      <label className="block font-mono text-xs text-muted-foreground">
+        Cancellation note (required)
+        <textarea
+          name="reviewNote"
+          required
+          maxLength={500}
+          rows={3}
+          placeholder="Why this order is cancelled — stored on the slip and in audit log"
+          className="mt-1 w-full rounded-md border border-border bg-background px-3 py-2 text-sm"
+        />
+      </label>
+      <div className="flex gap-2">
+        <Button type="submit" variant="outline" size="sm" disabled={pending}>
+          {pending ? "Cancelling…" : "Reject and cancel"}
+        </Button>
+        <Button
+          type="button"
+          variant="ghost"
+          size="sm"
+          disabled={pending}
+          onClick={() => setShowNote(false)}
+        >
+          Back
+        </Button>
+      </div>
+    </form>
+  );
+}
+
+export function SellerBankSlipReviewActions({
+  bankSlipId,
+}: {
+  bankSlipId: string;
+}) {
+  return (
+    <div className="flex flex-wrap items-start gap-3">
+      <SellerBankSlipApproveButton bankSlipId={bankSlipId} />
+      <SellerBankSlipRejectForm bankSlipId={bankSlipId} />
+      <SellerBankSlipRejectAndCancelForm bankSlipId={bankSlipId} />
+    </div>
+  );
+}

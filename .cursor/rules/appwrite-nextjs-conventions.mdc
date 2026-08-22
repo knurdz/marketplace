@@ -1,0 +1,15 @@
+---
+description: Next.js + Appwrite conventions for Knurdz marketplace
+alwaysApply: true
+---
+
+# Stack Conventions
+
+- **Frontend**: Next.js App Router + TypeScript.
+- **Backend**: Appwrite (Auth, Database, Storage, Functions).
+- Roles: `buyer` (default), `seller` (approved), `admin` — enforce with labels/teams **and** collection permissions.
+- Portals: storefront `/`, seller `/seller`, admin `/admin` (adjust only if project structure already differs).
+- Payments: PayHere sandbox, bank transfer, free (`amount = 0`) — single-seller orders for MVP.
+- Shared types/enums for order and payment statuses; do not invent parallel status strings.
+- Client SDK for public reads/user actions; secrets and PayHere notify only in Appwrite Functions (or secure server routes).
+- Prefer least privilege on every new collection/bucket; document permission intent in the PR/commit message when touching schema.

@@ -1,0 +1,22 @@
+---
+description: Security review after every change — auth, payments, data gaps
+alwaysApply: true
+---
+
+# Security First
+
+After each implementation, run a security pass and **fix gaps before finishing**.
+
+## Mandatory checks
+
+- **AuthZ**: Server-side Appwrite permissions / role labels — never rely on UI hiding alone.
+- **Secrets**: No merchant secrets, API keys, or service keys in client code or `NEXT_PUBLIC_*`.
+- **Payments**: PayHere hash + `notify_url` verification only on server/Functions; never trust `return_url` alone; keep payment updates idempotent.
+- **Uploads**: Validate type/size; bank slips and digital goods stay in private buckets with least-privilege access.
+- **Input**: Validate and sanitize user input; avoid injecting unchecked strings into queries or HTML.
+- **IDOR**: Confirm the caller owns the order/listing/profile they mutate.
+- **Logs**: Do not log secrets, full card data, or raw bank account numbers.
+
+## Priority
+
+If a fast path weakens security or data integrity, reject it. Fix the secure design instead.

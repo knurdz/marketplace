@@ -1,0 +1,24 @@
+---
+description: Humans own git commits, PRs, and merges — agents never do them alone
+alwaysApply: true
+---
+
+# Human-Only Git Operations
+
+Agents must **not** create commits, open/update PRs, merge, push, rebase, or amend unless the human **explicitly** asks in that message.
+
+## Do
+
+- Leave changes unstaged/uncommitted for the human to review.
+- Summarize what changed so the human can commit easily.
+- Suggest a commit message **only if asked**.
+
+## Do not
+
+- Run `git commit`, `git push`, `gh pr create`, `gh pr merge`, or merge/rebase flows on your own.
+- Use GitHub MCP (not approved for this project) for PRs/issues/merges.
+- Batch “I’ll just commit this” after finishing a feature.
+
+If the human later says “commit” or “open a PR,” follow their request and the repo’s git safety rules at that time.
+
+When a commit **is** allowed (human asked, or Cloud Agent PR flow), identity must follow `.cursor/rules/git-commit-identity.mdc`: author and committer are the **invoking member**, never a bot identity.
