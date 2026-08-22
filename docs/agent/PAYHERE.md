@@ -182,16 +182,15 @@ Admin overrides on `/admin/orders` write the **platform ledger only** (`cancelAd
 | Cancel | `pending_payment` / `payment_review` → `cancelled` | not `paid`/`refunded` → `failed` | Unpaid only |
 | Refund | `paid` … `completed` → `refunded` | `paid` → `refunded` | Same statuses as notify `-3` |
 
-A later PayHere chargeback notify (`-3`) is idempotent when `payments.status` is already `refunded`. Captured card funds, if they must go back to the buyer, are returned in the **PayHere merchant dashboard** (sandbox), not by this app. No stock restore.
+A later PayHere chargeback notify (`-3`) is idempotent when `payments.status` is already `refunded`. Captured card funds, if they must go back to the buyer, are returned in the **PayHere merchant dashboard** (sandbox), not by this app. **Stock reserved at placement is restored** on platform refund / chargeback.
 
-Bank-slip leftovers after cancel (step **6.14**): a pending `bank_slips` row must not re-settle a `cancelled` order. Approve refuses; reject closes the slip only and never writes `failed` over `paid` / `refunded`. First bank approve sets `payments.idempotencyKey = bank:<orderId>`.
+Bank-slip leftovers after cancel (step **6.14**): a pending `bank_slips` row must not re-settle a `cancelled` order. Approve refuses; reject closes the slip only and never writes `failed` over `paid` / `refunded`. First bank approve sets `payments.idempotencyKey = bank:<orderId>`. Reject-with-retry (buyer still unpaid) returns payment to `pending` and the order to `pending_payment`. Reject-and-cancel is a separate admin action.
 
 ### Idempotency
 
 - Prefer `payments.idempotencyKey` = `payhere:<PayHere payment_id>` and `payherePaymentId`.
-- Replay of the same successful notify must **not** double-decrement stock or double-apply `paid` (already-`paid` → no-op; unique key races re-read `paid`).
-- Posted `payhere_amount` / `payhere_currency` must match the **DB** payment row; mismatch → no mutate.
-- Success (`2`) still marks `paid` if stock is short (money already captured); stock decrement is clamped at 0.
+- Replay of the same successful notify must **not** double-apply `paid` (already-`paid` → no-op; unique key races re-read `paid`). Stock was already reserved at `createOrder`; notify does **not** decrement stock.
+- Posted `payhere_amount` / `payhere_currency` must match the **DB** payment row, and `order.totalAmount` must match `payment.amount`; mismatch → no mutate.
 - Logs: `order_id`, `status_code`, ignore/reject **reason** only — never `md5sig`, merchant secret, or card/PAN fields.
 - **Persist (step 1.26):** each notify attempt writes one row to `payhere_notify_logs` (Function API key). Payload is an allowlist JSON (`merchant_id`, `order_id`, `payment_id`, amounts, `status_code`, `method`, `status_message`, `custom_1`/`custom_2`). A failed log insert **must not** change the HTTP status returned to PayHere (ignore/reject/settle success stay 200). Admin UI: [`listNotifyLogs`](../../lib/services/notify-logs.ts).
 
@@ -216,7 +215,7 @@ Member 2 UX calls `confirmFreeOrderAction` → this API; never writes `paid` fro
 2. Re-load order + payment + items with the **admin SDK**. `payment.method === "free"` and `payment.amount === 0` and `order.totalAmount === 0`. Every line item `unitPrice` / `lineTotal` must be `0`. Amounts are never taken from the request body.
 3. Never call PayHere with a forged zero amount for a paid listing. This path does not import or invoke PayHere.
 4. Idempotent: already `paid` → success no-op. Concurrent retries that lose the TablesDB transaction re-read payment and succeed if already `paid`. First successful settle sets `payments.idempotencyKey = free:<orderId>`.
-5. Stock decrements **once** in the same transaction as `paid` (`decrementRowColumn` `min: 0`). Insufficient stock **rejects** (free path has not collected money). Repair of a half-written row does **not** decrement again.
+5. Stock was reserved at `createOrder`. Confirm does **not** decrement again. Confirm still re-checks that each product is still free (`price === 0`) and `available`. Repair of a half-written row does **not** touch stock.
 6. Writes use `APPWRITE_API_KEY` (server-only). Missing key → `{ ok: false, error: "Free order confirmation is not configured yet." }`. Rate-limited per user+IP (`RATE_LIMITS.checkout`).
 
 ---

@@ -207,13 +207,22 @@ export async function confirmCodOrderAction(
   const refreshedOrder = await getOwnOrder(orderId);
   const refreshedPayment = await getOwnPaymentForOrder(orderId);
 
-  if (refreshedPayment?.status === "paid" && refreshedOrder) {
+  const accepted =
+    Boolean(refreshedOrder) &&
+    (refreshedOrder!.status === "processing" ||
+      refreshedOrder!.status === "shipped" ||
+      refreshedOrder!.status === "ready_pickup" ||
+      refreshedOrder!.status === "completed" ||
+      refreshedOrder!.status === "paid" ||
+      refreshedPayment?.status === "paid");
+
+  if (accepted && refreshedOrder) {
     revalidateCheckoutPaths();
     revalidateOrderPaths(orderId);
     return {
       ok: true,
       orderStatus: refreshedOrder.status,
-      paymentStatus: refreshedPayment.status,
+      paymentStatus: refreshedPayment?.status ?? payment.status,
     };
   }
 

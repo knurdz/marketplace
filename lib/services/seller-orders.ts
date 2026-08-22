@@ -20,6 +20,8 @@ import {
   canSellerFulfillmentTransition,
   isOrderStatus,
 } from "@/lib/types";
+import { logError } from "@/lib/observability/log-error";
+import { notifyFulfillmentHop } from "./order-notify";
 import {
   asOrder,
   asOrderItem,
@@ -243,7 +245,18 @@ export async function fulfillSellerOrder(
   }
 
   const payment = await getSellerPaymentForOrder(order.$id);
-  if (!payment || payment.status !== "paid") {
+  if (!payment) {
+    return { ok: false, error: "Order is not paid yet." };
+  }
+
+  const codAcceptedUnpaid =
+    order.paymentMethod === "cod" &&
+    payment.status === "pending" &&
+    (order.status === "processing" ||
+      order.status === "shipped" ||
+      order.status === "ready_pickup");
+
+  if (payment.status !== "paid" && !codAcceptedUnpaid) {
     return { ok: false, error: "Order is not paid yet." };
   }
 
@@ -258,6 +271,10 @@ export async function fulfillSellerOrder(
   }
 
   const expectedFrom = order.status;
+  const collectCodCash =
+    nextStatus === "completed" &&
+    order.paymentMethod === "cod" &&
+    payment.status === "pending";
 
   try {
     const { tables } = await createAdminClient();
@@ -274,18 +291,42 @@ export async function fulfillSellerOrder(
       };
     }
 
+    const tx = await tables.createTransaction({ ttl: 120 });
+    const transactionId = tx.$id;
+
     await tables.updateRow({
       databaseId: DATABASE_ID,
       tableId: TABLE_ORDERS,
       rowId: order.$id,
       data: { status: nextStatus },
+      transactionId,
     });
-  } catch {
+
+    if (collectCodCash) {
+      await tables.updateRow({
+        databaseId: DATABASE_ID,
+        tableId: TABLE_PAYMENTS,
+        rowId: payment.$id,
+        data: { status: "paid" },
+        transactionId,
+      });
+    }
+
+    await tables.updateTransaction({ transactionId, commit: true });
+  } catch (error) {
+    logError("seller.fulfill", error, { orderId: order.$id });
     return {
       ok: false,
       error: "Could not update order status. Please try again.",
     };
   }
+
+  await notifyFulfillmentHop({
+    orderId: order.$id,
+    buyerId: order.buyerId,
+    sellerId: order.sellerId,
+    status: nextStatus,
+  });
 
   return { ok: true, orderStatus: nextStatus };
 }

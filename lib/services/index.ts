@@ -91,8 +91,10 @@ export {
   bankSlipFileExists,
   evaluateBankSlipApprove,
   evaluateBankSlipReject,
+  evaluateBankSlipRejectAndCancel,
   getBankSlipReviewUrl,
   listPendingBankSlips,
+  rejectAndCancelBankSlipCore,
   rejectBankSlipCore,
   shouldListPendingBankSlip,
 } from "./bank-slip-review";
@@ -103,6 +105,7 @@ export type {
 } from "./bank-slip-review";
 export type {
   BankSlipApproveDecision,
+  BankSlipRejectAndCancelDecision,
   BankSlipRejectDecision,
 } from "./bank-slip-review-rules";
 export {
@@ -232,6 +235,7 @@ export type {
 export {
   asReview,
   canReviewProduct,
+  listOwnReviewsForOrder,
   listProductReviews,
 } from "./reviews";
 export {

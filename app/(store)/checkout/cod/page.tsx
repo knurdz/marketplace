@@ -34,9 +34,9 @@ export default async function CheckoutCodPage({
       </h1>
       <p className="mt-4 text-muted-foreground">
         Order <span className="font-mono text-foreground">{order.$id}</span>.
-        Confirmation checks that you own this order and that stock is available,
-        then accepts the order on the server. You will pay cash when the order
-        is delivered.
+        Confirmation checks that you own this order, then accepts it so the
+        seller can start fulfillment. Payment stays pending until cash is
+        collected on delivery.
       </p>
       <p className="mt-2 text-sm text-muted-foreground">
         Total due on delivery: {order.currency} {order.totalAmount.toFixed(2)}

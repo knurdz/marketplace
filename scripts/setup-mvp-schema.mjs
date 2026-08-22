@@ -111,13 +111,16 @@ async function ensureEnum(tableId, key, elements, required, opts = {}) {
   }
 }
 
-async function ensureEnumElements(tableId, key, elements) {
+async function ensureEnumElements(tableId, key, elements, required = true) {
   try {
     await db.updateEnumColumn({
       databaseId: DATABASE_ID,
       tableId,
       key,
       elements,
+      required,
+      // SDK requires xdefault even when the column is required; null is ignored.
+      xdefault: null,
     });
     console.log(`  ~ enum elements ${tableId}.${key}`);
   } catch (e) {
@@ -190,6 +193,23 @@ async function ensureIndex(tableId, key, type, columns) {
     console.log(`  + index ${tableId}.${key}`);
   } catch (e) {
     if (String(e?.message || e).includes("already exists")) return;
+    throw e;
+  }
+}
+
+async function dropIndexIfExists(tableId, key) {
+  try {
+    await db.deleteIndex({ databaseId: DATABASE_ID, tableId, key });
+    console.log(`  - index ${tableId}.${key}`);
+  } catch (e) {
+    const msg = String(e?.message || e);
+    if (
+      msg.includes("not found") ||
+      msg.includes("could not be found") ||
+      msg.includes("does not exist")
+    ) {
+      return;
+    }
     throw e;
   }
 }
@@ -574,10 +594,15 @@ async function setupReviews() {
   await ensureIndex("reviews", "productId_idx", TablesDBIndexType.Key, [
     "productId",
   ]);
-  await ensureIndex("reviews", "order_buyer_unique", TablesDBIndexType.Unique, [
-    "orderId",
-    "buyerId",
-  ]);
+  // Per-product uniqueness: one review per (order, buyer, product).
+  // Drop the older per-order unique if it is still present.
+  await dropIndexIfExists("reviews", "order_buyer_unique");
+  await ensureIndex(
+    "reviews",
+    "order_buyer_product_unique",
+    TablesDBIndexType.Unique,
+    ["orderId", "buyerId", "productId"],
+  );
 }
 
 async function setupReports() {
@@ -747,6 +772,12 @@ async function setupCouponRedemptions() {
     TablesDBIndexType.Key,
     ["couponId"],
   );
+  await ensureIndex(
+    "coupon_redemptions",
+    "coupon_buyer_unique",
+    TablesDBIndexType.Unique,
+    ["couponId", "buyerId"],
+  );
 }
 
 async function setupThreads() {
@@ -820,6 +851,27 @@ async function setupPayhereNotifyLogs() {
   ]);
 }
 
+async function setupRateLimits() {
+  // Admin SDK only — empty client permissions. Used by money-path rate limits.
+  await ensureTable("rate_limits", "Rate Limits", [], false);
+  await ensureString("rate_limits", "bucket", 64, true);
+  await ensureString("rate_limits", "limitKey", 256, true);
+  await ensureInt("rate_limits", "windowStart", true, { min: 0 });
+  await ensureInt("rate_limits", "count", true, { min: 0 });
+  await waitColumnsAvailable("rate_limits", [
+    "bucket",
+    "limitKey",
+    "windowStart",
+    "count",
+  ]);
+  await ensureIndex(
+    "rate_limits",
+    "bucket_key_unique",
+    TablesDBIndexType.Unique,
+    ["bucket", "limitKey"],
+  );
+}
+
 async function setupViewStats() {
   await ensureTable("view_stats", "View Stats", [], false);
   await ensureString("view_stats", "sellerId", 36, true);
@@ -847,7 +899,6 @@ async function setupViewStats() {
 
 async function main() {
   console.log(`Setting up schema in database=${DATABASE_ID}`);
-  await setupViewStats();
   // profiles + categories already created via MCP; keep idempotent helpers unused for them.
   await setupSellerProfiles();
   await setupProducts();
@@ -870,6 +921,7 @@ async function main() {
   await setupMessages();
   await setupPayhereNotifyLogs();
   await setupViewStats();
+  await setupRateLimits();
   console.log("Done.");
 }
 

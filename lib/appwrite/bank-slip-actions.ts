@@ -10,13 +10,13 @@ import { ROLE_LABELS, userHasLabel } from "@/lib/appwrite/roles";
 import { getLoggedInUser } from "@/lib/appwrite/session";
 import {
   approveBankSlipCore,
+  rejectAndCancelBankSlipCore,
   rejectBankSlipCore,
 } from "@/lib/services/bank-slip-review";
 
 export type BankSlipActionState = {
   success?: string;
   error?: string;
-  oversoldWarnings?: string[];
 };
 
 async function assertAdmin(): Promise<
@@ -54,7 +54,6 @@ export async function approveBankSlip(
   revalidateBankSlipPaths();
   return {
     success: result.message,
-    oversoldWarnings: result.oversoldWarnings,
   };
 }
 
@@ -110,4 +109,47 @@ export async function rejectBankSlipFormAction(
   }
 
   return rejectBankSlip(bankSlipId.trim(), reviewNote);
+}
+
+export async function rejectAndCancelBankSlip(
+  bankSlipId: string,
+  reviewNote: string,
+): Promise<BankSlipActionState> {
+  const auth = await assertAdmin();
+  if (!auth.ok) return { error: auth.error };
+
+  if (typeof bankSlipId !== "string" || !bankSlipId.trim()) {
+    return { error: "Missing bank slip." };
+  }
+
+  if (typeof reviewNote !== "string" || !reviewNote.trim()) {
+    return { error: "Review note is required." };
+  }
+
+  const result = await rejectAndCancelBankSlipCore(
+    auth.userId,
+    bankSlipId.trim(),
+    reviewNote,
+  );
+  if (!result.ok) return { error: result.error };
+
+  revalidateBankSlipPaths();
+  return { success: result.message };
+}
+
+export async function rejectAndCancelBankSlipFormAction(
+  _prev: BankSlipActionState,
+  formData: FormData,
+): Promise<BankSlipActionState> {
+  const bankSlipId = formData.get("bankSlipId");
+  if (typeof bankSlipId !== "string" || !bankSlipId.trim()) {
+    return { error: "Missing bank slip." };
+  }
+
+  const reviewNote = formData.get("reviewNote");
+  if (typeof reviewNote !== "string" || !reviewNote.trim()) {
+    return { error: "Review note is required." };
+  }
+
+  return rejectAndCancelBankSlip(bankSlipId.trim(), reviewNote);
 }

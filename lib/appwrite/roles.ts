@@ -95,7 +95,9 @@ export function homePathForUser(
     return "/seller/pending";
   }
   if (!userHasLabel(user, "buyer")) {
-    return "/seller/pending";
+    // No buyer label and no seller application — avoid /seller/pending loop
+    // when seller_profiles row is missing or unreadable.
+    return "/account";
   }
   return "/market";
 }

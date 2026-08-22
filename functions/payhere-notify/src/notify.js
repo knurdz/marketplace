@@ -116,6 +116,10 @@ export function decideNotifyAction(params) {
     return { action: "reject", reason: "order_closed" };
   }
 
+  if (!amountsMatch(order.totalAmount, payment.amount)) {
+    return { action: "reject", reason: "order_payment_amount_mismatch" };
+  }
+
   if (!amountsMatch(payment.amount, posted.payhere_amount)) {
     return { action: "reject", reason: "amount_mismatch" };
   }

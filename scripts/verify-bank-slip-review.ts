@@ -15,6 +15,7 @@ import {
   bankConfirmIdempotencyKey,
   evaluateBankSlipApprove,
   evaluateBankSlipReject,
+  evaluateBankSlipRejectAndCancel,
   shouldListPendingBankSlip,
 } from "../lib/services/bank-slip-review-rules";
 
@@ -96,7 +97,7 @@ assert(
 );
 
 assert(approve().action === "settle", "happy-path approve settles");
-assert(reject().action === "settle", "happy-path reject settles");
+assert(reject().action === "reopen", "happy-path reject reopens for retry");
 
 assert(
   approve({ slip: { status: "approved" } }).action === "noop" &&
@@ -182,8 +183,8 @@ assert(
 assert(
   reject({
     order: { status: "cancelled" },
-  }).action === "settle",
-  "cancelled + still-awaiting reject marks payment failed",
+  }).action === "settle_slip_only",
+  "cancelled + still-awaiting reject closes slip only",
 );
 
 assert(
@@ -220,6 +221,24 @@ assert(
     order: order(),
   }),
   "queue hides unverifiable payment",
+);
+
+assert(
+  evaluateBankSlipRejectAndCancel({
+    slip: slip(),
+    payment: payment(),
+    order: order(),
+  }).action === "cancel",
+  "reject-and-cancel eligible row",
+);
+
+assert(
+  evaluateBankSlipRejectAndCancel({
+    slip: slip(),
+    payment: payment({ status: "paid" }),
+    order: order({ status: "paid" }),
+  }).action === "refuse",
+  "reject-and-cancel refuses paid",
 );
 
 console.log("verify-bank-slip-review: OK");

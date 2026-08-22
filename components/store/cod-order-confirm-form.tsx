@@ -29,7 +29,13 @@ export function CodOrderConfirmForm({
   );
   const lastToast = useRef<string | null>(null);
 
-  const alreadyPaid = payment.status === "paid";
+  const alreadyAccepted =
+    payment.status === "paid" ||
+    order.status === "processing" ||
+    order.status === "shipped" ||
+    order.status === "ready_pickup" ||
+    order.status === "completed" ||
+    order.status === "paid";
 
   useEffect(() => {
     if (state.error) {
@@ -41,8 +47,13 @@ export function CodOrderConfirmForm({
       return;
     }
 
-    if (state.ok && state.paymentStatus === "paid") {
-      const key = "s:paid";
+    if (
+      state.ok &&
+      (state.orderStatus === "processing" ||
+        state.orderStatus === "paid" ||
+        state.paymentStatus === "paid")
+    ) {
+      const key = "s:accepted";
       if (key !== lastToast.current) {
         lastToast.current = key;
         toast.success("Your cash on delivery order is confirmed.");
@@ -51,7 +62,13 @@ export function CodOrderConfirmForm({
     }
   }, [state, router]);
 
-  if (alreadyPaid || (state.ok && state.paymentStatus === "paid")) {
+  if (
+    alreadyAccepted ||
+    (state.ok &&
+      (state.orderStatus === "processing" ||
+        state.orderStatus === "paid" ||
+        state.paymentStatus === "paid"))
+  ) {
     return (
       <div className="mt-8 space-y-4">
         <p

@@ -16,6 +16,12 @@ import {
 test.describe.configure({ mode: "serial" });
 
 test.describe("Guide §10 — MVP close (Phase 6.18)", () => {
+  // Unique forwarded IP per run so retries are not blocked by auth.register (5/hour/IP).
+  test.use({
+    extraHTTPHeaders: {
+      "x-forwarded-for": `198.51.100.${(Date.now() % 200) + 1}`,
+    },
+  });
   const runId = Date.now();
   const buyerEmail = `e2e-buyer-${runId}@knurdz.demo`;
   const sellerEmail = `e2e-seller-${runId}@knurdz.demo`;
@@ -34,7 +40,7 @@ test.describe("Guide §10 — MVP close (Phase 6.18)", () => {
       shopName: `E2E Shop ${runId}`,
       slug: shopSlug,
     });
-    await expect(page.getByText(/pending|under review/i)).toBeVisible({
+    await expect(page.getByText("Application under review")).toBeVisible({
       timeout: 15_000,
     });
 
@@ -44,7 +50,7 @@ test.describe("Guide §10 — MVP close (Phase 6.18)", () => {
     const row = page.locator("li").filter({ hasText: `E2E Shop ${runId}` });
     await expect(row).toBeVisible({ timeout: 15_000 });
     await row.getByTestId("admin-approve-seller").click();
-    await expect(page.getByText(/approved/i)).toBeVisible({ timeout: 15_000 });
+    await expect(row).toHaveCount(0, { timeout: 30_000 });
 
     await clearSession(page);
     await registerBuyer(page, {
@@ -64,17 +70,24 @@ test.describe("Guide §10 — MVP close (Phase 6.18)", () => {
     await page.locator("#bankAccountName").fill("E2E Seller Account");
     await page.locator("#bankAccountNumber").fill("1234567890");
     await page.getByTestId("seller-bank-save").click();
-    await expect(page.getByText(/saved|updated|bank/i)).toBeVisible({
+    await expect(page.getByText("Bank details saved.")).toBeVisible({
       timeout: 15_000,
     });
 
     await page.goto("/seller/listings/new");
+    await page.locator("#title").waitFor({ state: "visible" });
+    await expect(page.getByTestId("listing-save-draft")).toBeEnabled();
+    await page.locator("#categoryId option").nth(1).waitFor();
     await page.locator("#title").fill(freeTitle);
     await page.locator("#description").fill("Free listing for E2E.");
     await page.locator("#categoryId").selectOption({ index: 1 });
     await page.locator("#isFree").check();
     await page.locator("#stock").fill("5");
     await page.getByTestId("listing-save-draft").click();
+    await expect(page.getByTestId("listing-save-draft")).toHaveText(
+      /Saving draft/i,
+      { timeout: 5_000 },
+    );
     await page.waitForURL("/seller/listings", { timeout: 30_000 });
 
     const freeHref = await page
@@ -87,17 +100,26 @@ test.describe("Guide §10 — MVP close (Phase 6.18)", () => {
       .filter({ hasText: freeTitle })
       .getByTestId("listing-submit-review")
       .click();
-    await expect(page.getByText(/submitted|awaiting review/i)).toBeVisible({
+    await expect(
+      page.getByText(`"${freeTitle}" submitted for review`, { exact: false }),
+    ).toBeVisible({
       timeout: 15_000,
     });
 
     await page.goto("/seller/listings/new");
+    await page.locator("#title").waitFor({ state: "visible" });
+    await expect(page.getByTestId("listing-save-draft")).toBeEnabled();
+    await page.locator("#categoryId option").nth(1).waitFor();
     await page.locator("#title").fill(paidTitle);
     await page.locator("#description").fill("Paid listing for E2E bank path.");
     await page.locator("#categoryId").selectOption({ index: 1 });
     await page.locator("#price").fill("250");
     await page.locator("#stock").fill("5");
     await page.getByTestId("listing-save-draft").click();
+    await expect(page.getByTestId("listing-save-draft")).toHaveText(
+      /Saving draft/i,
+      { timeout: 5_000 },
+    );
     await page.waitForURL("/seller/listings", { timeout: 30_000 });
 
     const paidHref = await page
@@ -110,7 +132,9 @@ test.describe("Guide §10 — MVP close (Phase 6.18)", () => {
       .filter({ hasText: paidTitle })
       .getByTestId("listing-submit-review")
       .click();
-    await expect(page.getByText(/submitted|awaiting review/i)).toBeVisible({
+    await expect(
+      page.getByText(`"${paidTitle}" submitted for review`, { exact: false }),
+    ).toBeVisible({
       timeout: 15_000,
     });
   });
@@ -124,9 +148,7 @@ test.describe("Guide §10 — MVP close (Phase 6.18)", () => {
       const row = page.locator("li").filter({ hasText: title });
       await expect(row).toBeVisible({ timeout: 15_000 });
       await row.getByTestId("admin-approve-listing").click();
-      await expect(page.getByText(/approved|active/i)).toBeVisible({
-        timeout: 15_000,
-      });
+      await expect(row).toHaveCount(0, { timeout: 15_000 });
     }
   });
 
@@ -179,9 +201,7 @@ test.describe("Guide §10 — MVP close (Phase 6.18)", () => {
     const slipRow = page.locator("li").filter({ hasText: bankOrderId });
     await expect(slipRow).toBeVisible({ timeout: 30_000 });
     await slipRow.getByTestId("admin-approve-bank-slip").click();
-    await expect(page.getByText(/approved|paid/i)).toBeVisible({
-      timeout: 30_000,
-    });
+    await expect(slipRow).toHaveCount(0, { timeout: 30_000 });
   });
 
   test("PayHere sandbox path", async ({ page }) => {

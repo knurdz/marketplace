@@ -8,7 +8,7 @@ export default async function SellerMessagesPage() {
   const user = await getLoggedInUser();
   if (!user) redirect("/login?next=/seller/messages");
 
-  const threads = await listSellerThreads();
+  const { threads, error } = await listSellerThreads();
 
   return (
     <div className="mx-auto max-w-3xl">
@@ -18,7 +18,13 @@ export default async function SellerMessagesPage() {
         slips — admin handles payment proof review.
       </p>
 
-      {threads.length === 0 ? (
+      {error ? (
+        <p role="alert" className="mt-6 text-sm text-destructive">
+          {error}
+        </p>
+      ) : null}
+
+      {threads.length === 0 && !error ? (
         <p className="mt-10 text-muted-foreground">No conversations yet.</p>
       ) : (
         <ul className="mt-10 space-y-3">

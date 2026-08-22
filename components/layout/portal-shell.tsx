@@ -36,8 +36,8 @@ export function PortalShell({
   return (
     <div className="flex min-h-screen bg-background text-foreground">
       <SkipToContent />
-      <aside className="hidden w-60 shrink-0 border-r border-border bg-sidebar md:flex md:flex-col">
-        <div className="px-4 py-5">
+      <aside className="hidden w-60 shrink-0 border-r border-border bg-sidebar md:sticky md:top-0 md:flex md:h-dvh md:flex-col">
+        <div className="shrink-0 px-4 py-5">
           <Link href={homeHref} className="text-sm font-semibold tracking-tight">
             Knurdz
             <span className="text-accent">.</span>
@@ -45,9 +45,9 @@ export function PortalShell({
           <h1 className="mt-3 text-lg font-bold tracking-tight">{title}</h1>
         </div>
         <Separator />
-        <div className="flex flex-1 flex-col gap-4 p-3">
+        <div className="flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto p-3">
           <PortalSideNav groups={nav} label={title} />
-          <div className="mt-auto space-y-2 p-1">
+          <div className="mt-auto shrink-0 space-y-2 p-1">
             <form action={signOut}>
               <Button type="submit" variant="ghost" size="sm" className="w-full">
                 Sign out

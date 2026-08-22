@@ -2,8 +2,8 @@
 
 /**
  * Cash on delivery order confirmation.
- * Session + IDOR + DB amounts; admin SDK writes `paid` + stock once.
- * Semantic: COD accepted (cash collected on delivery).
+ * Session + IDOR + DB amounts. Buyer acceptance sets order `processing`
+ * and leaves payment `pending` until the seller collects cash on delivery.
  */
 
 import { Query } from "node-appwrite";
@@ -12,13 +12,13 @@ import {
   TABLE_ORDER_ITEMS,
   TABLE_ORDERS,
   TABLE_PAYMENTS,
-  TABLE_PRODUCTS,
   hasAppwritePublicConfig,
 } from "@/lib/appwrite/config";
 import { createAdminClient } from "@/lib/appwrite/server";
 import { getLoggedInUser } from "@/lib/appwrite/session";
+import { logError } from "@/lib/observability/log-error";
+import { assertDurableRateLimit } from "@/lib/security/durable-rate-limit";
 import {
-  assertRateLimit,
   getClientIp,
   RATE_LIMIT_MESSAGE,
   RATE_LIMITS,
@@ -27,11 +27,10 @@ import type { Order, OrderItem, Payment } from "@/lib/types";
 import {
   codConfirmIdempotencyKey,
   COD_CONFIRM_NOT_FOUND,
-  COD_CONFIRM_STOCK,
   evaluateCodConfirm,
 } from "./cod-order-rules";
+import { notifyCodAccepted } from "./order-notify";
 import { asOrder, asOrderItem, asPayment, getOwnOrder } from "./orders";
-import { asProduct, clampedStockDecrement } from "./products";
 
 const ORDER_ID_MAX = 36;
 const NOT_CONFIGURED =
@@ -66,7 +65,8 @@ async function loadAdminOrder(orderId: string): Promise<Order | null> {
       rowId: orderId,
     });
     return asOrder(row as unknown as Record<string, unknown>);
-  } catch {
+  } catch (error) {
+    logError("cod.loadOrder", error, { orderId });
     return null;
   }
 }
@@ -84,7 +84,8 @@ async function loadAdminPaymentForOrder(
     const row = result.rows[0];
     if (!row) return null;
     return asPayment(row as unknown as Record<string, unknown>);
-  } catch {
+  } catch (error) {
+    logError("cod.loadPayment", error, { orderId });
     return null;
   }
 }
@@ -103,107 +104,42 @@ async function loadAdminOrderItems(orderId: string): Promise<OrderItem[]> {
       if (item) items.push(item);
     }
     return items;
-  } catch {
+  } catch (error) {
+    logError("cod.loadItems", error, { orderId });
     return [];
   }
 }
 
-type StockPlan = { productId: string; decrement: number };
-
-async function planStockDecrements(
-  items: OrderItem[],
-): Promise<{ ok: true; plans: StockPlan[] } | { ok: false; error: string }> {
-  const qtyByProduct = new Map<string, number>();
-  for (const item of items) {
-    qtyByProduct.set(
-      item.productId,
-      (qtyByProduct.get(item.productId) ?? 0) + item.quantity,
-    );
-  }
-
-  try {
-    const { tables } = await createAdminClient();
-    const plans: StockPlan[] = [];
-
-    for (const [productId, quantity] of qtyByProduct) {
-      let product;
-      try {
-        const row = await tables.getRow({
-          databaseId: DATABASE_ID,
-          tableId: TABLE_PRODUCTS,
-          rowId: productId,
-        });
-        product = asProduct(row as unknown as Record<string, unknown>);
-      } catch {
-        product = null;
-      }
-
-      if (!product || product.stock < quantity || !product.available) {
-        return { ok: false, error: COD_CONFIRM_STOCK };
-      }
-
-      plans.push({
-        productId: product.$id,
-        decrement: clampedStockDecrement(product.stock, quantity),
-      });
-    }
-
-    return { ok: true, plans };
-  } catch {
-    return { ok: false, error: GENERIC_FAILURE };
-  }
-}
-
-async function applyPaidSettlement(params: {
+async function applyCodAcceptance(params: {
   orderId: string;
   paymentId: string;
-  plans: StockPlan[];
   updateOrder: boolean;
-  updatePayment: boolean;
-  decrementStock: boolean;
+  markPaymentPaid: boolean;
 }): Promise<void> {
   const { tables } = await createAdminClient();
   const tx = await tables.createTransaction({ ttl: 120 });
   const transactionId = tx.$id;
   const idempotencyKey = codConfirmIdempotencyKey(params.orderId);
 
-  if (params.updatePayment) {
-    await tables.updateRow({
-      databaseId: DATABASE_ID,
-      tableId: TABLE_PAYMENTS,
-      rowId: params.paymentId,
-      data: {
-        status: "paid",
-        idempotencyKey,
-      },
-      transactionId,
-    });
-  }
-
   if (params.updateOrder) {
     await tables.updateRow({
       databaseId: DATABASE_ID,
       tableId: TABLE_ORDERS,
       rowId: params.orderId,
-      data: { status: "paid" },
+      data: { status: params.markPaymentPaid ? "paid" : "processing" },
       transactionId,
     });
   }
 
-  if (params.decrementStock) {
-    for (const plan of params.plans) {
-      if (plan.decrement <= 0) continue;
-      await tables.decrementRowColumn({
-        databaseId: DATABASE_ID,
-        tableId: TABLE_PRODUCTS,
-        rowId: plan.productId,
-        column: "stock",
-        value: plan.decrement,
-        min: 0,
-        transactionId,
-      });
-    }
-  }
+  await tables.updateRow({
+    databaseId: DATABASE_ID,
+    tableId: TABLE_PAYMENTS,
+    rowId: params.paymentId,
+    data: params.markPaymentPaid
+      ? { status: "paid", idempotencyKey }
+      : { idempotencyKey },
+    transactionId,
+  });
 
   await tables.updateTransaction({
     transactionId,
@@ -211,13 +147,19 @@ async function applyPaidSettlement(params: {
   });
 }
 
-async function paymentAlreadyPaid(orderId: string): Promise<boolean> {
-  const payment = await loadAdminPaymentForOrder(orderId);
-  return payment?.status === "paid";
+function alreadyAccepted(order: Order, payment: Payment): boolean {
+  if (payment.status === "paid") return true;
+  return (
+    payment.status === "pending" &&
+    (order.status === "processing" ||
+      order.status === "shipped" ||
+      order.status === "ready_pickup" ||
+      order.status === "completed")
+  );
 }
 
 /**
- * Confirm a COD order: own order, method=cod, mark paid once, decrement stock.
+ * Confirm a COD order: own order, method=cod, move to processing, payment stays pending.
  */
 export async function confirmCodOrder(
   request: ConfirmCodOrderRequest,
@@ -237,7 +179,7 @@ export async function confirmCodOrder(
   }
 
   const ip = await getClientIp();
-  const limited = assertRateLimit({
+  const limited = await assertDurableRateLimit({
     bucket: "cod-confirm",
     key: `${user.$id}:${ip}`,
     ...RATE_LIMITS.checkout,
@@ -276,35 +218,37 @@ export async function confirmCodOrder(
     return { ok: true };
   }
 
-  let plans: StockPlan[] = [];
-  const decrementStock = decision.action === "settle";
   const updateOrder =
-    decision.action === "settle" ||
+    decision.action === "accept" ||
     (decision.action === "repair" && decision.repairOrder);
-  const updatePayment =
-    decision.action === "settle" ||
-    (decision.action === "repair" && decision.repairPayment);
-
-  if (decrementStock) {
-    const stock = await planStockDecrements(items);
-    if (!stock.ok) {
-      return { ok: false, error: stock.error };
-    }
-    plans = stock.plans;
-  }
+  const markPaymentPaid = decision.action === "repair" && payment.status === "paid";
 
   try {
-    await applyPaidSettlement({
+    await applyCodAcceptance({
       orderId: order.$id,
       paymentId: payment.$id,
-      plans,
       updateOrder,
-      updatePayment,
-      decrementStock,
+      markPaymentPaid,
     });
+    if (decision.action === "accept") {
+      await notifyCodAccepted({
+        orderId: order.$id,
+        buyerId: order.buyerId,
+        sellerId: order.sellerId,
+      });
+    }
     return { ok: true };
-  } catch {
-    if (await paymentAlreadyPaid(orderId)) {
+  } catch (error) {
+    logError("cod.confirm", error, { orderId });
+    const [refreshedOrder, refreshedPayment] = await Promise.all([
+      loadAdminOrder(orderId),
+      loadAdminPaymentForOrder(orderId),
+    ]);
+    if (
+      refreshedOrder &&
+      refreshedPayment &&
+      alreadyAccepted(refreshedOrder, refreshedPayment)
+    ) {
       return { ok: true };
     }
     return { ok: false, error: GENERIC_FAILURE };

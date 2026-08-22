@@ -44,11 +44,19 @@ export default async function SellerLayout({
     );
   }
 
-  const profile = await getOwnSellerProfile();
-  const dest = blockedSellerPortalDestination(hasSellerLabel, profile);
-  if (isPendingPage && dest === "/seller/pending") {
+  if (isPendingPage) {
+    const profile = await getOwnSellerProfile();
+    if (!profile) {
+      redirect("/account");
+    }
+    if (profile.status === "approved") {
+      redirect("/seller");
+    }
     return <PendingSellerShell>{children}</PendingSellerShell>;
   }
+
+  const profile = await getOwnSellerProfile();
+  const dest = blockedSellerPortalDestination(hasSellerLabel, profile);
   if (dest) {
     redirect(dest);
   }

@@ -20,7 +20,7 @@ export default async function BuyerThreadPage({ params }: ThreadPageProps) {
   const thread = await getParticipantThread(id);
   if (!thread || thread.buyerId !== user.$id) notFound();
 
-  const messages = await listThreadMessages(thread.$id);
+  const { messages, error } = await listThreadMessages(thread.$id);
 
   return (
     <main className="relative mx-auto w-full max-w-3xl px-6 py-16 sm:px-10">
@@ -28,6 +28,12 @@ export default async function BuyerThreadPage({ params }: ThreadPageProps) {
       <p className="mt-2 font-mono text-sm text-muted-foreground">
         Order {thread.orderId}
       </p>
+
+      {error ? (
+        <p role="alert" className="mt-6 text-sm text-destructive">
+          {error}
+        </p>
+      ) : null}
 
       <div className="mt-10">
         <MessageThreadPanel

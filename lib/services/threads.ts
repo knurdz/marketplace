@@ -12,6 +12,8 @@ import {
   RATE_LIMIT_MESSAGE,
   RATE_LIMITS,
 } from "@/lib/security/rate-limit";
+import { logError } from "@/lib/observability/log-error";
+import { notifyNewMessage } from "./order-notify";
 import type { Message, Thread } from "@/lib/types/messaging";
 import type { Order, OrderStatus } from "@/lib/types";
 import { getOwnOrder } from "./orders";
@@ -176,7 +178,8 @@ export async function getOrCreateBuyerThread(
       permissions: threadPermissions(order.buyerId, order.sellerId),
     });
     return { ok: true, threadId: row.$id };
-  } catch {
+  } catch (error) {
+    logError("threads.createBuyer", error, { orderId: order.$id });
     return { ok: false, error: "Could not start conversation." };
   }
 }
@@ -224,14 +227,20 @@ export async function getOrCreateSellerThread(
       permissions: threadPermissions(order.buyerId, order.sellerId),
     });
     return { ok: true, threadId: row.$id };
-  } catch {
+  } catch (error) {
+    logError("threads.createSeller", error, { orderId: order.$id });
     return { ok: false, error: "Could not start conversation." };
   }
 }
 
-export async function listBuyerThreads(): Promise<Thread[]> {
+export type ThreadListResult = {
+  threads: Thread[];
+  error?: string;
+};
+
+export async function listBuyerThreads(): Promise<ThreadListResult> {
   const user = await getLoggedInUser();
-  if (!user || !hasAppwritePublicConfig()) return [];
+  if (!user || !hasAppwritePublicConfig()) return { threads: [] };
 
   try {
     const { tables } = await createSessionClient();
@@ -250,15 +259,19 @@ export async function listBuyerThreads(): Promise<Thread[]> {
       const thread = asThread(row as Record<string, unknown>);
       if (thread && thread.buyerId === user.$id) out.push(thread);
     }
-    return out;
-  } catch {
-    return [];
+    return { threads: out };
+  } catch (error) {
+    logError("threads.listBuyer", error);
+    return {
+      threads: [],
+      error: "Could not load conversations. Please try again.",
+    };
   }
 }
 
-export async function listSellerThreads(): Promise<Thread[]> {
+export async function listSellerThreads(): Promise<ThreadListResult> {
   const user = await getLoggedInUser();
-  if (!user || !hasAppwritePublicConfig()) return [];
+  if (!user || !hasAppwritePublicConfig()) return { threads: [] };
 
   try {
     const { tables } = await createSessionClient();
@@ -277,9 +290,13 @@ export async function listSellerThreads(): Promise<Thread[]> {
       const thread = asThread(row as Record<string, unknown>);
       if (thread && thread.sellerId === user.$id) out.push(thread);
     }
-    return out;
-  } catch {
-    return [];
+    return { threads: out };
+  } catch (error) {
+    logError("threads.listSeller", error);
+    return {
+      threads: [],
+      error: "Could not load conversations. Please try again.",
+    };
   }
 }
 
@@ -291,14 +308,23 @@ export async function getParticipantThread(
   return loadThreadForParticipant(threadId, user.$id);
 }
 
+export type MessageListResult = {
+  messages: Message[];
+  error?: string;
+};
+
 export async function listThreadMessages(
   threadId: string,
-): Promise<Message[]> {
+): Promise<MessageListResult> {
   const user = await getLoggedInUser();
-  if (!user) return [];
+  if (!user) {
+    return { messages: [], error: "Sign in to view this conversation." };
+  }
 
   const thread = await loadThreadForParticipant(threadId, user.$id);
-  if (!thread) return [];
+  if (!thread) {
+    return { messages: [], error: "Conversation not found." };
+  }
 
   try {
     const { tables } = await createSessionClient();
@@ -317,9 +343,13 @@ export async function listThreadMessages(
       const message = asMessage(row as Record<string, unknown>);
       if (message && message.threadId === thread.$id) out.push(message);
     }
-    return out;
-  } catch {
-    return [];
+    return { messages: out };
+  } catch (error) {
+    logError("threads.listMessages", error, { threadId });
+    return {
+      messages: [],
+      error: "Could not load messages. Please try again.",
+    };
   }
 }
 
@@ -330,13 +360,12 @@ export async function sendThreadMessage(
   const user = await getLoggedInUser();
   if (!user) return { ok: false, error: "Sign in to send a message." };
 
-  try {
-    assertRateLimit({
-      bucket: "messages",
-      key: user.$id,
-      ...RATE_LIMITS.messages,
-    });
-  } catch {
+  const limited = assertRateLimit({
+    bucket: "messages",
+    key: user.$id,
+    ...RATE_LIMITS.messages,
+  });
+  if (!limited.ok) {
     return { ok: false, error: RATE_LIMIT_MESSAGE };
   }
 
@@ -373,8 +402,19 @@ export async function sendThreadMessage(
       data: { lastMessageAt: now },
     });
 
+    const recipientId =
+      user.$id === thread.buyerId ? thread.sellerId : thread.buyerId;
+    const portal = user.$id === thread.buyerId ? "seller" : "buyer";
+    await notifyNewMessage({
+      recipientId,
+      orderId: thread.orderId,
+      threadId: thread.$id,
+      portal,
+    });
+
     return { ok: true, messageId: messageRow.$id };
-  } catch {
+  } catch (error) {
+    logError("threads.send", error, { threadId });
     return { ok: false, error: "Could not send message." };
   }
 }

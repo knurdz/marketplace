@@ -1,4 +1,4 @@
-import { Client, ID, Query, TablesDB } from "node-appwrite";
+import { Client, ID, Permission, Query, Role, TablesDB } from "node-appwrite";
 import { notifyLogRowFromDecision } from "./log.js";
 import { parseNotifyForm } from "./md5.js";
 import { decideNotifyAction, verifyNotifySignature } from "./notify.js";
@@ -9,6 +9,7 @@ const TABLE_ORDER_ITEMS = "order_items";
 const TABLE_PAYMENTS = "payments";
 const TABLE_PRODUCTS = "products";
 const TABLE_NOTIFY_LOGS = "payhere_notify_logs";
+const TABLE_NOTIFICATIONS = "notifications";
 
 function header(req, name) {
   const headers = req.headers || {};
@@ -80,6 +81,7 @@ async function loadOrderPaymentItems(tables, orderId) {
   const order = {
     $id: String(orderRow.$id),
     buyerId: String(orderRow.buyerId ?? ""),
+    sellerId: String(orderRow.sellerId ?? ""),
     status: String(orderRow.status ?? ""),
     totalAmount: asNumber(orderRow.totalAmount),
     currency: String(orderRow.currency ?? ""),
@@ -125,7 +127,58 @@ async function loadOrderPaymentItems(tables, orderId) {
   return { order, payment, items };
 }
 
-async function planStockDecrements(tables, items) {
+async function notifyPaid(tables, order) {
+  const buyerId = String(order.buyerId ?? "").trim();
+  const sellerId = String(order.sellerId ?? "").trim();
+  const orderId = String(order.$id ?? "").trim();
+  if (!buyerId || !orderId) return;
+
+  async function create(userId, type, title, body, link) {
+    try {
+      await tables.createRow({
+        databaseId: DATABASE_ID,
+        tableId: TABLE_NOTIFICATIONS,
+        rowId: ID.unique(),
+        data: {
+          userId,
+          type,
+          title,
+          body,
+          read: false,
+          link,
+          meta: null,
+        },
+        permissions: [
+          Permission.read(Role.user(userId)),
+          Permission.update(Role.user(userId)),
+          Permission.delete(Role.user(userId)),
+          Permission.read(Role.label("admin")),
+        ],
+      });
+    } catch {
+      /* notification must never fail settlement */
+    }
+  }
+
+  await create(
+    buyerId,
+    "order.paid",
+    "Payment confirmed",
+    "Your PayHere payment was confirmed.",
+    `/orders/${orderId}`,
+  );
+  if (sellerId) {
+    await create(
+      sellerId,
+      "order.paid",
+      "New paid order",
+      "A buyer paid for an order via PayHere.",
+      `/seller/orders/${orderId}`,
+    );
+  }
+}
+
+async function restoreStockForItems(tables, items, transactionId) {
   const qtyByProduct = new Map();
   for (const item of items) {
     if (!item.productId) continue;
@@ -134,26 +187,17 @@ async function planStockDecrements(tables, items) {
       (qtyByProduct.get(item.productId) ?? 0) + item.quantity,
     );
   }
-
-  const plans = [];
   for (const [productId, quantity] of qtyByProduct) {
-    let stockBefore = 0;
-    try {
-      const row = await tables.getRow({
-        databaseId: DATABASE_ID,
-        tableId: TABLE_PRODUCTS,
-        rowId: productId,
-      });
-      stockBefore = Math.max(0, Math.floor(asNumber(row.stock)));
-    } catch {
-      stockBefore = 0;
-    }
-    const decrement = Math.min(stockBefore, quantity);
-    if (decrement > 0) {
-      plans.push({ productId, decrement });
-    }
+    if (quantity <= 0) continue;
+    await tables.incrementRowColumn({
+      databaseId: DATABASE_ID,
+      tableId: TABLE_PRODUCTS,
+      rowId: productId,
+      column: "stock",
+      value: quantity,
+      transactionId,
+    });
   }
-  return plans;
 }
 
 async function applySettle(tables, params) {
@@ -181,18 +225,6 @@ async function applySettle(tables, params) {
       tableId: TABLE_ORDERS,
       rowId: params.orderId,
       data: { status: "paid" },
-      transactionId,
-    });
-  }
-
-  for (const plan of params.plans) {
-    await tables.decrementRowColumn({
-      databaseId: DATABASE_ID,
-      tableId: TABLE_PRODUCTS,
-      rowId: plan.productId,
-      column: "stock",
-      value: plan.decrement,
-      min: 0,
       transactionId,
     });
   }
@@ -325,6 +357,7 @@ async function handlePayHereNotify({ req, res, log, error }) {
         data: { status: "refunded" },
         transactionId,
       });
+      await restoreStockForItems(tables, loaded.items, transactionId);
       await tables.updateTransaction({ transactionId, commit: true });
       log(`payhere-notify refunded order=${orderId}`);
       await persistNotifyLog(
@@ -338,7 +371,6 @@ async function handlePayHereNotify({ req, res, log, error }) {
       return ok(res);
     }
 
-    const plans = await planStockDecrements(tables, loaded.items);
     try {
       await applySettle(tables, {
         paymentId: loaded.payment.$id,
@@ -346,7 +378,6 @@ async function handlePayHereNotify({ req, res, log, error }) {
         orderStatus: loaded.order.status,
         payherePaymentId: decision.payherePaymentId,
         idempotencyKey: decision.idempotencyKey,
-        plans,
       });
     } catch (err) {
       if (await paymentAlreadyPaid(tables, orderId)) {
@@ -376,6 +407,7 @@ async function handlePayHereNotify({ req, res, log, error }) {
     }
 
     log(`payhere-notify settled order=${orderId}`);
+    await notifyPaid(tables, loaded.order);
     await persistNotifyLog(
       tables,
       notifyLogRowFromDecision({

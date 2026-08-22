@@ -33,7 +33,7 @@ Use after every change that touches code or schema:
 - [x] No secrets in client / `NEXT_PUBLIC_*`
 - [x] IDOR / ownership checks on reads & writes you added — admin-only approve/reject + proxy checks `bankSlipFileExists`; no buyer-facing slip mutation
 - [x] Inputs validated (frontend + server); uploads constrained if applicable
-- [x] Payment paths (if touched): notify/hash trusted; idempotent; return_url not sole source of truth — bank approve/reject idempotent guards + TablesDB txn; live E2E pending seeded data
+- [x] Payment paths (if touched): notify/hash trusted; idempotent; return_url not sole source of truth — bank approve/reject idempotent guards + TablesDB txn; COD accept leaves payment pending; stock reserved at placement; live E2E pending seeded data
 - [x] Graphify consulted before work (if graph exists) and updated after
 - [x] Relevant Appwrite MCP tools used when touching Appwrite (docs/context/search/call)
 - [x] Relevant member checklist items below updated
@@ -129,8 +129,8 @@ Complete payment infrastructure so Members 2–4 only consume APIs / admin UI.
 | Step         | Goal                             | Do                                                                          | Verify                                                             |
 | ------------ | -------------------------------- | --------------------------------------------------------------------------- | ------------------------------------------------------------------ |
 | [x] **1.22** | PayHere hash Function            | Appwrite Function `payhere-checkout-hash`; secret in Function env only      | Signed checkout fields from DB order                               |
-| [x] **1.23** | PayHere notify Function          | `payhere-notify`; verify md5sig; idempotent `paid` + stock once             | Replay notify safe                                                 |
-| [x] **1.24** | Free confirm path                | Secure server/Function confirm for `method=free` (no client-trusted amount) | Free orders mark paid once                                         |
+| [x] **1.23** | PayHere notify Function          | `payhere-notify`; verify md5sig; amount vs order+payment; idempotent `paid` (stock reserved at placement) | Replay notify safe; amount mismatch rejected |
+| [x] **1.24** | Free confirm path                | Secure server/Function confirm for `method=free` (no client-trusted amount); stock already reserved | Free orders mark paid once |
 | [x] **1.25** | Wire client stub → live Function | `requestPayHereCheckout` calls real hash Function                           | Member 2 can POST sandbox form                                     |
 | [x] **1.26** | Notify / webhook failure logging | Persist failed/raw notify for ops (admin-readable later)                    | No secrets in logs/UI                                              |
 | [x] **1.27** | Sandbox payment notes            | Test cards + demo steps in `docs/agent/PAYHERE.md`                          | Human-runnable                                                     |
@@ -450,7 +450,8 @@ Pick up only after Phases 1–4 **and Phase 6 A–C** are solid (**6.18**). Assi
 **Product:** `draft`  `pending_review`  `active`  `rejected`  `archived`  
 **Payment method:** `payhere`  `bank_transfer`  `free`  `cod` (PayHere gated by `checkout.payhere_enabled`)  
 **Payment status:** `pending`  `awaiting_verification`  `paid`  `failed`  `refunded`  
-**Order (simplified):** `pending_payment` → `payment_review` → `paid` → `processing` → `shipped` / `ready_pickup` → `completed`  `cancelled` / `refunded`
+**Order (simplified):** `pending_payment` → `payment_review` → `paid` → `processing` → `shipped` / `ready_pickup` → `completed`  `cancelled` / `refunded`  
+**COD:** `pending_payment` → `processing` (payment stays `pending`) → `shipped` / `ready_pickup` → `completed` (payment → `paid` on that hop)
 
 ---
 

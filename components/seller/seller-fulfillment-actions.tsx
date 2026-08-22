@@ -10,6 +10,7 @@ import {
 import {
   sellerFulfillmentNextStatuses,
   type OrderStatus,
+  type PaymentMethod,
 } from "@/lib/types";
 import { toast } from "@/lib/ui/toast";
 
@@ -27,14 +28,23 @@ const STATUS_LABELS: Record<OrderStatus, string> = {
   refunded: "Refunded",
 };
 
+function statusLabel(nextStatus: OrderStatus, paymentMethod?: PaymentMethod) {
+  if (nextStatus === "completed" && paymentMethod === "cod") {
+    return "Mark delivered & cash collected";
+  }
+  return STATUS_LABELS[nextStatus];
+}
+
 type SellerFulfillmentButtonProps = {
   orderId: string;
   nextStatus: OrderStatus;
+  paymentMethod?: PaymentMethod;
 };
 
 function SellerFulfillmentButton({
   orderId,
   nextStatus,
+  paymentMethod,
 }: SellerFulfillmentButtonProps) {
   const [state, formAction, pending] = useActionState(
     updateSellerOrderStatus,
@@ -68,7 +78,7 @@ function SellerFulfillmentButton({
       <input type="hidden" name="orderId" value={orderId} />
       <input type="hidden" name="nextStatus" value={nextStatus} />
       <Button type="submit" size="sm" disabled={pending} data-testid={`fulfill-${nextStatus}`}>
-        {pending ? "Updating…" : STATUS_LABELS[nextStatus]}
+        {pending ? "Updating…" : statusLabel(nextStatus, paymentMethod)}
       </Button>
     </form>
   );
@@ -78,19 +88,30 @@ type SellerFulfillmentActionsProps = {
   orderId: string;
   currentStatus: OrderStatus;
   paymentPaid: boolean;
+  paymentMethod?: PaymentMethod;
 };
 
 export function SellerFulfillmentActions({
   orderId,
   currentStatus,
   paymentPaid,
+  paymentMethod,
 }: SellerFulfillmentActionsProps) {
-  if (!paymentPaid) {
+  const codReady =
+    paymentMethod === "cod" &&
+    !paymentPaid &&
+    (currentStatus === "processing" ||
+      currentStatus === "shipped" ||
+      currentStatus === "ready_pickup");
+
+  if (!paymentPaid && !codReady) {
     return (
       <section className="mt-10 space-y-4">
         <h3 className="text-xl font-bold tracking-tight">Fulfillment</h3>
         <p className="text-sm text-muted-foreground">
-          Fulfillment starts after this order is marked paid.
+          {paymentMethod === "cod"
+            ? "Fulfillment starts after the buyer accepts cash on delivery."
+            : "Fulfillment starts after this order is marked paid."}
         </p>
       </section>
     );
@@ -108,6 +129,7 @@ export function SellerFulfillmentActions({
             key={next}
             orderId={orderId}
             nextStatus={next}
+            paymentMethod={paymentMethod}
           />
         ))}
       </div>

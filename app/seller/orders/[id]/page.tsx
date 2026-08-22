@@ -17,12 +17,15 @@ import { isMessagingAllowedForOrder } from "@/lib/services/threads";
 
 type SellerOrderDetailPageProps = {
   params: Promise<{ id: string }>;
+  searchParams: Promise<{ msgError?: string }>;
 };
 
 export default async function SellerOrderDetailPage({
   params,
+  searchParams,
 }: SellerOrderDetailPageProps) {
   const { id } = await params;
+  const { msgError } = await searchParams;
 
   const order = await getSellerOrder(id);
   if (!order) {
@@ -37,6 +40,11 @@ export default async function SellerOrderDetailPage({
   return (
     <div className="mx-auto max-w-3xl">
       <h2 className="mt-3 text-3xl font-bold tracking-tight">Order details</h2>
+      {msgError ? (
+        <p role="alert" className="mt-4 text-sm text-destructive">
+          {msgError}
+        </p>
+      ) : null}
       <p className="mt-2 text-sm text-muted-foreground">
         Order{" "}
         <span className="font-mono text-foreground">{order.$id}</span> ·{" "}
@@ -108,6 +116,7 @@ export default async function SellerOrderDetailPage({
         orderId={order.$id}
         currentStatus={order.status}
         paymentPaid={payment?.status === "paid"}
+        paymentMethod={order.paymentMethod}
       />
 
       <div className="mt-12 flex flex-wrap gap-3">

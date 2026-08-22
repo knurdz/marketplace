@@ -7,6 +7,7 @@ import {
 } from "@/lib/appwrite/config";
 import { createSessionClient } from "@/lib/appwrite/server";
 import { getLoggedInUser } from "@/lib/appwrite/session";
+import { logError } from "@/lib/observability/log-error";
 import {
   assertRateLimit,
   getClientIp,
@@ -241,7 +242,8 @@ export async function getOrCreateCart(): Promise<Cart | null> {
     const created = asCart(row as unknown as Record<string, unknown>);
     if (!created || created.userId !== user.$id) return null;
     return created;
-  } catch {
+  } catch (error) {
+    logError("cart.getOrCreate", error);
     return null;
   }
 }
@@ -555,17 +557,24 @@ export async function clearCart(): Promise<CartActionState> {
 
     const items = await listCartItemsForCart(cart.$id);
     const { tables } = await createSessionClient();
-    for (const item of items) {
-      await tables.deleteRow({
-        databaseId: DATABASE_ID,
-        tableId: TABLE_CART_ITEMS,
-        rowId: item.$id,
-      });
+    if (items.length > 0) {
+      const tx = await tables.createTransaction({ ttl: 60 });
+      const transactionId = tx.$id;
+      for (const item of items) {
+        await tables.deleteRow({
+          databaseId: DATABASE_ID,
+          tableId: TABLE_CART_ITEMS,
+          rowId: item.$id,
+          transactionId,
+        });
+      }
+      await tables.updateTransaction({ transactionId, commit: true });
     }
 
     await syncCartSellerId(cart, []);
     return { success: "Cart cleared." };
   } catch (error) {
+    logError("cart.clear", error);
     if (error instanceof Error) {
       const code = (error as Error & { code?: CartErrorCode }).code;
       if (code) {
