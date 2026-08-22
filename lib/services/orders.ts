@@ -34,7 +34,8 @@ import {
   isPaymentMethod,
   isPaymentStatus,
 } from "@/lib/types";
-import { clearCart, getCart, addToCart } from "./cart";
+import { notifyBankSlipUploaded } from "./order-notify";
+import { addToCart, clearCart, getCart } from "./cart";
 import { CART_ERROR_CODES } from "./cart-errors";
 import {
   recordCouponRedemption,
@@ -555,6 +556,11 @@ export async function submitBankSlip(
       ORDER_ERROR_CODES.UPDATE_FAILED,
     );
   }
+
+  await notifyBankSlipUploaded({
+    orderId: order.$id,
+    sellerId: order.sellerId,
+  });
 
   return {
     ok: true,

@@ -14,7 +14,7 @@ export default function FaqPage() {
       <LegalSection title="What payment methods are supported?">
         <p>
           PayHere (sandbox during development), bank transfer with slip upload
-          for admin verification, and free checkout for zero-price listings.
+          for seller verification, and free checkout for zero-price listings.
         </p>
       </LegalSection>
 

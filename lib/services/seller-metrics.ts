@@ -20,8 +20,9 @@ export const SELLER_REVENUE_STATUSES: readonly OrderStatus[] = [
   "completed",
 ];
 
-/** Order statuses awaiting seller fulfillment action. */
+/** Order statuses awaiting seller action (fulfillment or slip review). */
 export const SELLER_PENDING_STATUSES: readonly OrderStatus[] = [
+  "payment_review",
   "paid",
   "processing",
   "shipped",

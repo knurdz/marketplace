@@ -8,12 +8,15 @@ import {
   TABLE_PAYMENTS,
   hasAppwritePublicConfig,
 } from "@/lib/appwrite/config";
-import { requireLabel } from "@/lib/appwrite/roles";
+import { ROLE_LABELS, requireLabel, userHasLabel } from "@/lib/appwrite/roles";
 import { createAdminClient } from "@/lib/appwrite/server";
+import { getLoggedInUser } from "@/lib/appwrite/session";
 import { logError } from "@/lib/observability/log-error";
 import type { BankSlip, Order, OrderItem, Payment } from "@/lib/types";
 import {
+  BANK_SLIP_NOT_OWN_ORDER,
   bankConfirmIdempotencyKey,
+  canSellerReviewBankSlip,
   evaluateBankSlipApprove,
   evaluateBankSlipReject,
   evaluateBankSlipRejectAndCancel,
@@ -23,6 +26,7 @@ import {
   notifyBankSlipRejected,
   notifyOrderPaid,
 } from "./order-notify";
+import { getSellerOrder } from "./seller-orders";
 import { restoreStockForLines } from "./stock";
 import {
   asBankSlip,
@@ -34,6 +38,7 @@ import {
 export { asBankSlip } from "./orders";
 export {
   bankConfirmIdempotencyKey,
+  canSellerReviewBankSlip,
   evaluateBankSlipApprove,
   evaluateBankSlipReject,
   evaluateBankSlipRejectAndCancel,
@@ -45,6 +50,7 @@ const DEFAULT_PAGE_SIZE = 25;
 const MAX_PAGE_SIZE = 100;
 const SUPERSEDED_REVIEW_NOTE =
   "Superseded: another slip for this payment was approved.";
+const UNAUTHORIZED_REVIEW = "Unauthorized";
 
 export type PendingBankSlipView = {
   slip: BankSlip;
@@ -52,6 +58,7 @@ export type PendingBankSlipView = {
   paymentAmount: number;
   paymentCurrency: string;
   buyerId: string;
+  sellerId: string;
 };
 
 export type ListPendingBankSlipsResult = {
@@ -98,6 +105,22 @@ function parseReviewNote(note: string): string | BankSlipReviewResult {
     };
   }
   return trimmed;
+}
+
+async function requireOwningSeller(
+  order: Order,
+): Promise<{ ok: true; userId: string } | { ok: false; error: string }> {
+  const user = await getLoggedInUser();
+  if (!user) {
+    return { ok: false, error: UNAUTHORIZED_REVIEW };
+  }
+  if (!userHasLabel(user, ROLE_LABELS.seller)) {
+    return { ok: false, error: UNAUTHORIZED_REVIEW };
+  }
+  if (!canSellerReviewBankSlip(user.$id, order.sellerId)) {
+    return { ok: false, error: BANK_SLIP_NOT_OWN_ORDER };
+  }
+  return { ok: true, userId: user.$id };
 }
 
 async function loadBankSlip(bankSlipId: string): Promise<BankSlip | null> {
@@ -244,14 +267,76 @@ function rejectConflictResult(
   return null;
 }
 
-/** Relative admin-only URL for slip image (proxy re-checks auth). */
+/** Relative URL for slip image (proxy re-checks admin or owning seller). */
 export async function getBankSlipReviewUrl(fileId: string): Promise<string> {
-  await requireLabel("admin");
+  const user = await getLoggedInUser();
   const trimmed = fileId?.trim();
-  if (!trimmed) {
-    throw new Error("Missing file id.");
+  if (!user || !trimmed) {
+    return "";
+  }
+  const allowed = await userCanAccessBankSlipFile(user, trimmed);
+  if (!allowed) {
+    return "";
   }
   return `/api/admin/bank-slips/${encodeURIComponent(trimmed)}`;
+}
+
+/** Admin or the order's seller may view the stored slip file. */
+export async function userCanAccessBankSlipFile(
+  user: { $id: string; labels?: string[] },
+  fileId: string,
+): Promise<boolean> {
+  if (!adminSdkAvailable()) return false;
+  const trimmed = fileId?.trim();
+  if (!trimmed) return false;
+
+  try {
+    const { tables } = await createAdminClient();
+    const result = await tables.listRows({
+      databaseId: DATABASE_ID,
+      tableId: TABLE_BANK_SLIPS,
+      queries: [Query.equal("fileId", trimmed), Query.limit(1)],
+    });
+    const row = result.rows[0];
+    if (!row) return false;
+    const slip = asBankSlip(row as unknown as Record<string, unknown>);
+    if (!slip) return false;
+
+    if (userHasLabel(user, ROLE_LABELS.admin)) return true;
+    if (!userHasLabel(user, ROLE_LABELS.seller)) return false;
+
+    const order = await loadOrder(slip.orderId);
+    return Boolean(order && canSellerReviewBankSlip(user.$id, order.sellerId));
+  } catch {
+    return false;
+  }
+}
+
+/** Latest pending slip for an order owned by the signed-in seller. */
+export async function getPendingBankSlipForSellerOrder(
+  orderId: string,
+): Promise<BankSlip | null> {
+  const order = await getSellerOrder(orderId);
+  if (!order || !adminSdkAvailable()) return null;
+
+  try {
+    const { tables } = await createAdminClient();
+    const result = await tables.listRows({
+      databaseId: DATABASE_ID,
+      tableId: TABLE_BANK_SLIPS,
+      queries: [
+        Query.equal("orderId", order.$id),
+        Query.equal("status", "pending"),
+        Query.orderDesc("$createdAt"),
+        Query.limit(1),
+      ],
+    });
+    const row = result.rows[0];
+    if (!row) return null;
+    return asBankSlip(row as unknown as Record<string, unknown>);
+  } catch {
+    return null;
+  }
 }
 
 /** Admin-scoped pending bank slip queue with payment/order context. */
@@ -296,6 +381,7 @@ export async function listPendingBankSlips(opts?: {
       let paymentAmount = 0;
       let paymentCurrency = "LKR";
       let buyerId = slip.uploadedBy;
+      let sellerId = "";
 
       try {
         const [paymentRow, orderRow] = await Promise.all([
@@ -320,6 +406,7 @@ export async function listPendingBankSlips(opts?: {
         order = asOrder(orderRow as unknown as Record<string, unknown>);
         if (order) {
           buyerId = order.buyerId;
+          sellerId = order.sellerId;
         }
       } catch {
         // skip unverifiable leftovers
@@ -335,6 +422,7 @@ export async function listPendingBankSlips(opts?: {
         paymentAmount,
         paymentCurrency,
         buyerId,
+        sellerId,
       });
     }
 
@@ -352,14 +440,13 @@ export async function listPendingBankSlips(opts?: {
 
 /**
  * Approve a pending bank slip: payment paid, order paid.
- * Idempotent: already-reviewed or already-paid payment → safe no-op.
+ * AuthZ: signed-in seller who owns the order. Idempotent already-reviewed → no-op.
  */
 export async function approveBankSlipCore(
-  adminUserId: string,
   bankSlipId: string,
 ): Promise<BankSlipReviewResult> {
   if (!adminSdkAvailable()) {
-    return { ok: false, error: "Admin backend is not configured." };
+    return { ok: false, error: "Marketplace backend is not configured." };
   }
 
   const trimmedId = bankSlipId?.trim();
@@ -369,6 +456,9 @@ export async function approveBankSlipCore(
 
   const loaded = await loadReviewContext(trimmedId);
   if (!loaded.ok) return loaded;
+
+  const auth = await requireOwningSeller(loaded.ctx.order);
+  if (!auth.ok) return auth;
 
   const decision = evaluateBankSlipApprove(loaded.ctx);
   if (decision.action === "refuse") {
@@ -403,7 +493,7 @@ export async function approveBankSlipCore(
       rowId: slip.$id,
       data: {
         status: "approved",
-        reviewedBy: adminUserId,
+        reviewedBy: auth.userId,
       },
       transactionId,
     });
@@ -415,7 +505,7 @@ export async function approveBankSlipCore(
         rowId: siblingId,
         data: {
           status: "rejected",
-          reviewedBy: adminUserId,
+          reviewedBy: auth.userId,
           reviewNote: SUPERSEDED_REVIEW_NOTE,
         },
         transactionId,
@@ -446,7 +536,7 @@ export async function approveBankSlipCore(
       tableId: TABLE_AUDIT_LOGS,
       rowId: auditRowId,
       data: {
-        actorId: adminUserId,
+        actorId: auth.userId,
         event: "bank_slip.approved",
         resourceType: "order",
         resourceId: order.$id,
@@ -490,16 +580,14 @@ export async function approveBankSlipCore(
 
 /**
  * Reject a pending bank slip and reopen the order so the buyer can re-upload.
- * Idempotent: already-rejected → safe no-op. Never overwrites paid/refunded.
- * Does not restore stock (order is still open).
+ * AuthZ: signed-in seller who owns the order. Does not restore stock.
  */
 export async function rejectBankSlipCore(
-  adminUserId: string,
   bankSlipId: string,
   reviewNote: string,
 ): Promise<BankSlipReviewResult> {
   if (!adminSdkAvailable()) {
-    return { ok: false, error: "Admin backend is not configured." };
+    return { ok: false, error: "Marketplace backend is not configured." };
   }
 
   const parsedNote = parseReviewNote(reviewNote);
@@ -512,6 +600,9 @@ export async function rejectBankSlipCore(
 
   const loaded = await loadReviewContext(trimmedId);
   if (!loaded.ok) return loaded;
+
+  const auth = await requireOwningSeller(loaded.ctx.order);
+  if (!auth.ok) return auth;
 
   const decision = evaluateBankSlipReject(loaded.ctx);
   if (decision.action === "refuse") {
@@ -540,7 +631,7 @@ export async function rejectBankSlipCore(
       rowId: slip.$id,
       data: {
         status: "rejected",
-        reviewedBy: adminUserId,
+        reviewedBy: auth.userId,
         reviewNote: parsedNote,
       },
       transactionId,
@@ -568,7 +659,7 @@ export async function rejectBankSlipCore(
       tableId: TABLE_AUDIT_LOGS,
       rowId: auditRowId,
       data: {
-        actorId: adminUserId,
+        actorId: auth.userId,
         event: "bank_slip.rejected",
         resourceType: "order",
         resourceId: order.$id,
@@ -615,14 +706,14 @@ export async function rejectBankSlipCore(
 
 /**
  * Reject the slip and cancel the order (no retry). Restores reserved stock.
+ * AuthZ: signed-in seller who owns the order.
  */
 export async function rejectAndCancelBankSlipCore(
-  adminUserId: string,
   bankSlipId: string,
   reviewNote: string,
 ): Promise<BankSlipReviewResult> {
   if (!adminSdkAvailable()) {
-    return { ok: false, error: "Admin backend is not configured." };
+    return { ok: false, error: "Marketplace backend is not configured." };
   }
 
   const parsedNote = parseReviewNote(reviewNote);
@@ -635,6 +726,9 @@ export async function rejectAndCancelBankSlipCore(
 
   const loaded = await loadReviewContext(trimmedId);
   if (!loaded.ok) return loaded;
+
+  const auth = await requireOwningSeller(loaded.ctx.order);
+  if (!auth.ok) return auth;
 
   const decision = evaluateBankSlipRejectAndCancel(loaded.ctx);
   if (decision.action === "refuse") {
@@ -663,7 +757,7 @@ export async function rejectAndCancelBankSlipCore(
       rowId: slip.$id,
       data: {
         status: "rejected",
-        reviewedBy: adminUserId,
+        reviewedBy: auth.userId,
         reviewNote: parsedNote,
       },
       transactionId,
@@ -692,7 +786,7 @@ export async function rejectAndCancelBankSlipCore(
       tableId: TABLE_AUDIT_LOGS,
       rowId: auditRowId,
       data: {
-        actorId: adminUserId,
+        actorId: auth.userId,
         event: "bank_slip.rejected_cancelled",
         resourceType: "order",
         resourceId: order.$id,

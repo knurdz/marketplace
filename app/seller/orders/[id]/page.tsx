@@ -1,5 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { BankSlipImage } from "@/components/bank-slip/bank-slip-preview";
+import { SellerBankSlipReviewActions } from "@/components/seller/seller-bank-slip-review-actions";
 import { SellerFulfillmentActions } from "@/components/seller/seller-fulfillment-actions";
 import { OpenSellerThreadButton } from "@/components/messaging/open-seller-thread-button";
 import { OrderTimeline } from "@/components/store/order-timeline";
@@ -13,6 +15,10 @@ import {
   getSellerOrderItems,
   getSellerPaymentForOrder,
 } from "@/lib/services";
+import {
+  getBankSlipReviewUrl,
+  getPendingBankSlipForSellerOrder,
+} from "@/lib/services/bank-slip-review";
 import { isMessagingAllowedForOrder } from "@/lib/services/threads";
 
 type SellerOrderDetailPageProps = {
@@ -36,6 +42,17 @@ export default async function SellerOrderDetailPage({
     getSellerOrderItems(id),
     getSellerPaymentForOrder(id),
   ]);
+
+  const needsSlipReview =
+    order.paymentMethod === "bank_transfer" &&
+    (order.status === "payment_review" ||
+      payment?.status === "awaiting_verification");
+  const pendingSlip = needsSlipReview
+    ? await getPendingBankSlipForSellerOrder(id)
+    : null;
+  const slipUrl = pendingSlip
+    ? await getBankSlipReviewUrl(pendingSlip.fileId)
+    : "";
 
   return (
     <div className="mx-auto max-w-3xl">
@@ -104,6 +121,22 @@ export default async function SellerOrderDetailPage({
       </section>
 
       <OrderTimeline status={order.status} />
+
+      {pendingSlip ? (
+        <section className="mt-10 space-y-4">
+          <h3 className="text-xl font-bold tracking-tight">Bank slip review</h3>
+          <p className="text-sm text-muted-foreground">
+            Approve to mark this payment paid, or reject so the buyer can retry.
+          </p>
+          <SellerBankSlipReviewActions bankSlipId={pendingSlip.$id} />
+          {slipUrl ? (
+            <BankSlipImage
+              src={slipUrl}
+              alt={`Bank slip for order ${order.$id}`}
+            />
+          ) : null}
+        </section>
+      ) : null}
 
       {isMessagingAllowedForOrder(order) ? (
         <section className="mt-10 space-y-4">

@@ -19,7 +19,7 @@ Shared TypeScript: [`lib/types/payhere.ts`](../../lib/types/payhere.ts) · clien
 | Wire stub → live hash Function, sandbox-only `actionUrl` | Member 1 (1.25) |
 | `payhere-checkout-hash` + `payhere-notify` Functions, merchant secret, idempotent `paid`, free confirm | **Member 1** (1.22–1.28) |
 | Checkout UI, POST form to PayHere, return/cancel pages that **poll DB** | Member 2 |
-| Bank slip approve/reject (admin UI) | Member 4 (default policy) |
+| Bank slip approve/reject (seller order detail) | Selling shop (`order.sellerId`); admin queue is read-only |
 
 ---
 
@@ -184,7 +184,7 @@ Admin overrides on `/admin/orders` write the **platform ledger only** (`cancelAd
 
 A later PayHere chargeback notify (`-3`) is idempotent when `payments.status` is already `refunded`. Captured card funds, if they must go back to the buyer, are returned in the **PayHere merchant dashboard** (sandbox), not by this app. **Stock reserved at placement is restored** on platform refund / chargeback.
 
-Bank-slip leftovers after cancel (step **6.14**): a pending `bank_slips` row must not re-settle a `cancelled` order. Approve refuses; reject closes the slip only and never writes `failed` over `paid` / `refunded`. First bank approve sets `payments.idempotencyKey = bank:<orderId>`. Reject-with-retry (buyer still unpaid) returns payment to `pending` and the order to `pending_payment`. Reject-and-cancel is a separate admin action.
+Bank-slip leftovers after cancel (step **6.14**): a pending `bank_slips` row must not re-settle a `cancelled` order. Approve refuses; reject closes the slip only and never writes `failed` over `paid` / `refunded`. First bank approve sets `payments.idempotencyKey = bank:<orderId>`. Reject-with-retry (buyer still unpaid) returns payment to `pending` and the order to `pending_payment`. Reject-and-cancel is a separate **seller** action.
 
 ### Idempotency
 

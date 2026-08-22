@@ -5,6 +5,7 @@
  */
 
 import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
 import { isPaymentMethod } from "@/lib/types";
 import { confirmFreeOrder } from "./free-order";
 import { confirmCodOrder } from "./cod-order";
@@ -257,11 +258,12 @@ export async function submitBankSlipAction(
 
   if (result.ok) {
     revalidateCheckoutPaths();
-    return {
-      ok: true,
-      orderStatus: result.orderStatus,
-      paymentStatus: result.paymentStatus,
-    };
+    revalidatePath(`/orders/${orderId}`);
+    revalidatePath("/orders");
+    revalidatePath(`/seller/orders/${orderId}`);
+    revalidatePath("/seller/orders");
+    revalidatePath("/seller");
+    redirect(`/orders/${orderId}`);
   }
 
   return {

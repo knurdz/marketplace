@@ -18,7 +18,7 @@
 3. **Graphify** — query before coding; `/graphify . --update` (or full rebuild) after meaningful code changes.
 4. **Approved MCPs only** — Appwrite, PayHere docs (+ optional Merchant), Context7, next-devtools, shadcn, Playwright (see `.cursor/rules/mcp-acceleration.mdc`). No GitHub MCP; humans own commits/PRs/merges.
 5. **Single-seller orders** for MVP (split cart by seller at checkout if needed).
-6. **Bank verification policy (default):** admin verifies slips; sellers can escalate. Change only by updating this file.
+6. **Bank verification policy:** the selling shop approves or rejects bank slips for its own orders (`order.sellerId`). Admin keeps read-only visibility of all orders and pending slips. Change only by updating this file.
 7. **Payment setup (Member 1):** PayHere hash + notify Functions, merchant secrets, free-confirm server path, `docs/agent/PAYHERE.md` implementation, webhook/notify logging, sandbox payment notes. **Never** put merchant secret in the client. Member 2 only builds checkout **UX** that calls Member 1 APIs; Member 4 does **not** own PayHere Functions.
 8. **MVP first:** working transactions before chat, AI, referrals, or heavy analytics.
 
@@ -234,8 +234,8 @@ Complete payment infrastructure so Members 2–4 only consume APIs / admin UI.
 - [x] Seller bank details for buyer transfers
 - [x] Earnings / completed payments list + bank payout tracking (manual OK)
 - [x] Seller settings / policy text
-- [x] Buyer ↔ seller messaging (optional / Phase 5 — **6.21** basic order threads; bank-verify policy unchanged)
-- [ ] Optional: own-order bank verify (optional / Phase 5 — **deferred:** policy unchanged — principle 6 admin verifies slips; sellers do not approve)
+- [x] Buyer ↔ seller messaging (optional / Phase 5 — **6.21** basic order threads)
+- [x] Own-order bank verify — seller approves/rejects slips; admin queue is read-only (principle 6)
 
 ### Step-by-step plan (implement one step at a time)
 
@@ -258,7 +258,7 @@ Complete payment infrastructure so Members 2–4 only consume APIs / admin UI.
 | [x] **3.12** | Bank details   | Fields for buyer bank checkout                      | Least exposure — **6.6**          |
 | [x] **3.13** | Earnings       | Paid orders; manual payout note                     | Matches `paid` payments — **6.10** |
 | [x] **3.14** | Settings       | Policy text                                         | Visible on shop/product — **6.11** |
-| [x] **3.15** | Optional       | Document deferral — messaging + own bank verify not started; policy unchanged | Deferred; documented in tasks above — **6.21** |
+| [x] **3.15** | Optional       | Messaging + own-order bank verify (seller approves slips) | Threads + seller slip review — **6.21** |
 
 ### Member 3 — verification extras
 
@@ -271,7 +271,7 @@ Complete payment infrastructure so Members 2–4 only consume APIs / admin UI.
 
 ## Member 4 — Admin, moderation, trust
 
-**Owns:** `/admin/`**, moderation, bank slip verification **UI**, platform settings UI, audit, reports. **Does not** own PayHere Functions or payment setup (Member 1).
+**Owns:** `/admin/`**, moderation, read-only bank slip queue, platform settings UI, audit, reports. **Does not** own PayHere Functions or payment setup (Member 1). Sellers approve slips (principle 6).
 
 **Depends on:** Member 1 Phase 0 + payment setup for accurate payment statuses; integrates with Members 2–3 order/listing data.
 
@@ -287,7 +287,7 @@ Complete payment infrastructure so Members 2–4 only consume APIs / admin UI.
 - [x] Categories CRUD
 - [x] All-orders oversight + payment filters
 - [x] Dispute handling (orders flagged by buyers/sellers)
-- [x] Bank slip verification UI (approve/reject proofs)
+- [x] Bank slip queue UI (read-only; sellers approve/reject proofs)
 - [x] User/listing reports triage
 - [x] Audit log viewer
 - [x] Platform settings (sandbox flag, fees, bank copy) — admin write UI
@@ -310,7 +310,7 @@ Complete payment infrastructure so Members 2–4 only consume APIs / admin UI.
 | [x] **4.4**  | Listing moderation      | Approve/reject/remove                     | Status enums only       |
 | [x] **4.5**  | Categories CRUD         | Create/update/order                       | Storefront reads them   |
 | [x] **4.6**  | All orders + filters    | By payment method/status                  | Admin access only       |
-| [x] **4.7**  | Bank slip queue         | Approve → `paid` + stock; reject          | Idempotent; audit       |
+| [x] **4.7**  | Bank slip queue         | Read-only admin view; seller approve → `paid`; reject | Idempotent; audit |
 | [x] **4.8**  | Reports / disputes      | Triage workflow                           | Status transitions      |
 | [x] **4.9**  | Platform settings UI    | Sandbox, bank copy, fees (admin write)    | Safe public fields only |
 | [x] **4.10** | Audit viewer            | List admin actions                        | Append-only             |
@@ -324,7 +324,7 @@ Complete payment infrastructure so Members 2–4 only consume APIs / admin UI.
 
 - [x] Admin actions audited
 - [x] Suspended users cannot checkout or publish
-- [x] Bank slip approve/reject is idempotent and audited — **Phase 6.14** (re-verify **4.7**; patch only if a gap remains)
+- [x] Bank slip approve/reject is seller-owned, idempotent, and audited — **Phase 6.14** (admin queue read-only)
 - [x] Does **not** implement PayHere Functions (Member 1)
 
 ---
@@ -380,7 +380,7 @@ After **6.8**, tick Member 3 verification extras: own-only mutations, unpublishe
 | ---- | ------- | ---- | -- | ------ |
 | [x] **6.19** | **2.16** | Trending / recently viewed / reorder | After **6.18**; needs completed orders + browse | Guest-safe; own-only history |
 | [x] **6.20** | **4.14** | Featured listings + coupons | Admin-controlled; needs **6.3** `active` products | After E2E |
-| [x] **6.21** | **3.15** | Messaging or seller bank-verify | Basic order threads (6.21). **Own-order bank verify only if default policy is updated** (admin verifies slips) | Messaging landed; bank-verify deferred |
+| [x] **6.21** | **3.15** | Messaging + seller bank-verify | Basic order threads. Seller approves own-order bank slips (principle 6) | Messaging + seller slip review |
 | [x] **6.22** | Member 1 Phase 0 optional | Phone on registration | Profile already has phone; register copy still says later | Optional field; not required for login |
 
 ### E — Creative backlog last (after Phase 6 E2E)

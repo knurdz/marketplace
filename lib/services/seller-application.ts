@@ -20,6 +20,7 @@ const MAX_BIO_LENGTH = 2000;
 const MAX_BANK_NAME_LENGTH = 128;
 const MAX_BANK_ACCOUNT_NAME_LENGTH = 128;
 const MAX_BANK_ACCOUNT_NUMBER_LENGTH = 64;
+const MAX_BANK_TRANSFER_NOTES_LENGTH = 2000;
 /** Digits, spaces, hyphens — Sri Lankan copy-paste friendly. */
 const BANK_ACCOUNT_NUMBER_PATTERN = /^[\d\s-]+$/;
 
@@ -56,6 +57,7 @@ export type UpdateSellerBankDetailsInput = {
   bankAccountName?: string;
   bankAccountNumber?: string;
   bankName?: string;
+  bankTransferNotes?: string;
 };
 
 export type UpdateShopPoliciesInput = {
@@ -73,6 +75,7 @@ export type ParsedSellerBankDetailsInput =
       bankAccountName: string | null;
       bankAccountNumber: string | null;
       bankName: string | null;
+      bankTransferNotes: string | null;
     }
   | { ok: false; error: string };
 
@@ -149,13 +152,21 @@ export function parseSellerBankDetailsInput(
   const bankName = input.bankName?.trim() ?? "";
   const bankAccountName = input.bankAccountName?.trim() ?? "";
   const bankAccountNumber = input.bankAccountNumber?.trim() ?? "";
+  const bankTransferNotes = input.bankTransferNotes?.trim() ?? "";
 
   if (!bankName && !bankAccountName && !bankAccountNumber) {
+    if (bankTransferNotes) {
+      return {
+        ok: false,
+        error: "Bank details are required when saving transfer notes.",
+      };
+    }
     return {
       ok: true,
       bankAccountName: null,
       bankAccountNumber: null,
       bankName: null,
+      bankTransferNotes: null,
     };
   }
 
@@ -199,12 +210,19 @@ export function parseSellerBankDetailsInput(
       error: "Account number may only contain digits, spaces, and hyphens.",
     };
   }
+  if (bankTransferNotes.length > MAX_BANK_TRANSFER_NOTES_LENGTH) {
+    return {
+      ok: false,
+      error: `Transfer notes must be at most ${MAX_BANK_TRANSFER_NOTES_LENGTH} characters.`,
+    };
+  }
 
   return {
     ok: true,
     bankAccountName,
     bankAccountNumber,
     bankName,
+    bankTransferNotes: bankTransferNotes || null,
   };
 }
 
@@ -576,6 +594,7 @@ export async function updateOwnBankDetailsCore(
         bankAccountName: parsed.bankAccountName,
         bankAccountNumber: parsed.bankAccountNumber,
         bankName: parsed.bankName,
+        bankTransferNotes: parsed.bankTransferNotes,
         userId: user.$id,
       },
     });

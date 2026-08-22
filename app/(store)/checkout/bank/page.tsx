@@ -42,7 +42,7 @@ export default async function CheckoutBankPage({
 
   const bankInstructions =
     bankInstructionsSetting?.value?.trim() ||
-    "Transfer the order total to the seller bank account below, then upload your payment slip for admin verification.";
+    "Transfer the order total to the seller bank account below, then upload your payment slip for seller verification.";
 
   return (
     <main className="relative mx-auto w-full max-w-3xl px-6 py-16 sm:px-10">
@@ -65,7 +65,8 @@ export default async function CheckoutBankPage({
         sellerBank &&
         (sellerBank.bankAccountName ||
           sellerBank.bankAccountNumber ||
-          sellerBank.bankName) ? (
+          sellerBank.bankName ||
+          sellerBank.bankTransferNotes) ? (
           <section className="mt-10 space-y-3">
             <h2 className="text-xl font-bold tracking-tight">Seller bank details</h2>
             <dl className="space-y-2 text-sm">
@@ -86,6 +87,14 @@ export default async function CheckoutBankPage({
                   <dt className="text-muted-foreground">Account number</dt>
                   <dd className="font-mono font-medium">
                     {sellerBank.bankAccountNumber}
+                  </dd>
+                </div>
+              ) : null}
+              {sellerBank.bankTransferNotes ? (
+                <div>
+                  <dt className="text-muted-foreground">Seller notes</dt>
+                  <dd className="whitespace-pre-wrap text-muted-foreground">
+                    {sellerBank.bankTransferNotes}
                   </dd>
                 </div>
               ) : null}

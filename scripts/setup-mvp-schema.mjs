@@ -265,6 +265,7 @@ async function setupSellerProfiles() {
   await ensureString("seller_profiles", "bankAccountName", 128, false);
   await ensureString("seller_profiles", "bankAccountNumber", 64, false);
   await ensureString("seller_profiles", "bankName", 128, false);
+  await ensureString("seller_profiles", "bankTransferNotes", 2000, false);
   await ensureString("seller_profiles", "rejectionReason", 500, false);
   await ensureString("seller_profiles", "returnPolicy", 2000, false);
   await ensureString("seller_profiles", "shippingPolicy", 2000, false);
@@ -278,6 +279,7 @@ async function setupSellerProfiles() {
     "bankAccountName",
     "bankAccountNumber",
     "bankName",
+    "bankTransferNotes",
     "rejectionReason",
     "returnPolicy",
     "shippingPolicy",
@@ -565,6 +567,9 @@ async function setupBankSlips() {
   ]);
   await ensureIndex("bank_slips", "orderId_idx", TablesDBIndexType.Key, [
     "orderId",
+  ]);
+  await ensureIndex("bank_slips", "fileId_idx", TablesDBIndexType.Key, [
+    "fileId",
   ]);
 }
 

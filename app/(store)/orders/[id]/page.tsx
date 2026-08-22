@@ -86,6 +86,24 @@ export default async function OrderDetailPage({
             </div>
           ) : null}
         </dl>
+        {payment &&
+        order.paymentMethod === "bank_transfer" &&
+        (payment.status === "pending" ||
+          payment.status === "awaiting_verification") ? (
+          <p className="rounded-md border border-border bg-card px-3 py-2 text-sm text-muted-foreground">
+            {payment.status === "awaiting_verification"
+              ? "Your bank slip is awaiting seller verification."
+              : "Transfer the amount and upload your bank slip to continue."}{" "}
+            <Link
+              href={`/checkout/bank?orderId=${encodeURIComponent(order.$id)}`}
+              className="font-medium text-accent hover:underline"
+            >
+              {payment.status === "awaiting_verification"
+                ? "Replace slip"
+                : "Upload bank slip"}
+            </Link>
+          </p>
+        ) : null}
       </section>
 
       <section className="mt-10 space-y-4">

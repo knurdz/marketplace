@@ -137,6 +137,8 @@ const SELLER_PROFILES = [
     bankAccountName: "Demo Shop (Pvt) Ltd",
     bankAccountNumber: "1234567890",
     bankName: "Demo Bank",
+    bankTransferNotes:
+      "When paying via online banking, put this order ID in the transfer remark so we can match your payment.",
   },
   {
     rowId: "seed_seller2_profile",
@@ -147,6 +149,8 @@ const SELLER_PROFILES = [
     bankAccountName: "Paper Trail Books",
     bankAccountNumber: "9876543210",
     bankName: "Seed Savings Bank",
+    bankTransferNotes:
+      "Use the Nugegoda branch. Put PT- plus the last 6 characters of your order ID as the payment reference.",
   },
 ];
 const BUYER_WELCOME_NOTIFICATION_ID = "seed_buyer_welcome_notification";
@@ -174,7 +178,7 @@ const PLATFORM_SETTINGS = [
     rowId: "seed_set_bank_instr",
     key: "checkout.bank_instructions",
     value:
-      "Transfer the order total to the seller bank details shown at checkout, then upload your slip for admin verification.",
+      "Transfer the order total to the seller bank details shown at checkout, then upload your slip for seller verification.",
     description: "Buyer-facing bank transfer instructions",
   },
   {
@@ -285,6 +289,7 @@ async function ensureSellerProfile(spec, sellerUserId) {
     bankAccountName: spec.bankAccountName,
     bankAccountNumber: spec.bankAccountNumber,
     bankName: spec.bankName,
+    bankTransferNotes: spec.bankTransferNotes ?? null,
     rejectionReason: null,
   };
   const permissions = [
