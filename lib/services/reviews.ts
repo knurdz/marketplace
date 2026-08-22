@@ -12,6 +12,7 @@ import {
   RATE_LIMIT_MESSAGE,
   RATE_LIMITS,
 } from "@/lib/security/rate-limit";
+import { logError } from "@/lib/observability/log-error";
 import type { Review } from "@/lib/types";
 import { getOwnOrderItems, listOwnOrders } from "./orders";
 import { getProduct } from "./products";
@@ -175,7 +176,7 @@ function mapReviewError(err: unknown): ReviewActionState {
   }
   if (code === REVIEW_ERROR_CODES.ALREADY_REVIEWED) {
     return {
-      error: "You already reviewed this order.",
+      error: "You already reviewed this product for this order.",
       errorCode: code,
     };
   }
@@ -192,9 +193,10 @@ function validateRating(value: number, label: string): string | null {
   return null;
 }
 
-async function hasReviewForOrder(
+async function hasReviewForOrderProduct(
   orderId: string,
   buyerId: string,
+  productId: string,
 ): Promise<boolean> {
   if (!hasAppwritePublicConfig()) return false;
 
@@ -206,11 +208,13 @@ async function hasReviewForOrder(
       queries: [
         Query.equal("orderId", orderId),
         Query.equal("buyerId", buyerId),
+        Query.equal("productId", productId),
         Query.limit(1),
       ],
     });
     return result.rows.length > 0;
-  } catch {
+  } catch (error) {
+    logError("reviews.hasExisting", error, { orderId, productId });
     return false;
   }
 }
@@ -220,7 +224,7 @@ async function findEligibleReviewOrder(
   productId: string,
   buyerId: string,
 ): Promise<string | null> {
-  const orders = await listOwnOrders({ limit: 50 });
+  const orders = await listOwnOrders({ limit: 100 });
   const completed = orders.filter((order) => order.status === "completed");
 
   for (const order of completed) {
@@ -228,13 +232,46 @@ async function findEligibleReviewOrder(
     const containsProduct = items.some((item) => item.productId === productId);
     if (!containsProduct) continue;
 
-    const alreadyReviewed = await hasReviewForOrder(order.$id, buyerId);
+    const alreadyReviewed = await hasReviewForOrderProduct(
+      order.$id,
+      buyerId,
+      productId,
+    );
     if (!alreadyReviewed) {
       return order.$id;
     }
   }
 
   return null;
+}
+
+export async function listOwnReviewsForOrder(
+  orderId: string,
+): Promise<Review[]> {
+  const user = await getLoggedInUser();
+  if (!user || !hasAppwritePublicConfig()) return [];
+
+  try {
+    const { tables } = await createSessionClient();
+    const result = await tables.listRows({
+      databaseId: DATABASE_ID,
+      tableId: TABLE_REVIEWS,
+      queries: [
+        Query.equal("orderId", orderId),
+        Query.equal("buyerId", user.$id),
+        Query.limit(100),
+      ],
+    });
+    const out: Review[] = [];
+    for (const row of result.rows) {
+      const review = asReview(row as unknown as Record<string, unknown>);
+      if (review && review.buyerId === user.$id) out.push(review);
+    }
+    return out;
+  } catch (error) {
+    logError("reviews.listOwnForOrder", error, { orderId });
+    return [];
+  }
 }
 
 /** Public list of reviews for a product (newest first). */
@@ -386,7 +423,7 @@ export async function createProductReview(
   } catch (err) {
     if (isUniqueConstraintError(err)) {
       return {
-        error: "You already reviewed this order.",
+        error: "You already reviewed this product for this order.",
         errorCode: REVIEW_ERROR_CODES.ALREADY_REVIEWED,
       };
     }

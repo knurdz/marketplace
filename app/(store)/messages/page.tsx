@@ -10,7 +10,7 @@ export default async function BuyerMessagesPage() {
   const user = await getLoggedInUser();
   if (!user) redirect("/login?next=/messages");
 
-  const threads = await listBuyerThreads();
+  const { threads, error } = await listBuyerThreads();
 
   return (
     <main className="mx-auto w-full max-w-3xl px-4 py-10 sm:px-6">
@@ -20,7 +20,13 @@ export default async function BuyerMessagesPage() {
         description="Order conversations with sellers. Bank slip verification stays with admin."
       />
 
-      {threads.length === 0 ? (
+      {error ? (
+        <p role="alert" className="mt-6 text-sm text-destructive">
+          {error}
+        </p>
+      ) : null}
+
+      {threads.length === 0 && !error ? (
         <EmptyState
           className="mt-10"
           title="No conversations yet"

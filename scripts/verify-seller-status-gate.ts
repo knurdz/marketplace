@@ -77,8 +77,8 @@ assert(
   "buyer home",
 );
 assert(
-  homePathForUser({ labels: [] }) === "/seller/pending",
-  "unlabeled account is not a shopper",
+  homePathForUser({ labels: [] }) === "/account",
+  "unlabeled account without seller profile → account (not pending loop)",
 );
 assert(
   homePathForUser({ labels: [] }, "pending") === "/seller/pending",

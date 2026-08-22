@@ -2,8 +2,8 @@
 
 /**
  * Free order confirmation (Member 1 step 1.24).
- * Session + IDOR + DB amounts; admin SDK writes `paid` + stock once.
- * Never calls PayHere. See docs/agent/PAYHERE.md.
+ * Session + IDOR + DB amounts; admin SDK writes `paid` once.
+ * Stock was reserved at order placement. Never calls PayHere. See docs/agent/PAYHERE.md.
  */
 
 import { Query } from "node-appwrite";
@@ -18,7 +18,9 @@ import {
 import { createAdminClient } from "@/lib/appwrite/server";
 import { getLoggedInUser } from "@/lib/appwrite/session";
 import {
-  assertRateLimit,
+  assertDurableRateLimit,
+} from "@/lib/security/durable-rate-limit";
+import {
   getClientIp,
   RATE_LIMIT_MESSAGE,
   RATE_LIMITS,
@@ -32,11 +34,12 @@ import {
   evaluateFreeConfirm,
   FREE_CONFIRM_NOT_FOUND,
   FREE_CONFIRM_NOT_FREE,
-  FREE_CONFIRM_STOCK,
   freeConfirmIdempotencyKey,
 } from "./free-order-rules";
 import { asOrder, asOrderItem, asPayment, getOwnOrder } from "./orders";
-import { asProduct, clampedStockDecrement } from "./products";
+import { asProduct } from "./products";
+import { notifyOrderPaid } from "./order-notify";
+import { logError } from "@/lib/observability/log-error";
 
 const ORDER_ID_MAX = 36;
 const NOT_CONFIGURED =
@@ -107,24 +110,15 @@ async function loadAdminOrderItems(orderId: string): Promise<OrderItem[]> {
   }
 }
 
-type StockPlan = { productId: string; decrement: number };
-
-async function planStockDecrements(
+async function assertFreeItemsStillValid(
   items: OrderItem[],
-): Promise<{ ok: true; plans: StockPlan[] } | { ok: false; error: string }> {
-  const qtyByProduct = new Map<string, number>();
-  for (const item of items) {
-    qtyByProduct.set(
-      item.productId,
-      (qtyByProduct.get(item.productId) ?? 0) + item.quantity,
-    );
-  }
+): Promise<{ ok: true } | { ok: false; error: string }> {
+  const productIds = [...new Set(items.map((item) => item.productId))];
 
   try {
     const { tables } = await createAdminClient();
-    const plans: StockPlan[] = [];
 
-    for (const [productId, quantity] of qtyByProduct) {
+    for (const productId of productIds) {
       let product;
       try {
         const row = await tables.getRow({
@@ -133,25 +127,19 @@ async function planStockDecrements(
           rowId: productId,
         });
         product = asProduct(row as unknown as Record<string, unknown>);
-      } catch {
+      } catch (error) {
+        logError("free.loadProduct", error, { productId });
         product = null;
       }
 
-      if (!product || product.stock < quantity) {
-        return { ok: false, error: FREE_CONFIRM_STOCK };
-      }
-      if (product.price !== 0 || !product.available) {
+      if (!product || product.price !== 0 || !product.available) {
         return { ok: false, error: FREE_CONFIRM_NOT_FREE };
       }
-
-      plans.push({
-        productId: product.$id,
-        decrement: clampedStockDecrement(product.stock, quantity),
-      });
     }
 
-    return { ok: true, plans };
-  } catch {
+    return { ok: true };
+  } catch (error) {
+    logError("free.assertItems", error);
     return { ok: false, error: GENERIC_FAILURE };
   }
 }
@@ -159,10 +147,8 @@ async function planStockDecrements(
 async function applyPaidSettlement(params: {
   orderId: string;
   paymentId: string;
-  plans: StockPlan[];
   updateOrder: boolean;
   updatePayment: boolean;
-  decrementStock: boolean;
 }): Promise<void> {
   const { tables } = await createAdminClient();
   const tx = await tables.createTransaction({ ttl: 120 });
@@ -190,21 +176,6 @@ async function applyPaidSettlement(params: {
       data: { status: "paid" },
       transactionId,
     });
-  }
-
-  if (params.decrementStock) {
-    for (const plan of params.plans) {
-      if (plan.decrement <= 0) continue;
-      await tables.decrementRowColumn({
-        databaseId: DATABASE_ID,
-        tableId: TABLE_PRODUCTS,
-        rowId: plan.productId,
-        column: "stock",
-        value: plan.decrement,
-        min: 0,
-        transactionId,
-      });
-    }
   }
 
   await tables.updateTransaction({
@@ -239,7 +210,7 @@ export async function confirmFreeOrder(
   }
 
   const ip = await getClientIp();
-  const limited = assertRateLimit({
+  const limited = await assertDurableRateLimit({
     bucket: "free-confirm",
     key: `${user.$id}:${ip}`,
     ...RATE_LIMITS.checkout,
@@ -279,8 +250,6 @@ export async function confirmFreeOrder(
     return { ok: true };
   }
 
-  let plans: StockPlan[] = [];
-  const decrementStock = decision.action === "settle";
   const updateOrder =
     decision.action === "settle" ||
     (decision.action === "repair" && decision.repairOrder);
@@ -288,25 +257,30 @@ export async function confirmFreeOrder(
     decision.action === "settle" ||
     (decision.action === "repair" && decision.repairPayment);
 
-  if (decrementStock) {
-    const stock = await planStockDecrements(items);
-    if (!stock.ok) {
-      return { ok: false, error: stock.error };
+  if (decision.action === "settle") {
+    const valid = await assertFreeItemsStillValid(items);
+    if (!valid.ok) {
+      return { ok: false, error: valid.error };
     }
-    plans = stock.plans;
   }
 
   try {
     await applyPaidSettlement({
       orderId: order.$id,
       paymentId: payment.$id,
-      plans,
       updateOrder,
       updatePayment,
-      decrementStock,
     });
+    if (decision.action === "settle") {
+      await notifyOrderPaid({
+        orderId: order.$id,
+        buyerId: order.buyerId,
+        sellerId: order.sellerId,
+      });
+    }
     return { ok: true };
-  } catch {
+  } catch (error) {
+    logError("free.confirm", error, { orderId });
     if (await paymentAlreadyPaid(orderId)) {
       return { ok: true };
     }

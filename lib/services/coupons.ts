@@ -1,4 +1,4 @@
-import { ID, Query } from "node-appwrite";
+import { AppwriteException, ID, Query } from "node-appwrite";
 import {
   DATABASE_ID,
   TABLE_COUPON_REDEMPTIONS,
@@ -6,6 +6,7 @@ import {
   hasAppwritePublicConfig,
 } from "@/lib/appwrite/config";
 import { createAdminClient } from "@/lib/appwrite/server";
+import { logError } from "@/lib/observability/log-error";
 import type { Coupon, CouponType } from "@/lib/types/coupon";
 import { isCouponType } from "@/lib/types/coupon";
 
@@ -94,6 +95,7 @@ export type CouponValidationResult =
 export async function validateCouponForCheckout(params: {
   code: string;
   subtotal: number;
+  buyerId?: string;
 }): Promise<CouponValidationResult> {
   if (!hasAppwritePublicConfig() || !process.env.APPWRITE_API_KEY?.trim()) {
     return { ok: false, error: "Coupons are not available right now." };
@@ -148,6 +150,21 @@ export async function validateCouponForCheckout(params: {
       };
     }
 
+    if (params.buyerId) {
+      const prior = await tables.listRows({
+        databaseId: DATABASE_ID,
+        tableId: TABLE_COUPON_REDEMPTIONS,
+        queries: [
+          Query.equal("couponId", coupon.$id),
+          Query.equal("buyerId", params.buyerId),
+          Query.limit(1),
+        ],
+      });
+      if (prior.rows.length > 0) {
+        return { ok: false, error: "You have already used this coupon." };
+      }
+    }
+
     const discountAmount = calculateCouponDiscount(coupon, subtotal);
     const payableTotal = roundMoney(subtotal - discountAmount);
 
@@ -158,34 +175,64 @@ export async function validateCouponForCheckout(params: {
       payableTotal,
       code: coupon.code,
     };
-  } catch {
+  } catch (error) {
+    logError("coupons.validate", error);
     return { ok: false, error: "Could not validate coupon. Try again." };
   }
 }
 
-/** Record redemption after order row exists (admin SDK; idempotent on orderId). */
+export type CouponRedemptionResult =
+  | { ok: true }
+  | { ok: false; error: string };
+
+function isConflict(error: unknown): boolean {
+  if (error instanceof AppwriteException) {
+    return error.code === 409 || String(error.type).includes("already_exists");
+  }
+  return false;
+}
+
+/** Record redemption after/with order row (admin SDK). Fails closed. */
 export async function recordCouponRedemption(params: {
   couponId: string;
   orderId: string;
   buyerId: string;
   discountAmount: number;
-}): Promise<void> {
-  if (!process.env.APPWRITE_API_KEY?.trim()) return;
+  transactionId?: string;
+  tables?: Awaited<ReturnType<typeof createAdminClient>>["tables"];
+}): Promise<CouponRedemptionResult> {
+  if (!process.env.APPWRITE_API_KEY?.trim()) {
+    return { ok: false, error: "Coupons are not available right now." };
+  }
 
-  const { tables } = await createAdminClient();
+  const tables = params.tables ?? (await createAdminClient()).tables;
 
   try {
+    const couponRow = await tables.getRow({
+      databaseId: DATABASE_ID,
+      tableId: TABLE_COUPONS,
+      rowId: params.couponId,
+    });
+    const coupon = asCoupon(couponRow as unknown as Record<string, unknown>);
+    if (!coupon || !coupon.active) {
+      return { ok: false, error: "This coupon is no longer valid." };
+    }
+    if (
+      coupon.maxRedemptions > 0 &&
+      coupon.redemptionCount >= coupon.maxRedemptions
+    ) {
+      return { ok: false, error: "This coupon has reached its usage limit." };
+    }
+
     const existing = await tables.listRows({
       databaseId: DATABASE_ID,
       tableId: TABLE_COUPON_REDEMPTIONS,
       queries: [Query.equal("orderId", params.orderId), Query.limit(1)],
     });
-    if (existing.rows.length > 0) return;
-  } catch {
-    return;
-  }
+    if (existing.rows.length > 0) {
+      return { ok: true };
+    }
 
-  try {
     await tables.createRow({
       databaseId: DATABASE_ID,
       tableId: TABLE_COUPON_REDEMPTIONS,
@@ -197,28 +244,37 @@ export async function recordCouponRedemption(params: {
         discountAmount: params.discountAmount,
       },
       permissions: [],
+      transactionId: params.transactionId,
     });
-  } catch {
-    return;
-  }
 
-  try {
-    const couponRow = await tables.getRow({
+    const increment: {
+      databaseId: string;
+      tableId: string;
+      rowId: string;
+      column: string;
+      value: number;
+      max?: number;
+      transactionId?: string;
+    } = {
       databaseId: DATABASE_ID,
       tableId: TABLE_COUPONS,
       rowId: params.couponId,
-    });
-    const coupon = asCoupon(couponRow as unknown as Record<string, unknown>);
-    if (!coupon) return;
+      column: "redemptionCount",
+      value: 1,
+      transactionId: params.transactionId,
+    };
+    if (coupon.maxRedemptions > 0) {
+      increment.max = coupon.maxRedemptions;
+    }
+    await tables.incrementRowColumn(increment);
 
-    await tables.updateRow({
-      databaseId: DATABASE_ID,
-      tableId: TABLE_COUPONS,
-      rowId: params.couponId,
-      data: { redemptionCount: coupon.redemptionCount + 1 },
-    });
-  } catch {
-    /* redemption row is source of truth for order; count may lag */
+    return { ok: true };
+  } catch (error) {
+    if (isConflict(error)) {
+      return { ok: false, error: "You have already used this coupon." };
+    }
+    logError("coupons.redeem", error, { orderId: params.orderId });
+    return { ok: false, error: "Could not apply this coupon. Please try again." };
   }
 }
 
@@ -239,7 +295,8 @@ export async function listCouponsAdmin(): Promise<Coupon[]> {
       if (coupon) out.push(coupon);
     }
     return out;
-  } catch {
+  } catch (error) {
+    logError("coupons.list", error);
     return [];
   }
 }
@@ -305,7 +362,8 @@ export async function createCouponAdmin(
     });
 
     return { ok: true, message: `Coupon ${code} created.` };
-  } catch {
+  } catch (error) {
+    logError("coupons.create", error);
     return { ok: false, error: "Failed to create coupon." };
   }
 }

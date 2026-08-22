@@ -27,8 +27,6 @@ const APPROVABLE_ORDER_STATUSES = new Set<OrderStatus>(
   EARLY_PAYMENT_ORDER_STATUSES,
 );
 
-const QUEUE_PAYMENT_STATUSES = new Set(BANK_SLIP_QUEUE_PAYMENT_STATUSES);
-
 const SETTLED_ORDER_STATUSES_SET = new Set<OrderStatus>(SETTLED_ORDER_STATUSES);
 
 /** Idempotency key written on first successful bank-slip approval. */
@@ -42,8 +40,13 @@ export type BankSlipApproveDecision =
   | { action: "refuse"; error: string };
 
 export type BankSlipRejectDecision =
-  | { action: "settle" }
+  | { action: "reopen" }
   | { action: "settle_slip_only" }
+  | { action: "noop"; message: string }
+  | { action: "refuse"; error: string };
+
+export type BankSlipRejectAndCancelDecision =
+  | { action: "cancel" }
   | { action: "noop"; message: string }
   | { action: "refuse"; error: string };
 
@@ -122,8 +125,9 @@ export function evaluateBankSlipApprove(params: {
 
 /**
  * Decide whether a pending bank slip may be rejected.
+ * Reopens the payment so the buyer can upload a new slip.
  * Never writes payment `failed` over `paid` / `refunded`.
- * After 6.13 cancel (payment already `failed`), close the slip only.
+ * After cancel (payment already `failed`), close the slip only.
  */
 export function evaluateBankSlipReject(params: {
   slip: BankSlip;
@@ -152,17 +156,62 @@ export function evaluateBankSlipReject(params: {
     return { action: "refuse", error: BANK_SLIP_REJECT_REFUNDED };
   }
 
-  if (payment.status === "failed") {
+  if (payment.status === "failed" || order.status === "cancelled") {
     return { action: "settle_slip_only" };
   }
 
   if (
     (payment.status === "pending" ||
       payment.status === "awaiting_verification") &&
-    (APPROVABLE_ORDER_STATUSES.has(order.status) ||
-      order.status === "cancelled")
+    APPROVABLE_ORDER_STATUSES.has(order.status)
   ) {
-    return { action: "settle" };
+    return { action: "reopen" };
+  }
+
+  return { action: "refuse", error: BANK_SLIP_PAYMENT_CLOSED };
+}
+
+/**
+ * Reject the slip and cancel the order (fraud / no retry). Restores stock.
+ */
+export function evaluateBankSlipRejectAndCancel(params: {
+  slip: BankSlip;
+  payment: Payment;
+  order: Order;
+}): BankSlipRejectAndCancelDecision {
+  const { slip, payment, order } = params;
+
+  if (!rowsPointAtSamePayment(params)) {
+    return { action: "refuse", error: BANK_SLIP_PAYMENT_CLOSED };
+  }
+
+  if (!isBankTransfer(order, payment)) {
+    return { action: "refuse", error: BANK_SLIP_NOT_BANK_TRANSFER };
+  }
+
+  if (slip.status !== "pending") {
+    return { action: "noop", message: alreadyReviewedMessage(slip) };
+  }
+
+  if (payment.status === "paid") {
+    return { action: "refuse", error: BANK_SLIP_REJECT_PAID };
+  }
+
+  if (payment.status === "refunded" || order.status === "refunded") {
+    return { action: "refuse", error: BANK_SLIP_REJECT_REFUNDED };
+  }
+
+  if (order.status === "cancelled") {
+    return { action: "noop", message: BANK_SLIP_ORDER_CANCELLED };
+  }
+
+  if (
+    (payment.status === "pending" ||
+      payment.status === "awaiting_verification" ||
+      payment.status === "failed") &&
+    APPROVABLE_ORDER_STATUSES.has(order.status)
+  ) {
+    return { action: "cancel" };
   }
 
   return { action: "refuse", error: BANK_SLIP_PAYMENT_CLOSED };

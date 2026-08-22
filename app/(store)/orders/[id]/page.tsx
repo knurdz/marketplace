@@ -15,16 +15,22 @@ import {
   getOwnOrderItems,
   getOwnPaymentForOrder,
 } from "@/lib/services/orders";
+import { listOwnReviewsForOrder } from "@/lib/services/reviews";
 import { isMessagingAllowedForOrder } from "@/lib/services/threads";
 import { isOrderCancelable } from "@/lib/types";
 
 type OrderDetailPageProps = {
   params: Promise<{ id: string }>;
+  searchParams: Promise<{ msgError?: string }>;
 };
 
-export default async function OrderDetailPage({ params }: OrderDetailPageProps) {
+export default async function OrderDetailPage({
+  params,
+  searchParams,
+}: OrderDetailPageProps) {
   const user = await getLoggedInUser();
   const { id } = await params;
+  const { msgError } = await searchParams;
 
   if (!user) {
     redirect(`/login?next=/orders/${encodeURIComponent(id)}`);
@@ -35,11 +41,13 @@ export default async function OrderDetailPage({ params }: OrderDetailPageProps) 
     notFound();
   }
 
-  const [items, payment] = await Promise.all([
+  const [items, payment, reviews] = await Promise.all([
     getOwnOrderItems(id),
     getOwnPaymentForOrder(id),
+    order.status === "completed" ? listOwnReviewsForOrder(id) : Promise.resolve([]),
   ]);
 
+  const reviewedProductIds = new Set(reviews.map((review) => review.productId));
   const canCancel = isOrderCancelable(order.status);
   const canReorder = order.status === "completed";
   const canMessage = isMessagingAllowedForOrder(order);
@@ -47,6 +55,11 @@ export default async function OrderDetailPage({ params }: OrderDetailPageProps) 
   return (
     <main className="relative mx-auto w-full max-w-3xl px-6 py-16 sm:px-10">
       <h1 className="mt-4 text-3xl font-bold tracking-tight">Order details</h1>
+      {msgError ? (
+        <p role="alert" className="mt-4 text-sm text-destructive">
+          {msgError}
+        </p>
+      ) : null}
       <p className="mt-4 text-muted-foreground">
         Order{" "}
         <span className="font-mono text-foreground">{order.$id}</span> ·{" "}
@@ -88,6 +101,22 @@ export default async function OrderDetailPage({ params }: OrderDetailPageProps) 
               >
                 <span>
                   {item.title} × {item.quantity}
+                  {canReorder ? (
+                    <span className="mt-1 block">
+                      {reviewedProductIds.has(item.productId) ? (
+                        <span className="text-xs text-muted-foreground">
+                          Review submitted
+                        </span>
+                      ) : (
+                        <Link
+                          href={`/products/${item.productId}#reviews`}
+                          className="text-xs font-medium text-accent hover:underline"
+                        >
+                          Leave a review
+                        </Link>
+                      )}
+                    </span>
+                  ) : null}
                 </span>
                 <span className="font-mono tabular-nums">
                   {order.currency} {item.lineTotal.toFixed(2)}

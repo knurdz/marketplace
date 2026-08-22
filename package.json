@@ -10,6 +10,9 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "typecheck": "tsc --noEmit",
+    "schema": "node --env-file=.env.local scripts/setup-mvp-schema.mjs",
+    "buckets": "node --env-file=.env.local scripts/setup-storage-buckets.mjs",
+    "schema:verify": "npx tsx --env-file=.env.local scripts/verify-schema-drift.ts",
     "seed": "node --env-file=.env.local scripts/seed-demo.mjs",
     "test:e2e": "playwright test",
     "test:e2e:payhere": "PAYHERE_E2E=1 playwright test"

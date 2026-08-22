@@ -6,19 +6,24 @@ import {
   TABLE_ORDER_ITEMS,
   TABLE_ORDERS,
   TABLE_PAYMENTS,
-  TABLE_PRODUCTS,
   hasAppwritePublicConfig,
 } from "@/lib/appwrite/config";
 import { requireLabel } from "@/lib/appwrite/roles";
 import { createAdminClient } from "@/lib/appwrite/server";
+import { logError } from "@/lib/observability/log-error";
 import type { BankSlip, Order, OrderItem, Payment } from "@/lib/types";
 import {
   bankConfirmIdempotencyKey,
   evaluateBankSlipApprove,
   evaluateBankSlipReject,
+  evaluateBankSlipRejectAndCancel,
   shouldListPendingBankSlip,
 } from "./bank-slip-review-rules";
-import { asProduct, clampedStockDecrement } from "./products";
+import {
+  notifyBankSlipRejected,
+  notifyOrderPaid,
+} from "./order-notify";
+import { restoreStockForLines } from "./stock";
 import {
   asBankSlip,
   asOrder,
@@ -31,6 +36,7 @@ export {
   bankConfirmIdempotencyKey,
   evaluateBankSlipApprove,
   evaluateBankSlipReject,
+  evaluateBankSlipRejectAndCancel,
   shouldListPendingBankSlip,
 } from "./bank-slip-review-rules";
 
@@ -58,18 +64,8 @@ export type BankSlipReviewResult =
       ok: true;
       message: string;
       alreadyReviewed?: boolean;
-      oversoldWarnings?: string[];
     }
   | { ok: false; error: string };
-
-type StockDecrementPlan = {
-  productId: string;
-  title: string;
-  requestedQty: number;
-  stockBefore: number;
-  actualDecrement: number;
-  clamped: boolean;
-};
 
 type ReviewContext = {
   slip: BankSlip;
@@ -186,49 +182,6 @@ async function loadOrderItems(orderId: string): Promise<OrderItem[]> {
     if (item) items.push(item);
   }
   return items;
-}
-
-async function planStockDecrements(
-  items: OrderItem[],
-): Promise<StockDecrementPlan[]> {
-  const { tables } = await createAdminClient();
-  const plans: StockDecrementPlan[] = [];
-
-  for (const item of items) {
-    let stockBefore = 0;
-    try {
-      const row = await tables.getRow({
-        databaseId: DATABASE_ID,
-        tableId: TABLE_PRODUCTS,
-        rowId: item.productId,
-      });
-      const product = asProduct(row as unknown as Record<string, unknown>);
-      stockBefore = product?.stock ?? 0;
-    } catch {
-      stockBefore = 0;
-    }
-
-    const actualDecrement = clampedStockDecrement(stockBefore, item.quantity);
-    plans.push({
-      productId: item.productId,
-      title: item.title,
-      requestedQty: item.quantity,
-      stockBefore,
-      actualDecrement,
-      clamped: stockBefore < item.quantity,
-    });
-  }
-
-  return plans;
-}
-
-function oversoldWarningsFromPlans(plans: StockDecrementPlan[]): string[] {
-  return plans
-    .filter((p) => p.clamped)
-    .map(
-      (p) =>
-        `"${p.title}": ordered ${p.requestedQty}, stock was ${p.stockBefore} — decremented ${p.actualDecrement} (clamped at 0).`,
-    );
 }
 
 async function listSiblingPendingSlipIds(
@@ -398,7 +351,7 @@ export async function listPendingBankSlips(opts?: {
 }
 
 /**
- * Approve a pending bank slip: payment paid, order paid, stock decremented once.
+ * Approve a pending bank slip: payment paid, order paid.
  * Idempotent: already-reviewed or already-paid payment → safe no-op.
  */
 export async function approveBankSlipCore(
@@ -435,21 +388,10 @@ export async function approveBankSlipCore(
     return { ok: false, error: "Order has no items." };
   }
 
-  const stockPlans = await planStockDecrements(items);
-  const oversoldWarnings = oversoldWarningsFromPlans(stockPlans);
   const siblingIds = await listSiblingPendingSlipIds(payment.$id, slip.$id);
 
   const { tables } = await createAdminClient();
   const auditRowId = ID.unique();
-  const productsDecrementedMeta = JSON.stringify(
-    stockPlans.map((p) => ({
-      productId: p.productId,
-      requestedQty: p.requestedQty,
-      decremented: p.actualDecrement,
-      stockBefore: p.stockBefore,
-      clamped: p.clamped,
-    })),
-  );
 
   try {
     const tx = await tables.createTransaction({ ttl: 120 });
@@ -476,19 +418,6 @@ export async function approveBankSlipCore(
           reviewedBy: adminUserId,
           reviewNote: SUPERSEDED_REVIEW_NOTE,
         },
-        transactionId,
-      });
-    }
-
-    for (const plan of stockPlans) {
-      if (plan.actualDecrement <= 0) continue;
-      await tables.decrementRowColumn({
-        databaseId: DATABASE_ID,
-        tableId: TABLE_PRODUCTS,
-        rowId: plan.productId,
-        column: "stock",
-        value: plan.actualDecrement,
-        min: 0,
         transactionId,
       });
     }
@@ -524,8 +453,6 @@ export async function approveBankSlipCore(
         meta: JSON.stringify({
           bankSlipId: slip.$id,
           paymentId: payment.$id,
-          productsDecremented: productsDecrementedMeta,
-          oversoldCount: String(oversoldWarnings.length),
           supersededSlipCount: String(siblingIds.length),
         }).slice(0, 4000),
       },
@@ -538,6 +465,7 @@ export async function approveBankSlipCore(
       commit: true,
     });
   } catch (error) {
+    logError("bank-slip.approve", error, { bankSlipId: trimmedId });
     const retry = approveConflictResult(await loadReviewContext(trimmedId));
     if (retry) return retry;
 
@@ -548,22 +476,22 @@ export async function approveBankSlipCore(
     return { ok: false, error: message };
   }
 
-  let message = "Bank slip approved. Payment and order marked paid.";
-  if (oversoldWarnings.length > 0) {
-    message += ` Warning: ${oversoldWarnings.length} product(s) had insufficient stock.`;
-  }
+  await notifyOrderPaid({
+    orderId: order.$id,
+    buyerId: order.buyerId,
+    sellerId: order.sellerId,
+  });
 
   return {
     ok: true,
-    message,
-    oversoldWarnings:
-      oversoldWarnings.length > 0 ? oversoldWarnings : undefined,
+    message: "Bank slip approved. Payment and order marked paid.",
   };
 }
 
 /**
- * Reject a pending bank slip: payment failed; no order/stock changes.
+ * Reject a pending bank slip and reopen the order so the buyer can re-upload.
  * Idempotent: already-rejected → safe no-op. Never overwrites paid/refunded.
+ * Does not restore stock (order is still open).
  */
 export async function rejectBankSlipCore(
   adminUserId: string,
@@ -598,7 +526,7 @@ export async function rejectBankSlipCore(
   }
 
   const { slip, payment, order } = loaded.ctx;
-  const updatePayment = decision.action === "settle";
+  const reopen = decision.action === "reopen";
   const { tables } = await createAdminClient();
   const auditRowId = ID.unique();
 
@@ -618,12 +546,19 @@ export async function rejectBankSlipCore(
       transactionId,
     });
 
-    if (updatePayment) {
+    if (reopen) {
       await tables.updateRow({
         databaseId: DATABASE_ID,
         tableId: TABLE_PAYMENTS,
         rowId: payment.$id,
-        data: { status: "failed" },
+        data: { status: "pending" },
+        transactionId,
+      });
+      await tables.updateRow({
+        databaseId: DATABASE_ID,
+        tableId: TABLE_ORDERS,
+        rowId: order.$id,
+        data: { status: "pending_payment" },
         transactionId,
       });
     }
@@ -641,7 +576,7 @@ export async function rejectBankSlipCore(
           bankSlipId: slip.$id,
           paymentId: payment.$id,
           reviewNote: parsedNote,
-          paymentUpdated: String(updatePayment),
+          reopened: String(reopen),
         }).slice(0, 4000),
       },
       permissions: [],
@@ -653,6 +588,7 @@ export async function rejectBankSlipCore(
       commit: true,
     });
   } catch (error) {
+    logError("bank-slip.reject", error, { bankSlipId: trimmedId });
     const retry = rejectConflictResult(await loadReviewContext(trimmedId));
     if (retry) return retry;
 
@@ -663,11 +599,131 @@ export async function rejectBankSlipCore(
     return { ok: false, error: message };
   }
 
+  await notifyBankSlipRejected({
+    orderId: order.$id,
+    buyerId: order.buyerId,
+    cancelled: false,
+  });
+
   return {
     ok: true,
-    message: updatePayment
-      ? "Bank slip rejected. Payment marked failed."
+    message: reopen
+      ? "Bank slip rejected. Buyer can upload a new slip."
       : "Bank slip rejected.",
+  };
+}
+
+/**
+ * Reject the slip and cancel the order (no retry). Restores reserved stock.
+ */
+export async function rejectAndCancelBankSlipCore(
+  adminUserId: string,
+  bankSlipId: string,
+  reviewNote: string,
+): Promise<BankSlipReviewResult> {
+  if (!adminSdkAvailable()) {
+    return { ok: false, error: "Admin backend is not configured." };
+  }
+
+  const parsedNote = parseReviewNote(reviewNote);
+  if (typeof parsedNote !== "string") return parsedNote;
+
+  const trimmedId = bankSlipId?.trim();
+  if (!trimmedId) {
+    return { ok: false, error: "Missing bank slip." };
+  }
+
+  const loaded = await loadReviewContext(trimmedId);
+  if (!loaded.ok) return loaded;
+
+  const decision = evaluateBankSlipRejectAndCancel(loaded.ctx);
+  if (decision.action === "refuse") {
+    return { ok: false, error: decision.error };
+  }
+  if (decision.action === "noop") {
+    return {
+      ok: true,
+      message: decision.message,
+      alreadyReviewed: true,
+    };
+  }
+
+  const { slip, payment, order } = loaded.ctx;
+  const items = await loadOrderItems(order.$id);
+  const { tables } = await createAdminClient();
+  const auditRowId = ID.unique();
+
+  try {
+    const tx = await tables.createTransaction({ ttl: 120 });
+    const transactionId = tx.$id;
+
+    await tables.updateRow({
+      databaseId: DATABASE_ID,
+      tableId: TABLE_BANK_SLIPS,
+      rowId: slip.$id,
+      data: {
+        status: "rejected",
+        reviewedBy: adminUserId,
+        reviewNote: parsedNote,
+      },
+      transactionId,
+    });
+
+    await tables.updateRow({
+      databaseId: DATABASE_ID,
+      tableId: TABLE_PAYMENTS,
+      rowId: payment.$id,
+      data: { status: "failed" },
+      transactionId,
+    });
+
+    await tables.updateRow({
+      databaseId: DATABASE_ID,
+      tableId: TABLE_ORDERS,
+      rowId: order.$id,
+      data: { status: "cancelled" },
+      transactionId,
+    });
+
+    await restoreStockForLines(tables, items, transactionId);
+
+    await tables.createRow({
+      databaseId: DATABASE_ID,
+      tableId: TABLE_AUDIT_LOGS,
+      rowId: auditRowId,
+      data: {
+        actorId: adminUserId,
+        event: "bank_slip.rejected_cancelled",
+        resourceType: "order",
+        resourceId: order.$id,
+        meta: JSON.stringify({
+          bankSlipId: slip.$id,
+          paymentId: payment.$id,
+          reviewNote: parsedNote,
+        }).slice(0, 4000),
+      },
+      permissions: [],
+      transactionId,
+    });
+
+    await tables.updateTransaction({
+      transactionId,
+      commit: true,
+    });
+  } catch (error) {
+    logError("bank-slip.reject-cancel", error, { bankSlipId: trimmedId });
+    return { ok: false, error: "Failed to reject and cancel this order." };
+  }
+
+  await notifyBankSlipRejected({
+    orderId: order.$id,
+    buyerId: order.buyerId,
+    cancelled: true,
+  });
+
+  return {
+    ok: true,
+    message: "Bank slip rejected and order cancelled.",
   };
 }
 

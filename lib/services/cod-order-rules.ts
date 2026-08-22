@@ -1,6 +1,8 @@
 /**
  * Pure COD confirm eligibility.
  * Amounts come from DB snapshots — never from the client body.
+ * Buyer acceptance moves the order to `processing` and leaves payment `pending`.
+ * Cash is marked paid by the seller on delivery.
  */
 
 import type { Order, OrderItem, Payment } from "@/lib/types";
@@ -12,8 +14,6 @@ export const COD_CONFIRM_NOT_COD =
 export const COD_CONFIRM_NO_ITEMS = "Order has no items.";
 export const COD_CONFIRM_CLOSED = "This order can no longer be confirmed.";
 export const COD_CONFIRM_WRONG_STATE = "This payment cannot be confirmed.";
-export const COD_CONFIRM_STOCK =
-  "One or more items are out of stock and cannot be confirmed.";
 
 /** Idempotency key written on first successful COD acceptance. */
 export function codConfirmIdempotencyKey(orderId: string): string {
@@ -24,15 +24,27 @@ export function isPositiveAmount(value: number): boolean {
   return Number.isFinite(value) && value > 0;
 }
 
+const COD_ACCEPTED_ORDER_STATUSES = [
+  "processing",
+  "shipped",
+  "ready_pickup",
+  "completed",
+] as const;
+
+export function isCodAcceptedOrderStatus(status: Order["status"]): boolean {
+  return (COD_ACCEPTED_ORDER_STATUSES as readonly string[]).includes(status);
+}
+
 export type CodConfirmDecision =
-  | { action: "settle" }
+  | { action: "accept" }
   | { action: "noop" }
-  | { action: "repair"; repairOrder: boolean; repairPayment: boolean }
+  | { action: "repair"; repairOrder: boolean }
   | { action: "reject"; error: string };
 
 /**
- * Decide whether a COD order may be marked paid (accepted).
+ * Decide whether a COD order may be accepted by the buyer.
  * Caller must already have authenticated the buyer; this re-checks IDOR.
+ * Does not mark payment paid.
  */
 export function evaluateCodConfirm(params: {
   buyerId: string;
@@ -83,6 +95,10 @@ export function evaluateCodConfirm(params: {
     return { action: "noop" };
   }
 
+  if (isCodAcceptedOrderStatus(order.status) && payment.status === "pending") {
+    return { action: "noop" };
+  }
+
   if (paymentPaid && !orderSettled) {
     if (order.status === "cancelled" || order.status === "refunded") {
       return { action: "noop" };
@@ -91,17 +107,13 @@ export function evaluateCodConfirm(params: {
       order.status === "pending_payment" ||
       order.status === "payment_review"
     ) {
-      return { action: "repair", repairOrder: true, repairPayment: false };
+      return { action: "repair", repairOrder: true };
     }
     return { action: "noop" };
   }
 
   if (order.status === "cancelled" || order.status === "refunded") {
     return { action: "reject", error: COD_CONFIRM_CLOSED };
-  }
-
-  if (orderSettled && payment.status === "pending") {
-    return { action: "repair", repairOrder: false, repairPayment: true };
   }
 
   if (payment.status !== "pending") {
@@ -112,5 +124,5 @@ export function evaluateCodConfirm(params: {
     return { action: "reject", error: COD_CONFIRM_CLOSED };
   }
 
-  return { action: "settle" };
+  return { action: "accept" };
 }

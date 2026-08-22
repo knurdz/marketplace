@@ -20,7 +20,7 @@ export default async function SellerThreadPage({ params }: SellerThreadPageProps
   const thread = await getParticipantThread(id);
   if (!thread || thread.sellerId !== user.$id) notFound();
 
-  const messages = await listThreadMessages(thread.$id);
+  const { messages, error } = await listThreadMessages(thread.$id);
 
   return (
     <div className="mx-auto max-w-3xl">
@@ -28,6 +28,12 @@ export default async function SellerThreadPage({ params }: SellerThreadPageProps
       <p className="mt-2 font-mono text-sm text-muted-foreground">
         Order {thread.orderId}
       </p>
+
+      {error ? (
+        <p role="alert" className="mt-6 text-sm text-destructive">
+          {error}
+        </p>
+      ) : null}
 
       <div className="mt-10">
         <MessageThreadPanel

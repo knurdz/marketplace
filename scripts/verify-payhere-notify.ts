@@ -124,6 +124,16 @@ assert(
   "valid-looking notify with wrong amount rejected",
 );
 
+const driftedTotals = decideNotifyAction({
+  posted: form,
+  order: { ...order, totalAmount: 1 },
+  payment,
+});
+assert(
+  driftedTotals.action === "reject",
+  "order total vs payment amount mismatch rejected",
+);
+
 const failed = decideNotifyAction({
   posted: { ...form, status_code: "-2" },
   order,

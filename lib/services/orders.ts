@@ -1,5 +1,6 @@
 import { ID, Permission, Query, Role } from "node-appwrite";
 import {
+  BUCKET_BANK_SLIPS,
   DATABASE_ID,
   TABLE_BANK_SLIPS,
   TABLE_ORDER_ITEMS,
@@ -7,15 +8,18 @@ import {
   TABLE_PAYMENTS,
   hasAppwritePublicConfig,
 } from "@/lib/appwrite/config";
+import { deleteFileAsAdmin } from "@/lib/appwrite/storage";
 import { createAdminClient, createSessionClient } from "@/lib/appwrite/server";
 import { getLoggedInUser } from "@/lib/appwrite/session";
+import { logError } from "@/lib/observability/log-error";
+import { assertDurableRateLimit } from "@/lib/security/durable-rate-limit";
 import { uploadBankSlip } from "./uploads";
 import {
-  assertRateLimit,
   getClientIp,
   RATE_LIMIT_MESSAGE,
   RATE_LIMITS,
 } from "@/lib/security/rate-limit";
+import { decrementStockForLines, restoreStockForLines } from "./stock";
 import type {
   BankSlip,
   Order,
@@ -214,7 +218,7 @@ function childRowPermissions(buyerId: string, sellerId: string): string[] {
 
 async function assertCheckoutRateLimit(userId: string): Promise<void> {
   const ip = await getClientIp();
-  const result = assertRateLimit({
+  const result = await assertDurableRateLimit({
     bucket: "checkout",
     key: `${userId}:${ip}`,
     ...RATE_LIMITS.checkout,
@@ -281,8 +285,8 @@ async function rollbackOrderRows(params: {
           tableId: TABLE_ORDER_ITEMS,
           rowId: itemId,
         });
-      } catch {
-        /* best effort */
+      } catch (error) {
+        logError("orders.rollback.item", error, { rowId: itemId });
       }
     }
     if (params.paymentId) {
@@ -292,8 +296,8 @@ async function rollbackOrderRows(params: {
           tableId: TABLE_PAYMENTS,
           rowId: params.paymentId,
         });
-      } catch {
-        /* best effort */
+      } catch (error) {
+        logError("orders.rollback.payment", error, { rowId: params.paymentId });
       }
     }
     if (params.orderId) {
@@ -303,12 +307,12 @@ async function rollbackOrderRows(params: {
           tableId: TABLE_ORDERS,
           rowId: params.orderId,
         });
-      } catch {
-        /* best effort */
+      } catch (error) {
+        logError("orders.rollback.order", error, { rowId: params.orderId });
       }
     }
-  } catch {
-    /* best effort rollback */
+  } catch (error) {
+    logError("orders.rollback", error, { orderId: params.orderId });
   }
 }
 
@@ -446,6 +450,19 @@ export async function submitBankSlip(
     );
   }
 
+  const ip = await getClientIp();
+  const limited = await assertDurableRateLimit({
+    bucket: "bank-slip",
+    key: `${user.$id}:${ip}`,
+    ...RATE_LIMITS.bankSlip,
+  });
+  if (!limited.ok) {
+    return fail<SubmitBankSlipResult>(
+      RATE_LIMIT_MESSAGE,
+      ORDER_ERROR_CODES.RATE_LIMITED,
+    );
+  }
+
   const orderId = input.orderId?.trim();
   if (!orderId) {
     return fail<SubmitBankSlipResult>("Invalid order id.", ORDER_ERROR_CODES.NOT_FOUND);
@@ -491,6 +508,7 @@ export async function submitBankSlip(
     return fail<SubmitBankSlipResult>(message, ORDER_ERROR_CODES.SLIP_UPLOAD_FAILED);
   }
 
+  let slipCreated = false;
   try {
     const { tables } = await createSessionClient();
 
@@ -507,6 +525,7 @@ export async function submitBankSlip(
       },
       permissions: bankSlipRowPermissions(),
     });
+    slipCreated = true;
 
     const { tables: adminTables } = await createAdminClient();
     await adminTables.updateRow({
@@ -522,7 +541,15 @@ export async function submitBankSlip(
       rowId: order.$id,
       data: { status: "payment_review" },
     });
-  } catch {
+  } catch (error) {
+    logError("orders.submitBankSlip", error, { orderId: order.$id });
+    if (!slipCreated) {
+      try {
+        await deleteFileAsAdmin(BUCKET_BANK_SLIPS, fileId);
+      } catch (cleanupError) {
+        logError("orders.submitBankSlip.cleanup", cleanupError, { fileId });
+      }
+    }
     return fail<SubmitBankSlipResult>(
       "Could not save your bank slip. Please try again.",
       ORDER_ERROR_CODES.UPDATE_FAILED,
@@ -663,6 +690,7 @@ export async function createOrder(
     const couponResult = await validateCouponForCheckout({
       code: couponRaw,
       subtotal,
+      buyerId: user.$id,
     });
     if (!couponResult.ok) {
       return fail<CreateOrderResult>(
@@ -713,9 +741,12 @@ export async function createOrder(
   let orderId: string | undefined;
   const orderItemIds: string[] = [];
   let paymentId: string | undefined;
+  let transactionId: string | undefined;
 
   try {
-    const { tables } = await createSessionClient();
+    const { tables } = await createAdminClient();
+    const tx = await tables.createTransaction({ ttl: 120 });
+    transactionId = tx.$id;
 
     const orderRow = await tables.createRow({
       databaseId: DATABASE_ID,
@@ -733,6 +764,7 @@ export async function createOrder(
         discountAmount,
       },
       permissions,
+      transactionId,
     });
 
     orderId = orderRow.$id;
@@ -751,6 +783,7 @@ export async function createOrder(
           lineTotal: line.lineTotal,
         },
         permissions: childPermissions,
+        transactionId,
       });
       orderItemIds.push(itemRow.$id);
     }
@@ -767,28 +800,57 @@ export async function createOrder(
         currency: resolvedCurrency,
       },
       permissions: childPermissions,
+      transactionId,
     });
     paymentId = paymentRow.$id;
-  } catch {
+
+    await decrementStockForLines(tables, prepared, transactionId);
+
+    if (appliedCouponId && orderId && discountAmount > 0) {
+      const redemption = await recordCouponRedemption({
+        couponId: appliedCouponId,
+        orderId,
+        buyerId,
+        discountAmount,
+        transactionId,
+        tables,
+      });
+      if (!redemption.ok) {
+        const err = new Error(redemption.error);
+        (err as Error & { code: OrderErrorCode }).code =
+          ORDER_ERROR_CODES.COUPON_INVALID;
+        throw err;
+      }
+    }
+
+    await tables.updateTransaction({
+      transactionId,
+      commit: true,
+    });
+  } catch (error) {
+    if (transactionId) {
+      try {
+        const { tables } = await createAdminClient();
+        await tables.updateTransaction({ transactionId, commit: false });
+      } catch (abortError) {
+        logError("orders.create.abort-tx", abortError, { orderId });
+      }
+    }
     await rollbackOrderRows({ orderId, orderItemIds, paymentId });
+    logError("orders.create", error, { buyerId });
+    const code = (error as Error & { code?: OrderErrorCode }).code;
+    if (code === ORDER_ERROR_CODES.COUPON_INVALID && error instanceof Error) {
+      return fail<CreateOrderResult>(error.message, code);
+    }
     return fail<CreateOrderResult>(
       "Could not place your order. Please try again.",
       ORDER_ERROR_CODES.CREATE_FAILED,
     );
   }
 
-  if (appliedCouponId && orderId && discountAmount > 0) {
-    await recordCouponRedemption({
-      couponId: appliedCouponId,
-      orderId,
-      buyerId,
-      discountAmount,
-    });
-  }
-
   const cleared = await clearCart();
   if (cleared.error) {
-    /* Order exists; cart clear failure is non-fatal for the buyer flow. */
+    logError("orders.create.clearCart", cleared.error, { orderId });
   }
 
   return {
@@ -798,7 +860,7 @@ export async function createOrder(
   };
 }
 
-/** Cancel an owned order in early statuses only (IDOR-safe; no payment/refund side effects). */
+/** Cancel an owned early-status order; mark payment failed and restore stock. */
 export async function cancelOrder(orderId: string): Promise<CancelOrderResult> {
   if (!hasAppwritePublicConfig()) {
     return fail<CancelOrderResult>(
@@ -812,6 +874,19 @@ export async function cancelOrder(orderId: string): Promise<CancelOrderResult> {
     return fail<CancelOrderResult>(
       "You must be signed in to cancel an order.",
       ORDER_ERROR_CODES.NOT_AUTHENTICATED,
+    );
+  }
+
+  const ip = await getClientIp();
+  const limited = await assertDurableRateLimit({
+    bucket: "cancel-order",
+    key: `${user.$id}:${ip}`,
+    ...RATE_LIMITS.cancelOrder,
+  });
+  if (!limited.ok) {
+    return fail<CancelOrderResult>(
+      RATE_LIMIT_MESSAGE,
+      ORDER_ERROR_CODES.RATE_LIMITED,
     );
   }
 
@@ -834,13 +909,34 @@ export async function cancelOrder(orderId: string): Promise<CancelOrderResult> {
 
   try {
     const { tables } = await createAdminClient();
+    const payment = await getOwnPaymentForOrder(order.$id);
+    const items = await getOwnOrderItems(order.$id);
+    const tx = await tables.createTransaction({ ttl: 120 });
+    const transactionId = tx.$id;
+
     await tables.updateRow({
       databaseId: DATABASE_ID,
       tableId: TABLE_ORDERS,
       rowId: order.$id,
       data: { status: "cancelled" },
+      transactionId,
     });
-  } catch {
+
+    if (payment && payment.status !== "failed" && payment.status !== "refunded") {
+      await tables.updateRow({
+        databaseId: DATABASE_ID,
+        tableId: TABLE_PAYMENTS,
+        rowId: payment.$id,
+        data: { status: "failed" },
+        transactionId,
+      });
+    }
+
+    await restoreStockForLines(tables, items, transactionId);
+
+    await tables.updateTransaction({ transactionId, commit: true });
+  } catch (error) {
+    logError("orders.cancel", error, { orderId: order.$id });
     return fail<CancelOrderResult>(
       "Could not cancel your order. Please try again.",
       ORDER_ERROR_CODES.UPDATE_FAILED,
@@ -856,6 +952,25 @@ export type ReorderResult =
 
 /** Re-add purchasable lines from a completed order into the buyer's cart (IDOR-safe). */
 export async function reorderOwnOrder(orderId: string): Promise<ReorderResult> {
+  const user = await getLoggedInUser();
+  if (!user) {
+    return {
+      ok: false,
+      error: "You must be signed in to reorder.",
+      code: ORDER_ERROR_CODES.NOT_AUTHENTICATED,
+    };
+  }
+
+  const ip = await getClientIp();
+  const limited = await assertDurableRateLimit({
+    bucket: "reorder",
+    key: `${user.$id}:${ip}`,
+    ...RATE_LIMITS.reorder,
+  });
+  if (!limited.ok) {
+    return { ok: false, error: RATE_LIMIT_MESSAGE, code: ORDER_ERROR_CODES.RATE_LIMITED };
+  }
+
   const order = await getOwnOrder(orderId);
   if (!order) {
     return {

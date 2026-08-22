@@ -2,19 +2,23 @@ import { ID, Query } from "node-appwrite";
 import {
   DATABASE_ID,
   TABLE_AUDIT_LOGS,
+  TABLE_ORDER_ITEMS,
   TABLE_ORDERS,
   TABLE_PAYMENTS,
   hasAppwritePublicConfig,
 } from "@/lib/appwrite/config";
 import { requireLabel } from "@/lib/appwrite/roles";
 import { createAdminClient } from "@/lib/appwrite/server";
+import { logError } from "@/lib/observability/log-error";
 import {
   canAdminCancelOrder,
   canAdminRefundOrder,
   type Order,
+  type OrderItem,
   type Payment,
 } from "@/lib/types";
-import { asOrder, asPayment } from "./orders";
+import { asOrder, asOrderItem, asPayment } from "./orders";
+import { restoreStockForLines } from "./stock";
 
 const MAX_REASON = 500;
 
@@ -91,6 +95,21 @@ async function loadOrderAndPayment(
   return { order, payment };
 }
 
+async function loadOrderItems(orderId: string): Promise<OrderItem[]> {
+  const { tables } = await createAdminClient();
+  const result = await tables.listRows({
+    databaseId: DATABASE_ID,
+    tableId: TABLE_ORDER_ITEMS,
+    queries: [Query.equal("orderId", orderId), Query.limit(100)],
+  });
+  const items: OrderItem[] = [];
+  for (const row of result.rows) {
+    const item = asOrderItem(row as unknown as Record<string, unknown>);
+    if (item) items.push(item);
+  }
+  return items;
+}
+
 /**
  * Admin cancel: unpaid early order → cancelled; payment → failed.
  * Idempotent when the order is already cancelled. No stock restore.
@@ -158,6 +177,9 @@ export async function cancelAdminOrder(
       });
     }
 
+    const items = await loadOrderItems(order.$id);
+    await restoreStockForLines(tables, items, transactionId);
+
     await tables.updateTransaction({ transactionId, commit: true });
 
     try {
@@ -188,14 +210,15 @@ export async function cancelAdminOrder(
       message: "Order cancelled.",
       alreadyApplied: false,
     };
-  } catch {
+  } catch (error) {
+    logError("admin.order.cancel", error, { orderId: trimmedId });
     return { ok: false, error: "Could not cancel this order. Please try again." };
   }
 }
 
 /**
  * Admin refund: paid-through-completed order → refunded; payment → refunded.
- * Platform ledger only (same statuses as PayHere chargeback notify). No stock restore.
+ * Platform ledger only (same statuses as PayHere chargeback notify). Restores stock reserved at placement.
  */
 export async function refundAdminOrder(
   orderId: string,
@@ -259,6 +282,9 @@ export async function refundAdminOrder(
       transactionId,
     });
 
+    const items = await loadOrderItems(order.$id);
+    await restoreStockForLines(tables, items, transactionId);
+
     await tables.updateTransaction({ transactionId, commit: true });
 
     try {
@@ -289,7 +315,8 @@ export async function refundAdminOrder(
       message: "Order refunded on the platform ledger.",
       alreadyApplied: false,
     };
-  } catch {
+  } catch (error) {
+    logError("admin.order.refund", error, { orderId: trimmedId });
     return { ok: false, error: "Could not refund this order. Please try again." };
   }
 }

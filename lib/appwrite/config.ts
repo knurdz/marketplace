@@ -35,6 +35,7 @@ export const TABLE_COUPON_REDEMPTIONS = "coupon_redemptions";
 export const TABLE_THREADS = "threads";
 export const TABLE_MESSAGES = "messages";
 export const TABLE_VIEW_STATS = "view_stats";
+export const TABLE_RATE_LIMITS = "rate_limits";
 
 /** All MVP table ids (for docs / sanity checks). */
 export const ALL_TABLE_IDS = [
@@ -61,6 +62,7 @@ export const ALL_TABLE_IDS = [
   TABLE_THREADS,
   TABLE_MESSAGES,
   TABLE_VIEW_STATS,
+  TABLE_RATE_LIMITS,
 ] as const;
 
 /** Storage bucket IDs — must match Appwrite console / docs/agent/SCHEMA.md. */

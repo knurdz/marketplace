@@ -52,12 +52,14 @@ Cross-member rules enforced in services — do not fork status strings or parall
 |------|------|
 | **Publish** | Seller create → `draft`; submit for review → `pending_review` only; **sellers never write `active`**; admin approve → `active`. |
 | **Live edits** | `updateOwnProductCore` may change title/price/stock/available on non-`archived` rows without forcing re-review (current behavior). |
-| **Stock on confirm** | Free confirm **rejects** if stock &lt; qty (`FREE_CONFIRM_STOCK`). Bank approve + PayHere notify **settle and clamp** at 0 (money already in flight). Admin cancel/refund does **not** restore stock (ledger-only — see PAYHERE.md 6.13). |
+| **Stock** | Decremented at **order placement** (`createOrder` transaction). Restore on buyer cancel, admin cancel, admin refund, PayHere chargeback, and bank-slip **reject-and-cancel**. Settlement paths (free confirm, bank approve, PayHere notify, COD accept) do **not** decrement again. Slip reject-with-retry does **not** restore stock. |
+| **COD** | Buyer accept moves the order to `processing` and leaves payment `pending`. Seller “Mark delivered & cash collected” (`completed`) sets payment `paid` in the same transaction. |
+| **Bank slips** | Reject (retry) returns payment to `pending` and order to `pending_payment` (slip stays `rejected`). Reject-and-cancel closes the order, marks payment `failed`, and restores stock. |
 | **Bank details** | Public shop omits account numbers (`PublicSellerInfo` in `lib/services/sellers.ts`). Full number on owned bank checkout + owner profile only. Admin seller queue shows masked last-4. |
 | **Storefront buyable** | `status=active` AND `available=true` AND `stock > 0` (`isProductPurchasable`). |
 | **Idempotency keys** | `free:<orderId>`, `bank:<orderId>`, `cod:<orderId>`, `payhere:<payment_id>` on first successful settle. |
 
-## Tables (22)
+## Tables (24)
 
 ### `profiles`
 
@@ -224,7 +226,9 @@ Cross-member rules enforced in services — do not fork status strings or parall
 | `discountAmount` | float | no | default `0`; pre-tax line discount |
 
 **Indexes:** `buyerId_idx`, `sellerId_idx`, `status_idx`  
-**Intent:** buyer + seller (+ admin) access via row permissions; IDOR checks in services.
+**Intent:** buyer + seller (+ admin) access via row permissions; IDOR checks in services. `couponCode` / `discountAmount` are written on every order (null / `0` when unused).
+
+**COD:** `paymentMethod=cod` → buyer accept sets order `processing` with payment still `pending`. Seller completion marks payment `paid`.
 
 ---
 
@@ -262,7 +266,7 @@ Cross-member rules enforced in services — do not fork status strings or parall
 | `idempotencyKey` | string(128) | no |
 
 **Indexes:** `orderId_idx`, `idempotencyKey_unique`  
-**Intent:** PayHere notify / free / bank paid updates are server-side and idempotent (**Member 1** payment setup; bank *approve UI* is Member 4). Free confirm (step **1.24**) writes `status=paid` + `idempotencyKey=free:<orderId>` via admin SDK; bank-slip approve (step **6.14**) writes `status=paid` + `idempotencyKey=bank:<orderId>`; buyers must not be trusted to set `paid`.
+**Intent:** PayHere notify / free / bank paid updates are server-side and idempotent (**Member 1** payment setup; bank *approve UI* is Member 4). Free confirm (step **1.24**) writes `status=paid` + `idempotencyKey=free:<orderId>` via admin SDK; bank-slip approve (step **6.14**) writes `status=paid` + `idempotencyKey=bank:<orderId>`; COD buyer accept writes `idempotencyKey=cod:<orderId>` and leaves `status=pending` until seller completion. Buyers must not be trusted to set `paid`.
 
 ---
 
@@ -281,7 +285,8 @@ Cross-member rules enforced in services — do not fork status strings or parall
 | `reviewedBy` | string(36) | no |
 | `reviewNote` | string(500) | no |
 
-**Indexes:** `paymentId_idx`, `orderId_idx`
+**Indexes:** `paymentId_idx`, `orderId_idx`  
+**Review:** Approve settles payment/order to `paid`. Reject (retry) reopens payment `pending` + order `pending_payment`. Reject-and-cancel closes the order.
 
 ---
 
@@ -300,7 +305,7 @@ Cross-member rules enforced in services — do not fork status strings or parall
 | `sellerRating` | integer | no (1–5) |
 | `comment` | string(2000) | no |
 
-**Indexes:** `productId_idx`, `order_buyer_unique`
+**Indexes:** `productId_idx`, `order_buyer_product_unique` (unique: `orderId`,`buyerId`,`productId`)
 
 ---
 
@@ -410,7 +415,7 @@ Cross-member rules enforced in services — do not fork status strings or parall
 | `buyerId` | string(36) | yes |
 | `discountAmount` | float | yes |
 
-**Indexes:** `orderId_unique` (unique: `orderId`), `couponId_idx`
+**Indexes:** `orderId_unique` (unique: `orderId`), `couponId_idx`, `coupon_buyer_unique` (unique: `couponId`,`buyerId`)
 
 ---
 
@@ -484,6 +489,22 @@ Cross-member rules enforced in services — do not fork status strings or parall
 **Indexes:** `seller_kind_target_day_unique` (unique), `sellerId_idx`  
 **Writers:** [`recordMarketplaceView`](../../lib/services/view-stats.ts) on buyer/guest PDP and public shop pages.
 
+### `rate_limits`
+
+- **Row security:** no  
+- **Table permissions:** none (admin SDK only)  
+- **Intent:** durable fixed-window limiter for money paths (checkout, confirms, bank slip, cancel, reorder). Survives process restarts. Cheap read paths stay in-memory (`lib/security/rate-limit.ts`).
+
+| Column | Type | Required | Notes |
+|--------|------|----------|-------|
+| `bucket` | string(64) | yes | Named limiter (e.g. `checkout`) |
+| `limitKey` | string(256) | yes | User id + IP (or similar) |
+| `windowStart` | integer | yes | Epoch ms of the current window |
+| `count` | integer | yes | Hits in this window (min 0) |
+
+**Indexes:** `bucket_key_unique` (unique: `bucket`,`limitKey`)  
+**Writers:** [`assertDurableRateLimit`](../../lib/security/durable-rate-limit.ts)
+
 ## Storage (step 1.8)
 
 Buckets created in console; re-apply with `node --env-file=.env.local scripts/setup-storage-buckets.mjs`.  
@@ -504,7 +525,7 @@ Uploads are rate-limited in `uploadFile` (see Abuse guards above).
 ## Console match checklist
 
 - [x] Database `marketplace` exists (TablesDB)
-- [x] All 22 table ids present and enabled
+- [x] All 24 table ids present and enabled
 - [x] Columns/indexes available (verified via SDK list)
 - [x] Enum values match this document
 - [x] Code constants in `lib/appwrite/config.ts` match table ids
@@ -531,3 +552,4 @@ Uploads are rate-limited in `uploadFile` (see Abuse guards above).
 | 2026-08-19 | MVP contract freeze subsection (step 6.16) — publish, stock-on-confirm, bank exposure, buyable rules. |
 | 2026-08-21 | Phase 6.20 — `products.featured`, `orders.couponCode`/`discountAmount`, tables `coupons` + `coupon_redemptions`. |
 | 2026-08-22 | Exclusive buyer/seller/admin shells. Register chooses buyer or seller (pending shop). `view_stats` daily aggregates for seller dashboards. |
+| 2026-08-22 | Payment hardening: stock at placement + restore on cancel/refund; COD accept leaves payment pending; bank-slip reject retry vs reject-and-cancel; `rate_limits` table; reviews unique `(orderId,buyerId,productId)`; coupon one-per-buyer. Drift check: `npm run schema:verify`. |

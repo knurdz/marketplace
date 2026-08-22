@@ -14,8 +14,8 @@ import {
 import { createSessionClient } from "@/lib/appwrite/server";
 import { getLoggedInUser } from "@/lib/appwrite/session";
 import { isPayHereCheckoutEnabled } from "@/lib/services/platform-settings";
+import { assertDurableRateLimit } from "@/lib/security/durable-rate-limit";
 import {
-  assertRateLimit,
   getClientIp,
   RATE_LIMIT_MESSAGE,
   RATE_LIMITS,
@@ -91,7 +91,7 @@ export async function requestPayHereCheckout(
   }
 
   const ip = await getClientIp();
-  const limited = assertRateLimit({
+  const limited = await assertDurableRateLimit({
     bucket: "payhere-checkout",
     key: `${user.$id}:${ip}`,
     ...RATE_LIMITS.checkout,
