@@ -193,11 +193,14 @@ export function asBankSlip(row: Record<string, unknown>): BankSlip | null {
   };
 }
 
-function bankSlipRowPermissions(): string[] {
+function bankSlipRowPermissions(buyerId: string, sellerId: string): string[] {
+  // Assigned via admin SDK after buyer ownership checks — not limited to session assignable scopes.
   return [
+    Permission.read(Role.user(buyerId)),
+    Permission.read(Role.user(sellerId)),
+    Permission.update(Role.user(sellerId)),
     Permission.read(Role.label("admin")),
     Permission.update(Role.label("admin")),
-    Permission.delete(Role.label("admin")),
   ];
 }
 
@@ -511,7 +514,7 @@ export async function submitBankSlip(
 
   let slipCreated = false;
   try {
-    const { tables } = await createSessionClient();
+    const { tables } = await createAdminClient();
 
     await tables.createRow({
       databaseId: DATABASE_ID,
@@ -524,19 +527,18 @@ export async function submitBankSlip(
         uploadedBy: user.$id,
         status: "pending",
       },
-      permissions: bankSlipRowPermissions(),
+      permissions: bankSlipRowPermissions(order.buyerId, order.sellerId),
     });
     slipCreated = true;
 
-    const { tables: adminTables } = await createAdminClient();
-    await adminTables.updateRow({
+    await tables.updateRow({
       databaseId: DATABASE_ID,
       tableId: TABLE_PAYMENTS,
       rowId: payment.$id,
       data: { status: "awaiting_verification" },
     });
 
-    await adminTables.updateRow({
+    await tables.updateRow({
       databaseId: DATABASE_ID,
       tableId: TABLE_ORDERS,
       rowId: order.$id,
