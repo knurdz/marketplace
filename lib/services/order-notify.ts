@@ -64,6 +64,19 @@ export async function notifyCodAccepted(params: {
   });
 }
 
+export async function notifyBankSlipUploaded(params: {
+  orderId: string;
+  sellerId: string;
+}): Promise<void> {
+  await notifyUserSafe({
+    userId: params.sellerId,
+    type: "payment.slip_uploaded",
+    title: "Bank slip uploaded",
+    body: "A buyer uploaded a bank transfer receipt. Review it to confirm payment.",
+    link: `/seller/orders/${params.orderId}`,
+  });
+}
+
 export async function notifyBankSlipRejected(params: {
   orderId: string;
   buyerId: string;

@@ -13,6 +13,7 @@ import {
   BANK_SLIP_REJECT_PAID,
   BANK_SLIP_REJECT_REFUNDED,
   bankConfirmIdempotencyKey,
+  canSellerReviewBankSlip,
   evaluateBankSlipApprove,
   evaluateBankSlipReject,
   evaluateBankSlipRejectAndCancel,
@@ -239,6 +240,19 @@ assert(
     order: order({ status: "paid" }),
   }).action === "refuse",
   "reject-and-cancel refuses paid",
+);
+
+assert(
+  canSellerReviewBankSlip("seller_1", "seller_1"),
+  "owning seller may review",
+);
+assert(
+  !canSellerReviewBankSlip("seller_2", "seller_1"),
+  "other seller must not review",
+);
+assert(
+  !canSellerReviewBankSlip("admin_1", "seller_1"),
+  "admin id without ownership must not review",
 );
 
 console.log("verify-bank-slip-review: OK");

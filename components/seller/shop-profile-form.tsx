@@ -215,6 +215,22 @@ export function ShopProfileForm({
           />
         </div>
 
+        <div className="space-y-2">
+          <Label htmlFor="bankTransferNotes">Transfer notes for buyers</Label>
+          <textarea
+            id="bankTransferNotes"
+            name="bankTransferNotes"
+            rows={4}
+            maxLength={2000}
+            defaultValue={profile.bankTransferNotes ?? ""}
+            placeholder="e.g. Put the order ID in the online-banking remark"
+            className="w-full rounded-lg border border-input bg-transparent px-2.5 py-2 text-sm outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
+          />
+          <p className="text-xs text-muted-foreground">
+            Shown only on the bank-transfer checkout page for your orders.
+          </p>
+        </div>
+
       <Button type="submit" disabled={bankPending} data-testid="seller-bank-save">
           {bankPending ? "Saving…" : "Save bank details"}
         </Button>

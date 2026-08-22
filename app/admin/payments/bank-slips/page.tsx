@@ -1,8 +1,5 @@
 import Link from "next/link";
-import {
-  BankSlipImage,
-  BankSlipReviewActions,
-} from "@/components/admin/bank-slip-review-actions";
+import { BankSlipImage } from "@/components/bank-slip/bank-slip-preview";
 import { Button } from "@/components/ui/button";
 import {
   getBankSlipReviewUrl,
@@ -58,17 +55,17 @@ export default async function AdminBankSlipsPage({ searchParams }: PageProps) {
   return (
     <div className="mx-auto max-w-4xl">
       <h2 className="mt-3 text-3xl font-bold tracking-tight">
-        Bank slip verification
+        Bank slip queue
       </h2>
       <p className="mt-2 max-w-xl text-sm text-muted-foreground">
-        Review pending bank transfer proofs. Approving marks payment paid,
-        advances the order, and decrements stock exactly once.
+        Read-only view of pending bank transfer proofs. The selling shop
+        approves or rejects each slip. You can still open any order from here.
       </p>
 
       {slips.length === 0 ? (
         <p className="mt-10 rounded-md border border-border bg-card px-4 py-5 font-mono text-sm text-muted-foreground">
-          No pending bank slips. When buyers upload transfer proofs at checkout,
-          they appear here for verification.
+          No pending bank slips. When buyers upload transfer proofs, they appear
+          here after the seller has them in their order inbox.
         </p>
       ) : (
         <ul className="mt-10 space-y-6">
@@ -95,6 +92,10 @@ export default async function AdminBankSlipsPage({ searchParams }: PageProps) {
                     </p>
                     <dl className="mt-3 space-y-1 font-mono text-xs text-muted-foreground">
                       <div className="flex gap-2">
+                        <dt className="text-foreground/70">Seller</dt>
+                        <dd>{entry.sellerId || "—"}</dd>
+                      </div>
+                      <div className="flex gap-2">
                         <dt className="text-foreground/70">Buyer</dt>
                         <dd>{entry.buyerId}</dd>
                       </div>
@@ -108,7 +109,6 @@ export default async function AdminBankSlipsPage({ searchParams }: PageProps) {
                       </div>
                     </dl>
                   </div>
-                  <BankSlipReviewActions bankSlipId={entry.slip.$id} />
                 </div>
 
                 {imageUrl ? (

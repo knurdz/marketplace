@@ -96,6 +96,7 @@ Cross-member rules enforced in services — do not fork status strings or parall
 | `bankAccountName` | string(128) | no |
 | `bankAccountNumber` | string(64) | no |
 | `bankName` | string(128) | no |
+| `bankTransferNotes` | string(2000) | no | Shown only on owned bank-transfer checkout, never on public shop cards |
 | `rejectionReason` | string(500) | no |
 | `returnPolicy` | string(2000) | no |
 | `shippingPolicy` | string(2000) | no |
@@ -285,8 +286,8 @@ Cross-member rules enforced in services — do not fork status strings or parall
 | `reviewedBy` | string(36) | no |
 | `reviewNote` | string(500) | no |
 
-**Indexes:** `paymentId_idx`, `orderId_idx`  
-**Review:** Approve settles payment/order to `paid`. Reject (retry) reopens payment `pending` + order `pending_payment`. Reject-and-cancel closes the order.
+**Indexes:** `paymentId_idx`, `orderId_idx`, `fileId_idx`  
+**Review:** The order’s seller approves (settle payment/order to `paid`) or rejects. Reject (retry) reopens payment `pending` + order `pending_payment`. Reject-and-cancel closes the order. Admin queue is read-only.
 
 ---
 
@@ -553,3 +554,4 @@ Uploads are rate-limited in `uploadFile` (see Abuse guards above).
 | 2026-08-21 | Phase 6.20 — `products.featured`, `orders.couponCode`/`discountAmount`, tables `coupons` + `coupon_redemptions`. |
 | 2026-08-22 | Exclusive buyer/seller/admin shells. Register chooses buyer or seller (pending shop). `view_stats` daily aggregates for seller dashboards. |
 | 2026-08-22 | Payment hardening: stock at placement + restore on cancel/refund; COD accept leaves payment pending; bank-slip reject retry vs reject-and-cancel; `rate_limits` table; reviews unique `(orderId,buyerId,productId)`; coupon one-per-buyer. Drift check: `npm run schema:verify`. |
+| 2026-08-22 | `seller_profiles.bankTransferNotes` (optional, 2000). Bank-slip approve/reject is seller-owned (`order.sellerId`); admin bank-slip queue is read-only. `bank_slips.fileId_idx`. |

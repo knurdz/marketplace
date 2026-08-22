@@ -114,6 +114,7 @@ export type CheckoutSellerBankDetails = {
   bankAccountName: string | null;
   bankAccountNumber: string | null;
   bankName: string | null;
+  bankTransferNotes: string | null;
 };
 
 /**
@@ -162,6 +163,7 @@ export async function getSellerBankDetailsForCheckout(
       bankAccountName: asNullableString(record.bankAccountName),
       bankAccountNumber: asNullableString(record.bankAccountNumber),
       bankName: asNullableString(record.bankName),
+      bankTransferNotes: asNullableString(record.bankTransferNotes),
     };
   } catch {
     return null;

@@ -113,6 +113,25 @@ async function main() {
     "rate_limits missing bucket_key_unique",
   );
 
+  const sellerCols = await db.listColumns({
+    databaseId: DATABASE_ID,
+    tableId: "seller_profiles",
+  });
+  const sellerKeys = new Set(sellerCols.columns.map((c) => c.key));
+  assert(
+    sellerKeys.has("bankTransferNotes"),
+    "seller_profiles missing bankTransferNotes",
+  );
+
+  const slipIndexes = await db.listIndexes({
+    databaseId: DATABASE_ID,
+    tableId: "bank_slips",
+  });
+  assert(
+    slipIndexes.indexes.some((i) => i.key === "fileId_idx"),
+    "bank_slips missing fileId_idx",
+  );
+
   console.log("verify-schema-drift: OK");
 }
 

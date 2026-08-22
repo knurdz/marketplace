@@ -77,6 +77,7 @@ export async function updateOwnBankDetails(
     bankName: readString(formData, "bankName"),
     bankAccountName: readString(formData, "bankAccountName"),
     bankAccountNumber: readString(formData, "bankAccountNumber"),
+    bankTransferNotes: readString(formData, "bankTransferNotes"),
   });
 
   if (!result.ok) {

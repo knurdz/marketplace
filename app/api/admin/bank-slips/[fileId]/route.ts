@@ -1,9 +1,8 @@
 import { NextResponse } from "next/server";
 import { BUCKET_BANK_SLIPS } from "@/lib/appwrite/config";
-import { ROLE_LABELS, userHasLabel } from "@/lib/appwrite/roles";
 import { createAdminClient } from "@/lib/appwrite/server";
 import { getLoggedInUser } from "@/lib/appwrite/session";
-import { bankSlipFileExists } from "@/lib/services/bank-slip-review";
+import { userCanAccessBankSlipFile } from "@/lib/services/bank-slip-review";
 
 type RouteParams = {
   params: Promise<{ fileId: string }>;
@@ -14,9 +13,6 @@ export async function GET(_request: Request, { params }: RouteParams) {
   if (!user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
-  if (!userHasLabel(user, ROLE_LABELS.admin)) {
-    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
-  }
 
   const { fileId: rawFileId } = await params;
   const fileId = rawFileId?.trim();
@@ -24,9 +20,9 @@ export async function GET(_request: Request, { params }: RouteParams) {
     return NextResponse.json({ error: "Missing file id." }, { status: 400 });
   }
 
-  const exists = await bankSlipFileExists(fileId);
-  if (!exists) {
-    return NextResponse.json({ error: "Bank slip not found." }, { status: 404 });
+  const allowed = await userCanAccessBankSlipFile(user, fileId);
+  if (!allowed) {
+    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
   try {

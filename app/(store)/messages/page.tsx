@@ -17,7 +17,7 @@ export default async function BuyerMessagesPage() {
       <PageHeader
         eyebrow="Account"
         title="Messages"
-        description="Order conversations with sellers. Bank slip verification stays with admin."
+        description="Order conversations with sellers. Bank slip verification is done by the seller."
       />
 
       {error ? (

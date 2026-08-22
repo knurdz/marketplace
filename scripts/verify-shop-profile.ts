@@ -58,6 +58,7 @@ const publicSeller = toPublicSellerInfo({
   bankAccountName: "Secret Name",
   bankAccountNumber: "1234567890",
   bankName: "Secret Bank",
+  bankTransferNotes: "secret notes",
   rejectionReason: "should not leak",
 });
 assert(publicSeller !== null, "approved seller projects");
@@ -70,6 +71,10 @@ if (publicSeller) {
   assert(
     !("bankAccountName" in publicSeller),
     "public seller omits bankAccountName",
+  );
+  assert(
+    !("bankTransferNotes" in publicSeller),
+    "public seller omits bankTransferNotes",
   );
   assert(
     !("rejectionReason" in publicSeller),

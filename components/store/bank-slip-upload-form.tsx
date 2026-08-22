@@ -48,7 +48,7 @@ export function BankSlipUploadForm({ order, payment }: BankSlipUploadFormProps) 
       const key = "s:awaiting";
       if (key !== lastToast.current) {
         lastToast.current = key;
-        toast.success("Bank slip uploaded. Awaiting admin verification.");
+        toast.success("Bank slip uploaded. Awaiting seller verification.");
       }
       router.refresh();
     }
@@ -75,7 +75,7 @@ export function BankSlipUploadForm({ order, payment }: BankSlipUploadFormProps) 
 
       {awaitingVerification ? (
         <p className="text-sm text-muted-foreground" role="status">
-          Your slip is awaiting admin verification. You may upload a replacement
+          Your slip is awaiting seller verification. You may upload a replacement
           if needed.
         </p>
       ) : null}

@@ -8,7 +8,7 @@ import {
   rejectAndCancelBankSlipFormAction,
   rejectBankSlipFormAction,
   type BankSlipActionState,
-} from "@/lib/appwrite/bank-slip-actions";
+} from "@/lib/appwrite/seller-bank-slip-actions";
 import { toast } from "@/lib/ui/toast";
 
 const initial: BankSlipActionState = {};
@@ -42,7 +42,7 @@ function useBankSlipToast(
   }, [state, onSuccess, router]);
 }
 
-export function BankSlipApproveButton({ bankSlipId }: { bankSlipId: string }) {
+function SellerBankSlipApproveButton({ bankSlipId }: { bankSlipId: string }) {
   const [state, formAction, pending] = useActionState(
     approveBankSlipFormAction,
     initial,
@@ -55,7 +55,7 @@ export function BankSlipApproveButton({ bankSlipId }: { bankSlipId: string }) {
       onSubmit={(e) => {
         if (
           !window.confirm(
-            "Approve this bank slip? This marks the payment paid and lets the seller fulfill. This cannot be undone.",
+            "Approve this bank slip? This marks the payment paid so you can fulfill. This cannot be undone.",
           )
         ) {
           e.preventDefault();
@@ -63,14 +63,19 @@ export function BankSlipApproveButton({ bankSlipId }: { bankSlipId: string }) {
       }}
     >
       <input type="hidden" name="bankSlipId" value={bankSlipId} />
-      <Button type="submit" disabled={pending} size="sm" data-testid="admin-approve-bank-slip">
+      <Button
+        type="submit"
+        disabled={pending}
+        size="sm"
+        data-testid="seller-approve-bank-slip"
+      >
         {pending ? "Approving…" : "Approve"}
       </Button>
     </form>
   );
 }
 
-export function BankSlipRejectForm({ bankSlipId }: { bankSlipId: string }) {
+function SellerBankSlipRejectForm({ bankSlipId }: { bankSlipId: string }) {
   const [showNote, setShowNote] = useState(false);
   const [state, formAction, pending] = useActionState(
     rejectBankSlipFormAction,
@@ -87,7 +92,7 @@ export function BankSlipRejectForm({ bankSlipId }: { bankSlipId: string }) {
         size="sm"
         onClick={() => setShowNote(true)}
       >
-        Reject
+        Reject — allow retry
       </Button>
     );
   }
@@ -124,7 +129,7 @@ export function BankSlipRejectForm({ bankSlipId }: { bankSlipId: string }) {
   );
 }
 
-export function BankSlipRejectAndCancelForm({
+function SellerBankSlipRejectAndCancelForm({
   bankSlipId,
 }: {
   bankSlipId: string;
@@ -182,26 +187,16 @@ export function BankSlipRejectAndCancelForm({
   );
 }
 
-export function BankSlipReviewActions({ bankSlipId }: { bankSlipId: string }) {
+export function SellerBankSlipReviewActions({
+  bankSlipId,
+}: {
+  bankSlipId: string;
+}) {
   return (
     <div className="flex flex-wrap items-start gap-3">
-      <BankSlipApproveButton bankSlipId={bankSlipId} />
-      <BankSlipRejectForm bankSlipId={bankSlipId} />
-      <BankSlipRejectAndCancelForm bankSlipId={bankSlipId} />
-    </div>
-  );
-}
-
-export function BankSlipImage({ src, alt }: { src: string; alt: string }) {
-  return (
-    <div className="mt-4 overflow-hidden rounded-md border border-border bg-muted/30">
-      {/* eslint-disable-next-line @next/next/no-img-element -- admin-only authenticated proxy URL */}
-      <img
-        src={src}
-        alt={alt}
-        className="max-h-96 w-full object-contain"
-        loading="lazy"
-      />
+      <SellerBankSlipApproveButton bankSlipId={bankSlipId} />
+      <SellerBankSlipRejectForm bankSlipId={bankSlipId} />
+      <SellerBankSlipRejectAndCancelForm bankSlipId={bankSlipId} />
     </div>
   );
 }

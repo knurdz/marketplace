@@ -21,11 +21,11 @@ A **3-portal marketplace**:
 | Seller     | `/seller/**`     | Approved sellers |
 | Admin      | `/admin/**`      | Admins           |
 
-**Payments (MVP):** PayHere sandbox · bank transfer (admin verifies slips) · free (`price = 0`).  
+**Payments (MVP):** PayHere sandbox · bank transfer (seller verifies slips) · free (`price = 0`).  
 **Business model:** Free selling (no paid listing fee required for MVP).  
 **Order model:** **One seller per order** (split cart by seller at checkout).
 
-**Success for MVP:** A buyer can discover a product, check out via all 3 payment paths, a seller can fulfill, and an admin can approve sellers and verify bank slips — securely.
+**Success for MVP:** A buyer can discover a product, check out via all 3 payment paths, a seller can fulfill and verify bank slips, and an admin can approve sellers — securely.
 
 ---
 
@@ -315,7 +315,7 @@ Governance UI + bank slip verification **UI** + moderation + audit/reports. **No
 
 ### Member 4 — Definition of done
 
-Approve seller; verify bank slip; admin can suspend and take down listing. PayHere notify is Member 1’s responsibility.
+Approve seller; admin can suspend and take down listing. Bank slip approve/reject is seller-owned (read-only admin queue). PayHere notify is Member 1’s responsibility.
 
 ---
 

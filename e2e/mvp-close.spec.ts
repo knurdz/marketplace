@@ -172,7 +172,7 @@ test.describe("Guide §10 — MVP close (Phase 6.18)", () => {
     });
   });
 
-  test("buyer bank checkout + admin approves slip", async ({ page }) => {
+  test("buyer bank checkout + seller approves slip", async ({ page }) => {
     await clearSession(page);
     await loginAs(page, buyerEmail);
 
@@ -190,18 +190,24 @@ test.describe("Guide §10 — MVP close (Phase 6.18)", () => {
       buffer: minimalPngBuffer(),
     });
     await page.getByTestId("bank-slip-upload").click();
-    await expect(page.getByText(/awaiting admin verification/i)).toBeVisible({
+    await page.waitForURL(new RegExp(`/orders/${bankOrderId}`), {
       timeout: 30_000,
+    });
+    await expect(page.getByText(/awaiting seller verification/i)).toBeVisible({
+      timeout: 15_000,
     });
 
     await clearSession(page);
-    await loginAs(page, ADMIN_EMAIL);
+    await loginAs(page, sellerEmail);
     page.once("dialog", (dialog) => dialog.accept());
-    await page.goto("/admin/payments/bank-slips");
-    const slipRow = page.locator("li").filter({ hasText: bankOrderId });
-    await expect(slipRow).toBeVisible({ timeout: 30_000 });
-    await slipRow.getByTestId("admin-approve-bank-slip").click();
-    await expect(slipRow).toHaveCount(0, { timeout: 30_000 });
+    await page.goto(`/seller/orders/${bankOrderId}`);
+    await expect(page.getByTestId("seller-approve-bank-slip")).toBeVisible({
+      timeout: 30_000,
+    });
+    await page.getByTestId("seller-approve-bank-slip").click();
+    await expect(page.getByTestId("seller-approve-bank-slip")).toHaveCount(0, {
+      timeout: 30_000,
+    });
   });
 
   test("PayHere sandbox path", async ({ page }) => {

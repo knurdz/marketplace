@@ -89,14 +89,17 @@ export {
   asBankSlip,
   bankConfirmIdempotencyKey,
   bankSlipFileExists,
+  canSellerReviewBankSlip,
   evaluateBankSlipApprove,
   evaluateBankSlipReject,
   evaluateBankSlipRejectAndCancel,
   getBankSlipReviewUrl,
+  getPendingBankSlipForSellerOrder,
   listPendingBankSlips,
   rejectAndCancelBankSlipCore,
   rejectBankSlipCore,
   shouldListPendingBankSlip,
+  userCanAccessBankSlipFile,
 } from "./bank-slip-review";
 export type {
   BankSlipReviewResult,

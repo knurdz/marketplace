@@ -1,6 +1,6 @@
 /**
- * Pure bank-slip approve/reject eligibility (Phase 6.14).
- * Callers must already have authenticated an admin; this only decides mutations.
+ * Pure bank-slip approve/reject eligibility.
+ * Callers must already have authenticated the order's seller; this only decides mutations.
  */
 
 import type { BankSlip, Order, OrderStatus, Payment } from "@/lib/types";
@@ -243,4 +243,19 @@ export function shouldListPendingBankSlip(params: {
     return false;
   }
   return APPROVABLE_ORDER_STATUSES.has(params.order.status);
+}
+
+export const BANK_SLIP_NOT_OWN_ORDER =
+  "You can only review bank slips for your own orders.";
+
+/** IDOR gate: the reviewer must be the order's seller. */
+export function canSellerReviewBankSlip(
+  reviewerUserId: string,
+  orderSellerId: string,
+): boolean {
+  return (
+    reviewerUserId.length > 0 &&
+    orderSellerId.length > 0 &&
+    reviewerUserId === orderSellerId
+  );
 }

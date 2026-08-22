@@ -44,6 +44,7 @@ export function asSellerProfile(
     bankAccountName: asNullableString(row.bankAccountName),
     bankAccountNumber: asNullableString(row.bankAccountNumber),
     bankName: asNullableString(row.bankName),
+    bankTransferNotes: asNullableString(row.bankTransferNotes),
     rejectionReason: asNullableString(row.rejectionReason),
     returnPolicy: asNullableString(row.returnPolicy),
     shippingPolicy: asNullableString(row.shippingPolicy),

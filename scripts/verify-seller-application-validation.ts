@@ -53,6 +53,7 @@ if (cleared.ok) {
   assert(cleared.bankName === null, "cleared bank name");
   assert(cleared.bankAccountName === null, "cleared account name");
   assert(cleared.bankAccountNumber === null, "cleared account number");
+  assert(cleared.bankTransferNotes === null, "cleared transfer notes");
 }
 
 assert(
@@ -76,16 +77,38 @@ assert(
   "illegal account chars rejected",
 );
 
+assert(
+  !parseSellerBankDetailsInput({
+    bankTransferNotes: "Put the order ID in the remark",
+  }).ok,
+  "notes without bank details rejected",
+);
+
 const bankOk = parseSellerBankDetailsInput({
   bankName: "Commercial Bank",
   bankAccountName: "Campus Crafts",
   bankAccountNumber: "1234-5678 90",
+  bankTransferNotes: "  Include the order ID in the remark  ",
 });
 assert(bankOk.ok, "valid bank triple should parse");
 if (bankOk.ok) {
   assert(bankOk.bankName === "Commercial Bank", "bank name preserved");
   assert(bankOk.bankAccountName === "Campus Crafts", "account name preserved");
   assert(bankOk.bankAccountNumber === "1234-5678 90", "account number preserved");
+  assert(
+    bankOk.bankTransferNotes === "Include the order ID in the remark",
+    "transfer notes trimmed",
+  );
 }
+
+assert(
+  !parseSellerBankDetailsInput({
+    bankName: "Commercial Bank",
+    bankAccountName: "Campus Crafts",
+    bankAccountNumber: "1234567890",
+    bankTransferNotes: "x".repeat(2001),
+  }).ok,
+  "long transfer notes rejected",
+);
 
 console.log("seller-application validation checks passed");
