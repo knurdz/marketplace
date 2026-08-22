@@ -20,9 +20,9 @@ Appwrite Auth **labels** (not Teams for MVP):
 
 | Label | Meaning | Assigned by |
 |-------|---------|-------------|
-| `buyer` | Default shopper | Register (`Users.updateLabels`) |
-| `seller` | Approved seller | Seed / admin approval (later) |
-| `admin` | Platform admin | Seed / console (later) |
+| `buyer` | Shopper | Register as Buyer (`Users.updateLabels`) |
+| `seller` | Approved seller | Admin approval (not merged with `buyer`) |
+| `admin` | Platform admin | Appwrite console / seed |
 
 Permission helper: `Role.label('admin')`, etc. Server helpers: [`lib/appwrite/roles.ts`](../../lib/appwrite/roles.ts).
 
@@ -467,6 +467,23 @@ Cross-member rules enforced in services — do not fork status strings or parall
 
 **App read path:** [`listNotifyLogs`](../../lib/services/notify-logs.ts) via admin SDK (`requireLabel("admin")`). Session clients cannot read this table.
 
+### `view_stats`
+
+- **Row security:** no  
+- **Table permissions:** none (admin/server SDK only)  
+- **Intent:** daily aggregate product/shop views for seller dashboards. **No buyer `userId`.** One increment per IP + target per UTC day.
+
+| Column | Type | Required | Notes |
+|--------|------|----------|-------|
+| `sellerId` | string(36) | yes | Listing owner Auth `$id` |
+| `kind` | enum `product` \| `shop` | yes | |
+| `targetId` | string(36) | yes | Product `$id` or seller `userId` for shop |
+| `day` | string(10) | yes | `YYYY-MM-DD` UTC |
+| `count` | integer | yes | min 0 |
+
+**Indexes:** `seller_kind_target_day_unique` (unique), `sellerId_idx`  
+**Writers:** [`recordMarketplaceView`](../../lib/services/view-stats.ts) on buyer/guest PDP and public shop pages.
+
 ## Storage (step 1.8)
 
 Buckets created in console; re-apply with `node --env-file=.env.local scripts/setup-storage-buckets.mjs`.  
@@ -513,4 +530,4 @@ Uploads are rate-limited in `uploadFile` (see Abuse guards above).
 | 2026-08-19 | Phase 6.1–6.14 reused frozen columns — **no console migration** (step 6.15). Idempotency keys: `free:<orderId>`, `bank:<orderId>`, `payhere:<payment_id>`. `audit_logs.ip` reserved; writers omit it today. |
 | 2026-08-19 | MVP contract freeze subsection (step 6.16) — publish, stock-on-confirm, bank exposure, buyable rules. |
 | 2026-08-21 | Phase 6.20 — `products.featured`, `orders.couponCode`/`discountAmount`, tables `coupons` + `coupon_redemptions`. |
-| 2026-08-21 | Phase 6.21 — order-scoped `threads` + `messages` (buyer↔seller; admin still verifies bank slips). |
+| 2026-08-22 | Exclusive buyer/seller/admin shells. Register chooses buyer or seller (pending shop). `view_stats` daily aggregates for seller dashboards. |

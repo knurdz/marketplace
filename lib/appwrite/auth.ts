@@ -2,7 +2,7 @@
 
 import { cookies } from "next/headers";
 import { redirect, unstable_rethrow } from "next/navigation";
-import { AppwriteException, ID } from "node-appwrite";
+import { AppwriteException, ID, Query } from "node-appwrite";
 import {
   assertRateLimit,
   assertRateLimits,
@@ -11,14 +11,42 @@ import {
   RATE_LIMIT_MESSAGE,
   RATE_LIMITS,
 } from "@/lib/security/rate-limit";
-import { DATABASE_ID, SESSION_COOKIE, TABLE_PROFILES } from "./config";
+import { DATABASE_ID, SESSION_COOKIE, TABLE_PROFILES, TABLE_SELLER_PROFILES } from "./config";
 import { createProfileForUser } from "./profiles";
-import { postLoginPath, ROLE_LABELS } from "./roles";
+import { resolveHomePath, resolvePostLoginPath } from "./home-path";
+import { ROLE_LABELS } from "./roles";
 import { createAdminClient, createSessionClient } from "./server";
+import { getLoggedInUser } from "./session";
+import {
+  createPendingSellerProfileForUser,
+  parseSellerApplicationInput,
+} from "@/lib/services/seller-application";
 
 async function rollbackSignup(userId: string) {
   try {
     const { users, tables } = await createAdminClient();
+    try {
+      const shops = await tables.listRows({
+        databaseId: DATABASE_ID,
+        tableId: TABLE_SELLER_PROFILES,
+        queries: [Query.equal("userId", userId), Query.limit(10)],
+      });
+      for (const row of shops.rows) {
+        const rowId = typeof row.$id === "string" ? row.$id : "";
+        if (!rowId) continue;
+        try {
+          await tables.deleteRow({
+            databaseId: DATABASE_ID,
+            tableId: TABLE_SELLER_PROFILES,
+            rowId,
+          });
+        } catch {
+          // Best-effort cleanup.
+        }
+      }
+    } catch {
+      // Shop row may not exist yet.
+    }
     try {
       await tables.deleteRow({
         databaseId: DATABASE_ID,
@@ -97,7 +125,11 @@ export async function signUpWithEmail(
   const password = readString(formData, "password");
   const name = readString(formData, "name");
   const phone = readString(formData, "phone");
+  const accountType = readString(formData, "accountType");
 
+  if (accountType !== "buyer" && accountType !== "seller") {
+    return { error: "Choose Buyer or Seller." };
+  }
   if (!email || !password) {
     return { error: "Email and password are required." };
   }
@@ -106,6 +138,18 @@ export async function signUpWithEmail(
   }
   if (phone.length > 32) {
     return { error: "Phone number is too long." };
+  }
+
+  const sellerInput =
+    accountType === "seller"
+      ? parseSellerApplicationInput({
+          shopName: readString(formData, "shopName"),
+          slug: readString(formData, "slug") || undefined,
+          bio: readString(formData, "bio") || undefined,
+        })
+      : null;
+  if (sellerInput && !sellerInput.ok) {
+    return { error: sellerInput.error };
   }
 
   const ip = await getClientIp();
@@ -130,11 +174,12 @@ export async function signUpWithEmail(
     });
     createdUserId = user.$id;
 
-    // updateLabels replaces the full label list — set buyer only at register.
-    await users.updateLabels({
-      userId: user.$id,
-      labels: [ROLE_LABELS.buyer],
-    });
+    if (accountType === "buyer") {
+      await users.updateLabels({
+        userId: user.$id,
+        labels: [ROLE_LABELS.buyer],
+      });
+    }
 
     try {
       await createProfileForUser({
@@ -147,6 +192,19 @@ export async function signUpWithEmail(
       await rollbackSignup(user.$id);
       createdUserId = null;
       throw profileError;
+    }
+
+    if (accountType === "seller" && sellerInput?.ok) {
+      const shop = await createPendingSellerProfileForUser(user.$id, {
+        shopName: sellerInput.shopName,
+        slug: sellerInput.slug,
+        bio: sellerInput.bio ?? undefined,
+      });
+      if (!shop.ok) {
+        await rollbackSignup(user.$id);
+        createdUserId = null;
+        return { error: shop.error };
+      }
     }
 
     const session = await account.createEmailPasswordSession({
@@ -162,7 +220,8 @@ export async function signUpWithEmail(
     return { error: mapAuthError(error) };
   }
 
-  redirect("/");
+  const sessionUser = await getLoggedInUser();
+  redirect(sessionUser ? await resolveHomePath(sessionUser) : "/market");
 }
 
 export async function signInWithEmail(
@@ -206,10 +265,12 @@ export async function signInWithEmail(
     await setSessionCookie(session.secret, session.expire);
     try {
       const user = await users.get({ userId: session.userId });
-      destination = postLoginPath(user, nextRaw);
+      destination = await resolvePostLoginPath(user, nextRaw);
     } catch {
-      // Session cookie is already set; label lookup failed — storefront is safe.
-      destination = "/market";
+      const sessionUser = await getLoggedInUser();
+      destination = sessionUser
+        ? await resolvePostLoginPath(sessionUser, nextRaw)
+        : "/market";
     }
   } catch (error) {
     unstable_rethrow(error);

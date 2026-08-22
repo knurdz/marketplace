@@ -18,14 +18,11 @@ export default function FaqPage() {
         </p>
       </LegalSection>
 
-      <LegalSection title="How do I become a seller?">
+      <LegalSection title="How do I sell on Knurdz?">
         <p>
-          Register as a buyer, then apply at{" "}
-          <a href="/become-seller" className="text-accent hover:underline">
-            Become a seller
-          </a>
-          . An admin must approve your seller profile before you can publish
-          listings.
+          Create an account and choose Seller at registration. An admin reviews
+          your shop before you can publish listings. Buyer and seller accounts
+          are separate — buyers cannot convert later.
         </p>
       </LegalSection>
 

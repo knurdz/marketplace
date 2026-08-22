@@ -38,8 +38,8 @@ export default async function AdminSellersPage() {
 
       {pending.length === 0 ? (
         <p className="mt-10 rounded-md border border-border bg-card px-4 py-5 font-mono text-sm text-muted-foreground">
-          No pending applications. When buyers apply via the seller portal,
-          they will appear here.
+          No pending applications. New seller registrations appear here until
+          you approve or reject them.
         </p>
       ) : (
         <ul className="mt-10 space-y-4">

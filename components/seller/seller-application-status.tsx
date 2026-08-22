@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import type { SellerProfile } from "@/lib/types";
 
@@ -19,12 +18,8 @@ export function SellerApplicationStatus({
         <p className="mt-2 text-sm text-muted-foreground">
           Your shop <strong>{profile.shopName}</strong> (
           <span className="font-mono">{profile.slug}</span>) is waiting for
-          admin approval. You will get seller portal access once approved.
-        </p>
-        <p className="mt-4 text-sm text-muted-foreground">
-          <Link href="/" className="text-accent hover:underline">
-            Back to storefront
-          </Link>
+          admin approval. You will get seller portal access once approved. This
+          account cannot shop the buyer market.
         </p>
       </div>
     );
@@ -49,10 +44,8 @@ export function SellerApplicationStatus({
           </p>
         )}
         <p className="mt-4 text-sm text-muted-foreground">
-          Only one application is allowed per account.{" "}
-          <Link href="/" className="text-accent hover:underline">
-            Back to storefront
-          </Link>
+          Only one application is allowed per account. Sign out to register a
+          buyer account instead.
         </p>
       </div>
     );

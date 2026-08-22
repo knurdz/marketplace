@@ -1,5 +1,7 @@
 import type { ReactNode } from "react";
+import { headers } from "next/headers";
 import { redirect } from "next/navigation";
+import { PendingSellerShell } from "@/components/layout/pending-seller-shell";
 import { PortalShell } from "@/components/layout/portal-shell";
 import { ROLE_LABELS, requireUser, userHasLabel } from "@/lib/appwrite/roles";
 import {
@@ -28,16 +30,27 @@ export default async function SellerLayout({
 }) {
   const user = await requireUser();
   const hasSellerLabel = userHasLabel(user, ROLE_LABELS.seller);
+  const pathname = (await headers()).get("x-knurdz-pathname") ?? "";
+  const isPendingPage = pathname === "/seller/pending";
 
-  if (!hasSellerLabel) {
-    const profile = await getOwnSellerProfile();
-    const dest = blockedSellerPortalDestination(hasSellerLabel, profile);
-    if (dest) redirect(dest);
+  if (hasSellerLabel) {
+    if (isPendingPage) {
+      redirect("/seller");
+    }
+    return (
+      <PortalShell title="Seller" homeHref="/seller" nav={SELLER_NAV}>
+        {children}
+      </PortalShell>
+    );
   }
 
-  return (
-    <PortalShell title="Seller" homeHref="/market" nav={SELLER_NAV}>
-      {children}
-    </PortalShell>
-  );
+  const profile = await getOwnSellerProfile();
+  const dest = blockedSellerPortalDestination(hasSellerLabel, profile);
+  if (isPendingPage && dest === "/seller/pending") {
+    return <PendingSellerShell>{children}</PendingSellerShell>;
+  }
+  if (dest) {
+    redirect(dest);
+  }
+  redirect("/");
 }

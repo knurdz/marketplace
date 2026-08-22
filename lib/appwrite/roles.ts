@@ -1,5 +1,6 @@
 import type { Models } from "node-appwrite";
 import { redirect } from "next/navigation";
+import type { SellerStatus } from "@/lib/types";
 import { getLoggedInUser } from "./session";
 
 /** Appwrite Auth labels used for marketplace roles. */
@@ -35,35 +36,108 @@ function pathIsPortal(path: string, portal: "/admin" | "/seller"): boolean {
   return pathname === portal || pathname.startsWith(`${portal}/`);
 }
 
+/** FAQ / legal stay reachable without mixing buyer commerce. */
+export function pathIsPublicStoreException(path: string): boolean {
+  const pathname = pathnameOf(path);
+  return pathname === "/faq" || pathname.startsWith("/legal/");
+}
+
+const AUTH_PREFIXES = [
+  "/login",
+  "/register",
+  "/account",
+  "/forgot-password",
+  "/reset-password",
+  "/verify-email",
+] as const;
+
+function pathIsAuth(path: string): boolean {
+  const pathname = pathnameOf(path);
+  return AUTH_PREFIXES.some(
+    (prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`),
+  );
+}
+
 /**
- * Default destination after login/register. Admin wins if the user also has
- * seller. Buyers (and anyone without a portal label) go to the market.
+ * Buyer-only commerce (catalog, cart, checkout, buyer hub).
+ * Portals, auth, FAQ, and legal are excluded.
  */
-export function homePathForUser(user: LabeledUser): string {
+export function pathIsBuyerCommerce(path: string): boolean {
+  if (pathIsPublicStoreException(path) || pathIsAuth(path)) return false;
+  if (pathIsPortal(path, "/admin") || pathIsPortal(path, "/seller")) {
+    return false;
+  }
+  return true;
+}
+
+export function shouldLeaveBuyerStorefront(
+  user: LabeledUser,
+  sellerStatus?: SellerStatus | null,
+): boolean {
+  return homePathForUser(user, sellerStatus) !== "/market";
+}
+
+/**
+ * Default destination after login/register.
+ * Pass seller profile status so pending applicants do not land on the market.
+ */
+export function homePathForUser(
+  user: LabeledUser,
+  sellerStatus?: SellerStatus | null,
+): string {
   if (userHasLabel(user, "admin")) {
     return "/admin";
   }
   if (userHasLabel(user, "seller")) {
     return "/seller";
   }
+  if (sellerStatus === "pending" || sellerStatus === "rejected") {
+    return "/seller/pending";
+  }
+  if (!userHasLabel(user, "buyer")) {
+    return "/seller/pending";
+  }
   return "/market";
 }
 
 /**
  * Post-login destination: honor a safe `next` only when the user may visit it.
- * `/admin*` requires the admin label; `/seller*` requires seller.
+ * Admins and sellers (and pending applicants) cannot be sent into buyer commerce.
  */
-export function postLoginPath(user: LabeledUser, next?: string | null): string {
-  const roleHome = homePathForUser(user);
+export function postLoginPath(
+  user: LabeledUser,
+  next?: string | null,
+  sellerStatus?: SellerStatus | null,
+): string {
+  const roleHome = homePathForUser(user, sellerStatus);
   const safe = safeNextPath(next ?? undefined);
   if (!safe) return roleHome;
 
   if (pathIsPortal(safe, "/admin") && !userHasLabel(user, "admin")) {
     return roleHome;
   }
-  if (pathIsPortal(safe, "/seller") && !userHasLabel(user, "seller")) {
+
+  if (pathIsPortal(safe, "/seller")) {
+    const pendingPage = pathnameOf(safe) === "/seller/pending";
+    if (pendingPage) {
+      if (userHasLabel(user, "seller")) return "/seller";
+      if (sellerStatus === "pending" || sellerStatus === "rejected") {
+        return safe;
+      }
+      return roleHome;
+    }
+    if (!userHasLabel(user, "seller")) {
+      return roleHome;
+    }
+  }
+
+  if (
+    pathIsBuyerCommerce(safe) &&
+    shouldLeaveBuyerStorefront(user, sellerStatus)
+  ) {
     return roleHome;
   }
+
   return safe;
 }
 
@@ -78,7 +152,7 @@ export async function requireUser(): Promise<Models.User<Models.Preferences>> {
 
 /**
  * Authoritative role gate for Server Components / layouts.
- * Labels are set only via admin API (register → buyer; seller/admin later).
+ * Labels are set only via admin API (register → buyer; seller after approval).
  * Never trust UI-only checks.
  */
 export async function requireLabel(

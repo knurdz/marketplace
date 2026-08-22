@@ -29,6 +29,7 @@ export {
   TABLE_REVIEWS,
   TABLE_SELLER_PROFILES,
   TABLE_PAYHERE_NOTIFY_LOGS,
+  TABLE_VIEW_STATS,
   getAppUrl,
   getAppwriteEndpoint,
   getAppwriteProjectId,
@@ -56,13 +57,17 @@ export type { NotificationActionState } from "./notifications";
 export {
   ROLE_LABELS,
   homePathForUser,
+  pathIsBuyerCommerce,
+  pathIsPublicStoreException,
   postLoginPath,
   requireLabel,
   requireUser,
   safeNextPath,
+  shouldLeaveBuyerStorefront,
   userHasLabel,
 } from "./roles";
 export type { RoleLabel } from "./roles";
+export { loadSellerStatus, resolveHomePath, resolvePostLoginPath } from "./home-path";
 export {
   createAdminClient,
   createPublicClient,

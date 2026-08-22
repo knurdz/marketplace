@@ -6,11 +6,11 @@ export default async function SellerSettingsPage() {
   const profile = await getOwnSellerProfile();
 
   if (!profile) {
-    redirect("/become-seller");
+    redirect("/seller/pending");
   }
 
   if (profile.status !== "approved") {
-    redirect("/become-seller");
+    redirect("/seller/pending");
   }
 
   return (

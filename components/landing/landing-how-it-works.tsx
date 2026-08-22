@@ -13,8 +13,8 @@ const STEPS = [
   },
   {
     n: "03",
-    title: "Fulfill",
-    body: "Sellers ship or mark ready for pickup. You track the order from your dashboard.",
+    title: "Track",
+    body: "Follow fulfillment from your dashboard. Orders stay with one seller at a time.",
   },
 ] as const;
 

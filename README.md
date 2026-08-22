@@ -101,17 +101,18 @@ API key for seed needs **users.write** + TablesDB write (same key used for schem
 
 ### Auth routes
 
-Shared storefront `/` is the landing page for every role. There is a single `/login` (no `/admin/login` or `/seller/login`). After sign-in, users are sent to their portal: **admin → `/admin`**, **seller → `/seller`**, **buyer → `/`**. The storefront itself does not auto-redirect by role. A `?next=` return path is honored only when it is a same-origin relative URL the user’s labels may visit.
+Shared storefront `/` is the buyer landing page. There is a single `/login` (no `/admin/login` or `/seller/login`). After sign-in, users are sent to their portal: **admin → `/admin`**, **seller → `/seller`**, **pending seller → `/seller/pending`**, **buyer → `/market`**. Admins and sellers cannot browse the buyer market. A `?next=` return path is honored only when it is a same-origin relative URL the user’s labels may visit.
 
 | Path               | Purpose                                         |
 | ------------------ | ----------------------------------------------- |
 | `/login`           | Email/password sign in (role redirect after)    |
-| `/register`        | Create account (buyer → `/`)                    |
+| `/register`        | Create account (buyer or seller application)    |
 | `/account`         | Session + profile edit, verify resend, sign out |
 | `/forgot-password` | Request password recovery email                 |
 | `/reset-password`  | Set new password from recovery link             |
 | `/verify-email`    | Complete email verification from email link     |
 | `/seller`          | Seller portal (requires `seller` label)         |
+| `/seller/pending`  | Holding page until admin approves a shop        |
 | `/admin`           | Admin portal (requires `admin` label)           |
 
 ## Status

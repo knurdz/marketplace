@@ -1,7 +1,6 @@
 import Link from "next/link";
-import type { Models } from "node-appwrite";
 import { Heart, Menu, Search, ShoppingBag } from "lucide-react";
-import { userHasLabel } from "@/lib/appwrite/roles";
+import type { SessionUserView } from "@/lib/appwrite/session-user";
 import { AccountMenu } from "@/components/layout/account-menu";
 import { NotificationBell } from "@/components/notifications/notification-bell";
 import { Button } from "@/components/ui/button";
@@ -16,21 +15,17 @@ import {
 } from "@/components/ui/sheet";
 
 type StoreNavbarProps = {
-  user: Models.User<Models.Preferences> | null;
+  user: SessionUserView | null;
   cartItemCount?: number;
   displayName?: string | null;
   avatarUrl?: string | null;
 };
 
 function NavLinks({
-  user,
   className,
 }: {
-  user: Models.User<Models.Preferences> | null;
   className?: string;
 }) {
-  const isSeller = Boolean(user && userHasLabel(user, "seller"));
-
   return (
     <nav aria-label="Store" className={className}>
       <Link
@@ -44,12 +39,6 @@ function NavLinks({
         className="text-sm text-muted-foreground transition hover:text-foreground"
       >
         Categories
-      </Link>
-      <Link
-        href={isSeller ? "/seller" : "/become-seller"}
-        className="text-sm text-muted-foreground transition hover:text-foreground"
-      >
-        Sell
       </Link>
     </nav>
   );
@@ -90,10 +79,7 @@ export function StoreNavbar({
           <span className="text-accent">.</span>
         </Link>
 
-        <NavLinks
-          user={user}
-          className="hidden items-center gap-6 md:flex"
-        />
+        <NavLinks className="hidden items-center gap-6 md:flex" />
 
         <SearchForm className="hidden min-w-0 flex-1 lg:flex" />
 
@@ -160,7 +146,7 @@ export function StoreNavbar({
               </SheetHeader>
               <div className="mt-6 flex flex-col gap-4 px-4">
                 <SearchForm className="flex w-full" />
-                <NavLinks user={user} className="flex flex-col gap-3" />
+                <NavLinks className="flex flex-col gap-3" />
                 <Separator />
                 {user ? (
                   <div className="flex flex-col gap-2">

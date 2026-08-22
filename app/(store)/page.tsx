@@ -1,11 +1,10 @@
 import { CategoryMarquee } from "@/components/store/category-marquee";
 import { LandingHero } from "@/components/landing/landing-hero";
 import { LandingHowItWorks } from "@/components/landing/landing-how-it-works";
-import { LandingSellCta } from "@/components/landing/landing-sell-cta";
 import { ProductGrid } from "@/components/store/product-grid";
 import { Reveal } from "@/components/motion/reveal";
 import { Button } from "@/components/ui/button";
-import { userHasLabel } from "@/lib/appwrite/roles";
+import { toSessionUserView } from "@/lib/appwrite/session-user";
 import {
   getSessionUser,
   listCategories,
@@ -16,7 +15,8 @@ import {
 import Link from "next/link";
 
 export default async function Home() {
-  const user = await getSessionUser();
+  const authUser = await getSessionUser();
+  const user = authUser ? toSessionUserView(authUser) : null;
   const [categories, featured, trending] = await Promise.all([
     listCategories(),
     listFeaturedProducts({ limit: 8 }),
@@ -25,7 +25,6 @@ export default async function Home() {
 
   const coverIds = [...featured, ...trending].map((product) => product.$id);
   const covers = await listCoverImagesByProductIds(coverIds);
-  const isSeller = Boolean(user && userHasLabel(user, "seller"));
 
   return (
     <main className="relative">
@@ -87,12 +86,6 @@ export default async function Home() {
             <h2 className="mt-2 text-2xl font-bold tracking-tight">Three steps. No noise.</h2>
           </div>
           <LandingHowItWorks />
-        </section>
-      </Reveal>
-
-      <Reveal>
-        <section className="mx-auto w-full max-w-6xl px-4 pb-20 sm:px-6 lg:px-8">
-          <LandingSellCta isSeller={isSeller} />
         </section>
       </Reveal>
     </main>

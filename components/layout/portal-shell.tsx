@@ -38,7 +38,7 @@ export function PortalShell({
       <SkipToContent />
       <aside className="hidden w-60 shrink-0 border-r border-border bg-sidebar md:flex md:flex-col">
         <div className="px-4 py-5">
-          <Link href="/" className="text-sm font-semibold tracking-tight">
+          <Link href={homeHref} className="text-sm font-semibold tracking-tight">
             Knurdz
             <span className="text-accent">.</span>
           </Link>
@@ -48,9 +48,6 @@ export function PortalShell({
         <div className="flex flex-1 flex-col gap-4 p-3">
           <PortalSideNav groups={nav} label={title} />
           <div className="mt-auto space-y-2 p-1">
-            <Button variant="secondary" size="sm" className="w-full" asChild>
-              <Link href={homeHref}>Market</Link>
-            </Button>
             <form action={signOut}>
               <Button type="submit" variant="ghost" size="sm" className="w-full">
                 Sign out
@@ -80,9 +77,6 @@ export function PortalShell({
                 <div className="mt-4 flex flex-col gap-4 px-2">
                   <PortalSideNav groups={nav} label={title} />
                   <Separator />
-                  <Button variant="secondary" asChild>
-                    <Link href={homeHref}>Market</Link>
-                  </Button>
                   <form action={signOut}>
                     <Button type="submit" variant="ghost" className="w-full">
                       Sign out

@@ -6,6 +6,7 @@ import {
   blockedSellerPortalDestination,
   parseSellerApplicationInput,
 } from "../lib/services/seller-application";
+import { homePathForUser, postLoginPath } from "../lib/appwrite/roles";
 import type { SellerProfile } from "../lib/types";
 
 function assert(condition: boolean, message: string): void {
@@ -40,12 +41,12 @@ assert(
 );
 assert(
   blockedSellerPortalDestination(false, profile("pending")) ===
-    "/become-seller",
+    "/seller/pending",
   "pending without label → status page",
 );
 assert(
   blockedSellerPortalDestination(false, profile("rejected")) ===
-    "/become-seller",
+    "/seller/pending",
   "rejected without label → status page",
 );
 assert(
@@ -55,6 +56,44 @@ assert(
 assert(
   blockedSellerPortalDestination(false, profile("approved")) === "/",
   "approved without label → home (label is authoritative gate)",
+);
+
+assert(
+  homePathForUser({ labels: ["admin"] }) === "/admin",
+  "admin home",
+);
+assert(
+  homePathForUser({ labels: ["seller"] }) === "/seller",
+  "seller home",
+);
+assert(
+  homePathForUser({ labels: ["buyer"] }) === "/market",
+  "buyer home",
+);
+assert(
+  homePathForUser({ labels: [] }) === "/seller/pending",
+  "unlabeled account is not a shopper",
+);
+assert(
+  homePathForUser({ labels: [] }, "pending") === "/seller/pending",
+  "pending applicant home",
+);
+assert(
+  postLoginPath({ labels: ["seller"] }, "/market") === "/seller",
+  "seller cannot next into market",
+);
+assert(
+  postLoginPath({ labels: ["admin"] }, "/products/x") === "/admin",
+  "admin cannot next into market product",
+);
+assert(
+  postLoginPath({ labels: [] }, "/seller/pending", "pending") ===
+    "/seller/pending",
+  "pending may open holding page",
+);
+assert(
+  postLoginPath({ labels: ["buyer"] }, "/cart") === "/cart",
+  "buyer may next into cart",
 );
 
 const ok = parseSellerApplicationInput({ shopName: "Campus Crafts" });

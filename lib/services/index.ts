@@ -17,10 +17,33 @@ export {
   getSellerOrder,
   getSellerOrderItems,
   getSellerPaymentForOrder,
+  listSellerOrderItemsForOrderIds,
   listSellerOrders,
   ownedBySeller,
 } from "./seller-orders";
 export type { FulfillSellerOrderResult } from "./seller-orders";
+export {
+  bucketSellerEarnings,
+  getSellerDashboardSnapshot,
+  getSellerEarningsAnalytics,
+  parseSellerAnalyticsRange,
+} from "./seller-dashboard";
+export type {
+  SellerAnalyticsRange,
+  SellerDashboardSnapshot,
+  SellerEarningsAnalytics,
+  SellerProductEarnings,
+  SellerSalesBucket,
+} from "./seller-dashboard";
+export {
+  getSellerViewInsights,
+  recordMarketplaceView,
+} from "./view-stats";
+export type {
+  SellerProductViewRow,
+  SellerViewInsights,
+  ViewKind,
+} from "./view-stats";
 export {
   getSalesOverTime,
   getUserGrowthOverTime,
@@ -149,6 +172,7 @@ export {
 } from "./seller-approvals";
 export {
   blockedSellerPortalDestination,
+  createPendingSellerProfileForUser,
   getOwnSellerProfile,
   normalizeShopSlug,
   parseSellerApplicationInput,

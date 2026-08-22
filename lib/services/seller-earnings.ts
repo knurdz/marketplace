@@ -18,12 +18,14 @@ const LIST_DISPLAY_LIMIT = 50;
 export type SellerEarningsLine = {
   order: Order;
   payment: Payment;
+  paidAt: string;
 };
 
 export type SellerEarnings = {
   total: number;
   currency: string;
   lines: SellerEarningsLine[];
+  allLines: SellerEarningsLine[];
   lineCount: number;
 };
 
@@ -33,7 +35,13 @@ function asNullableString(value: unknown): string | null {
 }
 
 function emptyEarnings(): SellerEarnings {
-  return { total: 0, currency: DEFAULT_CURRENCY, lines: [], lineCount: 0 };
+  return {
+    total: 0,
+    currency: DEFAULT_CURRENCY,
+    lines: [],
+    allLines: [],
+    lineCount: 0,
+  };
 }
 
 /**
@@ -107,11 +115,11 @@ async function listSellerOrders(sellerId: string): Promise<Order[]> {
 async function fetchPaidPaymentsForOrders(
   orderIds: string[],
   ownedOrderIds: Set<string>,
-): Promise<Payment[]> {
+): Promise<Array<{ payment: Payment; paidAt: string }>> {
   if (orderIds.length === 0) return [];
 
   const { tables } = await createSessionClient();
-  const payments: Payment[] = [];
+  const payments: Array<{ payment: Payment; paidAt: string }> = [];
 
   for (let i = 0; i < orderIds.length; i += PAGE_SIZE) {
     const chunk = orderIds.slice(i, i + PAGE_SIZE);
@@ -142,7 +150,12 @@ async function fetchPaidPaymentsForOrders(
           payment.status === "paid" &&
           ownedOrderIds.has(payment.orderId)
         ) {
-          payments.push(payment);
+          const paidAt =
+            typeof (row as unknown as Record<string, unknown>).$createdAt ===
+            "string"
+              ? ((row as unknown as Record<string, unknown>).$createdAt as string)
+              : "";
+          payments.push({ payment, paidAt });
         }
       }
 
@@ -163,17 +176,17 @@ async function fetchPaidPaymentsForOrders(
 
 function buildEarningsLines(
   orders: Order[],
-  payments: Payment[],
+  payments: Array<{ payment: Payment; paidAt: string }>,
   sellerId: string,
 ): SellerEarningsLine[] {
   const orderById = new Map(orders.map((o) => [o.$id, o]));
   const orderIndex = new Map(orders.map((o, i) => [o.$id, i]));
   const lines: SellerEarningsLine[] = [];
 
-  for (const payment of payments) {
+  for (const { payment, paidAt } of payments) {
     const order = orderById.get(payment.orderId);
     if (!order || !ownedBySeller(order, sellerId)) continue;
-    lines.push({ order, payment });
+    lines.push({ order, payment, paidAt });
   }
 
   lines.sort(
@@ -199,18 +212,20 @@ export async function getSellerEarnings(): Promise<SellerEarnings> {
   try {
     const orders = await listSellerOrders(sellerId);
     const ownedOrderIds = new Set(orders.map((o) => o.$id));
-    const payments = await fetchPaidPaymentsForOrders(
+    const paidPayments = await fetchPaidPaymentsForOrders(
       [...ownedOrderIds],
       ownedOrderIds,
     );
+    const payments = paidPayments.map((entry) => entry.payment);
 
     const { total, currency } = aggregatePaidEarnings(payments);
-    const lines = buildEarningsLines(orders, payments, sellerId);
+    const lines = buildEarningsLines(orders, paidPayments, sellerId);
 
     return {
       total,
       currency,
       lineCount: lines.length,
+      allLines: lines,
       lines: lines.slice(0, LIST_DISPLAY_LIMIT),
     };
   } catch {
