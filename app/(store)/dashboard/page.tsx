@@ -2,7 +2,10 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { OrderListRow } from "@/components/store/order-list-row";
 import { RecentlyViewedSection } from "@/components/store/recently-viewed-section";
+import { EmptyState } from "@/components/layout/empty-state";
+import { PageHeader } from "@/components/layout/page-header";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
 import { getLoggedInUser } from "@/lib/appwrite/session";
 import { getOwnWishlistView, listOwnOrders } from "@/lib/services";
 import type { Order, OrderStatus, WishlistLine } from "@/lib/types";
@@ -80,12 +83,12 @@ export default async function DashboardPage() {
   const recentOrders = orders.slice(0, RECENT_ORDERS_LIMIT);
 
   return (
-    <main className="relative mx-auto w-full max-w-3xl px-6 py-16 sm:px-10">
-      <p className="font-mono text-sm text-accent">$ ./dashboard</p>
-      <h1 className="mt-4 text-3xl font-bold tracking-tight">Your dashboard</h1>
-      <p className="mt-2 text-sm text-muted-foreground">
-        Order summary, recent purchases, and saved products for your account.
-      </p>
+    <main className="mx-auto w-full max-w-4xl px-4 py-10 sm:px-6">
+      <PageHeader
+        eyebrow="Account"
+        title="Your dashboard"
+        description="Orders, saved products, and what you viewed on this device."
+      />
 
       <section className="mt-12" aria-labelledby="order-summary-heading">
         <h2
@@ -97,25 +100,31 @@ export default async function DashboardPage() {
         <p className="mt-1 text-sm text-muted-foreground">
           Counts from your most recent orders.
         </p>
-        <dl className="mt-6 grid grid-cols-3 gap-4">
-          <div>
-            <dt className="text-sm text-muted-foreground">Pending</dt>
-            <dd className="mt-1 font-mono text-2xl tabular-nums">
-              {summary.pending}
-            </dd>
-          </div>
-          <div>
-            <dt className="text-sm text-muted-foreground">In progress</dt>
-            <dd className="mt-1 font-mono text-2xl tabular-nums">
-              {summary.inProgress}
-            </dd>
-          </div>
-          <div>
-            <dt className="text-sm text-muted-foreground">Completed</dt>
-            <dd className="mt-1 font-mono text-2xl tabular-nums">
-              {summary.completed}
-            </dd>
-          </div>
+        <dl className="mt-6 grid grid-cols-3 gap-3">
+          <Card>
+            <CardContent>
+              <dt className="text-sm text-muted-foreground">Pending</dt>
+              <dd className="mt-1 font-mono text-2xl tabular-nums">
+                {summary.pending}
+              </dd>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent>
+              <dt className="text-sm text-muted-foreground">In progress</dt>
+              <dd className="mt-1 font-mono text-2xl tabular-nums">
+                {summary.inProgress}
+              </dd>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent>
+              <dt className="text-sm text-muted-foreground">Completed</dt>
+              <dd className="mt-1 font-mono text-2xl tabular-nums">
+                {summary.completed}
+              </dd>
+            </CardContent>
+          </Card>
         </dl>
       </section>
 
@@ -128,14 +137,15 @@ export default async function DashboardPage() {
         </h2>
         {recentOrders.length === 0 ? (
           <>
-            <p className="mt-4 text-muted-foreground">
-              You have not placed any orders yet.
-            </p>
-            <p className="mt-6">
-              <Button variant="outline" size="sm" asChild>
-                <Link href="/">Browse listings</Link>
-              </Button>
-            </p>
+            <EmptyState
+              className="mt-4"
+              title="No orders yet"
+              action={
+                <Button asChild>
+                  <Link href="/market">Browse listings</Link>
+                </Button>
+              }
+            />
           </>
         ) : (
           <>
@@ -145,7 +155,7 @@ export default async function DashboardPage() {
               ))}
             </ul>
             <p className="mt-6">
-              <Button variant="outline" size="sm" asChild>
+              <Button variant="secondary" size="sm" asChild>
                 <Link href="/orders">View all orders</Link>
               </Button>
             </p>
@@ -167,15 +177,16 @@ export default async function DashboardPage() {
         </h2>
         {wishlistView.lines.length === 0 ? (
           <>
-            <p className="mt-4 text-muted-foreground">
-              You have not saved any products yet. Browse listings and tap Save
-              on a product page.
-            </p>
-            <p className="mt-6">
-              <Button variant="outline" size="sm" asChild>
-                <Link href="/">Browse listings</Link>
-              </Button>
-            </p>
+            <EmptyState
+              className="mt-4"
+              title="Nothing saved yet"
+              description="Browse listings and tap Save on a product page."
+              action={
+                <Button asChild>
+                  <Link href="/market">Browse listings</Link>
+                </Button>
+              }
+            />
           </>
         ) : (
           <>
@@ -219,7 +230,7 @@ export default async function DashboardPage() {
               })}
             </ul>
             <p className="mt-6">
-              <Button variant="outline" size="sm" asChild>
+              <Button variant="secondary" size="sm" asChild>
                 <Link href="/wishlist">View wishlist</Link>
               </Button>
             </p>

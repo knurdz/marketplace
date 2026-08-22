@@ -49,7 +49,6 @@ export default async function EditListingPage({ params }: EditListingPageProps) 
 
   return (
     <div className="mx-auto max-w-3xl">
-      <p className="font-mono text-sm text-accent">$ ./seller --listings edit</p>
       <h2 className="mt-3 text-3xl font-bold tracking-tight">Edit listing</h2>
       <p className="mt-2 max-w-xl text-sm text-muted-foreground">
         {listingPublishStatusCopy(product.status)}

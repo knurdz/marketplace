@@ -95,7 +95,7 @@ export function PayHerePaymentStatus({
           Payment confirmed — your order is paid.
         </p>
         <Button variant="outline" size="sm" asChild>
-          <Link href="/">Back to listings</Link>
+          <Link href="/market">Back to listings</Link>
         </Button>
       </div>
     );
@@ -117,7 +117,7 @@ export function PayHerePaymentStatus({
             </Link>
           </Button>
           <Button variant="outline" size="sm" asChild>
-            <Link href="/">Back to listings</Link>
+            <Link href="/market">Back to listings</Link>
           </Button>
         </div>
       </div>
@@ -162,7 +162,7 @@ export function PayHerePaymentStatus({
           </Button>
         ) : null}
         <Button variant="outline" size="sm" asChild>
-          <Link href="/">Back to listings</Link>
+          <Link href="/market">Back to listings</Link>
         </Button>
       </div>
 

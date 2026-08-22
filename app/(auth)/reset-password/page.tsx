@@ -1,5 +1,7 @@
 import Link from "next/link";
 import { ResetPasswordForm } from "@/components/auth/reset-password-form";
+import { PageHeader } from "@/components/layout/page-header";
+import { Button } from "@/components/ui/button";
 
 type SearchParams = Promise<{ userId?: string; secret?: string }>;
 
@@ -14,26 +16,23 @@ export default async function ResetPasswordPage({
 
   return (
     <div>
-      <p className="font-mono text-sm text-accent">$ ./auth --reset</p>
-      <h1 className="mt-4 text-3xl font-bold tracking-tight">Reset password</h1>
-      <p className="mt-2 text-sm text-muted-foreground">
-        Choose a new password for your account.
-      </p>
+      <PageHeader
+        eyebrow="Account"
+        title="Reset password"
+        description="Choose a new password for your account."
+      />
       <div className="mt-8">
         {!userId || !secret ? (
           <div className="space-y-4">
             <p
               role="alert"
-              className="rounded-md border border-border bg-card px-3 py-2 font-mono text-sm text-accent-bright"
+              className="rounded-lg border border-border bg-card px-3 py-2 text-sm"
             >
               This reset link is missing required parameters. Request a new one.
             </p>
-            <Link
-              href="/forgot-password"
-              className="inline-flex font-mono text-sm text-accent hover:underline"
-            >
-              Request reset link
-            </Link>
+            <Button asChild>
+              <Link href="/forgot-password">Request reset link</Link>
+            </Button>
           </div>
         ) : (
           <ResetPasswordForm userId={userId} secret={secret} />

@@ -1,5 +1,7 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import { EmptyState } from "@/components/layout/empty-state";
+import { PageHeader } from "@/components/layout/page-header";
 import { OrderListRow } from "@/components/store/order-list-row";
 import { Button } from "@/components/ui/button";
 import { getLoggedInUser } from "@/lib/appwrite/session";
@@ -14,17 +16,24 @@ export default async function OrdersPage() {
   const orders = await listOwnOrders();
 
   return (
-    <main className="relative mx-auto w-full max-w-3xl px-6 py-16 sm:px-10">
-      <p className="font-mono text-sm text-accent">$ ./orders --list</p>
-      <h1 className="mt-4 text-3xl font-bold tracking-tight">Your orders</h1>
-      <p className="mt-2 text-sm text-muted-foreground">
-        Order history for your account. Only your orders are shown here.
-      </p>
+    <main className="mx-auto w-full max-w-3xl px-4 py-10 sm:px-6">
+      <PageHeader
+        eyebrow="Account"
+        title="Your orders"
+        description="Only your orders are shown here."
+      />
 
       {orders.length === 0 ? (
-        <p className="mt-10 text-muted-foreground">
-          You have not placed any orders yet.
-        </p>
+        <EmptyState
+          className="mt-10"
+          title="No orders yet"
+          description="When you check out, they will land here."
+          action={
+            <Button asChild>
+              <Link href="/market">Browse listings</Link>
+            </Button>
+          }
+        />
       ) : (
         <ul className="mt-10" aria-label="Order history">
           {orders.map((order) => (
@@ -32,12 +41,6 @@ export default async function OrdersPage() {
           ))}
         </ul>
       )}
-
-      <p className="mt-12">
-        <Button variant="outline" size="sm" asChild>
-          <Link href="/">Back to listings</Link>
-        </Button>
-      </p>
     </main>
   );
 }

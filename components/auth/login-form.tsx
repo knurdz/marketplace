@@ -3,6 +3,9 @@
 import Link from "next/link";
 import { useActionState } from "react";
 import { signInWithEmail, type AuthActionState } from "@/lib/appwrite/auth";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 
 const initialState: AuthActionState = {};
 
@@ -23,17 +26,15 @@ export function LoginForm({ nextPath }: { nextPath?: string }) {
         <p
           id={errorId}
           role="alert"
-          className="rounded-md border border-border bg-card px-3 py-2 font-mono text-sm text-accent-bright"
+          className="rounded-lg border border-border bg-card px-3 py-2 text-sm"
         >
           {state.error}
         </p>
       ) : null}
 
       <div className="space-y-2">
-        <label htmlFor="email" className="block text-sm text-muted-foreground">
-          Email
-        </label>
-        <input
+        <Label htmlFor="email">Email</Label>
+        <Input
           id="email"
           name="email"
           type="email"
@@ -41,15 +42,12 @@ export function LoginForm({ nextPath }: { nextPath?: string }) {
           required
           aria-invalid={hasError || undefined}
           aria-describedby={hasError ? errorId : undefined}
-          className="w-full rounded-md border border-border bg-card px-3 py-2.5 text-foreground outline-none ring-accent focus:ring-2"
         />
       </div>
 
       <div className="space-y-2">
-        <label htmlFor="password" className="block text-sm text-muted-foreground">
-          Password
-        </label>
-        <input
+        <Label htmlFor="password">Password</Label>
+        <Input
           id="password"
           name="password"
           type="password"
@@ -58,29 +56,23 @@ export function LoginForm({ nextPath }: { nextPath?: string }) {
           minLength={8}
           aria-invalid={hasError || undefined}
           aria-describedby={hasError ? errorId : undefined}
-          className="w-full rounded-md border border-border bg-card px-3 py-2.5 text-foreground outline-none ring-accent focus:ring-2"
         />
       </div>
 
-      <button
-        type="submit"
-        disabled={pending}
-        data-testid="login-submit"
-        className="inline-flex w-full items-center justify-center rounded-md bg-foreground px-5 py-2.5 text-sm font-medium text-background transition hover:opacity-90 disabled:opacity-60"
-      >
+      <Button type="submit" className="w-full" disabled={pending} data-testid="login-submit">
         {pending ? "Signing in…" : "Sign in"}
-      </button>
+      </Button>
 
-      <p className="font-mono text-sm text-muted-foreground">
-        <Link href="/forgot-password" className="text-accent hover:underline">
+      <p className="text-sm text-muted-foreground">
+        <Link href="/forgot-password" className="hover:text-foreground">
           Forgot password?
         </Link>
       </p>
 
-      <p className="font-mono text-sm text-muted-foreground">
-        No account?{" "}
-        <Link href="/register" className="text-accent hover:underline">
-          Register
+      <p className="text-sm text-muted-foreground">
+        New here?{" "}
+        <Link href="/register" className="text-foreground hover:underline">
+          Create an account
         </Link>
       </p>
     </form>

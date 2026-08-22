@@ -22,7 +22,6 @@ export default async function AdminSellersPage() {
 
   return (
     <div className="mx-auto max-w-3xl">
-      <p className="font-mono text-sm text-accent">$ ./admin --sellers</p>
       <h2 className="mt-3 text-3xl font-bold tracking-tight">
         Seller approvals
       </h2>

@@ -1,5 +1,7 @@
 import Link from "next/link";
 import { getSellerMetrics } from "@/lib/services";
+import { PageHeader } from "@/components/layout/page-header";
+import { Card, CardContent } from "@/components/ui/card";
 
 function formatCount(value: number): string {
   return new Intl.NumberFormat(undefined, {
@@ -45,22 +47,23 @@ export default async function SellerPage() {
   ];
 
   return (
-    <div className="mx-auto max-w-3xl">
-      <p className="font-mono text-sm text-accent">$ ./seller --dashboard</p>
-      <h2 className="mt-3 text-3xl font-bold tracking-tight">Dashboard</h2>
-      <p className="mt-2 max-w-xl text-sm text-muted-foreground">
-        Your order totals, paid revenue, and orders awaiting fulfillment.
-      </p>
+    <div>
+      <PageHeader
+        headingAs="h2"
+        eyebrow="Seller"
+        title="Dashboard"
+        description="Order totals, paid revenue, and work waiting on you."
+      />
 
       <div className="mt-10 grid gap-4 sm:grid-cols-3">
         {cards.map(({ label, value, href }) => (
-          <Link
-            key={label}
-            href={href}
-            className="rounded-md border border-border bg-card px-4 py-5 transition hover:border-accent/40"
-          >
-            <p className="font-mono text-xs text-muted-foreground">{label}</p>
-            <p className="mt-2 text-2xl font-bold tracking-tight">{value}</p>
+          <Link key={label} href={href}>
+            <Card className="h-full transition-colors hover:border-foreground/20 hover:bg-card-hover">
+              <CardContent>
+                <p className="text-sm text-muted-foreground">{label}</p>
+                <p className="mt-2 text-2xl font-bold tracking-tight">{value}</p>
+              </CardContent>
+            </Card>
           </Link>
         ))}
       </div>

@@ -1,8 +1,8 @@
 import Link from "next/link";
 import type { Models } from "node-appwrite";
-import { Menu, Search, ShoppingCart } from "lucide-react";
-import { signOut } from "@/lib/appwrite/auth";
+import { Heart, Menu, Search, ShoppingBag } from "lucide-react";
 import { userHasLabel } from "@/lib/appwrite/roles";
+import { AccountMenu } from "@/components/layout/account-menu";
 import { NotificationBell } from "@/components/notifications/notification-bell";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -18,6 +18,8 @@ import {
 type StoreNavbarProps = {
   user: Models.User<Models.Preferences> | null;
   cartItemCount?: number;
+  displayName?: string | null;
+  avatarUrl?: string | null;
 };
 
 function NavLinks({
@@ -27,84 +29,28 @@ function NavLinks({
   user: Models.User<Models.Preferences> | null;
   className?: string;
 }) {
+  const isSeller = Boolean(user && userHasLabel(user, "seller"));
+
   return (
     <nav aria-label="Store" className={className}>
       <Link
-        href="/"
+        href="/market"
         className="text-sm text-muted-foreground transition hover:text-foreground"
       >
-        Home
+        Market
       </Link>
       <Link
-        href="/search"
+        href="/categories"
         className="text-sm text-muted-foreground transition hover:text-foreground"
       >
-        Browse
+        Categories
       </Link>
-      {user ? (
-        <Link
-          href="/cart"
-          className="text-sm text-muted-foreground transition hover:text-foreground"
-        >
-          Cart
-        </Link>
-      ) : null}
-      {user ? (
-        <Link
-          href="/dashboard"
-          className="text-sm text-muted-foreground transition hover:text-foreground"
-        >
-          Dashboard
-        </Link>
-      ) : null}
-      {user ? (
-        <Link
-          href="/orders"
-          className="text-sm text-muted-foreground transition hover:text-foreground"
-        >
-          Orders
-        </Link>
-      ) : null}
-      {user ? (
-        <Link
-          href="/messages"
-          className="text-sm text-muted-foreground transition hover:text-foreground"
-        >
-          Messages
-        </Link>
-      ) : null}
-      {user ? (
-        <Link
-          href="/wishlist"
-          className="text-sm text-muted-foreground transition hover:text-foreground"
-        >
-          Wishlist
-        </Link>
-      ) : null}
-      {user && userHasLabel(user, "seller") ? (
-        <Link
-          href="/seller"
-          className="text-sm text-muted-foreground transition hover:text-foreground"
-        >
-          Seller
-        </Link>
-      ) : null}
-      {user && !userHasLabel(user, "seller") ? (
-        <Link
-          href="/become-seller"
-          className="text-sm text-muted-foreground transition hover:text-foreground"
-        >
-          Sell
-        </Link>
-      ) : null}
-      {user && userHasLabel(user, "admin") ? (
-        <Link
-          href="/admin"
-          className="text-sm text-muted-foreground transition hover:text-foreground"
-        >
-          Admin
-        </Link>
-      ) : null}
+      <Link
+        href={isSeller ? "/seller" : "/become-seller"}
+        className="text-sm text-muted-foreground transition hover:text-foreground"
+      >
+        Sell
+      </Link>
     </nav>
   );
 }
@@ -112,160 +58,135 @@ function NavLinks({
 function SearchForm({ className }: { className?: string }) {
   return (
     <form action="/search" method="get" className={className} role="search">
-      <div className="relative flex min-w-0 flex-1 items-center">
+      <div className="relative min-w-0 flex-1">
         <Search
-          className="pointer-events-none absolute left-2.5 size-3.5 text-muted-foreground"
+          className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground"
           aria-hidden
         />
         <Input
           type="search"
           name="q"
-          placeholder="Search…"
+          placeholder="Search the market"
           maxLength={64}
           aria-label="Search products"
-          className="h-8 pl-8 text-sm"
+          className="h-10 pl-9"
         />
       </div>
-      <Button type="submit" size="sm" variant="outline" className="shrink-0">
-        Go
-      </Button>
     </form>
   );
 }
 
-export function StoreNavbar({ user, cartItemCount = 0 }: StoreNavbarProps) {
+export function StoreNavbar({
+  user,
+  cartItemCount = 0,
+  displayName,
+  avatarUrl,
+}: StoreNavbarProps) {
   return (
     <header className="sticky top-0 z-40 border-b border-border bg-background/80 backdrop-blur-md">
-      <div className="mx-auto flex h-14 w-full max-w-6xl items-center justify-between gap-4 px-4 sm:px-6">
-        <div className="flex min-w-0 flex-1 items-center gap-4 md:gap-6">
-          <Link href="/" className="shrink-0 font-mono text-sm tracking-tight">
-            Knurdz
-            <span className="text-accent">.</span>
-          </Link>
-          <NavLinks
-            user={user}
-            className="hidden items-center gap-5 md:flex"
-          />
-          <SearchForm className="hidden min-w-0 max-w-xs flex-1 items-center gap-2 lg:flex" />
-        </div>
+      <div className="mx-auto flex h-16 w-full max-w-6xl items-center gap-4 px-4 sm:px-6">
+        <Link href="/" className="shrink-0 text-sm font-semibold tracking-tight">
+          Knurdz
+          <span className="text-accent">.</span>
+        </Link>
 
-        <div className="hidden items-center gap-2 md:flex">
+        <NavLinks
+          user={user}
+          className="hidden items-center gap-6 md:flex"
+        />
+
+        <SearchForm className="hidden min-w-0 flex-1 lg:flex" />
+
+        <div className="ml-auto hidden items-center gap-1.5 md:flex">
           {user ? (
             <>
-              <Button variant="ghost" size="sm" className="relative gap-1.5" asChild>
-                <Link href="/cart" aria-label={`Cart${cartItemCount > 0 ? `, ${cartItemCount} items` : ""}`}>
-                  <ShoppingCart className="size-4" aria-hidden />
-                  Cart
+              <Button variant="ghost" size="icon" className="relative" asChild>
+                <Link
+                  href="/wishlist"
+                  aria-label="Wishlist"
+                >
+                  <Heart className="size-4" aria-hidden />
+                </Link>
+              </Button>
+              <Button variant="ghost" size="icon" className="relative" asChild>
+                <Link
+                  href="/cart"
+                  aria-label={`Cart${cartItemCount > 0 ? `, ${cartItemCount} items` : ""}`}
+                >
+                  <ShoppingBag className="size-4" aria-hidden />
                   {cartItemCount > 0 ? (
-                    <span className="font-mono text-xs tabular-nums text-accent">
-                      ({cartItemCount})
+                    <span className="absolute top-1.5 right-1.5 flex size-4 items-center justify-center rounded-full bg-primary font-mono text-[10px] text-primary-foreground">
+                      {cartItemCount > 9 ? "9+" : cartItemCount}
                     </span>
                   ) : null}
                 </Link>
               </Button>
               <NotificationBell className="size-10" />
-              <Button variant="outline" size="sm" asChild>
-                <Link href="/dashboard">Dashboard</Link>
-              </Button>
-              <Button variant="outline" size="sm" asChild>
-                <Link href="/orders">Orders</Link>
-              </Button>
-              <Button variant="outline" size="sm" asChild>
-                <Link href="/messages">Messages</Link>
-              </Button>
-              <Button variant="outline" size="sm" asChild>
-                <Link href="/wishlist">Wishlist</Link>
-              </Button>
-              <Button variant="outline" size="sm" asChild>
-                <Link href="/account">Account</Link>
-              </Button>
-              <form action={signOut}>
-                <Button type="submit" variant="ghost" size="sm">
-                  Sign out
-                </Button>
-              </form>
+              <AccountMenu
+                user={user}
+                displayName={displayName}
+                avatarUrl={avatarUrl}
+              />
             </>
           ) : (
             <>
-              <Button variant="ghost" size="sm" asChild>
+              <Button variant="secondary" asChild>
                 <Link href="/login">Sign in</Link>
               </Button>
-              <Button size="sm" asChild>
-                <Link href="/register">Register</Link>
+              <Button asChild>
+                <Link href="/register">Create account</Link>
               </Button>
             </>
           )}
         </div>
 
-        <div className="flex items-center gap-2 md:hidden">
+        <div className="ml-auto flex items-center gap-1.5 md:hidden">
           {user ? <NotificationBell className="size-10" /> : null}
           <Sheet>
             <SheetTrigger asChild>
               <Button
-                variant="outline"
+                variant="secondary"
                 size="icon"
-                className="size-10"
                 aria-label="Open menu"
               >
                 <Menu />
               </Button>
             </SheetTrigger>
-            <SheetContent side="right" className="w-[280px]">
+            <SheetContent side="right" className="w-[300px]">
               <SheetHeader>
-                <SheetTitle className="font-mono text-left">
+                <SheetTitle className="text-left">
                   Knurdz<span className="text-accent">.</span>
                 </SheetTitle>
               </SheetHeader>
               <div className="mt-6 flex flex-col gap-4 px-4">
-                <SearchForm className="flex w-full items-center gap-2" />
+                <SearchForm className="flex w-full" />
                 <NavLinks user={user} className="flex flex-col gap-3" />
-                {user ? (
-                  <Button variant="outline" asChild>
-                    <Link href="/dashboard">Dashboard</Link>
-                  </Button>
-                ) : null}
-                {user ? (
-                  <Button variant="outline" asChild>
-                    <Link href="/orders">Orders</Link>
-                  </Button>
-                ) : null}
-                {user ? (
-                  <Button variant="outline" asChild>
-                    <Link href="/messages">Messages</Link>
-                  </Button>
-                ) : null}
-                {user ? (
-                  <Button variant="outline" asChild>
-                    <Link href="/wishlist">Wishlist</Link>
-                  </Button>
-                ) : null}
-                {user ? (
-                  <Button variant="outline" asChild>
-                    <Link href="/cart">
-                      Cart
-                      {cartItemCount > 0 ? ` (${cartItemCount})` : ""}
-                    </Link>
-                  </Button>
-                ) : null}
                 <Separator />
                 {user ? (
                   <div className="flex flex-col gap-2">
-                    <Button variant="outline" asChild>
+                    <Button asChild>
+                      <Link href="/market">Go to market</Link>
+                    </Button>
+                    <Button variant="secondary" asChild>
+                      <Link href="/cart">
+                        Cart
+                        {cartItemCount > 0 ? ` (${cartItemCount})` : ""}
+                      </Link>
+                    </Button>
+                    <Button variant="secondary" asChild>
+                      <Link href="/dashboard">Dashboard</Link>
+                    </Button>
+                    <Button variant="secondary" asChild>
                       <Link href="/account">Account</Link>
                     </Button>
-                    <form action={signOut}>
-                      <Button type="submit" variant="ghost" className="w-full">
-                        Sign out
-                      </Button>
-                    </form>
                   </div>
                 ) : (
                   <div className="flex flex-col gap-2">
-                    <Button variant="outline" asChild>
-                      <Link href="/login">Sign in</Link>
-                    </Button>
                     <Button asChild>
-                      <Link href="/register">Register</Link>
+                      <Link href="/register">Create account</Link>
+                    </Button>
+                    <Button variant="secondary" asChild>
+                      <Link href="/login">Sign in</Link>
                     </Button>
                   </div>
                 )}

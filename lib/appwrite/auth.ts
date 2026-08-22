@@ -195,7 +195,7 @@ export async function signInWithEmail(
     return { error: RATE_LIMIT_MESSAGE };
   }
 
-  let destination = "/";
+  let destination = "/market";
 
   try {
     const { account, users } = await createAdminClient();
@@ -209,7 +209,7 @@ export async function signInWithEmail(
       destination = postLoginPath(user, nextRaw);
     } catch {
       // Session cookie is already set; label lookup failed — storefront is safe.
-      destination = "/";
+      destination = "/market";
     }
   } catch (error) {
     unstable_rethrow(error);

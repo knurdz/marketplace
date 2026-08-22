@@ -398,6 +398,59 @@ export async function listProductImages(
   }
 }
 
+export type ProductCover = {
+  fileId: string;
+  alt: string | null;
+};
+
+export type ProductCoverMap = Record<string, ProductCover>;
+
+const COVER_ID_CHUNK = 50;
+
+/**
+ * First image (lowest sortOrder) per product. One query per chunk — no N+1.
+ */
+export async function listCoverImagesByProductIds(
+  productIds: string[],
+): Promise<ProductCoverMap> {
+  const ids = Array.from(
+    new Set(productIds.map((id) => id.trim()).filter(Boolean)),
+  );
+  if (ids.length === 0 || !hasAppwritePublicConfig()) return {};
+
+  const covers: ProductCoverMap = {};
+
+  try {
+    const { tables } = await createPublicClient();
+
+    for (let i = 0; i < ids.length; i += COVER_ID_CHUNK) {
+      const chunk = ids.slice(i, i + COVER_ID_CHUNK);
+      const result = await tables.listRows({
+        databaseId: DATABASE_ID,
+        tableId: TABLE_PRODUCT_IMAGES,
+        queries: [
+          Query.equal("productId", chunk),
+          Query.orderAsc("sortOrder"),
+          Query.limit(100),
+        ],
+      });
+
+      for (const row of result.rows) {
+        const image = asProductImage(row as unknown as Record<string, unknown>);
+        if (!image || !chunk.includes(image.productId)) continue;
+        const existing = covers[image.productId];
+        if (!existing) {
+          covers[image.productId] = { fileId: image.fileId, alt: image.alt };
+        }
+      }
+    }
+  } catch {
+    return covers;
+  }
+
+  return covers;
+}
+
 /**
  * Top sellers from recent completed orders (admin read; no soldCount column).
  * Returns active + available + in-stock products only.

@@ -151,7 +151,7 @@ export function CartContents({ cartView }: CartContentsProps) {
       <div className="mt-10 space-y-4">
         <p className="text-muted-foreground">Your cart is empty.</p>
         <Button variant="outline" size="sm" asChild>
-          <Link href="/">Browse listings</Link>
+          <Link href="/market">Browse listings</Link>
         </Button>
       </div>
     );
@@ -202,7 +202,7 @@ export function CartContents({ cartView }: CartContentsProps) {
           {pending ? "Clearing…" : "Clear cart"}
         </Button>
         <Button variant="outline" size="sm" asChild>
-          <Link href="/">Continue shopping</Link>
+          <Link href="/market">Continue shopping</Link>
         </Button>
       </div>
     </div>

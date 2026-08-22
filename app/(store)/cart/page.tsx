@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { CartContents } from "@/components/store/cart-contents";
+import { PageHeader } from "@/components/layout/page-header";
 import { Button } from "@/components/ui/button";
 import { getLoggedInUser } from "@/lib/appwrite/session";
 import { getCart } from "@/lib/services";
@@ -14,18 +15,20 @@ export default async function CartPage() {
   const cartView = await getCart();
 
   return (
-    <main className="relative mx-auto w-full max-w-3xl px-6 py-16 sm:px-10">
-      <p className="font-mono text-sm text-accent">$ ./cart --list</p>
-      <h1 className="mt-4 text-3xl font-bold tracking-tight">Your cart</h1>
-      <p className="mt-2 text-sm text-muted-foreground">
-        One seller per cart. Prices are snapshotted when items are added.
-      </p>
+    <main className="mx-auto w-full max-w-3xl px-4 py-10 sm:px-6">
+      <PageHeader
+        eyebrow="Checkout"
+        title="Your cart"
+        description="One seller per cart. Prices are snapshotted when items are added."
+      />
 
-      <CartContents cartView={cartView} />
+      <div className="mt-10">
+        <CartContents cartView={cartView} />
+      </div>
 
       <p className="mt-12">
-        <Button variant="outline" size="sm" asChild>
-          <Link href="/">Back to listings</Link>
+        <Button variant="secondary" asChild>
+          <Link href="/market">Continue shopping</Link>
         </Button>
       </p>
     </main>

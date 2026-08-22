@@ -68,10 +68,9 @@ export function CheckoutForm({ cartView, payhereEnabled }: CheckoutFormProps) {
   const availableMethods = isFreeOrder ? (["free"] as const) : paidMethods;
 
   return (
-    <div className="mt-10 grid gap-12 lg:grid-cols-[minmax(0,1fr)_minmax(0,20rem)] lg:gap-16">
+    <div className="grid gap-12 lg:grid-cols-[minmax(0,1fr)_minmax(0,20rem)] lg:gap-16">
       <form action={formAction} className="space-y-10">
         <section className="space-y-5">
-          <p className="font-mono text-sm text-accent">$ ./checkout --address</p>
           <h2 className="text-xl font-bold tracking-tight">Shipping address</h2>
 
           {state.error ? (
@@ -145,7 +144,6 @@ export function CheckoutForm({ cartView, payhereEnabled }: CheckoutFormProps) {
 
         {!isFreeOrder ? (
           <section className="space-y-5">
-            <p className="font-mono text-sm text-accent">$ ./checkout --coupon</p>
             <h2 className="text-xl font-bold tracking-tight">Coupon code</h2>
             <div className="space-y-2">
               <Label htmlFor="couponCode">
@@ -168,7 +166,6 @@ export function CheckoutForm({ cartView, payhereEnabled }: CheckoutFormProps) {
         ) : null}
 
         <section className="space-y-5">
-          <p className="font-mono text-sm text-accent">$ ./checkout --method</p>
           <h2 className="text-xl font-bold tracking-tight">Payment method</h2>
 
           <fieldset className="space-y-3" disabled={!canSubmit}>
@@ -224,7 +221,6 @@ export function CheckoutForm({ cartView, payhereEnabled }: CheckoutFormProps) {
 
       <aside className="space-y-6">
         <div>
-          <p className="font-mono text-sm text-accent">$ ./checkout --summary</p>
           <h2 className="mt-2 text-xl font-bold tracking-tight">Order summary</h2>
         </div>
 

@@ -46,7 +46,6 @@ export default async function OrderDetailPage({ params }: OrderDetailPageProps) 
 
   return (
     <main className="relative mx-auto w-full max-w-3xl px-6 py-16 sm:px-10">
-      <p className="font-mono text-sm text-accent">$ ./orders --detail</p>
       <h1 className="mt-4 text-3xl font-bold tracking-tight">Order details</h1>
       <p className="mt-4 text-muted-foreground">
         Order{" "}
@@ -55,7 +54,6 @@ export default async function OrderDetailPage({ params }: OrderDetailPageProps) 
       </p>
 
       <section className="mt-10 space-y-4">
-        <p className="font-mono text-sm text-accent">$ ./order --summary</p>
         <h2 className="text-xl font-bold tracking-tight">Summary</h2>
         <dl className="space-y-2 text-sm">
           <div className="flex flex-wrap justify-between gap-2">
@@ -78,7 +76,6 @@ export default async function OrderDetailPage({ params }: OrderDetailPageProps) 
       </section>
 
       <section className="mt-10 space-y-4">
-        <p className="font-mono text-sm text-accent">$ ./order --items</p>
         <h2 className="text-xl font-bold tracking-tight">Items</h2>
         {items.length === 0 ? (
           <p className="text-sm text-muted-foreground">No line items found.</p>
@@ -102,7 +99,6 @@ export default async function OrderDetailPage({ params }: OrderDetailPageProps) 
       </section>
 
       <section className="mt-10 space-y-4">
-        <p className="font-mono text-sm text-accent">$ ./order --shipping</p>
         <h2 className="text-xl font-bold tracking-tight">Shipping address</h2>
         <p className="whitespace-pre-wrap text-sm text-muted-foreground">
           {order.shippingAddress}
@@ -113,7 +109,6 @@ export default async function OrderDetailPage({ params }: OrderDetailPageProps) 
 
       {canMessage ? (
         <section className="mt-10 space-y-4">
-          <p className="font-mono text-sm text-accent">$ ./order --message</p>
           <h2 className="text-xl font-bold tracking-tight">Contact seller</h2>
           <OpenBuyerThreadButton orderId={order.$id} />
         </section>
@@ -121,7 +116,6 @@ export default async function OrderDetailPage({ params }: OrderDetailPageProps) 
 
       {canReorder ? (
         <section className="mt-10 space-y-4">
-          <p className="font-mono text-sm text-accent">$ ./order --reorder</p>
           <h2 className="text-xl font-bold tracking-tight">Buy again</h2>
           <p className="text-sm text-muted-foreground">
             Add available items from this order back to your cart.
@@ -132,7 +126,6 @@ export default async function OrderDetailPage({ params }: OrderDetailPageProps) 
 
       {canCancel ? (
         <section className="mt-10 space-y-4">
-          <p className="font-mono text-sm text-accent">$ ./order --cancel</p>
           <h2 className="text-xl font-bold tracking-tight">Cancel order</h2>
           <p className="text-sm text-muted-foreground">
             You can cancel this order while payment is still pending or under
@@ -147,7 +140,7 @@ export default async function OrderDetailPage({ params }: OrderDetailPageProps) 
           <Link href="/orders">All orders</Link>
         </Button>
         <Button variant="outline" size="sm" asChild>
-          <Link href="/">Back to listings</Link>
+          <Link href="/market">Back to listings</Link>
         </Button>
       </div>
     </main>

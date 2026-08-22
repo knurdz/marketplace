@@ -75,7 +75,6 @@ export function ShopProfileForm({
       </div>
 
       <form action={bannerAction} className="space-y-5">
-        <p className="font-mono text-sm text-accent">$ ./shop --banner</p>
         <h2 className="text-xl font-bold tracking-tight">Banner</h2>
 
         {bannerState.error ? (
@@ -119,7 +118,6 @@ export function ShopProfileForm({
       </form>
 
       <form action={profileAction} className="max-w-lg space-y-5">
-        <p className="font-mono text-sm text-accent">$ ./shop --profile</p>
         <h2 className="text-xl font-bold tracking-tight">Shop details</h2>
 
         {profileState.error ? (
@@ -162,7 +160,6 @@ export function ShopProfileForm({
       </form>
 
       <form action={bankAction} className="max-w-lg space-y-5">
-        <p className="font-mono text-sm text-accent">$ ./shop --bank</p>
         <h2 className="text-xl font-bold tracking-tight">Bank details</h2>
         <p className="text-sm text-muted-foreground">
           Shown only to buyers who pay by bank transfer for your orders. Not

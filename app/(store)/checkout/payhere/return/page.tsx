@@ -33,7 +33,6 @@ export default async function PayHereReturnPage({
 
   return (
     <main className="relative mx-auto w-full max-w-3xl px-6 py-16 sm:px-10">
-      <p className="font-mono text-sm text-accent">$ ./checkout --payhere-return</p>
       <h1 className="mt-4 text-3xl font-bold tracking-tight">
         Payment confirmation
       </h1>

@@ -30,7 +30,6 @@ export default async function AdminAnalyticsPage({ searchParams }: PageProps) {
 
   return (
     <div className="mx-auto max-w-5xl">
-      <p className="font-mono text-sm text-accent">$ ./admin --analytics</p>
       <h2 className="mt-3 text-3xl font-bold tracking-tight">Analytics</h2>
       <p className="mt-2 max-w-2xl text-sm text-muted-foreground">
         Aggregate platform trends only. Charts show counts and totals — never

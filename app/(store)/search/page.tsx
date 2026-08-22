@@ -1,13 +1,12 @@
-import Link from "next/link";
+import { redirect } from "next/navigation";
+import { CatalogView } from "@/components/store/catalog-view";
 import {
+  listCategories,
+  listCoverImagesByProductIds,
   normalizeProductSearchQuery,
   parseProductCatalogParams,
   searchActiveProducts,
 } from "@/lib/services";
-import { ProductCatalogFilters } from "@/components/store/product-catalog-filters";
-import { ProductList } from "@/components/store/product-list";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 
 type SearchPageProps = {
   searchParams: Promise<{
@@ -22,16 +21,23 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
   const params = await searchParams;
   const rawQ = typeof params.q === "string" ? params.q : "";
   const normalized = normalizeProductSearchQuery(rawQ);
+  if (!normalized) {
+    redirect("/market");
+  }
+
   const catalogParams = parseProductCatalogParams(params);
-  const products =
-    normalized && !catalogParams.invalidPriceRange
-      ? await searchActiveProducts(normalized, {
-          limit: 24,
+  const [products, categories] = await Promise.all([
+    catalogParams.invalidPriceRange
+      ? Promise.resolve([])
+      : searchActiveProducts(normalized, {
+          limit: 48,
           minPrice: catalogParams.minPrice,
           maxPrice: catalogParams.maxPrice,
           sort: catalogParams.sort,
-        })
-      : [];
+        }),
+    listCategories(),
+  ]);
+  const covers = await listCoverImagesByProductIds(products.map((p) => p.$id));
 
   const hasActiveFilters =
     catalogParams.minPrice != null ||
@@ -39,74 +45,20 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
     catalogParams.sort !== "newest";
 
   return (
-    <main className="relative mx-auto w-full max-w-5xl px-6 py-16 sm:px-10">
-      <p className="font-mono text-sm text-accent">$ ./products --search</p>
-      <h1 className="mt-3 text-3xl font-bold tracking-tight sm:text-4xl">
-        Search
-      </h1>
-      <p className="mt-2 max-w-xl text-sm text-muted-foreground">
-        Active listings by title via{" "}
-        <code className="font-mono text-xs">searchActiveProducts</code>.
-      </p>
-
-      <form
-        action="/search"
-        method="get"
-        className="mt-8 flex max-w-md flex-col gap-3 sm:flex-row sm:items-center"
-      >
-        <Input
-          type="search"
-          name="q"
-          defaultValue={normalized ?? ""}
-          placeholder="Search products…"
-          maxLength={64}
-          aria-label="Search products"
-          className="flex-1"
-        />
-        <Button type="submit" size="sm">
-          Search
-        </Button>
-      </form>
-
-      {normalized ? (
-        <ProductCatalogFilters
-          action="/search"
-          defaults={catalogParams}
-          preserve={{ q: normalized }}
-        />
-      ) : null}
-
-      {!normalized ? (
-        <p className="mt-10 font-mono text-sm text-muted-foreground">
-          Enter a query to search active products.
-        </p>
-      ) : catalogParams.invalidPriceRange ? (
-        <p className="mt-10 font-mono text-sm text-muted-foreground">
-          Minimum price cannot be greater than maximum price.
-        </p>
-      ) : products.length === 0 ? (
-        <p className="mt-10 font-mono text-sm text-muted-foreground">
-          {hasActiveFilters
-            ? `No active products matched “${normalized}” with these filters.`
-            : `No active products matched “${normalized}”.`}
-        </p>
-      ) : (
-        <>
-          <p className="mt-8 font-mono text-xs text-muted-foreground">
-            {products.length} result{products.length === 1 ? "" : "s"} for “
-            {normalized}”
-          </p>
-          <div className="mt-4">
-            <ProductList products={products} />
-          </div>
-        </>
-      )}
-
-      <p className="mt-12">
-        <Button variant="outline" size="sm" asChild>
-          <Link href="/#active-listings">Back to listings</Link>
-        </Button>
-      </p>
-    </main>
+    <CatalogView
+      eyebrow="Search"
+      title={`“${normalized}”`}
+      description="Active listings matching the title."
+      categories={categories}
+      products={products}
+      covers={covers}
+      filterAction="/search"
+      catalogParams={catalogParams}
+      preserve={{ q: normalized }}
+      resultLabel={`${products.length} result${products.length === 1 ? "" : "s"}`}
+      emptyTitle={hasActiveFilters ? "No matches in this range" : "No matches"}
+      emptyDescription={`Nothing active matched “${normalized}”.`}
+      invalidPriceRange={catalogParams.invalidPriceRange}
+    />
   );
 }

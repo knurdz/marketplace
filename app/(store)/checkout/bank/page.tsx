@@ -46,7 +46,6 @@ export default async function CheckoutBankPage({
 
   return (
     <main className="relative mx-auto w-full max-w-3xl px-6 py-16 sm:px-10">
-      <p className="font-mono text-sm text-accent">$ ./checkout --bank</p>
       <h1 className="mt-4 text-3xl font-bold tracking-tight">
         Bank transfer instructions
       </h1>
@@ -56,7 +55,6 @@ export default async function CheckoutBankPage({
       </p>
 
       <section className="mt-10 space-y-4">
-        <p className="font-mono text-sm text-accent">$ ./checkout --instructions</p>
         <h2 className="text-xl font-bold tracking-tight">How to pay</h2>
         <p className="text-muted-foreground whitespace-pre-wrap">
           {bankInstructions}
@@ -69,7 +67,6 @@ export default async function CheckoutBankPage({
           sellerBank.bankAccountNumber ||
           sellerBank.bankName) ? (
           <section className="mt-10 space-y-3">
-            <p className="font-mono text-sm text-accent">$ ./checkout --seller-bank</p>
             <h2 className="text-xl font-bold tracking-tight">Seller bank details</h2>
             <dl className="space-y-2 text-sm">
               {sellerBank.bankName ? (

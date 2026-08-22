@@ -7,7 +7,6 @@ export default async function AdminSettingsPage() {
   if ("error" in result) {
     return (
       <div className="mx-auto max-w-3xl">
-        <p className="font-mono text-sm text-accent">$ ./admin --settings</p>
         <h2 className="mt-3 text-3xl font-bold tracking-tight">
           Platform settings
         </h2>
@@ -18,7 +17,6 @@ export default async function AdminSettingsPage() {
 
   return (
     <div className="mx-auto max-w-3xl">
-      <p className="font-mono text-sm text-accent">$ ./admin --settings</p>
       <h2 className="mt-3 text-3xl font-bold tracking-tight">
         Platform settings
       </h2>

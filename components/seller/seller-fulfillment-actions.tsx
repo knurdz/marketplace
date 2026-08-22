@@ -88,7 +88,6 @@ export function SellerFulfillmentActions({
   if (!paymentPaid) {
     return (
       <section className="mt-10 space-y-4">
-        <p className="font-mono text-sm text-accent">$ ./order --fulfill</p>
         <h3 className="text-xl font-bold tracking-tight">Fulfillment</h3>
         <p className="text-sm text-muted-foreground">
           Fulfillment starts after this order is marked paid.
@@ -102,7 +101,6 @@ export function SellerFulfillmentActions({
 
   return (
     <section className="mt-10 space-y-4">
-      <p className="font-mono text-sm text-accent">$ ./order --fulfill</p>
       <h3 className="text-xl font-bold tracking-tight">Fulfillment</h3>
       <div className="flex flex-wrap gap-2">
         {nextStatuses.map((next) => (

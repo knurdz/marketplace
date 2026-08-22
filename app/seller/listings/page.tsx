@@ -1,6 +1,8 @@
 import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { EmptyState } from "@/components/layout/empty-state";
+import { PageHeader } from "@/components/layout/page-header";
 import { SubmitListingButton } from "@/components/seller/submit-listing-button";
 import { listCategories } from "@/lib/services/categories";
 import {
@@ -23,32 +25,31 @@ export default async function SellerListingsPage() {
   const imageCounts = await countProductImagesForOwnProducts(products);
 
   return (
-    <div className="mx-auto max-w-3xl">
-      <div className="flex flex-wrap items-start justify-between gap-4">
-        <div>
-          <p className="font-mono text-sm text-accent">$ ./seller --listings</p>
-          <h2 className="mt-3 text-3xl font-bold tracking-tight">Listings</h2>
-          <p className="mt-2 max-w-xl text-sm text-muted-foreground">
-            Drafts stay private until you submit for review. Approved listings
-            appear on the storefront; rejected listings can be resubmitted.
-          </p>
-        </div>
-        <Button asChild disabled={categories.length === 0}>
-          <Link href="/seller/listings/new">New listing</Link>
-        </Button>
-      </div>
+    <div>
+      <PageHeader
+        headingAs="h2"
+        title="Listings"
+        description="Drafts stay private until you submit for review. Approved listings appear on the storefront."
+        actions={
+          <Button asChild disabled={categories.length === 0}>
+            <Link href="/seller/listings/new">New listing</Link>
+          </Button>
+        }
+      />
 
       {products.length === 0 ? (
-        <div className="mt-10 rounded-md border border-border bg-card px-4 py-8 text-center">
-          <p className="text-sm text-muted-foreground">
-            No listings yet. Create your first draft to get started.
-          </p>
-          {categories.length > 0 ? (
-            <Button className="mt-4" asChild>
-              <Link href="/seller/listings/new">Create draft listing</Link>
-            </Button>
-          ) : null}
-        </div>
+        <EmptyState
+          className="mt-10"
+          title="No listings yet"
+          description="Create your first draft to get started."
+          action={
+            categories.length > 0 ? (
+              <Button asChild>
+                <Link href="/seller/listings/new">Create draft listing</Link>
+              </Button>
+            ) : null
+          }
+        />
       ) : (
         <ul className="mt-10 divide-y divide-border rounded-md border border-border bg-card">
           {products.map((product) => (

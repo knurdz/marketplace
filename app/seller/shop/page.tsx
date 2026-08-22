@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 import { ShopProfileForm } from "@/components/seller/shop-profile-form";
+import { PageHeader } from "@/components/layout/page-header";
 import { getShopBannerPreviewUrl } from "@/lib/appwrite/storage-urls";
 import { getOwnSellerProfile } from "@/lib/services/seller-application";
 
@@ -17,15 +18,15 @@ export default async function SellerShopPage() {
   const bannerPreviewUrl = getShopBannerPreviewUrl(profile.bannerFileId);
 
   return (
-    <div className="mx-auto max-w-3xl">
-      <p className="font-mono text-sm text-accent">$ ./seller --shop</p>
-      <h2 className="mt-3 text-3xl font-bold tracking-tight">Shop profile</h2>
-      <p className="mt-2 max-w-xl text-sm text-muted-foreground">
-        Edit how buyers see your shop on the public storefront and add bank
-        details for bank-transfer payouts.
-      </p>
-
-      <ShopProfileForm profile={profile} bannerPreviewUrl={bannerPreviewUrl} />
+    <div>
+      <PageHeader
+        headingAs="h2"
+        title="Shop profile"
+        description="How buyers see your shop, plus bank details for transfer payouts."
+      />
+      <div className="mt-8">
+        <ShopProfileForm profile={profile} bannerPreviewUrl={bannerPreviewUrl} />
+      </div>
     </div>
   );
 }

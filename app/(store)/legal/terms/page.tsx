@@ -3,7 +3,6 @@ import { LegalPage, LegalSection } from "@/components/legal/legal-page";
 export default function TermsPage() {
   return (
     <LegalPage
-      shell="$ ./legal --terms"
       title="Terms of use"
       updated="11 August 2026"
     >

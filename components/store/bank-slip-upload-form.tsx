@@ -71,7 +71,6 @@ export function BankSlipUploadForm({ order, payment }: BankSlipUploadFormProps) 
 
   return (
     <section className="mt-10 space-y-5">
-      <p className="font-mono text-sm text-accent">$ ./checkout --upload-slip</p>
       <h2 className="text-xl font-bold tracking-tight">Upload bank slip</h2>
 
       {awaitingVerification ? (
@@ -112,7 +111,7 @@ export function BankSlipUploadForm({ order, payment }: BankSlipUploadFormProps) 
             {pending ? "Uploading…" : "Upload bank slip"}
           </Button>
           <Button type="button" variant="outline" size="sm" asChild>
-            <Link href="/">Back to listings</Link>
+            <Link href="/market">Back to listings</Link>
           </Button>
         </div>
       </form>
