@@ -67,7 +67,6 @@ export default async function AdminListingsPage({ searchParams }: PageProps) {
 
   return (
     <div className="mx-auto max-w-3xl">
-      <p className="font-mono text-sm text-accent">$ ./admin --listings</p>
       <h2 className="mt-3 text-3xl font-bold tracking-tight">
         Listing moderation
       </h2>

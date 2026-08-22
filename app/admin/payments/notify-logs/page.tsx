@@ -84,7 +84,6 @@ export default async function AdminNotifyLogsPage({ searchParams }: PageProps) {
 
   return (
     <div className="mx-auto max-w-3xl">
-      <p className="font-mono text-sm text-accent">$ ./admin --notify-logs</p>
       <h2 className="mt-3 text-3xl font-bold tracking-tight">
         PayHere notify logs
       </h2>

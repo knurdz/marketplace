@@ -116,7 +116,6 @@ export default async function AdminOrdersPage({ searchParams }: PageProps) {
 
   return (
     <div className="mx-auto max-w-3xl">
-      <p className="font-mono text-sm text-accent">$ ./admin --orders</p>
       <h2 className="mt-3 text-3xl font-bold tracking-tight">All orders</h2>
       <p className="mt-2 max-w-xl text-sm text-muted-foreground">
         Platform-wide order oversight. Cancel unpaid orders or refund paid

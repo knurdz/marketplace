@@ -24,7 +24,7 @@ export function ProductCatalogFilters({
     <form
       action={action}
       method="get"
-      className="mt-8 flex max-w-2xl flex-col gap-4 sm:flex-row sm:flex-wrap sm:items-end"
+      className="flex flex-col gap-3 rounded-xl border border-border bg-card/50 p-3 sm:flex-row sm:flex-wrap sm:items-end"
     >
       {preserve &&
         Object.entries(preserve).map(([name, value]) => (
@@ -32,7 +32,7 @@ export function ProductCatalogFilters({
         ))}
 
       <div className="flex min-w-[8rem] flex-1 flex-col gap-1.5">
-        <Label htmlFor="minPrice">Min price</Label>
+        <Label htmlFor="minPrice">Min</Label>
         <Input
           id="minPrice"
           name="minPrice"
@@ -49,7 +49,7 @@ export function ProductCatalogFilters({
       </div>
 
       <div className="flex min-w-[8rem] flex-1 flex-col gap-1.5">
-        <Label htmlFor="maxPrice">Max price</Label>
+        <Label htmlFor="maxPrice">Max</Label>
         <Input
           id="maxPrice"
           name="maxPrice"
@@ -72,7 +72,7 @@ export function ProductCatalogFilters({
           name="sort"
           defaultValue={defaults.sort}
           aria-label="Sort products"
-          className="border-input bg-background ring-offset-background focus-visible:ring-ring flex h-9 w-full rounded-md border px-3 py-1 text-sm shadow-xs outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
+          className="border-input bg-background focus-visible:ring-ring flex h-10 w-full rounded-lg border px-3 text-sm outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
         >
           {SORT_OPTIONS.map((option) => (
             <option key={option.value} value={option.value}>
@@ -82,9 +82,7 @@ export function ProductCatalogFilters({
         </select>
       </div>
 
-      <Button type="submit" size="sm" className="sm:mb-0.5">
-        Apply
-      </Button>
+      <Button type="submit">Apply</Button>
     </form>
   );
 }

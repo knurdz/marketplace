@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { SellerApplyForm } from "@/components/seller/seller-apply-form";
 import { SellerApplicationStatus } from "@/components/seller/seller-application-status";
+import { PageHeader } from "@/components/layout/page-header";
 import { ROLE_LABELS, userHasLabel } from "@/lib/appwrite/roles";
 import { getLoggedInUser } from "@/lib/appwrite/session";
 import { getOwnSellerProfile } from "@/lib/services/seller-application";
@@ -22,19 +23,24 @@ export default async function BecomeSellerPage() {
   }
 
   return (
-    <div className="mx-auto max-w-3xl px-4 py-10 sm:px-6">
-      <p className="font-mono text-sm text-accent">$ ./seller --apply</p>
-      <h1 className="mt-3 text-3xl font-bold tracking-tight">Become a seller</h1>
-      <p className="mt-2 max-w-xl text-sm text-muted-foreground">
-        Apply to open a shop on Knurdz. An admin reviews applications before you
-        can publish listings.
-      </p>
+    <main className="mx-auto max-w-3xl px-4 py-10 sm:px-6">
+      <PageHeader
+        eyebrow="Sell"
+        title="Become a seller"
+        description="Apply to open a shop. An admin reviews applications before you can publish listings."
+      />
 
       {existing?.status === "pending" || existing?.status === "rejected" ? (
-        <SellerApplicationStatus profile={existing} />
+        <div className="mt-8">
+          <SellerApplicationStatus profile={existing} />
+        </div>
       ) : null}
 
-      {!existing ? <SellerApplyForm /> : null}
-    </div>
+      {!existing ? (
+        <div className="mt-8">
+          <SellerApplyForm />
+        </div>
+      ) : null}
+    </main>
   );
 }

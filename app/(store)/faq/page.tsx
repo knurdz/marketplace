@@ -2,7 +2,7 @@ import { LegalPage, LegalSection } from "@/components/legal/legal-page";
 
 export default function FaqPage() {
   return (
-    <LegalPage shell="$ ./help --faq" title="FAQ" updated="11 August 2026">
+    <LegalPage title="FAQ" updated="11 August 2026">
       <LegalSection title="How do I buy something?">
         <p>
           Browse or search active listings, then check out when Member 2’s cart

@@ -46,7 +46,6 @@ export function CouponsManager({ coupons }: { coupons: Coupon[] }) {
   return (
     <div className="space-y-12">
       <section className="rounded-md border border-border bg-card px-4 py-5">
-        <p className="font-mono text-sm text-accent">$ ./coupons --create</p>
         <h3 className="mt-2 text-lg font-bold">New coupon</h3>
         <form action={createAction} className="mt-6 grid gap-4 sm:grid-cols-2">
           <div className="space-y-2 sm:col-span-2">
@@ -125,7 +124,6 @@ export function CouponsManager({ coupons }: { coupons: Coupon[] }) {
       </section>
 
       <section>
-        <p className="font-mono text-sm text-accent">$ ./coupons --list</p>
         <h3 className="mt-2 text-lg font-bold">All coupons</h3>
         {coupons.length === 0 ? (
           <p className="mt-6 text-sm text-muted-foreground">No coupons yet.</p>

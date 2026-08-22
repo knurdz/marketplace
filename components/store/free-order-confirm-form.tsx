@@ -61,7 +61,7 @@ export function FreeOrderConfirmForm({
           Payment confirmed — your order is paid.
         </p>
         <Button variant="outline" size="sm" asChild>
-          <Link href="/">Back to listings</Link>
+          <Link href="/market">Back to listings</Link>
         </Button>
       </div>
     );
@@ -94,7 +94,7 @@ export function FreeOrderConfirmForm({
           {pending ? "Confirming…" : "Confirm free order"}
         </Button>
         <Button type="button" variant="outline" size="sm" asChild>
-          <Link href="/">Back to listings</Link>
+          <Link href="/market">Back to listings</Link>
         </Button>
       </form>
 

@@ -402,9 +402,9 @@ Pick up only after Phases 1–4 **and Phase 6 A–C** are solid (**6.18**). Assi
 
 | ID  | Item                                        | Suggested owner |
 | --- | ------------------------------------------- | --------------- |
+| [x] **UX-1** | Storefront / portal UI polish (landing, `/market`, shared chrome) | Member 1 |
 | X01 | CAPTCHA on register/login (optional)        | Member 1        |
-| X02 | Dark/light mode     
-                        | Member 1        |
+| X02 | Dark/light mode                             | Member 1        |
 | X03 | Realtime notifications (vs polling)         | Member 1        |
 | X04 | AI product recommendations                  | Later           |
 | X05 | Referral system                             | Later           |

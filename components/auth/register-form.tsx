@@ -3,6 +3,9 @@
 import Link from "next/link";
 import { useActionState } from "react";
 import { signUpWithEmail, type AuthActionState } from "@/lib/appwrite/auth";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 
 const initialState: AuthActionState = {};
 
@@ -15,82 +18,64 @@ export function RegisterForm() {
   return (
     <form action={formAction} className="space-y-5">
       {state?.error ? (
-        <p
-          role="alert"
-          className="rounded-md border border-border bg-card px-3 py-2 font-mono text-sm text-accent-bright"
-        >
+        <p role="alert" className="rounded-lg border border-border bg-card px-3 py-2 text-sm">
           {state.error}
         </p>
       ) : null}
 
       <div className="space-y-2">
-        <label htmlFor="name" className="block text-sm text-muted-foreground">
-          Name
-        </label>
-        <input
-          id="name"
-          name="name"
-          type="text"
-          autoComplete="name"
-          className="w-full rounded-md border border-border bg-card px-3 py-2.5 text-foreground outline-none ring-accent focus:ring-2"
-        />
+        <Label htmlFor="name">Name</Label>
+        <Input id="name" name="name" type="text" autoComplete="name" />
       </div>
 
       <div className="space-y-2">
-        <label htmlFor="email" className="block text-sm text-muted-foreground">
-          Email
-        </label>
-        <input
+        <Label htmlFor="email">Email</Label>
+        <Input
           id="email"
           name="email"
           type="email"
           autoComplete="email"
           required
-          className="w-full rounded-md border border-border bg-card px-3 py-2.5 text-foreground outline-none ring-accent focus:ring-2"
         />
       </div>
 
       <div className="space-y-2">
-        <label htmlFor="phone" className="block text-sm text-muted-foreground">
-          Phone <span className="text-muted-foreground">(optional)</span>
-        </label>
-        <input
+        <Label htmlFor="phone">
+          Phone <span className="font-normal text-muted-foreground">(optional)</span>
+        </Label>
+        <Input
           id="phone"
           name="phone"
           type="tel"
           autoComplete="tel"
           maxLength={32}
-          className="w-full rounded-md border border-border bg-card px-3 py-2.5 text-foreground outline-none ring-accent focus:ring-2"
         />
       </div>
 
       <div className="space-y-2">
-        <label htmlFor="password" className="block text-sm text-muted-foreground">
-          Password
-        </label>
-        <input
+        <Label htmlFor="password">Password</Label>
+        <Input
           id="password"
           name="password"
           type="password"
           autoComplete="new-password"
           required
           minLength={8}
-          className="w-full rounded-md border border-border bg-card px-3 py-2.5 text-foreground outline-none ring-accent focus:ring-2"
         />
       </div>
 
-      <button
+      <Button
         type="submit"
+        className="w-full"
         disabled={pending}
         data-testid="register-submit"
-        className="inline-flex w-full items-center justify-center rounded-md bg-foreground px-5 py-2.5 text-sm font-medium text-background transition hover:opacity-90 disabled:opacity-60"
       >
         {pending ? "Creating account…" : "Create account"}
-      </button>
+      </Button>
 
-      <p className="font-mono text-sm text-muted-foreground">
+      <p className="text-sm text-muted-foreground">
         Already registered?{" "}
-        <Link href="/login" className="text-accent hover:underline">
+        <Link href="/login" className="text-foreground hover:underline">
           Sign in
         </Link>
       </p>

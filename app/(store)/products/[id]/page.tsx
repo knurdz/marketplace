@@ -8,7 +8,16 @@ import { RecentlyViewedSection } from "@/components/store/recently-viewed-sectio
 import { ReportListingButton } from "@/components/store/report-listing-button";
 import { SellerInfoCard } from "@/components/store/seller-info-card";
 import { WishlistToggleButton } from "@/components/store/wishlist-toggle-button";
+import { formatProductPrice } from "@/components/store/product-display";
 import { Button } from "@/components/ui/button";
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from "@/components/ui/breadcrumb";
 import { getLoggedInUser } from "@/lib/appwrite/session";
 import {
   canReviewProduct,
@@ -16,6 +25,7 @@ import {
   getPublicSellerByUserId,
   isProductInOwnWishlist,
   isProductPurchasable,
+  listCategories,
   listProductImages,
   listProductReviews,
 } from "@/lib/services";
@@ -26,7 +36,11 @@ type ProductPageProps = {
 
 export default async function ProductPage({ params }: ProductPageProps) {
   const { id } = await params;
-  const [product, user] = await Promise.all([getProduct(id), getLoggedInUser()]);
+  const [product, user, categories] = await Promise.all([
+    getProduct(id),
+    getLoggedInUser(),
+    listCategories(),
+  ]);
   if (!product) notFound();
 
   const [images, seller, saved, reviews, reviewEligibility] = await Promise.all([
@@ -37,37 +51,54 @@ export default async function ProductPage({ params }: ProductPageProps) {
     user ? canReviewProduct(product.$id) : Promise.resolve({ eligible: false }),
   ]);
 
-  const priceLabel = product.isFree
-    ? "free"
-    : `${product.currency} ${product.price.toFixed(2)}`;
-
+  const category = categories.find((entry) => entry.$id === product.categoryId);
+  const priceLabel = formatProductPrice(product);
   const canBuy = isProductPurchasable(product);
   const loginHref = `/login?next=${encodeURIComponent(`/products/${product.$id}`)}`;
 
   return (
-    <main className="relative mx-auto w-full max-w-5xl px-6 py-16 sm:px-10">
+    <main className="mx-auto w-full max-w-6xl px-4 py-10 sm:px-6 lg:px-8">
       <RecordRecentlyViewed productId={product.$id} />
-      <p className="font-mono text-sm text-accent">$ ./products --id={product.$id}</p>
+      <Breadcrumb>
+        <BreadcrumbList>
+          <BreadcrumbItem>
+            <BreadcrumbLink asChild>
+              <Link href="/market">Market</Link>
+            </BreadcrumbLink>
+          </BreadcrumbItem>
+          {category ? (
+            <>
+              <BreadcrumbSeparator />
+              <BreadcrumbItem>
+                <BreadcrumbLink asChild>
+                  <Link href={`/categories/${category.slug}`}>{category.name}</Link>
+                </BreadcrumbLink>
+              </BreadcrumbItem>
+            </>
+          ) : null}
+          <BreadcrumbSeparator />
+          <BreadcrumbItem>
+            <BreadcrumbPage>{product.title}</BreadcrumbPage>
+          </BreadcrumbItem>
+        </BreadcrumbList>
+      </Breadcrumb>
 
-      <div className="mt-8 grid gap-10 lg:grid-cols-2 lg:gap-12">
+      <div className="mt-8 grid gap-10 lg:grid-cols-[minmax(0,1.05fr)_minmax(0,0.95fr)] lg:items-start lg:gap-14">
         <ProductImageGallery images={images} productTitle={product.title} />
 
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight sm:text-4xl">
+        <div className="lg:sticky lg:top-24">
+          {product.featured ? (
+            <p className="text-xs font-medium tracking-[0.18em] text-muted-foreground uppercase">
+              Featured
+            </p>
+          ) : null}
+          <h1 className="mt-2 text-3xl font-bold tracking-tight sm:text-4xl">
             {product.title}
           </h1>
-          <p className="mt-3 font-mono text-lg text-muted-foreground">
-            {priceLabel}
+          <p className="mt-4 font-mono text-2xl tabular-nums">{priceLabel}</p>
+          <p className="mt-2 text-sm text-muted-foreground">
+            {product.stock > 0 ? `${product.stock} in stock` : "Out of stock"}
           </p>
-          {product.stock > 0 ? (
-            <p className="mt-2 font-mono text-xs text-muted-foreground">
-              {product.stock} in stock
-            </p>
-          ) : (
-            <p className="mt-2 font-mono text-xs text-muted-foreground">
-              Out of stock
-            </p>
-          )}
 
           {canBuy ? (
             <AddToCartButton
@@ -84,48 +115,45 @@ export default async function ProductPage({ params }: ProductPageProps) {
             </p>
           )}
 
-          <WishlistToggleButton
-            productId={product.$id}
-            initialSaved={saved}
-            isLoggedIn={Boolean(user)}
-            loginHref={loginHref}
-          />
+          <div className="mt-2 flex flex-wrap gap-2">
+            <WishlistToggleButton
+              productId={product.$id}
+              initialSaved={saved}
+              isLoggedIn={Boolean(user)}
+              loginHref={loginHref}
+            />
+            <ReportListingButton
+              productId={product.$id}
+              isLoggedIn={Boolean(user)}
+              loginHref={loginHref}
+            />
+          </div>
 
-          <ReportListingButton
-            productId={product.$id}
-            isLoggedIn={Boolean(user)}
-            loginHref={loginHref}
-          />
-
-          <section aria-labelledby="description-heading" className="mt-8">
-            <h2
-              id="description-heading"
-              className="font-mono text-xs uppercase tracking-wider text-muted-foreground"
-            >
+          <section aria-labelledby="description-heading" className="mt-10 border-t border-border pt-8">
+            <h2 id="description-heading" className="text-sm font-medium">
               Description
             </h2>
-            <p className="mt-4 max-w-prose whitespace-pre-wrap text-sm leading-relaxed">
+            <p className="mt-4 max-w-prose whitespace-pre-wrap text-sm leading-relaxed text-muted-foreground">
               {product.description}
             </p>
           </section>
         </div>
       </div>
 
-      <SellerInfoCard seller={seller} />
-      <ProductReviewsPlaceholder
-        productId={product.$id}
-        reviews={reviews}
-        canReview={reviewEligibility.eligible}
-        isLoggedIn={Boolean(user)}
-        loginHref={loginHref}
-      />
+      <div className="mt-14 grid gap-10 lg:grid-cols-2">
+        <SellerInfoCard seller={seller} />
+        <ProductReviewsPlaceholder
+          productId={product.$id}
+          reviews={reviews}
+          canReview={reviewEligibility.eligible}
+          isLoggedIn={Boolean(user)}
+          loginHref={loginHref}
+        />
+      </div>
 
-      <p className="mt-12 flex flex-wrap gap-3">
-        <Button variant="outline" size="sm" asChild>
-          <Link href="/categories">All categories</Link>
-        </Button>
-        <Button variant="outline" size="sm" asChild>
-          <Link href="/#active-listings">Back to listings</Link>
+      <p className="mt-12">
+        <Button variant="secondary" asChild>
+          <Link href="/market">Back to listings</Link>
         </Button>
       </p>
 

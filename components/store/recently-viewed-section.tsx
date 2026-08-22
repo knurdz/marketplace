@@ -1,9 +1,10 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { ProductList } from "@/components/store/product-list";
+import { ProductGrid } from "@/components/store/product-grid";
 import { fetchPublicProductsByIds } from "@/lib/services/product-actions";
 import { readRecentlyViewedIds } from "@/lib/storefront/recently-viewed";
+import type { ProductCoverMap } from "@/lib/services/products";
 import type { Product } from "@/lib/types";
 
 type RecentlyViewedSectionProps = {
@@ -15,6 +16,7 @@ export function RecentlyViewedSection({
   excludeProductId,
 }: RecentlyViewedSectionProps) {
   const [products, setProducts] = useState<Product[]>([]);
+  const [covers, setCovers] = useState<ProductCoverMap>({});
   const [loaded, setLoaded] = useState(false);
 
   useEffect(() => {
@@ -27,6 +29,7 @@ export function RecentlyViewedSection({
       if (ids.length === 0) {
         if (!cancelled) {
           setProducts([]);
+          setCovers({});
           setLoaded(true);
         }
         return;
@@ -34,7 +37,8 @@ export function RecentlyViewedSection({
 
       const hydrated = await fetchPublicProductsByIds(ids);
       if (!cancelled) {
-        setProducts(hydrated);
+        setProducts(hydrated.products);
+        setCovers(hydrated.covers);
         setLoaded(true);
       }
     }
@@ -48,14 +52,16 @@ export function RecentlyViewedSection({
   if (!loaded || products.length === 0) return null;
 
   return (
-    <section className="relative mx-auto w-full max-w-5xl border-t border-border px-6 py-12 sm:px-10">
-      <p className="font-mono text-sm text-accent">$ ./products --recent</p>
-      <h2 className="mt-3 text-2xl font-bold tracking-tight">Recently viewed</h2>
+    <section className="mx-auto w-full max-w-6xl px-4 py-12 sm:px-6 lg:px-8">
+      <p className="text-xs font-medium tracking-[0.18em] text-muted-foreground uppercase">
+        Recently viewed
+      </p>
+      <h2 className="mt-2 text-2xl font-bold tracking-tight">On this device</h2>
       <p className="mt-2 text-sm text-muted-foreground">
-        Saved on this device only — not shared across accounts.
+        Saved locally — not shared across accounts.
       </p>
       <div className="mt-6">
-        <ProductList products={products} />
+        <ProductGrid products={products} covers={covers} />
       </div>
     </section>
   );

@@ -18,8 +18,7 @@ export function ErrorFallback({
 }: ErrorFallbackProps) {
   return (
     <main className="mx-auto flex min-h-[50vh] w-full max-w-lg flex-col justify-center px-6 py-16">
-      <p className="font-mono text-sm text-accent">$ ./error</p>
-      <h1 className="mt-3 text-2xl font-bold tracking-tight">{title}</h1>
+      <h1 className="text-2xl font-bold tracking-tight">{title}</h1>
       <p className="mt-3 text-sm text-muted-foreground">
         An unexpected error occurred. You can try again or return to the
         storefront.
@@ -28,7 +27,7 @@ export function ErrorFallback({
         <Button type="button" onClick={reset}>
           Try again
         </Button>
-        <Button variant="outline" asChild>
+        <Button variant="secondary" asChild>
           <Link href="/">Home</Link>
         </Button>
       </div>

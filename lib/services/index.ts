@@ -97,6 +97,7 @@ export {
   getProduct,
   isProductPurchasable,
   listActiveProducts,
+  listCoverImagesByProductIds,
   listFeaturedProducts,
   listProductImages,
   listPublicProductsByIds,
@@ -251,7 +252,12 @@ export type {
   CheckoutSellerBankDetails,
   PublicSellerInfo,
 } from "./sellers";
-export type { ProductCatalogParams, ProductCatalogSort } from "./products";
+export type {
+  ProductCatalogParams,
+  ProductCatalogSort,
+  ProductCover,
+  ProductCoverMap,
+} from "./products";
 export {
   asNotification,
   countOwnUnread,

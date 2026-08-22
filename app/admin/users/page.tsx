@@ -46,7 +46,6 @@ export default async function AdminUsersPage({ searchParams }: PageProps) {
 
   return (
     <div className="mx-auto max-w-3xl">
-      <p className="font-mono text-sm text-accent">$ ./admin --users</p>
       <h2 className="mt-3 text-3xl font-bold tracking-tight">User management</h2>
       <p className="mt-2 max-w-xl text-sm text-muted-foreground">
         View platform users and suspend or unsuspend accounts. Suspended users

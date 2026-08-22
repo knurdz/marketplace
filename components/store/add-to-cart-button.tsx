@@ -30,7 +30,7 @@ export function AddToCartButton({
 
   if (!isLoggedIn) {
     return (
-      <Button asChild size="sm">
+      <Button asChild>
         <Link href={loginHref}>Sign in to add to cart</Link>
       </Button>
     );
@@ -69,7 +69,7 @@ export function AddToCartButton({
   return (
     <div className="mt-8 space-y-4">
       <div className="flex flex-wrap items-center gap-3">
-        <label className="font-mono text-xs text-muted-foreground" htmlFor="qty">
+        <label className="text-sm text-muted-foreground" htmlFor="qty">
           Qty
         </label>
         <Input
@@ -83,26 +83,25 @@ export function AddToCartButton({
             if (!Number.isFinite(n)) return;
             setQuantity(Math.min(Math.max(1, Math.floor(n)), maxStock));
           }}
-          className="h-9 w-20 font-mono text-sm"
+          className="h-10 w-20 font-mono text-sm"
           disabled={pending}
         />
-        <Button type="button" size="sm" onClick={onAdd} disabled={pending} data-testid="add-to-cart">
+        <Button type="button" onClick={onAdd} disabled={pending} data-testid="add-to-cart">
           {pending ? "Adding…" : "Add to cart"}
         </Button>
-        <Button variant="outline" size="sm" asChild>
+        <Button variant="secondary" asChild>
           <Link href="/cart">View cart</Link>
         </Button>
       </div>
 
       {showClearPrompt ? (
-        <div className="space-y-2 border border-border px-4 py-3">
+        <div className="space-y-3 rounded-xl border border-border bg-card px-4 py-4">
           <p className="text-sm text-muted-foreground">
             Clear your cart and add this item from a different seller?
           </p>
           <Button
             type="button"
-            variant="outline"
-            size="sm"
+            variant="secondary"
             onClick={onClearAndAdd}
             disabled={pending}
           >

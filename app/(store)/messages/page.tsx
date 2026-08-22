@@ -1,5 +1,7 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import { EmptyState } from "@/components/layout/empty-state";
+import { PageHeader } from "@/components/layout/page-header";
 import { Button } from "@/components/ui/button";
 import { getLoggedInUser } from "@/lib/appwrite/session";
 import { listBuyerThreads } from "@/lib/services/threads";
@@ -11,25 +13,31 @@ export default async function BuyerMessagesPage() {
   const threads = await listBuyerThreads();
 
   return (
-    <main className="relative mx-auto w-full max-w-3xl px-6 py-16 sm:px-10">
-      <p className="font-mono text-sm text-accent">$ ./messages --inbox</p>
-      <h1 className="mt-4 text-3xl font-bold tracking-tight">Messages</h1>
-      <p className="mt-2 text-sm text-muted-foreground">
-        Order conversations with sellers. Bank slip verification stays with
-        admin — use messages for shipping questions only.
-      </p>
+    <main className="mx-auto w-full max-w-3xl px-4 py-10 sm:px-6">
+      <PageHeader
+        eyebrow="Account"
+        title="Messages"
+        description="Order conversations with sellers. Bank slip verification stays with admin."
+      />
 
       {threads.length === 0 ? (
-        <p className="mt-10 text-muted-foreground">
-          No conversations yet. Open a thread from a paid or in-progress order.
-        </p>
+        <EmptyState
+          className="mt-10"
+          title="No conversations yet"
+          description="Open a thread from a paid or in-progress order."
+          action={
+            <Button variant="secondary" asChild>
+              <Link href="/orders">Your orders</Link>
+            </Button>
+          }
+        />
       ) : (
-        <ul className="mt-10 space-y-3">
+        <ul className="mt-10 divide-y divide-border rounded-xl border border-border bg-card">
           {threads.map((thread) => (
-            <li key={thread.$id} className="border-b border-border py-3">
+            <li key={thread.$id}>
               <Link
                 href={`/messages/${thread.$id}`}
-                className="font-mono text-sm hover:text-accent"
+                className="block px-4 py-4 text-sm hover:bg-card-hover"
               >
                 Order {thread.orderId}
               </Link>
@@ -37,12 +45,6 @@ export default async function BuyerMessagesPage() {
           ))}
         </ul>
       )}
-
-      <p className="mt-12">
-        <Button variant="outline" size="sm" asChild>
-          <Link href="/orders">Your orders</Link>
-        </Button>
-      </p>
     </main>
   );
 }

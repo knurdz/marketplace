@@ -167,6 +167,7 @@
   --radius-2xl: calc(var(--radius) * 1.8);
   --radius-3xl: calc(var(--radius) * 2.2);
   --radius-4xl: calc(var(--radius) * 2.6);
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 * {
@@ -201,6 +202,79 @@ html[data-theme="light"] {
   }
   html {
     @apply font-sans;
+  }
+}
+
+@layer utilities {
+  .ease-out-expo {
+    transition-timing-function: var(--ease-out-expo);
+  }
+
+  .bg-grid-faint {
+    background-image:
+      linear-gradient(to right, color-mix(in srgb, var(--foreground) 6%, transparent) 1px, transparent 1px),
+      linear-gradient(to bottom, color-mix(in srgb, var(--foreground) 6%, transparent) 1px, transparent 1px);
+    background-size: 48px 48px;
+  }
+
+  .mask-fade-x {
+    mask-image: linear-gradient(to right, transparent, black 8%, black 92%, transparent);
+  }
+
+  .animate-fade-up {
+    animation: knurdz-fade-up 0.7s var(--ease-out-expo) both;
+  }
+
+  .animate-marquee {
+    animation: knurdz-marquee 42s linear infinite;
+  }
+
+  .animate-hero-glow {
+    animation: knurdz-hero-glow 14s ease-in-out infinite;
+  }
+
+  .hover-zoom {
+    transition: transform 0.6s var(--ease-out-expo);
+  }
+
+  .group\/card:hover .hover-zoom {
+    transform: scale(1.04);
+  }
+
+  .pause-on-hover:hover .animate-marquee {
+    animation-play-state: paused;
+  }
+}
+
+@keyframes knurdz-fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes knurdz-marquee {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+@keyframes knurdz-hero-glow {
+  0%,
+  100% {
+    opacity: 0.45;
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  50% {
+    opacity: 0.7;
+    transform: translate3d(4%, -3%, 0) scale(1.06);
   }
 }
 

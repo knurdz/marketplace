@@ -1,4 +1,6 @@
 import { getAdminMetrics } from "@/lib/services";
+import { PageHeader } from "@/components/layout/page-header";
+import { Card, CardContent } from "@/components/ui/card";
 
 function formatCount(value: number): string {
   return new Intl.NumberFormat(undefined, {
@@ -36,23 +38,22 @@ export default async function AdminPage() {
   ];
 
   return (
-    <div className="mx-auto max-w-3xl">
-      <p className="font-mono text-sm text-accent">$ ./admin --dashboard</p>
-      <h2 className="mt-3 text-3xl font-bold tracking-tight">Dashboard</h2>
-      <p className="mt-2 max-w-xl text-sm text-muted-foreground">
-        Platform metrics below. Approvals, moderation, and bank verification
-        land in later Member 4 steps.
-      </p>
+    <div>
+      <PageHeader
+        headingAs="h2"
+        eyebrow="Admin"
+        title="Dashboard"
+        description="Platform snapshot. Approvals, slips, and moderation live in the sidebar."
+      />
 
-      <div className="mt-10 grid gap-4 sm:grid-cols-3">
+      <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {cards.map(({ label, value }) => (
-          <div
-            key={label}
-            className="rounded-md border border-border bg-card px-4 py-5"
-          >
-            <p className="font-mono text-xs text-muted-foreground">{label}</p>
-            <p className="mt-2 text-2xl font-bold tracking-tight">{value}</p>
-          </div>
+          <Card key={label}>
+            <CardContent>
+              <p className="text-sm text-muted-foreground">{label}</p>
+              <p className="mt-2 text-2xl font-bold tracking-tight">{value}</p>
+            </CardContent>
+          </Card>
         ))}
       </div>
     </div>

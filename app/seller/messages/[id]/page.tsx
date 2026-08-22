@@ -24,7 +24,6 @@ export default async function SellerThreadPage({ params }: SellerThreadPageProps
 
   return (
     <div className="mx-auto max-w-3xl">
-      <p className="font-mono text-sm text-accent">$ ./seller --messages</p>
       <h2 className="mt-3 text-3xl font-bold tracking-tight">Conversation</h2>
       <p className="mt-2 font-mono text-sm text-muted-foreground">
         Order {thread.orderId}

@@ -40,7 +40,6 @@ export function ShopPolicyForm({ profile }: ShopPolicyFormProps) {
 
   return (
     <form action={action} className="mt-8 max-w-lg space-y-5">
-      <p className="font-mono text-sm text-accent">$ ./shop --policies</p>
       <h2 className="text-xl font-bold tracking-tight">Shop policies</h2>
       <p className="text-sm text-muted-foreground">
         Optional return and shipping text shown on your public shop page and on

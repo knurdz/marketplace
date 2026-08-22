@@ -48,9 +48,6 @@ export default async function AdminSellerPerformancePage({
 
   return (
     <div className="mx-auto max-w-5xl">
-      <p className="font-mono text-sm text-accent">
-        $ ./admin --sellers-performance
-      </p>
       <h2 className="mt-3 text-3xl font-bold tracking-tight">
         Seller performance
       </h2>

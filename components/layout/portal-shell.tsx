@@ -3,6 +3,10 @@ import type { ReactNode } from "react";
 import { Menu } from "lucide-react";
 import { signOut } from "@/lib/appwrite/auth";
 import { SkipToContent } from "@/components/layout/skip-to-content";
+import {
+  PortalSideNav,
+  type PortalNavGroup,
+} from "@/components/layout/portal-side-nav";
 import { NotificationBell } from "@/components/notifications/notification-bell";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
@@ -13,48 +17,18 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
-import { cn } from "@/lib/utils";
 
-export type PortalNavItem = {
-  href: string;
-  label: string;
-};
+export type { PortalNavGroup, PortalNavItem } from "@/components/layout/portal-side-nav";
 
 type PortalShellProps = {
   title: string;
-  subtitle: string;
   homeHref: string;
-  nav: PortalNavItem[];
+  nav: PortalNavGroup[];
   children: ReactNode;
 };
 
-function SideNav({
-  nav,
-  label,
-  className,
-}: {
-  nav: PortalNavItem[];
-  label: string;
-  className?: string;
-}) {
-  return (
-    <nav aria-label={label} className={cn("flex flex-col gap-1", className)}>
-      {nav.map((item) => (
-        <Link
-          key={item.href}
-          href={item.href}
-          className="rounded-md px-3 py-2 font-mono text-sm text-muted-foreground transition hover:bg-card hover:text-foreground"
-        >
-          {item.label}
-        </Link>
-      ))}
-    </nav>
-  );
-}
-
 export function PortalShell({
   title,
-  subtitle,
   homeHref,
   nav,
   children,
@@ -62,23 +36,20 @@ export function PortalShell({
   return (
     <div className="flex min-h-screen bg-background text-foreground">
       <SkipToContent />
-      <aside className="hidden w-56 shrink-0 border-r border-border bg-sidebar md:flex md:flex-col">
+      <aside className="hidden w-60 shrink-0 border-r border-border bg-sidebar md:flex md:flex-col">
         <div className="px-4 py-5">
-          <Link href="/" className="font-mono text-sm tracking-tight">
+          <Link href="/" className="text-sm font-semibold tracking-tight">
             Knurdz
             <span className="text-accent">.</span>
           </Link>
-          <p className="mt-3 font-mono text-xs text-accent">{subtitle}</p>
-          <h1 className="mt-1 hidden text-lg font-bold tracking-tight md:block">
-            {title}
-          </h1>
+          <h1 className="mt-3 text-lg font-bold tracking-tight">{title}</h1>
         </div>
         <Separator />
         <div className="flex flex-1 flex-col gap-4 p-3">
-          <SideNav nav={nav} label={title} />
+          <PortalSideNav groups={nav} label={title} />
           <div className="mt-auto space-y-2 p-1">
-            <Button variant="outline" size="sm" className="w-full" asChild>
-              <Link href={homeHref}>Storefront</Link>
+            <Button variant="secondary" size="sm" className="w-full" asChild>
+              <Link href={homeHref}>Market</Link>
             </Button>
             <form action={signOut}>
               <Button type="submit" variant="ghost" size="sm" className="w-full">
@@ -95,9 +66,8 @@ export function PortalShell({
             <Sheet>
               <SheetTrigger asChild>
                 <Button
-                  variant="outline"
+                  variant="secondary"
                   size="icon"
-                  className="size-10"
                   aria-label="Open menu"
                 >
                   <Menu />
@@ -108,10 +78,10 @@ export function PortalShell({
                   <SheetTitle className="text-left">{title}</SheetTitle>
                 </SheetHeader>
                 <div className="mt-4 flex flex-col gap-4 px-2">
-                  <SideNav nav={nav} label={title} />
+                  <PortalSideNav groups={nav} label={title} />
                   <Separator />
-                  <Button variant="outline" asChild>
-                    <Link href={homeHref}>Storefront</Link>
+                  <Button variant="secondary" asChild>
+                    <Link href={homeHref}>Market</Link>
                   </Button>
                   <form action={signOut}>
                     <Button type="submit" variant="ghost" className="w-full">
@@ -121,7 +91,7 @@ export function PortalShell({
                 </div>
               </SheetContent>
             </Sheet>
-            <h1 className="font-mono text-sm font-bold tracking-tight md:hidden">
+            <h1 className="text-sm font-bold tracking-tight md:hidden">
               {title}
             </h1>
           </div>
@@ -137,7 +107,7 @@ export function PortalShell({
           tabIndex={-1}
           className="flex-1 px-4 py-8 outline-none md:px-8"
         >
-          {children}
+          <div className="mx-auto w-full max-w-6xl">{children}</div>
         </main>
       </div>
     </div>

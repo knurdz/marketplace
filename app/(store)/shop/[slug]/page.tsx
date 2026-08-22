@@ -1,8 +1,14 @@
 import { notFound } from "next/navigation";
-import { ProductList } from "@/components/store/product-list";
+import { ProductGrid } from "@/components/store/product-grid";
 import { SellerPolicyBlocks } from "@/components/store/seller-policy-blocks";
+import { EmptyState } from "@/components/layout/empty-state";
+import { PageHeader } from "@/components/layout/page-header";
 import { getShopBannerPreviewUrl } from "@/lib/appwrite/storage-urls";
-import { getPublicSellerBySlug, listActiveProducts } from "@/lib/services";
+import {
+  getPublicSellerBySlug,
+  listActiveProducts,
+  listCoverImagesByProductIds,
+} from "@/lib/services";
 
 type ShopPageProps = {
   params: Promise<{ slug: string }>;
@@ -17,52 +23,41 @@ export default async function ShopPage({ params }: ShopPageProps) {
     sellerId: seller.userId,
     limit: 48,
   });
-
+  const covers = await listCoverImagesByProductIds(products.map((p) => p.$id));
   const bannerUrl = getShopBannerPreviewUrl(seller.bannerFileId);
 
   return (
-    <main className="relative mx-auto w-full max-w-5xl px-6 py-16 sm:px-10">
-      <p className="font-mono text-sm text-accent">$ ./shop --slug={seller.slug}</p>
-
+    <main className="mx-auto w-full max-w-6xl px-4 py-10 sm:px-6 lg:px-8">
       {bannerUrl ? (
         // eslint-disable-next-line @next/next/no-img-element -- Appwrite Storage URL
         <img
           src={bannerUrl}
           alt=""
-          className="mt-8 h-40 w-full rounded-md border border-border object-cover sm:h-52"
+          className="mb-8 h-44 w-full rounded-xl border border-border object-cover sm:h-56"
         />
       ) : null}
 
-      <header className={bannerUrl ? "mt-8" : "mt-8"}>
-        <h1 className="text-3xl font-bold tracking-tight sm:text-4xl">
-          {seller.shopName}
-        </h1>
-        <p className="mt-2 font-mono text-sm text-muted-foreground">
-          @{seller.slug}
-        </p>
-        {seller.bio ? (
-          <p className="mt-4 max-w-prose text-sm text-muted-foreground">
-            {seller.bio}
-          </p>
-        ) : null}
-        <SellerPolicyBlocks seller={seller} className="mt-8" />
-      </header>
+      <PageHeader
+        eyebrow={`@${seller.slug}`}
+        title={seller.shopName}
+        description={seller.bio ?? undefined}
+      />
+      <SellerPolicyBlocks seller={seller} className="mt-8" />
 
       <section aria-labelledby="shop-listings-heading" className="mt-12">
-        <h2
-          id="shop-listings-heading"
-          className="font-mono text-xs uppercase tracking-wider text-muted-foreground"
-        >
+        <h2 id="shop-listings-heading" className="text-lg font-semibold tracking-tight">
           Listings
         </h2>
         {products.length > 0 ? (
-          <div className="mt-4">
-            <ProductList products={products} />
+          <div className="mt-6">
+            <ProductGrid products={products} covers={covers} />
           </div>
         ) : (
-          <p className="mt-4 font-mono text-sm text-muted-foreground">
-            No active listings yet.
-          </p>
+          <EmptyState
+            className="mt-6"
+            title="No active listings yet"
+            description="This shop has not published anything public."
+          />
         )}
       </section>
     </main>

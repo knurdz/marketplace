@@ -62,7 +62,7 @@ export function CodOrderConfirmForm({
           order.
         </p>
         <Button variant="outline" size="sm" asChild>
-          <Link href="/">Back to listings</Link>
+          <Link href="/market">Back to listings</Link>
         </Button>
       </div>
     );
@@ -95,7 +95,7 @@ export function CodOrderConfirmForm({
           {pending ? "Confirming…" : "Confirm cash on delivery"}
         </Button>
         <Button type="button" variant="outline" size="sm" asChild>
-          <Link href="/">Back to listings</Link>
+          <Link href="/market">Back to listings</Link>
         </Button>
       </form>
 

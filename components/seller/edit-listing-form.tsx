@@ -89,7 +89,6 @@ export function EditListingForm({
       </div>
 
       <section className="space-y-4">
-        <p className="font-mono text-sm text-accent">$ ./listings --images</p>
         <h3 className="text-xl font-bold tracking-tight">Images</h3>
         {images.length === 0 ? (
           <p className="text-sm text-muted-foreground">No images yet.</p>
@@ -279,7 +278,6 @@ export function EditListingForm({
 
       {!isArchived ? (
         <section className="rounded-md border border-border bg-card px-4 py-4">
-          <p className="font-mono text-sm text-accent">$ ./listings --archive</p>
           <h3 className="mt-2 text-lg font-bold tracking-tight">Archive listing</h3>
           <p className="mt-2 text-sm text-muted-foreground">
             Archived listings are hidden from buyers and cannot be edited. This cannot

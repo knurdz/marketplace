@@ -54,7 +54,6 @@ export function ProfileForm({
   return (
     <div className="mt-8 space-y-10">
       <form action={avatarAction} className="space-y-5">
-        <p className="font-mono text-sm text-accent">$ ./profile --avatar</p>
         <h2 className="text-xl font-bold tracking-tight">Avatar</h2>
 
         {avatarState.error ? (
@@ -113,7 +112,6 @@ export function ProfileForm({
       </form>
 
       <form action={formAction} className="space-y-5">
-        <p className="font-mono text-sm text-accent">$ ./profile --update</p>
         <h2 className="text-xl font-bold tracking-tight">Profile</h2>
 
         {state.error ? (

@@ -8,13 +8,17 @@ import {
 } from "@/lib/services/seller-application";
 
 const SELLER_NAV = [
-  { href: "/seller", label: "Dashboard" },
-  { href: "/seller/shop", label: "Shop" },
-  { href: "/seller/listings", label: "Listings" },
-  { href: "/seller/orders", label: "Orders" },
-  { href: "/seller/messages", label: "Messages" },
-  { href: "/seller/earnings", label: "Earnings" },
-  { href: "/seller/settings", label: "Settings" },
+  {
+    items: [
+      { href: "/seller", label: "Dashboard" },
+      { href: "/seller/shop", label: "Shop" },
+      { href: "/seller/listings", label: "Listings" },
+      { href: "/seller/orders", label: "Orders" },
+      { href: "/seller/messages", label: "Messages" },
+      { href: "/seller/earnings", label: "Earnings" },
+      { href: "/seller/settings", label: "Settings" },
+    ],
+  },
 ];
 
 export default async function SellerLayout({
@@ -32,12 +36,7 @@ export default async function SellerLayout({
   }
 
   return (
-    <PortalShell
-      title="Seller"
-      subtitle="$ ./seller --portal"
-      homeHref="/"
-      nav={SELLER_NAV}
-    >
+    <PortalShell title="Seller" homeHref="/market" nav={SELLER_NAV}>
       {children}
     </PortalShell>
   );

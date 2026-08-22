@@ -36,7 +36,6 @@ export default async function SellerOrderDetailPage({
 
   return (
     <div className="mx-auto max-w-3xl">
-      <p className="font-mono text-sm text-accent">$ ./seller --order-detail</p>
       <h2 className="mt-3 text-3xl font-bold tracking-tight">Order details</h2>
       <p className="mt-2 text-sm text-muted-foreground">
         Order{" "}
@@ -45,7 +44,6 @@ export default async function SellerOrderDetailPage({
       </p>
 
       <section className="mt-10 space-y-4">
-        <p className="font-mono text-sm text-accent">$ ./order --summary</p>
         <h3 className="text-xl font-bold tracking-tight">Summary</h3>
         <dl className="space-y-2 text-sm">
           <div className="flex flex-wrap justify-between gap-2">
@@ -68,7 +66,6 @@ export default async function SellerOrderDetailPage({
       </section>
 
       <section className="mt-10 space-y-4">
-        <p className="font-mono text-sm text-accent">$ ./order --items</p>
         <h3 className="text-xl font-bold tracking-tight">Items</h3>
         {items.length === 0 ? (
           <p className="text-sm text-muted-foreground">No line items found.</p>
@@ -92,7 +89,6 @@ export default async function SellerOrderDetailPage({
       </section>
 
       <section className="mt-10 space-y-4">
-        <p className="font-mono text-sm text-accent">$ ./order --shipping</p>
         <h3 className="text-xl font-bold tracking-tight">Shipping address</h3>
         <p className="whitespace-pre-wrap text-sm text-muted-foreground">
           {order.shippingAddress}
@@ -103,7 +99,6 @@ export default async function SellerOrderDetailPage({
 
       {isMessagingAllowedForOrder(order) ? (
         <section className="mt-10 space-y-4">
-          <p className="font-mono text-sm text-accent">$ ./order --message</p>
           <h3 className="text-xl font-bold tracking-tight">Contact buyer</h3>
           <OpenSellerThreadButton orderId={order.$id} />
         </section>

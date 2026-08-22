@@ -87,7 +87,6 @@ export default async function AdminAuditPage({ searchParams }: PageProps) {
 
   return (
     <div className="mx-auto max-w-3xl">
-      <p className="font-mono text-sm text-accent">$ ./admin --audit</p>
       <h2 className="mt-3 text-3xl font-bold tracking-tight">Audit log</h2>
       <p className="mt-2 max-w-xl text-sm text-muted-foreground">
         Read-only history of admin actions. Append-only — no edits or deletions

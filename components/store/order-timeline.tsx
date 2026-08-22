@@ -10,7 +10,6 @@ export function OrderTimeline({ status }: OrderTimelineProps) {
 
   return (
     <section className="mt-10 space-y-4">
-      <p className="font-mono text-sm text-accent">$ ./order --timeline</p>
       <h2 className="text-xl font-bold tracking-tight">Order status</h2>
 
       {view.terminalOutcome ? (

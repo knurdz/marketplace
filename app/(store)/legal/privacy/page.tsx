@@ -3,7 +3,6 @@ import { LegalPage, LegalSection } from "@/components/legal/legal-page";
 export default function PrivacyPage() {
   return (
     <LegalPage
-      shell="$ ./legal --privacy"
       title="Privacy"
       updated="11 August 2026"
     >

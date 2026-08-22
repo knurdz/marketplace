@@ -37,7 +37,7 @@ function pathIsPortal(path: string, portal: "/admin" | "/seller"): boolean {
 
 /**
  * Default destination after login/register. Admin wins if the user also has
- * seller. Buyers (and anyone without a portal label) go to the storefront.
+ * seller. Buyers (and anyone without a portal label) go to the market.
  */
 export function homePathForUser(user: LabeledUser): string {
   if (userHasLabel(user, "admin")) {
@@ -46,7 +46,7 @@ export function homePathForUser(user: LabeledUser): string {
   if (userHasLabel(user, "seller")) {
     return "/seller";
   }
-  return "/";
+  return "/market";
 }
 
 /**

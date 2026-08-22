@@ -24,7 +24,6 @@ export default async function BuyerThreadPage({ params }: ThreadPageProps) {
 
   return (
     <main className="relative mx-auto w-full max-w-3xl px-6 py-16 sm:px-10">
-      <p className="font-mono text-sm text-accent">$ ./messages --thread</p>
       <h1 className="mt-4 text-3xl font-bold tracking-tight">Conversation</h1>
       <p className="mt-2 font-mono text-sm text-muted-foreground">
         Order {thread.orderId}

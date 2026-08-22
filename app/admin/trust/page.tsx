@@ -24,7 +24,6 @@ export default async function AdminTrustPage() {
 
   return (
     <div className="mx-auto max-w-4xl">
-      <p className="font-mono text-sm text-accent">$ ./admin --trust</p>
       <h2 className="mt-3 text-3xl font-bold tracking-tight">Trust signals</h2>
       <p className="mt-2 max-w-2xl text-sm text-muted-foreground">
         Read-only computed heuristics for human review. Verified badge
