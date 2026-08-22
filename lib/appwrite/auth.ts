@@ -11,7 +11,7 @@ import {
   RATE_LIMIT_MESSAGE,
   RATE_LIMITS,
 } from "@/lib/security/rate-limit";
-import { DATABASE_ID, SESSION_COOKIE, TABLE_PROFILES, TABLE_SELLER_PROFILES } from "./config";
+import { DATABASE_ID, SESSION_COOKIE, TABLE_PROFILES, TABLE_SELLER_PROFILES, getAppUrl } from "./config";
 import { createProfileForUser } from "./profiles";
 import { resolveHomePath, resolvePostLoginPath } from "./home-path";
 import { ROLE_LABELS } from "./roles";
@@ -21,6 +21,7 @@ import {
   createPendingSellerProfileForUser,
   parseSellerApplicationInput,
 } from "@/lib/services/seller-application";
+import { logError } from "@/lib/observability/log-error";
 
 async function rollbackSignup(userId: string) {
   try {
@@ -212,6 +213,16 @@ export async function signUpWithEmail(
       password,
     });
     await setSessionCookie(session.secret, session.expire);
+
+    try {
+      const { account: sessionAccount } = await createSessionClient();
+      await sessionAccount.createVerification({
+        url: `${getAppUrl()}/verify-email`,
+      });
+    } catch (verifyError) {
+      unstable_rethrow(verifyError);
+      logError("auth.signup.verify", verifyError, { userId: user.$id });
+    }
   } catch (error) {
     unstable_rethrow(error);
     if (createdUserId) {

@@ -141,15 +141,12 @@ function publicImagePermissions(userId: string): string[] {
   ];
 }
 
-/** Private bank slip — never grant read(any). */
+/** Private bank slip — uploader only; sellers/admin read via server proxy + admin SDK. */
 function bankSlipPermissions(userId: string): string[] {
   return [
     Permission.read(Role.user(userId)),
     Permission.update(Role.user(userId)),
     Permission.delete(Role.user(userId)),
-    Permission.read(Role.label("admin")),
-    Permission.update(Role.label("admin")),
-    Permission.delete(Role.label("admin")),
   ];
 }
 

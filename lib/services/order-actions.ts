@@ -84,11 +84,9 @@ export async function createOrder(
 
   if (result.ok) {
     revalidateCheckoutPaths();
-    return {
-      ok: true,
-      orderId: result.orderId,
-      paymentMethod: result.paymentMethod,
-    };
+    redirect(
+      checkoutContinuationPath(result.paymentMethod, result.orderId),
+    );
   }
 
   return {

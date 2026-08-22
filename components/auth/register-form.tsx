@@ -162,6 +162,10 @@ export function RegisterForm() {
       </Button>
 
       <p className="text-sm text-muted-foreground">
+        We will email you a link to verify your address after sign-up.
+      </p>
+
+      <p className="text-sm text-muted-foreground">
         Already registered?{" "}
         <Link href="/login" className="text-foreground hover:underline">
           Sign in

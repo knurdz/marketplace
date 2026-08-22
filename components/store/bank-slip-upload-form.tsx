@@ -90,7 +90,7 @@ export function BankSlipUploadForm({ order, payment }: BankSlipUploadFormProps) 
         </p>
       ) : null}
 
-      <form action={formAction} className="space-y-5" encType="multipart/form-data">
+      <form action={formAction} className="space-y-5">
         <input type="hidden" name="orderId" value={order.$id} />
 
         <div className="space-y-2">

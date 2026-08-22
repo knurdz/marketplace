@@ -1,13 +1,11 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { useActionState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
-  checkoutContinuationPath,
   createOrder,
   type CreateOrderActionState,
 } from "@/lib/services/order-actions";
@@ -30,7 +28,6 @@ const METHOD_LABELS: Record<(typeof PAYMENT_METHODS)[number], string> = {
 };
 
 export function CheckoutForm({ cartView, payhereEnabled }: CheckoutFormProps) {
-  const router = useRouter();
   const [state, formAction, pending] = useActionState(createOrder, initialState);
   const lastToast = useRef<string | null>(null);
 
@@ -50,14 +47,8 @@ export function CheckoutForm({ cartView, payhereEnabled }: CheckoutFormProps) {
         lastToast.current = key;
         toast.error(state.error);
       }
-      return;
     }
-
-    if (state.ok && state.orderId && state.paymentMethod) {
-      const path = checkoutContinuationPath(state.paymentMethod, state.orderId);
-      router.push(path);
-    }
-  }, [state, router]);
+  }, [state]);
 
   const defaultMethod = isFreeOrder ? "free" : "bank_transfer";
   const paidMethods = (
