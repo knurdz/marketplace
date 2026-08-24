@@ -53,6 +53,7 @@ const AUTH_PREFIXES = [
   "/forgot-password",
   "/reset-password",
   "/verify-email",
+  "/oauth",
 ] as const;
 
 function pathIsAuth(path: string): boolean {

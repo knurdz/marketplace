@@ -1,6 +1,5 @@
 "use server";
 
-import { cookies } from "next/headers";
 import { redirect, unstable_rethrow } from "next/navigation";
 import { AppwriteException, ID, Query } from "node-appwrite";
 import {
@@ -11,11 +10,12 @@ import {
   RATE_LIMIT_MESSAGE,
   RATE_LIMITS,
 } from "@/lib/security/rate-limit";
-import { DATABASE_ID, SESSION_COOKIE, TABLE_PROFILES, TABLE_SELLER_PROFILES, getAppUrl } from "./config";
+import { DATABASE_ID, TABLE_PROFILES, TABLE_SELLER_PROFILES, getAppUrl } from "./config";
 import { createProfileForUser } from "./profiles";
 import { resolveHomePath, resolvePostLoginPath } from "./home-path";
 import { ROLE_LABELS } from "./roles";
 import { createAdminClient, createSessionClient } from "./server";
+import { clearSessionCookie, setSessionCookie } from "./session-cookie";
 import { getLoggedInUser } from "./session";
 import {
   createPendingSellerProfileForUser,
@@ -106,17 +106,6 @@ function mapAuthError(error: unknown): string {
     }
   }
   return "Something went wrong. Please try again.";
-}
-
-async function setSessionCookie(secret: string, expire: string) {
-  const cookieStore = await cookies();
-  cookieStore.set(SESSION_COOKIE, secret, {
-    path: "/",
-    httpOnly: true,
-    sameSite: "lax",
-    secure: process.env.NODE_ENV === "production",
-    expires: new Date(expire),
-  });
 }
 
 export async function signUpWithEmail(
@@ -304,14 +293,12 @@ export async function signInWithEmail(
 export async function signOut() {
   try {
     const { account } = await createSessionClient();
-    const cookieStore = await cookies();
-    cookieStore.delete(SESSION_COOKIE);
+    await clearSessionCookie();
     await account.deleteSession({ sessionId: "current" });
   } catch (error) {
     unstable_rethrow(error);
     // Always clear local session cookie even if Appwrite session delete fails
-    const cookieStore = await cookies();
-    cookieStore.delete(SESSION_COOKIE);
+    await clearSessionCookie();
   }
 
   redirect("/login");
