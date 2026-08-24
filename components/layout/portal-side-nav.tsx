@@ -42,7 +42,7 @@ export function PortalSideNav({
       {groups.map((group) => (
         <div key={group.title ?? group.items.map((item) => item.href).join("-")}>
           {group.title ? (
-            <p className="px-3 pb-1.5 text-[11px] font-medium tracking-[0.16em] text-muted-foreground uppercase">
+            <p className="px-3 pb-1.5 font-mono text-xs text-accent">
               {group.title}
             </p>
           ) : null}
@@ -54,10 +54,10 @@ export function PortalSideNav({
                   key={item.href}
                   href={item.href}
                   className={cn(
-                    "rounded-md border-l-2 py-2 pl-[10px] pr-3 text-sm transition",
+                    "rounded-md border-l-2 py-2 pl-[10px] pr-3 text-base transition",
                     active
                       ? "border-accent bg-accent/10 font-medium text-foreground"
-                      : "border-transparent text-muted-foreground hover:bg-card hover:text-foreground",
+                      : "border-transparent text-muted-foreground hover:bg-card hover:text-accent",
                   )}
                   aria-current={active ? "page" : undefined}
                 >

@@ -30,13 +30,13 @@ function NavLinks({
     <nav aria-label="Store" className={className}>
       <Link
         href="/market"
-        className="text-sm text-muted-foreground transition hover:text-foreground"
+        className="text-base text-muted-foreground transition hover:text-accent"
       >
         Market
       </Link>
       <Link
         href="/categories"
-        className="text-sm text-muted-foreground transition hover:text-foreground"
+        className="text-base text-muted-foreground transition hover:text-accent"
       >
         Categories
       </Link>
@@ -74,7 +74,7 @@ export function StoreNavbar({
   return (
     <header className="sticky top-0 z-40 border-b border-border bg-background/80 backdrop-blur-md">
       <div className="mx-auto flex h-16 w-full max-w-6xl items-center gap-4 px-4 sm:px-6">
-        <Link href="/" className="shrink-0 text-sm font-semibold tracking-tight">
+        <Link href="/" className="shrink-0 text-base font-semibold tracking-tight">
           Knurdz
           <span className="text-accent">.</span>
         </Link>

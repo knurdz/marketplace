@@ -24,13 +24,13 @@ export function LandingHowItWorks() {
       {STEPS.map((step) => (
         <Card key={step.n} className="bg-card/60">
           <CardHeader>
-            <p className="font-mono text-xs tabular-nums text-muted-foreground">
+            <p className="font-mono text-sm tabular-nums text-accent">
               {step.n}
             </p>
             <CardTitle className="text-xl">{step.title}</CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-sm leading-relaxed text-muted-foreground">
+            <p className="text-base leading-relaxed text-muted-foreground">
               {step.body}
             </p>
           </CardContent>

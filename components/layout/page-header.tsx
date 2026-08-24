@@ -28,20 +28,20 @@ export function PageHeader({
     >
       <div className="min-w-0 max-w-2xl">
         {eyebrow ? (
-          <p className="text-xs font-medium tracking-[0.18em] text-muted-foreground uppercase">
+          <p className="font-mono text-sm text-accent">
             {eyebrow}
           </p>
         ) : null}
         <Heading
           className={cn(
-            "text-3xl font-bold tracking-tight sm:text-4xl",
+            "text-4xl font-bold tracking-tight sm:text-5xl",
             eyebrow ? "mt-2" : null,
           )}
         >
           {title}
         </Heading>
         {description ? (
-          <p className="mt-2 text-sm leading-relaxed text-muted-foreground sm:text-base">
+          <p className="mt-2 text-base leading-relaxed text-muted-foreground sm:text-lg">
             {description}
           </p>
         ) : null}

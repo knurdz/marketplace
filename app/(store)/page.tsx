@@ -49,9 +49,7 @@ export default async function Home() {
           <section className="mx-auto w-full max-w-6xl px-4 py-12 sm:px-6 lg:px-8">
             <div className="mb-6 flex items-end justify-between gap-4">
               <div>
-                <p className="text-xs font-medium tracking-[0.18em] text-muted-foreground uppercase">
-                  Featured
-                </p>
+                <p className="font-mono text-sm text-accent">featured</p>
                 <h2 className="mt-2 text-2xl font-bold tracking-tight">Hand-picked</h2>
               </div>
               <Button asChild>
@@ -67,9 +65,7 @@ export default async function Home() {
         <Reveal>
           <section className="mx-auto w-full max-w-6xl px-4 py-12 sm:px-6 lg:px-8">
             <div className="mb-6">
-              <p className="text-xs font-medium tracking-[0.18em] text-muted-foreground uppercase">
-                Trending
-              </p>
+              <p className="font-mono text-sm text-accent">trending</p>
               <h2 className="mt-2 text-2xl font-bold tracking-tight">Moving now</h2>
             </div>
             <ProductGrid products={trending} covers={covers} />
@@ -80,9 +76,7 @@ export default async function Home() {
       <Reveal>
         <section className="mx-auto w-full max-w-6xl px-4 py-16 sm:px-6 lg:px-8">
           <div className="mb-8">
-            <p className="text-xs font-medium tracking-[0.18em] text-muted-foreground uppercase">
-              How it works
-            </p>
+            <p className="font-mono text-sm text-accent">how it works</p>
             <h2 className="mt-2 text-2xl font-bold tracking-tight">Three steps. No noise.</h2>
           </div>
           <LandingHowItWorks />

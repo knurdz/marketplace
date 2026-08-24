@@ -39,16 +39,16 @@ export function StoreFooter() {
     <footer className="mt-auto border-t border-border">
       <div className="mx-auto grid w-full max-w-6xl gap-10 px-4 py-12 sm:px-6 md:grid-cols-5">
         <div className="md:col-span-1">
-          <p className="text-sm font-semibold tracking-tight">
+          <p className="text-base font-semibold tracking-tight">
             Knurdz<span className="text-accent">.</span>
           </p>
-          <p className="mt-3 max-w-xs text-sm leading-relaxed text-muted-foreground">
+          <p className="mt-3 max-w-xs text-base leading-relaxed text-muted-foreground">
             A market for the community that already ships.
           </p>
         </div>
         {FOOTER_COLUMNS.map((column) => (
           <nav key={column.title} aria-label={column.title}>
-            <p className="text-xs font-medium tracking-[0.16em] text-muted-foreground uppercase">
+            <p className="font-mono text-sm text-accent">
               {column.title}
             </p>
             <ul className="mt-3 space-y-2">
@@ -56,7 +56,7 @@ export function StoreFooter() {
                 <li key={`${column.title}-${link.href}-${link.label}`}>
                   <Link
                     href={link.href}
-                    className="text-sm text-muted-foreground transition hover:text-foreground"
+                    className="text-base text-muted-foreground transition hover:text-accent"
                   >
                     {link.label}
                   </Link>
@@ -67,7 +67,7 @@ export function StoreFooter() {
         ))}
       </div>
       <div className="border-t border-border">
-        <p className="mx-auto w-full max-w-6xl px-4 py-4 font-mono text-xs text-muted-foreground sm:px-6">
+        <p className="mx-auto w-full max-w-6xl px-4 py-4 font-mono text-sm text-muted-foreground sm:px-6">
           Knurdz Marketplace
         </p>
       </div>
