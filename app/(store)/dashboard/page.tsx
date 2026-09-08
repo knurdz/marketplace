@@ -6,6 +6,7 @@ import { EmptyState } from "@/components/layout/empty-state";
 import { PageHeader } from "@/components/layout/page-header";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { debugLog9ec1e5 } from "@/lib/debug-9ec1e5";
 import { getLoggedInUser } from "@/lib/appwrite/session";
 import { getOwnWishlistView, listOwnOrders } from "@/lib/services";
 import type { Order, OrderStatus, WishlistLine } from "@/lib/types";
@@ -80,6 +81,19 @@ export default async function DashboardPage() {
   ]);
 
   const summary = countOrdersBySummaryBucket(orders);
+
+  // #region agent log
+  await debugLog9ec1e5({
+    hypothesisId: "D",
+    location: "app/(store)/dashboard/page.tsx",
+    message: "buyer dashboard loaded",
+    data: {
+      orderCount: orders.length,
+      summary,
+      wishlistCount: wishlistView.itemCount,
+    },
+  });
+  // #endregion
   const recentOrders = orders.slice(0, RECENT_ORDERS_LIMIT);
 
   return (

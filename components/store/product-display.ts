@@ -7,7 +7,7 @@ import { cn } from "@/lib/utils";
 export function formatProductPrice(product: Pick<Product, "isFree" | "price" | "currency">): string {
   if (product.isFree) return "Free";
   try {
-    return new Intl.NumberFormat(undefined, {
+    return new Intl.NumberFormat("en-LK", {
       style: "currency",
       currency: product.currency,
       maximumFractionDigits: 2,
