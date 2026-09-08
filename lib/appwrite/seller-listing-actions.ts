@@ -66,6 +66,11 @@ function revalidateListingPaths(productId: string): void {
   revalidatePath("/shop", "layout");
 }
 
+function readCreateIntent(formData: FormData): "draft" | "list" {
+  const intent = readString(formData, "intent");
+  return intent === "list" ? "list" : "draft";
+}
+
 export async function createDraftListing(
   _prev: CreateListingActionState,
   formData: FormData,
@@ -80,6 +85,17 @@ export async function createDraftListing(
   }
 
   revalidatePath("/seller/listings");
+
+  if (readCreateIntent(formData) === "list") {
+    const submit = await submitListingForReviewCore(result.productId);
+    revalidatePath(`/seller/listings/${result.productId}`);
+    revalidatePath("/admin/listings");
+    if (submit.ok) {
+      redirect("/seller/listings");
+    }
+    redirect(`/seller/listings/${result.productId}`);
+  }
+
   redirect("/seller/listings");
 }
 

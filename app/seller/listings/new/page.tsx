@@ -14,8 +14,11 @@ export default async function NewListingPage() {
     <div className="mx-auto max-w-3xl">
       <h2 className="mt-3 text-3xl font-bold tracking-tight">New listing</h2>
       <p className="mt-2 max-w-xl text-sm text-muted-foreground">
-        Saves as a draft. Submit it for admin review from your listings page
-        before buyers can see it on the storefront.
+        Use <strong className="font-medium text-foreground">List item</strong> to
+        save and submit for admin review in one step. Use{" "}
+        <strong className="font-medium text-foreground">Save draft</strong> to
+        keep it private until you submit from your listings page. Approved
+        listings appear on the storefront.
       </p>
 
       <CreateListingForm
