@@ -23,6 +23,7 @@ import {
   RATE_LIMIT_MESSAGE,
   RATE_LIMITS,
 } from "@/lib/security/rate-limit";
+import { debugLog9ec1e5 } from "@/lib/debug-9ec1e5";
 import type { Product, ProductImage, ProductStatus } from "@/lib/types";
 import {
   ARCHIVED_PRODUCT_STATUS,
@@ -877,7 +878,20 @@ export async function submitListingForReviewCore(
       rowId: product.$id,
       data: { status: PENDING_REVIEW_PRODUCT_STATUS },
     });
-  } catch {
+  } catch (error) {
+    // #region agent log
+    await debugLog9ec1e5({
+      hypothesisId: "B",
+      location: "lib/services/seller-listings.ts:submitListingForReviewCore",
+      message: "session updateRow failed",
+      data: {
+        productId: product.$id,
+        status: product.status,
+        errorName: error instanceof Error ? error.name : typeof error,
+        errorMessage: error instanceof Error ? error.message : "unknown",
+      },
+    });
+    // #endregion
     return { ok: false, error: "Could not submit listing. Please try again." };
   }
 
