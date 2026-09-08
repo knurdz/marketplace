@@ -108,18 +108,17 @@ test.describe("Guide §10 — MVP close (Phase 6.18)", () => {
 
     await page.goto("/seller/listings/new");
     await page.locator("#title").waitFor({ state: "visible" });
-    await expect(page.getByTestId("listing-save-draft")).toBeEnabled();
+    await expect(page.getByTestId("listing-list-item")).toBeEnabled();
     await page.locator("#categoryId option").nth(1).waitFor();
     await page.locator("#title").fill(paidTitle);
     await page.locator("#description").fill("Paid listing for E2E bank path.");
     await page.locator("#categoryId").selectOption({ index: 1 });
     await page.locator("#price").fill("250");
     await page.locator("#stock").fill("5");
-    await page.getByTestId("listing-save-draft").click();
-    await expect(page.getByTestId("listing-save-draft")).toHaveText(
-      /Saving draft/i,
-      { timeout: 5_000 },
-    );
+    await page.getByTestId("listing-list-item").click();
+    await expect(page.getByTestId("listing-list-item")).toHaveText(/Listing/i, {
+      timeout: 5_000,
+    });
     await page.waitForURL("/seller/listings", { timeout: 30_000 });
 
     const paidHref = await page
@@ -127,16 +126,12 @@ test.describe("Guide §10 — MVP close (Phase 6.18)", () => {
       .getAttribute("href");
     paidProductId = paidHref?.split("/").pop() ?? "";
     expect(paidProductId).toBeTruthy();
-    await page
-      .locator("li")
-      .filter({ hasText: paidTitle })
-      .getByTestId("listing-submit-review")
-      .click();
     await expect(
-      page.getByText(`"${paidTitle}" submitted for review`, { exact: false }),
-    ).toBeVisible({
-      timeout: 15_000,
-    });
+      page
+        .locator("li")
+        .filter({ hasText: paidTitle })
+        .getByText("pending_review"),
+    ).toBeVisible({ timeout: 15_000 });
   });
 
   test("admin approves both listings", async ({ page }) => {

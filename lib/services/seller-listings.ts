@@ -11,7 +11,7 @@ import {
   hasAppwritePublicConfig,
 } from "@/lib/appwrite/config";
 import { ROLE_LABELS, userHasLabel } from "@/lib/appwrite/roles";
-import { createSessionClient } from "@/lib/appwrite/server";
+import { createAdminClient, createSessionClient } from "@/lib/appwrite/server";
 import { getLoggedInUser } from "@/lib/appwrite/session";
 import {
   deleteFile,
@@ -495,7 +495,7 @@ export async function addOwnProductImagesCore(
     existing.reduce((max, image) => Math.max(max, image.sortOrder), -1) + 1;
 
   try {
-    const { tables } = await createSessionClient();
+    const { tables } = await createAdminClient();
     for (let i = 0; i < imageCheck.files.length; i++) {
       const file = imageCheck.files[i]!;
       const { fileId } = await uploadProductImage(file);
@@ -668,7 +668,7 @@ export async function createDraftProductCore(
   const uploadedFileIds: string[] = [];
 
   try {
-    const { tables } = await createSessionClient();
+    const { tables } = await createAdminClient();
     const row = await tables.createRow({
       databaseId: DATABASE_ID,
       tableId: TABLE_PRODUCTS,
@@ -731,11 +731,6 @@ export async function createDraftProductCore(
   } catch (error) {
     await cleanupUploadedFiles(uploadedFileIds);
 
-    if (error instanceof AppwriteException) {
-      if (error.code === 401) {
-        return { ok: false, error: "You must be signed in to create a listing." };
-      }
-    }
     if (error instanceof Error && !(error instanceof AppwriteException)) {
       return { ok: false, error: error.message };
     }
