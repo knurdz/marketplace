@@ -29,28 +29,28 @@
   --primary-foreground: #000000;
   --secondary: #141926;
   --secondary-foreground: #ffffff;
-  --accent: #00c758;
-  --accent-bright: #05df72;
-  --accent-deep: #16a34a;
-  --accent-foreground: #000000;
+  --accent: #159c55;
+  --accent-bright: #1ba95e;
+  --accent-deep: #127a3c;
+  --accent-foreground: #ffffff;
   --destructive: #ef4444;
-  --ring: #00c758;
+  --ring: #159c55;
   --radius: 0.375rem;
 
-  --chart-1: #00c758;
-  --chart-2: #05df72;
+  --chart-1: #159c55;
+  --chart-2: #1ba95e;
   --chart-3: #9ca3af;
   --chart-4: #ffffff;
-  --chart-5: #16a34a;
+  --chart-5: #127a3c;
 
   --sidebar: #030712;
   --sidebar-foreground: #ffffff;
-  --sidebar-primary: #00c758;
-  --sidebar-primary-foreground: #000000;
+  --sidebar-primary: #159c55;
+  --sidebar-primary-foreground: #ffffff;
   --sidebar-accent: #ffffff0d;
   --sidebar-accent-foreground: #ffffff;
   --sidebar-border: #ffffff1a;
-  --sidebar-ring: #00c758;
+  --sidebar-ring: #159c55;
 }
 
 .light,
@@ -116,20 +116,20 @@
   --primary-foreground: #000000;
   --secondary: #141926;
   --secondary-foreground: #ffffff;
-  --accent: #00c758;
-  --accent-bright: #05df72;
-  --accent-deep: #16a34a;
-  --accent-foreground: #000000;
+  --accent: #159c55;
+  --accent-bright: #1ba95e;
+  --accent-deep: #127a3c;
+  --accent-foreground: #ffffff;
   --destructive: #ef4444;
-  --ring: #00c758;
+  --ring: #159c55;
   --sidebar: #080b12;
   --sidebar-foreground: #ffffff;
-  --sidebar-primary: #00c758;
-  --sidebar-primary-foreground: #000000;
+  --sidebar-primary: #159c55;
+  --sidebar-primary-foreground: #ffffff;
   --sidebar-accent: #141926;
   --sidebar-accent-foreground: #ffffff;
   --sidebar-border: #1e2638;
-  --sidebar-ring: #00c758;
+  --sidebar-ring: #159c55;
 }
 
 @theme inline {
@@ -312,11 +312,11 @@ html[data-theme="light"] {
 
   /* Modern marketplace luminous glow utilities */
   .glow-accent {
-    box-shadow: 0 0 30px -4px rgba(0, 199, 88, 0.25);
+    box-shadow: 0 0 30px -4px rgba(21, 156, 85, 0.25);
   }
 
   .glow-accent-subtle {
-    box-shadow: 0 0 20px -2px rgba(0, 199, 88, 0.12);
+    box-shadow: 0 0 20px -2px rgba(21, 156, 85, 0.12);
   }
 
   .card-gradient-highlight {

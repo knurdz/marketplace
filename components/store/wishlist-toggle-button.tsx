@@ -7,11 +7,14 @@ import { Button } from "@/components/ui/button";
 import { toggleWishlistProduct } from "@/lib/services/wishlist-actions";
 import { toast } from "@/lib/ui/toast";
 
+import { cn } from "@/lib/utils";
+
 type WishlistToggleButtonProps = {
   productId: string;
   initialSaved: boolean;
   isLoggedIn: boolean;
   loginHref: string;
+  className?: string;
 };
 
 export function WishlistToggleButton({
@@ -19,13 +22,14 @@ export function WishlistToggleButton({
   initialSaved,
   isLoggedIn,
   loginHref,
+  className,
 }: WishlistToggleButtonProps) {
   const [saved, setSaved] = useState(initialSaved);
   const [pending, startTransition] = useTransition();
 
   if (!isLoggedIn) {
     return (
-      <Button variant="secondary" asChild className="mt-4">
+      <Button variant="secondary" asChild className={cn("h-10", className)}>
         <Link href={loginHref}>
           <Heart className="mr-1.5 size-4" aria-hidden />
           Sign in to save
@@ -54,7 +58,7 @@ export function WishlistToggleButton({
     <Button
       type="button"
       variant="secondary"
-      className="mt-4"
+      className={cn("h-10", className)}
       disabled={pending}
       onClick={handleToggle}
       aria-pressed={saved}

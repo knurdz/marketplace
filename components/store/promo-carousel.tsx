@@ -137,7 +137,7 @@ export function PromoCarousel({ slides }: { slides: PromoSlide[] }) {
               aria-roledescription="slide"
               aria-label={`${index + 1} of ${slides.length}`}
             >
-              <div className="group/featured relative flex h-full min-h-[380px] flex-col justify-between overflow-hidden rounded-2xl border border-border bg-card shadow-sm transition-all duration-300 hover:-translate-y-1.5 hover:border-accent/50 hover:bg-card-hover hover:shadow-[0_12px_30px_rgba(0,199,88,0.16)]">
+              <div className="group/featured relative flex h-full min-h-[380px] flex-col justify-between overflow-hidden rounded-2xl border border-border bg-card shadow-sm transition-all duration-300 hover:-translate-y-1.5 hover:border-accent/50 hover:bg-card-hover hover:shadow-[0_12px_30px_rgba(21,156,85,0.16)]">
                 {/* Card Media Preview */}
                 <div className="relative aspect-[16/10] w-full overflow-hidden bg-background-alt">
                   {slide.imageUrl ? (
@@ -194,7 +194,7 @@ export function PromoCarousel({ slides }: { slides: PromoSlide[] }) {
                     <Button
                       size="sm"
                       asChild
-                      className="group/btn bg-accent text-accent-foreground font-semibold shadow-xs transition-all hover:bg-accent-bright hover:shadow-[0_0_16px_rgba(0,199,88,0.3)]"
+                      className="group/btn bg-accent text-accent-foreground font-semibold shadow-xs transition-all hover:bg-accent-bright hover:shadow-[0_0_16px_rgba(21,156,85,0.25)]"
                     >
                       <Link href={slide.href}>
                         {slide.ctaLabel}

@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { ArrowLeft } from "lucide-react";
 import { AddToCartButton } from "@/components/store/add-to-cart-button";
 import { ProductImageGallery } from "@/components/store/product-image-gallery";
 import { ProductReviewsPlaceholder } from "@/components/store/product-reviews-placeholder";
@@ -10,6 +11,7 @@ import { SellerInfoCard } from "@/components/store/seller-info-card";
 import { WishlistToggleButton } from "@/components/store/wishlist-toggle-button";
 import { formatProductPrice } from "@/components/store/product-display";
 import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -95,59 +97,87 @@ export default async function ProductPage({ params }: ProductPageProps) {
 
         <div className="lg:sticky lg:top-24">
           {product.featured ? (
-            <p className="text-xs font-medium tracking-[0.18em] text-muted-foreground uppercase">
+            <span className="inline-flex items-center rounded-md bg-accent/15 px-2.5 py-0.5 font-mono text-[11px] font-semibold tracking-wider text-accent uppercase">
               Featured
-            </p>
+            </span>
           ) : null}
-          <h1 className="mt-2 text-3xl font-bold tracking-tight sm:text-4xl">
+          <h1 className="mt-2 text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
             {product.title}
           </h1>
-          <p className="mt-4 font-mono text-2xl tabular-nums">{priceLabel}</p>
-          <p className="mt-2 text-sm text-muted-foreground">
-            {product.stock > 0 ? `${product.stock} in stock` : "Out of stock"}
-          </p>
 
-          {canBuy ? (
-            <AddToCartButton
-              productId={product.$id}
-              maxStock={product.stock}
-              isLoggedIn={Boolean(user)}
-              loginHref={loginHref}
-            />
-          ) : (
-            <p className="mt-8 text-sm text-muted-foreground">
-              {!product.available
-                ? "This item is currently unavailable."
-                : "Out of stock — check back later."}
+          {/* Price & Stock status aligned together */}
+          <div className="mt-4 flex flex-wrap items-center gap-3">
+            <p className="font-mono text-3xl font-bold tracking-tight text-foreground tabular-nums">
+              {priceLabel}
             </p>
-          )}
+            <span
+              className={cn(
+                "inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 font-mono text-xs font-medium",
+                product.stock > 0
+                  ? "border border-accent/30 bg-accent/10 text-accent"
+                  : "border border-destructive/30 bg-destructive/10 text-destructive",
+              )}
+            >
+              <span
+                className={cn(
+                  "size-1.5 rounded-full",
+                  product.stock > 0 ? "bg-accent" : "bg-destructive",
+                )}
+              />
+              {product.stock > 0 ? `${product.stock} in stock` : "Out of stock"}
+            </span>
+          </div>
 
-          <div className="mt-2 flex flex-wrap gap-2">
+          {/* Primary purchase and wishlist actions aligned together */}
+          <div className="mt-6 flex flex-wrap items-center gap-3">
+            {canBuy ? (
+              <AddToCartButton
+                productId={product.$id}
+                maxStock={product.stock}
+                isLoggedIn={Boolean(user)}
+                loginHref={loginHref}
+              />
+            ) : (
+              <p className="text-sm text-muted-foreground">
+                {!product.available
+                  ? "This item is currently unavailable."
+                  : "Out of stock — check back later."}
+              </p>
+            )}
+
             <WishlistToggleButton
               productId={product.$id}
               initialSaved={saved}
               isLoggedIn={Boolean(user)}
               loginHref={loginHref}
             />
+          </div>
+
+          {/* Product Description */}
+          <section aria-labelledby="description-heading" className="mt-8 border-t border-border pt-6">
+            <h2 id="description-heading" className="text-sm font-semibold tracking-tight text-foreground">
+              Description
+            </h2>
+            <p className="mt-3 max-w-prose whitespace-pre-wrap text-sm leading-relaxed text-muted-foreground">
+              {product.description}
+            </p>
+          </section>
+
+          {/* Metadata Bar & Report Listing Action */}
+          <div className="mt-8 flex items-center justify-between border-t border-border/60 pt-4 text-xs text-muted-foreground">
+            <span className="font-mono text-[11px]">
+              Listing SKU: <span className="text-foreground/70">{product.$id.slice(-8).toUpperCase()}</span>
+            </span>
             <ReportListingButton
               productId={product.$id}
               isLoggedIn={Boolean(user)}
               loginHref={loginHref}
             />
           </div>
-
-          <section aria-labelledby="description-heading" className="mt-10 border-t border-border pt-8">
-            <h2 id="description-heading" className="text-sm font-medium">
-              Description
-            </h2>
-            <p className="mt-4 max-w-prose whitespace-pre-wrap text-sm leading-relaxed text-muted-foreground">
-              {product.description}
-            </p>
-          </section>
         </div>
       </div>
 
-      <div className="mt-14 grid gap-10 lg:grid-cols-2">
+      <div className="mt-14 grid gap-8 lg:grid-cols-2">
         <SellerInfoCard seller={seller} />
         <ProductReviewsPlaceholder
           productId={product.$id}
@@ -158,11 +188,14 @@ export default async function ProductPage({ params }: ProductPageProps) {
         />
       </div>
 
-      <p className="mt-12">
-        <Button variant="secondary" asChild>
-          <Link href="/market">Back to listings</Link>
+      <div className="mt-10">
+        <Button variant="outline" asChild className="gap-2">
+          <Link href="/market">
+            <ArrowLeft className="size-4" />
+            Back to listings
+          </Link>
         </Button>
-      </p>
+      </div>
 
       <RecentlyViewedSection excludeProductId={product.$id} />
     </main>

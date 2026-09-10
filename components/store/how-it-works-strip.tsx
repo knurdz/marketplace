@@ -26,7 +26,7 @@ export function HowItWorksStrip() {
           key={title}
           className="group relative flex items-start gap-4 p-6 transition-all duration-300 hover:bg-card-hover"
         >
-          <div className="flex size-11 shrink-0 items-center justify-center rounded-xl border border-border/80 bg-background-alt text-accent shadow-xs transition-transform duration-300 group-hover:scale-110 group-hover:border-accent/50 group-hover:bg-accent/10 group-hover:shadow-[0_0_15px_rgba(0,199,88,0.2)]">
+          <div className="flex size-11 shrink-0 items-center justify-center rounded-xl border border-border/80 bg-background-alt text-accent shadow-xs transition-transform duration-300 group-hover:scale-110 group-hover:border-accent/50 group-hover:bg-accent/10 group-hover:shadow-[0_0_15px_rgba(21,156,85,0.2)]">
             <Icon className="size-5 stroke-[1.8]" aria-hidden />
           </div>
           <div className="min-w-0">
