@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { createProductReview } from "@/lib/services/review-actions";
 import type { Review } from "@/lib/types";
 import { toast } from "@/lib/ui/toast";
@@ -124,30 +125,24 @@ export function ProductReviewsPlaceholder({
       : null;
 
   return (
-    <section
-      aria-labelledby="reviews-heading"
-      className="border-t border-border pt-10"
-    >
-      <div className="flex flex-wrap items-baseline justify-between gap-3">
-        <h2
-          id="reviews-heading"
-          className="font-mono text-xs uppercase tracking-wider text-muted-foreground"
-        >
-          Reviews
-        </h2>
-        {averageProductRating ? (
-          <p className="font-mono text-xs text-muted-foreground">
-            {averageProductRating} avg · {reviews.length}{" "}
-            {reviews.length === 1 ? "review" : "reviews"}
+    <Card id="reviews">
+      <CardHeader>
+        <div className="flex flex-wrap items-baseline justify-between gap-3">
+          <CardTitle>Reviews</CardTitle>
+          {averageProductRating ? (
+            <p className="font-mono text-xs text-muted-foreground">
+              {averageProductRating} avg · {reviews.length}{" "}
+              {reviews.length === 1 ? "review" : "reviews"}
+            </p>
+          ) : null}
+        </div>
+      </CardHeader>
+      <CardContent>
+        {reviews.length === 0 ? (
+          <p className="text-sm text-muted-foreground">
+            No reviews yet. Be the first after you complete an order.
           </p>
-        ) : null}
-      </div>
-
-      {reviews.length === 0 ? (
-        <p className="mt-4 max-w-prose text-sm text-muted-foreground">
-          No reviews yet. Be the first after you complete an order.
-        </p>
-      ) : (
+        ) : (
         <ul className="mt-6 space-y-6">
           {reviews.map((review) => (
             <li key={review.$id} className="max-w-prose">
@@ -222,6 +217,7 @@ export function ProductReviewsPlaceholder({
           </p>
         )}
       </div>
-    </section>
+      </CardContent>
+    </Card>
   );
 }

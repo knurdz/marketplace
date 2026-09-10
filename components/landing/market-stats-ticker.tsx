@@ -43,7 +43,7 @@ export function MarketStatsTicker({ className }: { className?: string }) {
         return (
           <div
             key={stat.label}
-            className="group relative overflow-hidden rounded-2xl border border-border bg-card p-4 transition-all duration-300 hover:-translate-y-1 hover:border-accent/40 hover:bg-card-hover hover:shadow-[0_8px_24px_rgba(0,199,88,0.1)]"
+            className="group relative overflow-hidden rounded-2xl border border-border bg-card p-4 transition-all duration-300 hover:-translate-y-1 hover:border-accent/40 hover:bg-card-hover hover:shadow-[0_8px_24px_rgba(21,156,85,0.12)]"
           >
             <div className="flex items-center gap-2 text-muted-foreground transition-colors group-hover:text-accent">
               <Icon className="size-4 shrink-0 stroke-[2]" aria-hidden />

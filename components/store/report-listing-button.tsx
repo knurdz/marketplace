@@ -15,17 +15,20 @@ import {
 } from "@/components/ui/sheet";
 import { createProductReport } from "@/lib/services/report-actions";
 import { toast } from "@/lib/ui/toast";
+import { cn } from "@/lib/utils";
 
 type ReportListingButtonProps = {
   productId: string;
   isLoggedIn: boolean;
   loginHref: string;
+  className?: string;
 };
 
 export function ReportListingButton({
   productId,
   isLoggedIn,
   loginHref,
+  className,
 }: ReportListingButtonProps) {
   const [open, setOpen] = useState(false);
   const [reason, setReason] = useState("");
@@ -34,7 +37,12 @@ export function ReportListingButton({
 
   if (!isLoggedIn) {
     return (
-      <Button variant="ghost" size="sm" asChild className="mt-2 px-0 text-muted-foreground">
+      <Button
+        variant="ghost"
+        size="sm"
+        asChild
+        className={cn("h-8 text-xs text-muted-foreground hover:text-foreground", className)}
+      >
         <Link href={loginHref}>
           <Flag className="mr-1.5 size-3.5" aria-hidden />
           Sign in to report listing
@@ -75,7 +83,7 @@ export function ReportListingButton({
           type="button"
           variant="ghost"
           size="sm"
-          className="mt-2 px-0 text-muted-foreground"
+          className={cn("h-8 text-xs text-muted-foreground hover:text-foreground", className)}
         >
           <Flag className="mr-1.5 size-3.5" aria-hidden />
           Report listing

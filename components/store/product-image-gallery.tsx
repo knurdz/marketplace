@@ -1,5 +1,6 @@
 "use client";
 
+import { Package } from "lucide-react";
 import { useState } from "react";
 import { BUCKET_PRODUCT_IMAGES } from "@/lib/appwrite/config";
 import { getFilePreviewUrl } from "@/lib/appwrite/storage-urls";
@@ -21,10 +22,15 @@ export function ProductImageGallery({
   if (!current) {
     return (
       <div
-        className="flex aspect-square w-full items-center justify-center rounded-xl border border-dashed border-border bg-muted/30"
+        className="flex aspect-square w-full flex-col items-center justify-center rounded-2xl border border-border bg-card p-8 text-center"
         aria-label="No product images"
       >
-        <span className="size-12 rounded-lg border border-border bg-card" />
+        <div className="flex size-14 items-center justify-center rounded-2xl border border-border/80 bg-background-alt text-muted-foreground/60 shadow-xs">
+          <Package className="size-7 stroke-[1.5]" />
+        </div>
+        <p className="mt-3 font-mono text-xs uppercase tracking-wider text-muted-foreground">
+          Knurdz Catalog Item
+        </p>
       </div>
     );
   }

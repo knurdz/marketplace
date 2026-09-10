@@ -38,7 +38,7 @@ export function CreatorCtaBanner({ className }: { className?: string }) {
             <Button
               size="lg"
               asChild
-              className="group/cta bg-accent text-accent-foreground font-semibold shadow-md transition-all duration-300 hover:scale-105 hover:bg-accent-bright hover:shadow-[0_0_24px_rgba(0,199,88,0.35)]"
+              className="group/cta bg-accent text-accent-foreground font-semibold shadow-md transition-all duration-300 hover:scale-105 hover:bg-accent-bright hover:shadow-[0_0_24px_rgba(21,156,85,0.3)]"
             >
               <Link href="/become-seller">
                 Start selling today

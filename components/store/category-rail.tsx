@@ -77,7 +77,7 @@ export function CategoryRail({
             className={cn(
               "group/pill inline-flex h-9 shrink-0 snap-start items-center gap-1.5 rounded-full border px-4 text-sm font-medium transition-all duration-200",
               !activeSlug
-                ? "border-accent bg-accent text-accent-foreground shadow-[0_0_16px_-2px_rgba(0,199,88,0.4)]"
+                ? "border-accent bg-accent text-accent-foreground shadow-[0_0_16px_-2px_rgba(21,156,85,0.3)]"
                 : "border-border bg-card text-foreground/80 hover:border-accent/50 hover:bg-card-hover hover:text-foreground hover:-translate-y-0.5 shadow-xs",
             )}
           >
@@ -99,7 +99,7 @@ export function CategoryRail({
                 className={cn(
                   "group/pill inline-flex h-9 shrink-0 snap-start items-center gap-1.5 rounded-full border px-4 text-sm font-medium whitespace-nowrap transition-all duration-200",
                   active
-                    ? "border-accent bg-accent text-accent-foreground shadow-[0_0_16px_-2px_rgba(0,199,88,0.4)]"
+                    ? "border-accent bg-accent text-accent-foreground shadow-[0_0_16px_-2px_rgba(21,156,85,0.3)]"
                     : "border-border bg-card text-foreground/80 hover:border-accent/50 hover:bg-card-hover hover:text-foreground hover:-translate-y-0.5 shadow-xs",
                 )}
               >
