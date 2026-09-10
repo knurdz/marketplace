@@ -20,13 +20,13 @@ export function formatProductPrice(product: Pick<Product, "isFree" | "price" | "
 export function coverPreviewUrl(cover: ProductCover, size = 640): string {
   return getFilePreviewUrl(BUCKET_PRODUCT_IMAGES, cover.fileId, {
     width: size,
-    height: Math.round(size * 1.25),
+    height: size,
   });
 }
 
 export function productCardClassName(className?: string): string {
   return cn(
-    "group/card block overflow-hidden rounded-xl border border-border bg-card transition-colors hover:border-foreground/20 hover:bg-card-hover",
+    "group/card block overflow-hidden rounded-xl border border-border bg-card transition-all hover:border-foreground/25 hover:bg-card-hover hover:shadow-md",
     className,
   );
 }

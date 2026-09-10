@@ -1,5 +1,18 @@
 import Link from "next/link";
+import {
+  DataTableEmpty,
+  DataTableShell,
+} from "@/components/layout/data-table-shell";
+import { PortalPageHeader } from "@/components/layout/portal-page-header";
 import { Button } from "@/components/ui/button";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { formatPaymentMethod } from "@/lib/order-display";
 import {
   getSellerEarningsAnalytics,
@@ -34,23 +47,22 @@ export default async function SellerEarningsPage({
   const { earnings } = analytics;
 
   return (
-    <div className="mx-auto max-w-4xl">
-      <h2 className="mt-3 text-3xl font-bold tracking-tight">Earnings</h2>
-      <p className="mt-2 max-w-xl text-sm text-muted-foreground">
-        Completed payments for your shop. Totals reflect payments marked paid.
-        Payouts are processed manually to your registered bank account.
-      </p>
+    <div>
+      <PortalPageHeader
+        title="Earnings"
+        description="Completed payments for your shop. Totals reflect payments marked paid. Payouts are processed manually to your registered bank account."
+      />
 
-      <section className="mt-10 rounded-md border border-border bg-card px-4 py-5">
+      <section className="mt-6 rounded-xl border border-border bg-card px-4 py-5">
         <p className="text-sm text-muted-foreground">Total paid</p>
         <p className="mt-2 text-3xl font-bold tracking-tight">
           {formatRevenue(earnings.total, earnings.currency)}
         </p>
       </section>
 
-      <section className="mt-8 rounded-xl border border-border bg-card p-5">
+      <section className="mt-6 rounded-xl border border-border bg-card p-5">
         <div className="flex flex-wrap items-center justify-between gap-3">
-          <h3 className="text-lg font-semibold tracking-tight">
+          <h3 className="text-base font-semibold tracking-tight">
             {range === "12m" ? "Monthly revenue" : "Daily revenue (30 days)"}
           </h3>
           <div className="flex gap-2">
@@ -72,88 +84,88 @@ export default async function SellerEarningsPage({
       </section>
 
       <section className="mt-8">
-        <h3 className="text-lg font-semibold tracking-tight">By product</h3>
+        <h3 className="text-base font-semibold tracking-tight">By product</h3>
         {analytics.byProduct.length === 0 ? (
-          <p className="mt-4 text-sm text-muted-foreground">
-            No paid line items yet.
-          </p>
+          <DataTableEmpty className="mt-4" message="No paid line items yet." />
         ) : (
-          <ul className="mt-4 divide-y divide-border" aria-label="Earnings by product">
-            {analytics.byProduct.map((row) => (
-              <li key={row.productId} className="flex flex-wrap items-baseline justify-between gap-2 py-3">
-                <Link
-                  href={`/seller/listings/${row.productId}`}
-                  className="text-sm hover:text-accent"
-                >
-                  {row.title}
-                </Link>
-                <span className="text-sm text-muted-foreground">
-                  {row.quantity} sold
-                </span>
-                <span className="font-mono text-sm tabular-nums">
-                  {formatRevenue(row.revenue, analytics.currency)}
-                </span>
-              </li>
-            ))}
-          </ul>
+          <DataTableShell className="mt-4">
+            <Table aria-label="Earnings by product">
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="px-4">Product</TableHead>
+                  <TableHead className="px-4 text-right">Sold</TableHead>
+                  <TableHead className="px-4 text-right">Revenue</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {analytics.byProduct.map((row) => (
+                  <TableRow key={row.productId}>
+                    <TableCell className="px-4">
+                      <Link
+                        href={`/seller/listings/${row.productId}`}
+                        className="hover:text-accent"
+                      >
+                        {row.title}
+                      </Link>
+                    </TableCell>
+                    <TableCell className="px-4 text-right font-mono text-sm tabular-nums text-muted-foreground">
+                      {row.quantity}
+                    </TableCell>
+                    <TableCell className="px-4 text-right font-mono text-sm tabular-nums">
+                      {formatRevenue(row.revenue, analytics.currency)}
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </DataTableShell>
         )}
       </section>
 
-      {earnings.lines.length === 0 ? (
-        <p className="mt-10 text-sm text-muted-foreground">
-          No paid payments yet.
-        </p>
-      ) : (
-        <>
-          {earnings.lineCount > earnings.lines.length ? (
-            <p className="mt-10 text-sm text-muted-foreground">
-              Showing {earnings.lines.length} of {earnings.lineCount} paid
-              payments.
-            </p>
-          ) : (
-            <h3 className="mt-10 text-lg font-semibold tracking-tight">
-              Payment history
-            </h3>
-          )}
-          <ul
-            className={
-              earnings.lineCount > earnings.lines.length ? "mt-4" : "mt-4"
-            }
-            aria-label="Paid earnings"
-          >
-          {earnings.lines.map(({ order, payment }) => (
-            <li
-              key={payment.$id}
-              className="border-b border-border py-4 last:border-b-0"
-            >
-              <Link
-                href={`/seller/orders/${order.$id}`}
-                className="group block transition hover:opacity-90"
-              >
-                <div className="flex flex-wrap items-baseline justify-between gap-2">
-                  <span className="font-mono text-sm text-foreground group-hover:text-accent">
-                    {order.$id}
-                  </span>
-                  <span className="font-mono text-sm tabular-nums">
-                    {payment.currency} {payment.amount.toFixed(2)}
-                  </span>
-                </div>
-                <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-sm text-muted-foreground">
-                  <span>{formatPaymentMethod(payment.method)}</span>
-                  <span className="font-mono">paid</span>
-                </div>
-              </Link>
-            </li>
-          ))}
-          </ul>
-        </>
-      )}
-
-      <p className="mt-12">
-        <Button variant="outline" size="sm" asChild>
-          <Link href="/seller">Back to dashboard</Link>
-        </Button>
-      </p>
+      <section className="mt-8">
+        {earnings.lineCount > earnings.lines.length ? (
+          <p className="text-sm text-muted-foreground">
+            Showing {earnings.lines.length} of {earnings.lineCount} paid payments.
+          </p>
+        ) : (
+          <h3 className="text-base font-semibold tracking-tight">Payment history</h3>
+        )}
+        {earnings.lines.length === 0 ? (
+          <DataTableEmpty className="mt-4" message="No paid payments yet." />
+        ) : (
+          <DataTableShell className="mt-4">
+            <Table aria-label="Paid earnings">
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="px-4">Order</TableHead>
+                  <TableHead className="px-4">Method</TableHead>
+                  <TableHead className="px-4 text-right">Amount</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {earnings.lines.map(({ order, payment }) => (
+                  <TableRow key={payment.$id}>
+                    <TableCell className="px-4">
+                      <Link
+                        href={`/seller/orders/${order.$id}`}
+                        className="font-mono text-sm hover:text-accent"
+                      >
+                        {order.$id}
+                      </Link>
+                    </TableCell>
+                    <TableCell className="px-4 text-sm text-muted-foreground">
+                      {formatPaymentMethod(payment.method)}
+                    </TableCell>
+                    <TableCell className="px-4 text-right font-mono text-sm tabular-nums">
+                      {payment.currency} {payment.amount.toFixed(2)}
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </DataTableShell>
+        )}
+      </section>
     </div>
   );
 }

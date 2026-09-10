@@ -6,7 +6,8 @@
 
 /*
   Knurdz theme tokens — sourced from https://knurdz.org (Aug 2026).
-  Dark is the default (matches the live homepage). Light pair is for a later toggle.
+  Dark is the default (matches the live homepage); `next-themes` swaps the
+  `light` / `dark` class on <html>.
   Mapped onto shadcn semantic CSS variables for the UI kit.
 */
 
@@ -70,21 +71,31 @@
   --primary-foreground: #faf7f2;
   --secondary: #f3ede4;
   --secondary-foreground: #1a1a2e;
-  --accent: #00c758;
-  --accent-bright: #05df72;
-  --accent-deep: #16a34a;
-  --accent-foreground: #000000;
+  /*
+    Same brand green, darkened for light surfaces: `text-accent` on cream must
+    clear WCAG AA, which #00c758 does not (≈1.9:1).
+  */
+  --accent: #0a7a45;
+  --accent-bright: #076b3c;
+  --accent-deep: #054d2b;
+  --accent-foreground: #ffffff;
   --destructive: #dc2626;
-  --ring: #00c758;
+  --ring: #0a7a45;
+
+  --chart-1: #0a7a45;
+  --chart-2: #16a34a;
+  --chart-3: #64748b;
+  --chart-4: #1a1a2e;
+  --chart-5: #054d2b;
 
   --sidebar: #f3ede4;
   --sidebar-foreground: #1a1a2e;
-  --sidebar-primary: #00c758;
-  --sidebar-primary-foreground: #000000;
+  --sidebar-primary: #0a7a45;
+  --sidebar-primary-foreground: #ffffff;
   --sidebar-accent: #fffcf7;
   --sidebar-accent-foreground: #1a1a2e;
   --sidebar-border: #0f172a1f;
-  --sidebar-ring: #00c758;
+  --sidebar-ring: #0a7a45;
 }
 
 /* Alias .dark to same tokens as :root (dark-first). */
@@ -233,24 +244,18 @@ html[data-theme="light"] {
     background-size: 48px 48px;
   }
 
-  .mask-fade-x {
-    mask-image: linear-gradient(to right, transparent, black 8%, black 92%, transparent);
+  /* Category / rail sliders scroll horizontally without a visible scrollbar. */
+  .scrollbar-none {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
   }
 
-  .animate-fade-up {
-    animation: knurdz-fade-up 0.7s var(--ease-out-expo) both;
-  }
-
-  .animate-marquee {
-    animation: knurdz-marquee 42s linear infinite;
+  .scrollbar-none::-webkit-scrollbar {
+    display: none;
   }
 
   .animate-hero-glow {
     animation: knurdz-hero-glow 14s ease-in-out infinite;
-  }
-
-  .animate-cursor-blink {
-    animation: knurdz-cursor-blink 1.1s steps(1, end) infinite;
   }
 
   .hover-zoom {
@@ -259,41 +264,6 @@ html[data-theme="light"] {
 
   .group\/card:hover .hover-zoom {
     transform: scale(1.04);
-  }
-
-  .pause-on-hover:hover .animate-marquee {
-    animation-play-state: paused;
-  }
-}
-
-@keyframes knurdz-fade-up {
-  from {
-    opacity: 0;
-    transform: translateY(16px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-@keyframes knurdz-marquee {
-  from {
-    transform: translateX(0);
-  }
-  to {
-    transform: translateX(-50%);
-  }
-}
-
-@keyframes knurdz-cursor-blink {
-  0%,
-  49% {
-    opacity: 1;
-  }
-  50%,
-  100% {
-    opacity: 0;
   }
 }
 

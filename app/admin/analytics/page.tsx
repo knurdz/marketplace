@@ -29,10 +29,10 @@ export default async function AdminAnalyticsPage({ searchParams }: PageProps) {
   const rangeTitle = range === "12m" ? "Last 12 months" : "Last 30 days";
 
   return (
-    <div className="mx-auto max-w-5xl">
-      <h2 className="mt-3 text-3xl font-bold tracking-tight">Analytics</h2>
-      <p className="mt-2 max-w-2xl text-sm text-muted-foreground">
-        Aggregate platform trends only. Charts show counts and totals — never
+    <div>
+      <h2 className="text-xl font-bold tracking-tight sm:text-2xl">Analytics</h2>
+      <p className="mt-1.5 max-w-2xl text-sm text-muted-foreground">
+        Aggregate platform trends only. Charts show counts and totals. Never
         individual users, orders, or sellers.
       </p>
 

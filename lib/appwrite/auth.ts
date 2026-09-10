@@ -22,8 +22,6 @@ import {
   parseSellerApplicationInput,
 } from "@/lib/services/seller-application";
 import { logError } from "@/lib/observability/log-error";
-import { debugLog9ec1e5 } from "@/lib/debug-9ec1e5";
-import { debugLog9145e1 } from "@/lib/debug-9145e1";
 
 async function rollbackSignup(userId: string) {
   try {
@@ -277,41 +275,9 @@ export async function signInWithEmail(
   } catch (error) {
     unstable_rethrow(error);
     const mapped = mapAuthError(error);
-    // #region agent log
-    await debugLog9ec1e5({
-      hypothesisId: "F",
-      runId: "post-fix",
-      location: "lib/appwrite/auth.ts:signInWithEmail",
-      message: "sign-in failed",
-      data: {
-        mappedError: mapped,
-        hasApiKey: Boolean(process.env.APPWRITE_API_KEY?.trim()),
-        hasEndpoint: Boolean(process.env.NEXT_PUBLIC_APPWRITE_ENDPOINT?.trim()),
-        hasProject: Boolean(process.env.NEXT_PUBLIC_APPWRITE_PROJECT_ID?.trim()),
-      },
-    });
-    // #endregion
     return { error: mapped };
   }
 
-  // #region agent log
-  await debugLog9ec1e5({
-    hypothesisId: "F",
-    location: "lib/appwrite/auth.ts:signInWithEmail:ok",
-    message: "sign-in succeeded",
-    data: { destination },
-  });
-  // #endregion
-
-  // #region agent log
-  debugLog9145e1({
-    hypothesisId: "D",
-    runId: "post-fix",
-    location: "lib/appwrite/auth.ts:signInWithEmail",
-    message: "sign-in redirect destination",
-    data: { nextRaw: nextRaw || null, destination },
-  });
-  // #endregion
   redirect(destination);
 }
 

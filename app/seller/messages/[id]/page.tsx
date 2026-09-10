@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { MessageThreadPanel } from "@/components/messaging/message-thread-panel";
+import { PortalPageHeader } from "@/components/layout/portal-page-header";
 import { Button } from "@/components/ui/button";
 import { getLoggedInUser } from "@/lib/appwrite/session";
 import {
@@ -23,11 +24,11 @@ export default async function SellerThreadPage({ params }: SellerThreadPageProps
   const { messages, error } = await listThreadMessages(thread.$id);
 
   return (
-    <div className="mx-auto max-w-3xl">
-      <h2 className="mt-3 text-3xl font-bold tracking-tight">Conversation</h2>
-      <p className="mt-2 font-mono text-sm text-muted-foreground">
-        Order {thread.orderId}
-      </p>
+    <div className="max-w-3xl">
+      <PortalPageHeader
+        title="Conversation"
+        description={`Order ${thread.orderId}`}
+      />
 
       {error ? (
         <p role="alert" className="mt-6 text-sm text-destructive">

@@ -5,7 +5,6 @@ import { resolvePostLoginPath } from "@/lib/appwrite/home-path";
 import { oauthErrorMessage } from "@/lib/appwrite/oauth-errors";
 import { safeNextPath } from "@/lib/appwrite/roles";
 import { getLoggedInUser } from "@/lib/appwrite/session";
-import { debugLog9145e1 } from "@/lib/debug-9145e1";
 
 export default async function LoginPage({
   searchParams,
@@ -18,19 +17,6 @@ export default async function LoginPage({
   const user = await getLoggedInUser();
   if (user) {
     const dest = await resolvePostLoginPath(user, nextPath);
-    // #region agent log
-    debugLog9145e1({
-      hypothesisId: "D",
-      runId: "post-fix",
-      location: "app/(auth)/login/page.tsx",
-      message: "login page already-signed-in redirect",
-      data: {
-        nextPath: nextPath ?? null,
-        dest,
-        labels: Array.isArray(user.labels) ? user.labels : null,
-      },
-    });
-    // #endregion
     redirect(dest);
   }
 

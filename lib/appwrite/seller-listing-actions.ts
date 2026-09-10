@@ -2,7 +2,6 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { debugLog9ec1e5 } from "@/lib/debug-9ec1e5";
 import {
   addOwnProductImagesCore,
   archiveOwnProductCore,
@@ -82,25 +81,6 @@ export async function createDraftListing(
     readImageFiles(formData),
   );
 
-  // #region agent log
-  await debugLog9ec1e5({
-    hypothesisId: "A",
-    location: "lib/appwrite/seller-listing-actions.ts:createDraftListing",
-    message: "create listing result",
-    data: {
-      intent,
-      intentRaw:
-        typeof formData.get("intent") === "string"
-          ? formData.get("intent")
-          : typeof formData.get("intent"),
-      formKeys: Array.from(formData.keys()),
-      ok: result.ok,
-      error: result.ok ? null : result.error,
-      productId: result.ok ? result.productId : null,
-    },
-  });
-  // #endregion
-
   if (!result.ok) {
     return { error: result.error };
   }
@@ -109,19 +89,6 @@ export async function createDraftListing(
 
   if (intent === "list") {
     const submit = await submitListingForReviewCore(result.productId);
-    // #region agent log
-    await debugLog9ec1e5({
-      hypothesisId: "B",
-      location: "lib/appwrite/seller-listing-actions.ts:createDraftListing:submit",
-      message: "auto submit after list intent",
-      data: {
-        productId: result.productId,
-        submitOk: submit.ok,
-        submitError: submit.ok ? null : submit.error,
-        submitMessage: submit.ok ? submit.message : null,
-      },
-    });
-    // #endregion
     revalidatePath(`/seller/listings/${result.productId}`);
     revalidatePath("/admin/listings");
     if (submit.ok) {

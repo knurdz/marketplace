@@ -1,6 +1,7 @@
 import Link from "next/link";
 import type { ProductCover } from "@/lib/services/products";
 import type { Product } from "@/lib/types";
+import { Badge } from "@/components/ui/badge";
 import {
   coverPreviewUrl,
   formatProductPrice,
@@ -14,6 +15,7 @@ type ProductCardProps = {
 
 export function ProductCard({ product, cover }: ProductCardProps) {
   const price = formatProductPrice(product);
+  const outOfStock = product.stock <= 0 || !product.available;
 
   return (
     <li>
@@ -21,13 +23,14 @@ export function ProductCard({ product, cover }: ProductCardProps) {
         href={`/products/${product.$id}`}
         className={productCardClassName()}
       >
-        <div className="relative aspect-[4/5] overflow-hidden bg-muted/40">
+        <div className="relative aspect-square overflow-hidden bg-muted/40">
           {cover ? (
             // eslint-disable-next-line @next/next/no-img-element -- Appwrite Storage preview URL
             <img
               src={coverPreviewUrl(cover)}
               alt={cover.alt ?? product.title}
               className="hover-zoom h-full w-full object-cover"
+              loading="lazy"
             />
           ) : (
             <div
@@ -37,22 +40,28 @@ export function ProductCard({ product, cover }: ProductCardProps) {
               <span className="size-10 rounded-md border border-border bg-background/40" />
             </div>
           )}
-          {product.isFree ? (
-            <span className="absolute top-3 left-3 rounded-md bg-background/90 px-2 py-1 text-[11px] font-medium tracking-wide">
-              Free
-            </span>
-          ) : null}
-          {product.featured && !product.isFree ? (
-            <span className="absolute top-3 left-3 rounded-md border border-border bg-background/90 px-2 py-1 text-[11px] font-medium tracking-wide">
-              Featured
-            </span>
+
+          <div className="absolute top-2 left-2 flex flex-wrap gap-1">
+            {product.isFree ? (
+              <Badge className="bg-accent text-accent-foreground">Free</Badge>
+            ) : null}
+            {product.featured && !product.isFree ? (
+              <Badge variant="secondary">Featured</Badge>
+            ) : null}
+          </div>
+
+          {outOfStock ? (
+            <div className="absolute inset-x-0 bottom-0 bg-background/85 px-3 py-1.5 text-center text-xs font-medium">
+              Out of stock
+            </div>
           ) : null}
         </div>
-        <div className="flex items-start justify-between gap-3 px-3 py-3">
-          <p className="min-w-0 truncate text-sm font-medium tracking-tight">
+
+        <div className="flex flex-col gap-1 px-3 py-3">
+          <p className="line-clamp-2 min-h-[2.5rem] text-sm leading-snug text-muted-foreground">
             {product.title}
           </p>
-          <p className="shrink-0 font-mono text-xs tabular-nums text-muted-foreground">
+          <p className="font-mono text-base font-semibold tabular-nums tracking-tight">
             {price}
           </p>
         </div>

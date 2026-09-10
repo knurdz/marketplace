@@ -1,4 +1,3 @@
-import { debugLog9ec1e5 } from "@/lib/debug-9ec1e5";
 import { Query } from "node-appwrite";
 import {
   DATABASE_ID,
@@ -148,26 +147,8 @@ export async function getAdminMetrics(): Promise<AdminMetrics> {
       grossRevenue: revenue.grossRevenue,
       currency: revenue.currency,
     };
-    // #region agent log
-    await debugLog9ec1e5({
-      hypothesisId: "D",
-      location: "lib/services/admin-metrics.ts:getAdminMetrics",
-      message: "admin metrics",
-      data: metrics,
-    });
-    // #endregion
     return metrics;
-  } catch (error) {
-    // #region agent log
-    await debugLog9ec1e5({
-      hypothesisId: "D",
-      location: "lib/services/admin-metrics.ts:getAdminMetrics:error",
-      message: "admin metrics failed",
-      data: {
-        errorMessage: error instanceof Error ? error.message : "unknown",
-      },
-    });
-    // #endregion
+  } catch {
     return emptyMetrics();
   }
 }

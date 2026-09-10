@@ -2,7 +2,6 @@ import { ProductCatalogFilters } from "@/components/store/product-catalog-filter
 import { CategoryRail } from "@/components/store/category-rail";
 import { ProductGrid } from "@/components/store/product-grid";
 import { EmptyState } from "@/components/layout/empty-state";
-import { PageHeader } from "@/components/layout/page-header";
 import { Button } from "@/components/ui/button";
 import type { ProductCatalogParams, ProductCoverMap } from "@/lib/services/products";
 import type { Category, Product } from "@/lib/types";
@@ -42,10 +41,22 @@ export function CatalogView({
   invalidPriceRange,
 }: CatalogViewProps) {
   return (
-    <main className="mx-auto w-full max-w-6xl px-4 py-10 sm:px-6 lg:px-8">
-      <PageHeader eyebrow={eyebrow} title={title} description={description} />
+    <main className="mx-auto w-full max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+      <div className="min-w-0">
+        <p className="font-mono text-xs tracking-wide text-muted-foreground uppercase">
+          {eyebrow}
+        </p>
+        <h1 className="mt-1.5 text-2xl font-bold tracking-tight sm:text-3xl">
+          {title}
+        </h1>
+        {description ? (
+          <p className="mt-2 max-w-2xl text-sm leading-relaxed text-muted-foreground">
+            {description}
+          </p>
+        ) : null}
+      </div>
 
-      <div className="mt-8 space-y-6">
+      <div className="mt-6 space-y-4">
         <CategoryRail categories={categories} activeSlug={activeSlug} />
         <ProductCatalogFilters
           action={filterAction}
@@ -75,7 +86,7 @@ export function CatalogView({
           }
         />
       ) : (
-        <div className="mt-8">
+        <div className="mt-6">
           <ProductGrid products={products} covers={covers} />
         </div>
       )}

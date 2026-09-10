@@ -4,6 +4,23 @@ import {
   ListingRowActions,
 } from "@/components/admin/listing-moderation-actions";
 import {
+  DataTableEmpty,
+  DataTableShell,
+  FilterTabs,
+  LoadMoreLink,
+} from "@/components/layout/data-table-shell";
+import { PortalPageHeader } from "@/components/layout/portal-page-header";
+import { StatusPill } from "@/components/layout/status-pill";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { productStatusTone } from "@/lib/ui/status-tone";
+import {
   getPublicSellerByUserId,
   listCategories,
   listPendingModerationQueue,
@@ -62,113 +79,113 @@ export default async function AdminListingsPage({ searchParams }: PageProps) {
       }).toString()}`
     : null;
 
-  const pendingHref = "/admin/listings?view=pending";
-  const activeHref = "/admin/listings?view=active";
-
   return (
-    <div className="mx-auto max-w-3xl">
-      <h2 className="mt-3 text-3xl font-bold tracking-tight">
-        Listing moderation
-      </h2>
-      <p className="mt-2 max-w-xl text-sm text-muted-foreground">
-        Review pending listings before they go live, or remove active listings
-        from the storefront.
-      </p>
+    <div>
+      <PortalPageHeader
+        title="Listing moderation"
+        description="Review pending listings before they go live, or remove active listings from the storefront."
+      />
 
-      <nav className="mt-8 flex gap-2 font-mono text-sm">
-        <Link
-          href={pendingHref}
-          className={
-            view === "pending"
-              ? "rounded-md border border-border bg-card px-3 py-2 font-bold"
-              : "rounded-md border border-transparent px-3 py-2 text-muted-foreground hover:border-border"
-          }
-        >
-          Pending review
-        </Link>
-        <Link
-          href={activeHref}
-          className={
-            view === "active"
-              ? "rounded-md border border-border bg-card px-3 py-2 font-bold"
-              : "rounded-md border border-transparent px-3 py-2 text-muted-foreground hover:border-border"
-          }
-        >
-          Active listings
-        </Link>
-      </nav>
+      <FilterTabs
+        className="mt-6"
+        tabs={[
+          {
+            href: "/admin/listings?view=pending",
+            label: "Pending review",
+            active: view === "pending",
+          },
+          {
+            href: "/admin/listings?view=active",
+            label: "Active listings",
+            active: view === "active",
+          },
+        ]}
+      />
 
       {listings.length === 0 ? (
-        <p className="mt-10 rounded-md border border-border bg-card px-4 py-5 font-mono text-sm text-muted-foreground">
-          {view === "pending"
-            ? "No listings awaiting review. When sellers submit products for approval, they will appear here."
-            : "No active listings to manage."}
-        </p>
+        <DataTableEmpty
+          className="mt-6"
+          message={
+            view === "pending"
+              ? "No listings awaiting review. When sellers submit products for approval, they will appear here."
+              : "No active listings to manage."
+          }
+        />
       ) : (
-        <ul className="mt-10 space-y-4">
-          {listings.map((product) => {
-            const shopName = sellerById.get(product.sellerId);
-            const categoryName =
-              categoryById.get(product.categoryId) ?? product.categoryId;
+        <DataTableShell className="mt-6">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead className="px-4">Listing</TableHead>
+                <TableHead className="px-4">Seller</TableHead>
+                <TableHead className="px-4">Category</TableHead>
+                <TableHead className="px-4 text-right">Price</TableHead>
+                <TableHead className="px-4">Stock</TableHead>
+                <TableHead className="px-4">Actions</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {listings.map((product) => {
+                const shopName = sellerById.get(product.sellerId);
+                const categoryName =
+                  categoryById.get(product.categoryId) ?? product.categoryId;
 
-            return (
-              <li
-                key={product.$id}
-                className="rounded-md border border-border bg-card px-4 py-5"
-              >
-                <div className="flex flex-wrap items-start justify-between gap-3">
-                  <div>
-                    <p className="text-lg font-bold tracking-tight">
-                      {product.title}
-                    </p>
-                    <p className="mt-1 font-mono text-xs text-muted-foreground">
-                      Seller: {shopName ?? product.sellerId}
-                    </p>
-                  </div>
-                  <p className="font-mono text-sm font-bold">
-                    {formatPrice(
-                      product.price,
-                      product.currency,
-                      product.isFree,
-                    )}
-                  </p>
-                </div>
-
-                <p className="mt-2 font-mono text-xs text-muted-foreground">
-                  Category: {categoryName}
-                  {" · "}
-                  {product.available ? "Available" : "Unavailable"}
-                  {" · "}
-                  Stock: {product.stock}
-                  {product.featured ? " · Featured" : ""}
-                </p>
-
-                <ListingDescription description={product.description} />
-
-                <div className="mt-4">
-                  <ListingRowActions
-                    productId={product.$id}
-                    title={product.title}
-                    view={view}
-                    featured={product.featured}
-                  />
-                </div>
-              </li>
-            );
-          })}
-        </ul>
+                return (
+                  <TableRow key={product.$id} className="align-top">
+                    <TableCell className="max-w-[420px] px-4 py-3 whitespace-normal">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <Link
+                          href={`/products/${product.$id}`}
+                          className="font-medium tracking-tight hover:underline"
+                        >
+                          {product.title}
+                        </Link>
+                        <StatusPill
+                          label={product.status}
+                          tone={productStatusTone(product.status)}
+                        />
+                        {product.featured ? (
+                          <StatusPill label="featured" tone="info" />
+                        ) : null}
+                      </div>
+                      <ListingDescription description={product.description} />
+                    </TableCell>
+                    <TableCell className="px-4 py-3 font-mono text-xs text-muted-foreground">
+                      {shopName ?? product.sellerId}
+                    </TableCell>
+                    <TableCell className="px-4 py-3 text-sm text-muted-foreground">
+                      {categoryName}
+                    </TableCell>
+                    <TableCell className="px-4 py-3 text-right font-mono text-sm font-semibold tabular-nums">
+                      {formatPrice(
+                        product.price,
+                        product.currency,
+                        product.isFree,
+                      )}
+                    </TableCell>
+                    <TableCell className="px-4 py-3 font-mono text-xs text-muted-foreground tabular-nums">
+                      {product.stock}
+                      <span className="block">
+                        {product.available ? "available" : "unavailable"}
+                      </span>
+                    </TableCell>
+                    <TableCell className="w-[260px] max-w-[260px] px-4 py-3 whitespace-normal">
+                      <ListingRowActions
+                        productId={product.$id}
+                        title={product.title}
+                        view={view}
+                        featured={product.featured}
+                      />
+                    </TableCell>
+                  </TableRow>
+                );
+              })}
+            </TableBody>
+          </Table>
+        </DataTableShell>
       )}
 
-      {nextHref ? (
-        <div className="mt-8">
-          <Link
-            href={nextHref}
-            className="inline-flex rounded-md border border-border px-4 py-2 font-mono text-sm hover:bg-muted"
-          >
-            Load more
-          </Link>
-        </div>
-      ) : null}
+      {nextHref ? <LoadMoreLink href={nextHref} /> : null}
     </div>
   );
 }

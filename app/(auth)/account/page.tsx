@@ -9,23 +9,9 @@ import { signOut } from "@/lib/appwrite/auth";
 import { getOwnProfile } from "@/lib/appwrite/profiles";
 import { getAvatarPreviewUrl } from "@/lib/appwrite/storage-urls";
 import { getLoggedInUser } from "@/lib/appwrite/session";
-import { debugLog9145e1 } from "@/lib/debug-9145e1";
 
 export default async function AccountPage() {
   const user = await getLoggedInUser();
-  // #region agent log
-    debugLog9145e1({
-      hypothesisId: "E",
-      runId: "post-fix",
-      location: "app/(auth)/account/page.tsx",
-    message: "account page session check",
-    data: {
-      hasUser: Boolean(user),
-      labels: user && Array.isArray(user.labels) ? user.labels : null,
-      userStatus: user ? user.status : null,
-    },
-  });
-  // #endregion
   if (!user) {
     redirect("/login");
   }

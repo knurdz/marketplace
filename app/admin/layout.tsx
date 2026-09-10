@@ -1,41 +1,56 @@
 import type { ReactNode } from "react";
-import { PortalShell } from "@/components/layout/portal-shell";
+import {
+  PortalShell,
+  type PortalNavGroup,
+} from "@/components/layout/portal-shell";
 import { requireLabel } from "@/lib/appwrite/roles";
 
-const ADMIN_NAV = [
+const ADMIN_NAV: PortalNavGroup[] = [
   {
     title: "Commerce",
     items: [
-      { href: "/admin", label: "Dashboard" },
-      { href: "/admin/listings", label: "Listings" },
-      { href: "/admin/categories", label: "Categories" },
-      { href: "/admin/coupons", label: "Coupons" },
-      { href: "/admin/orders", label: "Orders" },
+      { href: "/admin", label: "Dashboard", icon: "dashboard" },
+      { href: "/admin/listings", label: "Listings", icon: "listings" },
+      { href: "/admin/categories", label: "Categories", icon: "categories" },
+      { href: "/admin/coupons", label: "Coupons", icon: "coupons" },
+      { href: "/admin/orders", label: "Orders", icon: "orders" },
     ],
   },
   {
     title: "People",
     items: [
-      { href: "/admin/sellers", label: "Sellers" },
-      { href: "/admin/sellers/performance", label: "Performance" },
-      { href: "/admin/users", label: "Users" },
-      { href: "/admin/trust", label: "Trust" },
-      { href: "/admin/reports", label: "Reports" },
+      { href: "/admin/sellers", label: "Sellers", icon: "sellers" },
+      {
+        href: "/admin/sellers/performance",
+        label: "Performance",
+        icon: "performance",
+      },
+      { href: "/admin/users", label: "Users", icon: "users" },
+      { href: "/admin/trust", label: "Trust", icon: "trust" },
+      { href: "/admin/reports", label: "Reports", icon: "reports" },
     ],
   },
   {
     title: "Payments",
     items: [
-      { href: "/admin/payments/bank-slips", label: "Bank slips" },
-      { href: "/admin/payments/notify-logs", label: "Notify logs" },
+      {
+        href: "/admin/payments/bank-slips",
+        label: "Bank slips",
+        icon: "bankSlips",
+      },
+      {
+        href: "/admin/payments/notify-logs",
+        label: "Notify logs",
+        icon: "notifyLogs",
+      },
     ],
   },
   {
     title: "System",
     items: [
-      { href: "/admin/analytics", label: "Analytics" },
-      { href: "/admin/settings", label: "Settings" },
-      { href: "/admin/audit", label: "Audit" },
+      { href: "/admin/analytics", label: "Analytics", icon: "analytics" },
+      { href: "/admin/settings", label: "Settings", icon: "settings" },
+      { href: "/admin/audit", label: "Audit", icon: "audit" },
     ],
   },
 ];

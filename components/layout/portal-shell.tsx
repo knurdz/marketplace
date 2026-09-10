@@ -1,6 +1,6 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
-import { Menu } from "lucide-react";
+import { ExternalLink, Menu } from "lucide-react";
 import { signOut } from "@/lib/appwrite/auth";
 import { SkipToContent } from "@/components/layout/skip-to-content";
 import {
@@ -8,6 +8,7 @@ import {
   type PortalNavGroup,
 } from "@/components/layout/portal-side-nav";
 import { NotificationBell } from "@/components/notifications/notification-bell";
+import { ThemeToggle } from "@/components/theme/theme-toggle";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import {
@@ -18,7 +19,11 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 
-export type { PortalNavGroup, PortalNavItem } from "@/components/layout/portal-side-nav";
+export type {
+  PortalNavGroup,
+  PortalNavItem,
+  PortalNavIcon,
+} from "@/components/layout/portal-side-nav";
 
 type PortalShellProps = {
   title: string;
@@ -37,19 +42,35 @@ export function PortalShell({
     <div className="flex min-h-screen bg-background text-foreground">
       <SkipToContent />
       <aside className="hidden w-60 shrink-0 border-r border-border bg-sidebar md:sticky md:top-0 md:flex md:h-dvh md:flex-col">
-        <div className="shrink-0 px-4 py-5">
+        <div className="flex h-14 shrink-0 items-center gap-2 border-b border-border px-4">
           <Link href={homeHref} className="text-sm font-semibold tracking-tight">
             Knurdz
             <span className="text-accent">.</span>
           </Link>
-          <h1 className="mt-3 text-lg font-bold tracking-tight">{title}</h1>
+          <span
+            className="rounded-md bg-card px-1.5 py-0.5 text-[11px] font-medium text-muted-foreground"
+            aria-hidden
+          >
+            {title}
+          </span>
         </div>
-        <Separator />
-        <div className="flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto p-3">
+        <div className="flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto p-2">
           <PortalSideNav groups={nav} label={title} />
-          <div className="mt-auto shrink-0 space-y-2 p-1">
+          <div className="mt-auto shrink-0 space-y-1 pt-2">
+            <Separator className="mb-2" />
+            <Button variant="ghost" size="sm" className="w-full justify-start" asChild>
+              <Link href="/">
+                <ExternalLink className="size-4" aria-hidden />
+                Storefront
+              </Link>
+            </Button>
             <form action={signOut}>
-              <Button type="submit" variant="ghost" size="sm" className="w-full">
+              <Button
+                type="submit"
+                variant="ghost"
+                size="sm"
+                className="w-full justify-start"
+              >
                 Sign out
               </Button>
             </form>
@@ -58,13 +79,13 @@ export function PortalShell({
       </aside>
 
       <div className="flex min-w-0 flex-1 flex-col">
-        <header className="flex h-14 items-center justify-between border-b border-border px-4 md:px-6">
+        <header className="sticky top-0 z-30 flex h-14 items-center justify-between gap-3 border-b border-border bg-background/85 px-4 backdrop-blur-md md:px-6">
           <div className="flex items-center gap-3 md:hidden">
             <Sheet>
               <SheetTrigger asChild>
                 <Button
                   variant="secondary"
-                  size="icon"
+                  size="icon-sm"
                   aria-label="Open menu"
                 >
                   <Menu />
@@ -77,19 +98,28 @@ export function PortalShell({
                 <div className="mt-4 flex flex-col gap-4 px-2">
                   <PortalSideNav groups={nav} label={title} />
                   <Separator />
+                  <Button variant="ghost" className="justify-start" asChild>
+                    <Link href="/">
+                      <ExternalLink className="size-4" aria-hidden />
+                      Storefront
+                    </Link>
+                  </Button>
                   <form action={signOut}>
-                    <Button type="submit" variant="ghost" className="w-full">
+                    <Button
+                      type="submit"
+                      variant="ghost"
+                      className="w-full justify-start"
+                    >
                       Sign out
                     </Button>
                   </form>
                 </div>
               </SheetContent>
             </Sheet>
-            <h1 className="text-sm font-bold tracking-tight md:hidden">
-              {title}
-            </h1>
+            <p className="text-sm font-semibold tracking-tight">{title}</p>
           </div>
-          <div className="ml-auto flex items-center gap-2">
+          <div className="ml-auto flex items-center gap-1">
+            <ThemeToggle />
             <NotificationBell className="size-10" />
             <Button variant="ghost" size="sm" asChild>
               <Link href="/account">Account</Link>
@@ -99,9 +129,9 @@ export function PortalShell({
         <main
           id="main-content"
           tabIndex={-1}
-          className="flex-1 px-4 py-8 outline-none md:px-8"
+          className="flex-1 px-4 py-6 outline-none md:px-6 md:py-8"
         >
-          <div className="mx-auto w-full max-w-6xl">{children}</div>
+          <div className="mx-auto w-full max-w-[1400px]">{children}</div>
         </main>
       </div>
     </div>

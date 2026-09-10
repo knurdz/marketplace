@@ -6,7 +6,6 @@
  */
 
 import { revalidatePath } from "next/cache";
-import { debugLog9ec1e5 } from "@/lib/debug-9ec1e5";
 import {
   addToCart as addToCartImpl,
   clearCart as clearCartImpl,
@@ -26,20 +25,6 @@ export async function addToCart(
   quantity: number,
 ): Promise<CartActionState> {
   const result = await addToCartImpl({ productId, quantity });
-  // #region agent log
-  await debugLog9ec1e5({
-    hypothesisId: "E",
-    location: "lib/services/cart-actions.ts:addToCart",
-    message: "addToCart outcome",
-    data: {
-      productId,
-      quantity,
-      success: Boolean(result.success),
-      error: result.error ?? null,
-      errorCode: result.errorCode ?? null,
-    },
-  });
-  // #endregion
   if (result.success) revalidateCartPaths();
   return result;
 }

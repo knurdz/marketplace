@@ -1,5 +1,5 @@
 import { ShopProfileForm } from "@/components/seller/shop-profile-form";
-import { PageHeader } from "@/components/layout/page-header";
+import { PortalPageHeader } from "@/components/layout/portal-page-header";
 import { requireLabel } from "@/lib/appwrite/roles";
 import { getShopBannerPreviewUrl } from "@/lib/appwrite/storage-urls";
 import { getOwnSellerProfile } from "@/lib/services/seller-application";
@@ -11,8 +11,7 @@ export default async function SellerShopPage() {
   if (!profile) {
     return (
       <div>
-        <PageHeader
-          headingAs="h2"
+        <PortalPageHeader
           title="Shop profile"
           description="How buyers see your shop, plus bank details for transfer payouts."
         />
@@ -31,8 +30,7 @@ export default async function SellerShopPage() {
 
   return (
     <div>
-      <PageHeader
-        headingAs="h2"
+      <PortalPageHeader
         title="Shop profile"
         description="How buyers see your shop, plus bank details for transfer payouts."
       />

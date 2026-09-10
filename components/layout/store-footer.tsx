@@ -37,7 +37,7 @@ const FOOTER_COLUMNS = [
 export function StoreFooter() {
   return (
     <footer className="mt-auto border-t border-border">
-      <div className="mx-auto grid w-full max-w-6xl gap-10 px-4 py-12 sm:px-6 md:grid-cols-5">
+      <div className="mx-auto grid w-full max-w-7xl gap-10 px-4 py-12 sm:px-6 md:grid-cols-5">
         <div className="md:col-span-1">
           <p className="text-base font-semibold tracking-tight">
             Knurdz<span className="text-accent">.</span>
@@ -67,7 +67,7 @@ export function StoreFooter() {
         ))}
       </div>
       <div className="border-t border-border">
-        <p className="mx-auto w-full max-w-6xl px-4 py-4 font-mono text-sm text-muted-foreground sm:px-6">
+        <p className="mx-auto w-full max-w-7xl px-4 py-4 font-mono text-sm text-muted-foreground sm:px-6">
           Knurdz Marketplace
         </p>
       </div>

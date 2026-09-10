@@ -3,7 +3,24 @@ import {
   ReportDetails,
   ReportRowActions,
 } from "@/components/admin/report-triage-actions";
+import {
+  DataTableEmpty,
+  DataTableShell,
+  FilterTabs,
+  LoadMoreLink,
+} from "@/components/layout/data-table-shell";
+import { PortalPageHeader } from "@/components/layout/portal-page-header";
+import { StatusPill } from "@/components/layout/status-pill";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { listReports, parseReportStatusFilter } from "@/lib/services";
+import { reportStatusTone } from "@/lib/ui/status-tone";
 import { REPORT_STATUSES, type ReportStatus } from "@/lib/types";
 
 const PAGE_SIZE = 24;
@@ -60,102 +77,79 @@ export default async function AdminReportsPage({ searchParams }: PageProps) {
     : null;
 
   return (
-    <div className="mx-auto max-w-3xl">
-      <h2 className="mt-3 text-3xl font-bold tracking-tight">Reports</h2>
-      <p className="mt-2 max-w-xl text-sm text-muted-foreground">
-        Triage listing reports. Resolving or dismissing records the outcome in
-        the audit log; take down a listing from Listings if needed.
-      </p>
+    <div>
+      <PortalPageHeader
+        title="Reports"
+        description="Triage listing reports. Resolving or dismissing records the outcome in the audit log; take down a listing from Listings if needed."
+      />
 
-      <nav className="mt-8 flex flex-wrap gap-2 font-mono text-sm">
-        {REPORT_STATUSES.map((value) => {
-          const href = `/admin/reports?status=${value}`;
-          const active = status === value;
-          return (
-            <Link
-              key={value}
-              href={href}
-              className={
-                active
-                  ? "rounded-md border border-border bg-card px-3 py-2 font-bold"
-                  : "rounded-md border border-transparent px-3 py-2 text-muted-foreground hover:border-border"
-              }
-            >
-              {STATUS_LABELS[value]}
-            </Link>
-          );
-        })}
-      </nav>
+      <FilterTabs
+        className="mt-6"
+        tabs={REPORT_STATUSES.map((value) => ({
+          href: `/admin/reports?status=${value}`,
+          label: STATUS_LABELS[value],
+          active: status === value,
+        }))}
+      />
 
       {reports.length === 0 ? (
-        <p className="mt-10 rounded-md border border-border bg-card px-4 py-5 font-mono text-sm text-muted-foreground">
-          {EMPTY_COPY[status]}
-        </p>
+        <DataTableEmpty className="mt-6" message={EMPTY_COPY[status]} />
       ) : (
-        <ul className="mt-10 space-y-4">
-          {reports.map((report) => (
-            <li
-              key={report.$id}
-              className="rounded-md border border-border bg-card px-4 py-5"
-            >
-              <div className="flex flex-wrap items-start justify-between gap-3">
-                <div>
-                  <p className="text-lg font-bold tracking-tight">
-                    {report.reason}
-                  </p>
-                  <p className="mt-1 font-mono text-xs text-muted-foreground">
-                    Reporter: {report.reporterId}
-                  </p>
-                </div>
-                <p className="font-mono text-xs text-muted-foreground">
-                  {formatCreatedAt(report.$createdAt)}
-                </p>
-              </div>
-
-              <p className="mt-2 font-mono text-xs text-muted-foreground">
-                Listing: {report.productTitle ?? "Unavailable"}
-                {report.productStatus ? ` · ${report.productStatus}` : null}
-                {" · "}
-                {report.productId}
-                {" · "}
-                <Link
-                  href={`/products/${report.productId}`}
-                  className="text-accent hover:underline"
-                >
-                  View product
-                </Link>
-                {" · "}
-                <Link
-                  href="/admin/listings"
-                  className="text-accent hover:underline"
-                >
-                  Listings
-                </Link>
-              </p>
-
-              <ReportDetails details={report.details} />
-
-              <div className="mt-4">
-                <ReportRowActions
-                  reportId={report.$id}
-                  status={report.status}
-                />
-              </div>
-            </li>
-          ))}
-        </ul>
+        <DataTableShell className="mt-6">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead className="px-4">Report</TableHead>
+                <TableHead className="px-4">Listing</TableHead>
+                <TableHead className="px-4">Status</TableHead>
+                <TableHead className="px-4">Actions</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {reports.map((report) => (
+                <TableRow key={report.$id} className="align-top">
+                  <TableCell className="max-w-[360px] px-4 py-3 whitespace-normal">
+                    <p className="font-medium tracking-tight">{report.reason}</p>
+                    <p className="mt-1 font-mono text-xs text-muted-foreground">
+                      {report.reporterId} · {formatCreatedAt(report.$createdAt)}
+                    </p>
+                    <ReportDetails details={report.details} />
+                  </TableCell>
+                  <TableCell className="max-w-[280px] px-4 py-3 whitespace-normal">
+                    <p className="text-sm">{report.productTitle ?? "Unavailable"}</p>
+                    <p className="mt-1 font-mono text-xs text-muted-foreground">
+                      {report.productId}
+                      {report.productStatus ? ` · ${report.productStatus}` : ""}
+                    </p>
+                    <p className="mt-1 text-xs">
+                      <Link
+                        href={`/products/${report.productId}`}
+                        className="text-accent hover:underline"
+                      >
+                        View product
+                      </Link>
+                    </p>
+                  </TableCell>
+                  <TableCell className="px-4 py-3">
+                    <StatusPill
+                      label={STATUS_LABELS[report.status]}
+                      tone={reportStatusTone(report.status)}
+                    />
+                  </TableCell>
+                  <TableCell className="w-[240px] max-w-[240px] px-4 py-3 whitespace-normal">
+                    <ReportRowActions
+                      reportId={report.$id}
+                      status={report.status}
+                    />
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </DataTableShell>
       )}
 
-      {nextHref ? (
-        <div className="mt-8">
-          <Link
-            href={nextHref}
-            className="inline-flex rounded-md border border-border px-4 py-2 font-mono text-sm hover:bg-muted"
-          >
-            Load more
-          </Link>
-        </div>
-      ) : null}
+      {nextHref ? <LoadMoreLink href={nextHref} /> : null}
     </div>
   );
 }

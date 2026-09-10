@@ -21,7 +21,7 @@ export function ProductImageGallery({
   if (!current) {
     return (
       <div
-        className="flex aspect-[4/5] w-full items-center justify-center rounded-xl border border-dashed border-border bg-muted/30"
+        className="flex aspect-square w-full items-center justify-center rounded-xl border border-dashed border-border bg-muted/30"
         aria-label="No product images"
       >
         <span className="size-12 rounded-lg border border-border bg-card" />
@@ -31,12 +31,12 @@ export function ProductImageGallery({
 
   return (
     <div className="space-y-3">
-      <div className="relative aspect-[4/5] w-full overflow-hidden rounded-xl border border-border bg-muted/20">
+      <div className="relative aspect-square w-full overflow-hidden rounded-xl border border-border bg-muted/20">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src={getFilePreviewUrl(BUCKET_PRODUCT_IMAGES, current.fileId, {
             width: 960,
-            height: 1200,
+            height: 960,
           })}
           alt={current.alt ?? productTitle}
           className="h-full w-full object-cover"

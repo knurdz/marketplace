@@ -3,10 +3,8 @@ import { redirect } from "next/navigation";
 import { OrderListRow } from "@/components/store/order-list-row";
 import { RecentlyViewedSection } from "@/components/store/recently-viewed-section";
 import { EmptyState } from "@/components/layout/empty-state";
-import { PageHeader } from "@/components/layout/page-header";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { debugLog9ec1e5 } from "@/lib/debug-9ec1e5";
 import { getLoggedInUser } from "@/lib/appwrite/session";
 import { getOwnWishlistView, listOwnOrders } from "@/lib/services";
 import type { Order, OrderStatus, WishlistLine } from "@/lib/types";
@@ -82,27 +80,18 @@ export default async function DashboardPage() {
 
   const summary = countOrdersBySummaryBucket(orders);
 
-  // #region agent log
-  await debugLog9ec1e5({
-    hypothesisId: "D",
-    location: "app/(store)/dashboard/page.tsx",
-    message: "buyer dashboard loaded",
-    data: {
-      orderCount: orders.length,
-      summary,
-      wishlistCount: wishlistView.itemCount,
-    },
-  });
-  // #endregion
   const recentOrders = orders.slice(0, RECENT_ORDERS_LIMIT);
 
   return (
     <main className="mx-auto w-full max-w-4xl px-4 py-10 sm:px-6">
-      <PageHeader
-        eyebrow="Account"
-        title="Your dashboard"
-        description="Orders, saved products, and what you viewed on this device."
-      />
+      <header>
+        <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">
+          Your dashboard
+        </h1>
+        <p className="mt-2 max-w-2xl text-sm text-muted-foreground">
+          Orders, saved products, and what you viewed on this device.
+        </p>
+      </header>
 
       <section className="mt-12" aria-labelledby="order-summary-heading">
         <h2

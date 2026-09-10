@@ -1,5 +1,18 @@
 import Link from "next/link";
 import {
+  DataTableEmpty,
+  DataTableShell,
+} from "@/components/layout/data-table-shell";
+import { PortalPageHeader } from "@/components/layout/portal-page-header";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import {
   listSellersWithFlags,
   listVerifiedSellers,
   MAX_SELLERS_EVALUATED,
@@ -23,22 +36,18 @@ export default async function AdminTrustPage() {
   ]);
 
   return (
-    <div className="mx-auto max-w-4xl">
-      <h2 className="mt-3 text-3xl font-bold tracking-tight">Trust signals</h2>
-      <p className="mt-2 max-w-2xl text-sm text-muted-foreground">
-        Read-only computed heuristics for human review. Verified badge
-        eligibility and fraud flags are evaluated live from existing data — no
-        persisted state. See{" "}
-        <span className="font-mono text-xs">docs/agent/TRUST_RULES.md</span>{" "}
-        for thresholds.
-      </p>
+    <div>
+      <PortalPageHeader
+        title="Trust signals"
+        description="Read-only computed heuristics for human review. Verified badge eligibility and fraud flags are evaluated live from existing data."
+      />
       <p className="mt-2 font-mono text-xs text-muted-foreground">
         Evaluating up to {MAX_SELLERS_EVALUATED} most recently approved sellers
         per load.
       </p>
 
-      <section className="mt-10">
-        <h3 className="text-xl font-bold tracking-tight">Flagged sellers</h3>
+      <section className="mt-8">
+        <h3 className="text-base font-semibold tracking-tight">Flagged sellers</h3>
         <p className="mt-1 text-sm text-muted-foreground">
           Sellers with one or more triggered risk rules. Use{" "}
           <Link href="/admin/sellers" className="text-accent underline-offset-2 hover:underline">
@@ -52,45 +61,51 @@ export default async function AdminTrustPage() {
         </p>
 
         {flagged.length === 0 ? (
-          <p className="mt-6 rounded-md border border-border bg-card px-4 py-5 font-mono text-sm text-muted-foreground">
-            No flagged sellers in the current evaluation window.
-          </p>
+          <DataTableEmpty
+            className="mt-4"
+            message="No flagged sellers in the current evaluation window."
+          />
         ) : (
-          <ul className="mt-6 space-y-4">
-            {flagged.map((row) => (
-              <li
-                key={row.sellerId}
-                className="rounded-md border border-border bg-card px-4 py-5"
-              >
-                <div className="flex flex-wrap items-start justify-between gap-2">
-                  <p className="text-lg font-bold tracking-tight">{row.shopName}</p>
-                  <p className="font-mono text-xs text-muted-foreground">
-                    sellerId: {row.sellerId}
-                  </p>
-                </div>
-                <ul className="mt-4 space-y-2">
-                  {row.flags.map((flag) => (
-                    <li
-                      key={`${row.sellerId}-${flag.rule}`}
-                      className="border-l-2 border-destructive/60 pl-3"
-                    >
-                      <p className="font-mono text-xs font-medium text-destructive">
-                        {ruleLabel(flag.rule)}
-                      </p>
-                      <p className="mt-0.5 text-sm text-muted-foreground">
-                        {flag.reason}
-                      </p>
-                    </li>
-                  ))}
-                </ul>
-              </li>
-            ))}
-          </ul>
+          <DataTableShell className="mt-4">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="px-4">Shop</TableHead>
+                  <TableHead className="px-4">Seller ID</TableHead>
+                  <TableHead className="px-4">Flags</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {flagged.map((row) => (
+                  <TableRow key={row.sellerId}>
+                    <TableCell className="px-4 font-medium">{row.shopName}</TableCell>
+                    <TableCell className="px-4 font-mono text-xs text-muted-foreground">
+                      {row.sellerId}
+                    </TableCell>
+                    <TableCell className="px-4 whitespace-normal">
+                      <ul className="space-y-2">
+                        {row.flags.map((flag) => (
+                          <li key={`${row.sellerId}-${flag.rule}`}>
+                            <p className="font-mono text-xs font-medium text-destructive">
+                              {ruleLabel(flag.rule)}
+                            </p>
+                            <p className="mt-0.5 text-sm text-muted-foreground">
+                              {flag.reason}
+                            </p>
+                          </li>
+                        ))}
+                      </ul>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </DataTableShell>
         )}
       </section>
 
-      <section className="mt-12">
-        <h3 className="text-xl font-bold tracking-tight">
+      <section className="mt-10">
+        <h3 className="text-base font-semibold tracking-tight">
           Verified-eligible sellers
         </h3>
         <p className="mt-1 text-sm text-muted-foreground">
@@ -99,35 +114,39 @@ export default async function AdminTrustPage() {
         </p>
 
         {verified.length === 0 ? (
-          <p className="mt-6 rounded-md border border-border bg-card px-4 py-5 font-mono text-sm text-muted-foreground">
-            No sellers currently meet Verified eligibility criteria.
-          </p>
+          <DataTableEmpty
+            className="mt-4"
+            message="No sellers currently meet Verified eligibility criteria."
+          />
         ) : (
-          <ul className="mt-6 space-y-4">
-            {verified.map((row) => (
-              <li
-                key={row.sellerId}
-                className="rounded-md border border-border bg-card px-4 py-5"
-              >
-                <div className="flex flex-wrap items-start justify-between gap-2">
-                  <p className="text-lg font-bold tracking-tight">{row.shopName}</p>
-                  <p className="font-mono text-xs text-muted-foreground">
-                    sellerId: {row.sellerId}
-                  </p>
-                </div>
-                <ul className="mt-3 space-y-1">
-                  {row.verifiedReasons.map((reason) => (
-                    <li
-                      key={`${row.sellerId}-${reason}`}
-                      className="text-sm text-muted-foreground"
-                    >
-                      {reason}
-                    </li>
-                  ))}
-                </ul>
-              </li>
-            ))}
-          </ul>
+          <DataTableShell className="mt-4">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="px-4">Shop</TableHead>
+                  <TableHead className="px-4">Seller ID</TableHead>
+                  <TableHead className="px-4">Criteria</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {verified.map((row) => (
+                  <TableRow key={row.sellerId}>
+                    <TableCell className="px-4 font-medium">{row.shopName}</TableCell>
+                    <TableCell className="px-4 font-mono text-xs text-muted-foreground">
+                      {row.sellerId}
+                    </TableCell>
+                    <TableCell className="px-4 whitespace-normal text-sm text-muted-foreground">
+                      <ul className="list-disc space-y-1 pl-4">
+                        {row.verifiedReasons.map((reason) => (
+                          <li key={`${row.sellerId}-${reason}`}>{reason}</li>
+                        ))}
+                      </ul>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </DataTableShell>
         )}
       </section>
     </div>

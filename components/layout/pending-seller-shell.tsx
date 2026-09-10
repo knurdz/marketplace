@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import { signOut } from "@/lib/appwrite/auth";
 import { SkipToContent } from "@/components/layout/skip-to-content";
+import { ThemeToggle } from "@/components/theme/theme-toggle";
 import { Button } from "@/components/ui/button";
 
 export function PendingSellerShell({ children }: { children: ReactNode }) {
@@ -11,11 +12,14 @@ export function PendingSellerShell({ children }: { children: ReactNode }) {
         <p className="text-sm font-semibold tracking-tight">
           Knurdz<span className="text-accent">.</span>
         </p>
-        <form action={signOut}>
-          <Button type="submit" variant="ghost" size="sm">
-            Sign out
-          </Button>
-        </form>
+        <div className="flex items-center gap-1">
+          <ThemeToggle />
+          <form action={signOut}>
+            <Button type="submit" variant="ghost" size="sm">
+              Sign out
+            </Button>
+          </form>
+        </div>
       </header>
       <main
         id="main-content"
