@@ -6,7 +6,6 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { debugLog9ec1e5 } from "@/lib/debug-9ec1e5";
 import { isPaymentMethod } from "@/lib/types";
 import { confirmFreeOrder } from "./free-order";
 import { confirmCodOrder } from "./cod-order";
@@ -82,24 +81,6 @@ export async function createOrder(
         ? couponRaw
         : undefined,
   });
-
-  // #region agent log
-  await debugLog9ec1e5({
-    hypothesisId: "C",
-    location: "lib/services/order-actions.ts:createOrder",
-    message: "createOrder outcome",
-    data: {
-      paymentMethod,
-      ok: result.ok,
-      error: result.ok ? null : result.error,
-      code: result.ok ? null : result.code,
-      orderId: result.ok ? result.orderId : null,
-      continuePath: result.ok
-        ? checkoutContinuationPath(result.paymentMethod, result.orderId)
-        : null,
-    },
-  });
-  // #endregion
 
   if (result.ok) {
     revalidateCheckoutPaths();

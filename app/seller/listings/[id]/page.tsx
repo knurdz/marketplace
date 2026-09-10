@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { EditListingForm } from "@/components/seller/edit-listing-form";
 import { SubmitListingButton } from "@/components/seller/submit-listing-button";
+import { PortalPageHeader } from "@/components/layout/portal-page-header";
 import { Button } from "@/components/ui/button";
 import { listCategories } from "@/lib/services/categories";
 import { listProductImages } from "@/lib/services/products";
@@ -48,11 +49,11 @@ export default async function EditListingPage({ params }: EditListingPageProps) 
   const images = await listProductImages(product.$id);
 
   return (
-    <div className="mx-auto max-w-3xl">
-      <h2 className="mt-3 text-3xl font-bold tracking-tight">Edit listing</h2>
-      <p className="mt-2 max-w-xl text-sm text-muted-foreground">
-        {listingPublishStatusCopy(product.status)}
-      </p>
+    <div className="max-w-3xl">
+      <PortalPageHeader
+        title="Edit listing"
+        description={listingPublishStatusCopy(product.status)}
+      />
 
       {canSubmitListingForReview(product.status) ? (
         <div className="mt-4">

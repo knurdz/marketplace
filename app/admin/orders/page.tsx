@@ -1,10 +1,26 @@
 import Link from "next/link";
 import { AdminOrderOverrideActions } from "@/components/admin/admin-order-override-actions";
+import {
+  DataTableEmpty,
+  DataTableShell,
+  LoadMoreLink,
+} from "@/components/layout/data-table-shell";
+import { PortalPageHeader } from "@/components/layout/portal-page-header";
+import { StatusPill } from "@/components/layout/status-pill";
 import { Button } from "@/components/ui/button";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import {
   formatOrderStatus,
   formatPaymentMethod,
 } from "@/lib/order-display";
+import { orderStatusTone, paymentStatusTone } from "@/lib/ui/status-tone";
 import {
   getPublicSellerByUserId,
   listAllOrders,
@@ -115,21 +131,19 @@ export default async function AdminOrdersPage({ searchParams }: PageProps) {
     : null;
 
   return (
-    <div className="mx-auto max-w-3xl">
-      <h2 className="mt-3 text-3xl font-bold tracking-tight">All orders</h2>
-      <p className="mt-2 max-w-xl text-sm text-muted-foreground">
-        Platform-wide order oversight. Cancel unpaid orders or refund paid
-        ones — both write canonical statuses and an audit log. Captured
-        PayHere money is returned in the merchant dashboard, not here.
-      </p>
+    <div>
+      <PortalPageHeader
+        title="All orders"
+        description="Platform-wide order oversight. Cancel unpaid orders or refund paid ones — both write canonical statuses and an audit log. Captured PayHere money is returned in the merchant dashboard, not here."
+      />
 
-      <form method="get" className="mt-8 flex flex-wrap items-end gap-3">
-        <label className="flex flex-col gap-1 font-mono text-xs text-muted-foreground">
+      <form method="get" className="mt-6 flex flex-wrap items-end gap-3">
+        <label className="flex flex-col gap-1 text-xs text-muted-foreground">
           Order status
           <select
             name="status"
             defaultValue={status ?? ""}
-            className="min-w-[10rem] rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground"
+            className="h-9 min-w-[10rem] rounded-md border border-input bg-background px-3 text-sm text-foreground"
           >
             <option value="">All</option>
             {ORDER_STATUSES.map((s) => (
@@ -140,12 +154,12 @@ export default async function AdminOrdersPage({ searchParams }: PageProps) {
           </select>
         </label>
 
-        <label className="flex flex-col gap-1 font-mono text-xs text-muted-foreground">
+        <label className="flex flex-col gap-1 text-xs text-muted-foreground">
           Payment method
           <select
             name="method"
             defaultValue={method ?? ""}
-            className="min-w-[10rem] rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground"
+            className="h-9 min-w-[10rem] rounded-md border border-input bg-background px-3 text-sm text-foreground"
           >
             <option value="">All</option>
             {PAYMENT_METHODS.map((m) => (
@@ -156,12 +170,12 @@ export default async function AdminOrdersPage({ searchParams }: PageProps) {
           </select>
         </label>
 
-        <label className="flex flex-col gap-1 font-mono text-xs text-muted-foreground">
+        <label className="flex flex-col gap-1 text-xs text-muted-foreground">
           Payment status
           <select
             name="paymentStatus"
             defaultValue={paymentStatus ?? ""}
-            className="min-w-[10rem] rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground"
+            className="h-9 min-w-[10rem] rounded-md border border-input bg-background px-3 text-sm text-foreground"
           >
             <option value="">All</option>
             {PAYMENT_STATUSES.map((s) => (
@@ -172,94 +186,102 @@ export default async function AdminOrdersPage({ searchParams }: PageProps) {
           </select>
         </label>
 
-        <Button type="submit" size="sm" variant="outline">
+        <Button type="submit" size="sm" variant="secondary">
           Apply filters
         </Button>
 
         {hasFilters ? (
-          <Link
-            href={clearHref}
-            className="inline-flex items-center rounded-md border border-border px-3 py-2 font-mono text-xs text-muted-foreground hover:bg-muted"
-          >
-            Clear
-          </Link>
+          <Button size="sm" variant="ghost" asChild>
+            <Link href={clearHref}>Clear</Link>
+          </Button>
         ) : null}
       </form>
 
       {orders.length === 0 ? (
-        <p className="mt-10 rounded-md border border-border bg-card px-4 py-5 font-mono text-sm text-muted-foreground">
-          {hasFilters
-            ? "No orders match the selected filters."
-            : "No orders yet. When buyers complete checkout, orders will appear here."}
-        </p>
+        <DataTableEmpty
+          className="mt-6"
+          message={
+            hasFilters
+              ? "No orders match the selected filters."
+              : "No orders yet. When buyers complete checkout, orders will appear here."
+          }
+        />
       ) : (
-        <ul className="mt-10 space-y-4">
-          {orders.map((order) => {
-            const shopName = sellerById.get(order.sellerId);
-            return (
-              <li
-                key={order.$id}
-                className="rounded-md border border-border bg-card px-4 py-5"
-              >
-                <div className="flex flex-wrap items-start justify-between gap-3">
-                  <div>
-                    <p className="font-mono text-xs text-muted-foreground">
-                      {order.$id}
-                    </p>
-                    <p className="mt-1 text-lg font-bold tracking-tight">
+        <DataTableShell className="mt-6">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead className="px-4">Order</TableHead>
+                <TableHead className="px-4">Parties</TableHead>
+                <TableHead className="px-4">Status</TableHead>
+                <TableHead className="px-4">Payment</TableHead>
+                <TableHead className="px-4 text-right">Total</TableHead>
+                <TableHead className="px-4">Actions</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {orders.map((order) => {
+                const shopName = sellerById.get(order.sellerId);
+                return (
+                  <TableRow key={order.$id} className="align-top">
+                    <TableCell className="px-4 py-3">
+                      <p className="font-mono text-xs">{order.$id}</p>
+                      <p className="mt-0.5 font-mono text-xs text-muted-foreground">
+                        {formatCreatedAt(order.$createdAt)}
+                      </p>
+                      <p
+                        className="mt-1 max-w-[280px] truncate font-mono text-xs text-muted-foreground"
+                        title={order.shippingAddress}
+                      >
+                        {truncateAddress(order.shippingAddress)}
+                      </p>
+                    </TableCell>
+                    <TableCell className="px-4 py-3 font-mono text-xs text-muted-foreground">
+                      <span className="block">Buyer {order.buyerId}</span>
+                      <span className="block">
+                        Seller {shopName ?? order.sellerId}
+                      </span>
+                    </TableCell>
+                    <TableCell className="px-4 py-3">
+                      <StatusPill
+                        label={formatOrderStatus(order.status)}
+                        tone={orderStatusTone(order.status)}
+                      />
+                    </TableCell>
+                    <TableCell className="px-4 py-3">
+                      <div className="flex flex-col items-start gap-1">
+                        <span className="text-xs text-muted-foreground">
+                          {formatPaymentMethod(order.paymentMethod)}
+                        </span>
+                        {order.paymentStatus ? (
+                          <StatusPill
+                            label={formatPaymentStatus(order.paymentStatus)}
+                            tone={paymentStatusTone(order.paymentStatus)}
+                          />
+                        ) : (
+                          <span className="text-xs text-muted-foreground">—</span>
+                        )}
+                      </div>
+                    </TableCell>
+                    <TableCell className="px-4 py-3 text-right font-mono text-sm font-semibold tabular-nums">
                       {formatAmount(order.totalAmount, order.currency)}
-                    </p>
-                  </div>
-                  <p className="font-mono text-xs text-muted-foreground">
-                    {formatCreatedAt(order.$createdAt)}
-                  </p>
-                </div>
-
-                <p className="mt-3 font-mono text-xs text-muted-foreground">
-                  Buyer: {order.buyerId}
-                  {" · "}
-                  Seller: {shopName ?? order.sellerId}
-                </p>
-
-                <p className="mt-1 font-mono text-xs text-muted-foreground">
-                  Order: {formatOrderStatus(order.status)}
-                  {" · "}
-                  Method: {formatPaymentMethod(order.paymentMethod)}
-                  {" · "}
-                  Payment:{" "}
-                  {order.paymentStatus
-                    ? formatPaymentStatus(order.paymentStatus)
-                    : "—"}
-                </p>
-
-                <p
-                  className="mt-2 font-mono text-xs text-muted-foreground"
-                  title={order.shippingAddress}
-                >
-                  Ship to: {truncateAddress(order.shippingAddress)}
-                </p>
-
-                <AdminOrderOverrideActions
-                  orderId={order.$id}
-                  orderStatus={order.status}
-                  paymentStatus={order.paymentStatus}
-                />
-              </li>
-            );
-          })}
-        </ul>
+                    </TableCell>
+                    <TableCell className="w-[280px] max-w-[280px] px-4 py-3 whitespace-normal">
+                      <AdminOrderOverrideActions
+                        orderId={order.$id}
+                        orderStatus={order.status}
+                        paymentStatus={order.paymentStatus}
+                      />
+                    </TableCell>
+                  </TableRow>
+                );
+              })}
+            </TableBody>
+          </Table>
+        </DataTableShell>
       )}
 
-      {nextHref ? (
-        <div className="mt-8">
-          <Link
-            href={nextHref}
-            className="inline-flex items-center rounded-md border border-border px-4 py-2 font-mono text-sm hover:bg-muted"
-          >
-            Next page →
-          </Link>
-        </div>
-      ) : null}
+      {nextHref ? <LoadMoreLink href={nextHref} label="Next page" /> : null}
     </div>
   );
 }

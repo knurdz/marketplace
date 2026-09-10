@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { CreateListingForm } from "@/components/seller/create-listing-form";
+import { PortalPageHeader } from "@/components/layout/portal-page-header";
 import { Button } from "@/components/ui/button";
 import { listCategories } from "@/lib/services/categories";
 import { areFreeListingsEnabled } from "@/lib/services/platform-settings";
@@ -11,20 +12,18 @@ export default async function NewListingPage() {
   ]);
 
   return (
-    <div className="mx-auto max-w-3xl">
-      <h2 className="mt-3 text-3xl font-bold tracking-tight">New listing</h2>
-      <p className="mt-2 max-w-xl text-sm text-muted-foreground">
-        Use <strong className="font-medium text-foreground">List item</strong> to
-        save and submit for admin review in one step. Use{" "}
-        <strong className="font-medium text-foreground">Save draft</strong> to
-        keep it private until you submit from your listings page. Approved
-        listings appear on the storefront.
-      </p>
-
-      <CreateListingForm
-        categories={categories}
-        freeListingsEnabled={freeListingsEnabled}
+    <div className="max-w-3xl">
+      <PortalPageHeader
+        title="New listing"
+        description="Use List item to save and submit for admin review in one step. Use Save draft to keep it private until you submit from your listings page."
       />
+
+      <div className="mt-6">
+        <CreateListingForm
+          categories={categories}
+          freeListingsEnabled={freeListingsEnabled}
+        />
+      </div>
 
       <div className="mt-6">
         <Button variant="outline" size="sm" asChild>

@@ -1,4 +1,3 @@
-import { debugLog9ec1e5 } from "@/lib/debug-9ec1e5";
 import type { Order, Product, SellerProfile } from "@/lib/types";
 import {
   getSellerEarnings,
@@ -200,27 +199,6 @@ export async function getSellerDashboardSnapshot(): Promise<SellerDashboardSnaps
     draft: products.filter((p) => p.status === "draft").length,
     pendingReview: products.filter((p) => p.status === "pending_review").length,
   };
-
-  // #region agent log
-  await debugLog9ec1e5({
-    hypothesisId: "D",
-    location: "lib/services/seller-dashboard.ts:getSellerDashboardSnapshot",
-    message: "seller dashboard snapshot",
-    data: {
-      listingCounts,
-      recentOrderCount: recentOrders.length,
-      lowStockCount: products.filter(
-        (p) =>
-          p.status !== "archived" &&
-          p.available &&
-          p.stock >= 0 &&
-          p.stock <= 5,
-      ).length,
-      metricsOrderCount: metrics.orderCount,
-      hasShop: Boolean(profile),
-    },
-  });
-  // #endregion
 
   const lowStock = products
     .filter(

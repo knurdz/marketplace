@@ -47,7 +47,7 @@ test.describe("Guide §10 — MVP close (Phase 6.18)", () => {
     await clearSession(page);
     await loginAs(page, ADMIN_EMAIL);
     await page.goto("/admin/sellers");
-    const row = page.locator("li").filter({ hasText: `E2E Shop ${runId}` });
+    const row = page.locator("tr").filter({ hasText: `E2E Shop ${runId}` });
     await expect(row).toBeVisible({ timeout: 15_000 });
     await row.getByTestId("admin-approve-seller").click();
     await expect(row).toHaveCount(0, { timeout: 30_000 });
@@ -96,7 +96,7 @@ test.describe("Guide §10 — MVP close (Phase 6.18)", () => {
     freeProductId = freeHref?.split("/").pop() ?? "";
     expect(freeProductId).toBeTruthy();
     await page
-      .locator("li")
+      .locator("tr")
       .filter({ hasText: freeTitle })
       .getByTestId("listing-submit-review")
       .click();
@@ -128,7 +128,7 @@ test.describe("Guide §10 — MVP close (Phase 6.18)", () => {
     expect(paidProductId).toBeTruthy();
     await expect(
       page
-        .locator("li")
+        .locator("tr")
         .filter({ hasText: paidTitle })
         .getByText("pending_review"),
     ).toBeVisible({ timeout: 15_000 });
@@ -140,7 +140,7 @@ test.describe("Guide §10 — MVP close (Phase 6.18)", () => {
     await page.goto("/admin/listings");
 
     for (const title of [freeTitle, paidTitle]) {
-      const row = page.locator("li").filter({ hasText: title });
+      const row = page.locator("tr").filter({ hasText: title });
       await expect(row).toBeVisible({ timeout: 15_000 });
       await row.getByTestId("admin-approve-listing").click();
       await expect(row).toHaveCount(0, { timeout: 15_000 });
@@ -263,7 +263,7 @@ test.describe("Guide §10 — MVP close (Phase 6.18)", () => {
     await clearSession(page);
     await loginAs(page, ADMIN_EMAIL);
     await page.goto(`/admin/users?q=${encodeURIComponent(buyerEmail)}`);
-    const userRow = page.locator("li").filter({ hasText: buyerEmail });
+    const userRow = page.locator("tr").filter({ hasText: buyerEmail });
     await expect(userRow).toBeVisible({ timeout: 15_000 });
     await userRow.getByTestId("admin-suspend-user").click();
     await userRow.locator('textarea[name="reason"]').fill("E2E suspend test");

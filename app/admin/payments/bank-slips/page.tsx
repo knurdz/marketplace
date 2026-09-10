@@ -1,6 +1,10 @@
 import Link from "next/link";
 import { BankSlipImage } from "@/components/bank-slip/bank-slip-preview";
-import { Button } from "@/components/ui/button";
+import {
+  DataTableEmpty,
+  LoadMoreLink,
+} from "@/components/layout/data-table-shell";
+import { PortalPageHeader } from "@/components/layout/portal-page-header";
 import {
   getBankSlipReviewUrl,
   listPendingBankSlips,
@@ -53,28 +57,25 @@ export default async function AdminBankSlipsPage({ searchParams }: PageProps) {
   const urlBySlipId = new Map(slipUrls.map((s) => [s.id, s.url]));
 
   return (
-    <div className="mx-auto max-w-4xl">
-      <h2 className="mt-3 text-3xl font-bold tracking-tight">
-        Bank slip queue
-      </h2>
-      <p className="mt-2 max-w-xl text-sm text-muted-foreground">
-        Read-only view of pending bank transfer proofs. The selling shop
-        approves or rejects each slip. You can still open any order from here.
-      </p>
+    <div>
+      <PortalPageHeader
+        title="Bank slip queue"
+        description="Read-only view of pending bank transfer proofs. The selling shop approves or rejects each slip."
+      />
 
       {slips.length === 0 ? (
-        <p className="mt-10 rounded-md border border-border bg-card px-4 py-5 font-mono text-sm text-muted-foreground">
-          No pending bank slips. When buyers upload transfer proofs, they appear
-          here after the seller has them in their order inbox.
-        </p>
+        <DataTableEmpty
+          className="mt-6"
+          message="No pending bank slips. When buyers upload transfer proofs, they appear here after the seller has them in their order inbox."
+        />
       ) : (
-        <ul className="mt-10 space-y-6">
+        <ul className="mt-6 space-y-4">
           {slips.map((entry) => {
             const imageUrl = urlBySlipId.get(entry.slip.$id) ?? "";
             return (
               <li
                 key={entry.slip.$id}
-                className="rounded-md border border-border bg-card px-4 py-5"
+                className="rounded-xl border border-border bg-card px-4 py-5"
               >
                 <div className="flex flex-wrap items-start justify-between gap-4">
                   <div>
@@ -124,13 +125,7 @@ export default async function AdminBankSlipsPage({ searchParams }: PageProps) {
       )}
 
       {nextCursor ? (
-        <div className="mt-8">
-          <Button variant="outline" size="sm" asChild>
-            <Link href={`/admin/payments/bank-slips?cursor=${nextCursor}`}>
-              Load more
-            </Link>
-          </Button>
-        </div>
+        <LoadMoreLink href={`/admin/payments/bank-slips?cursor=${nextCursor}`} />
       ) : null}
     </div>
   );

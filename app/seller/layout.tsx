@@ -2,24 +2,26 @@ import type { ReactNode } from "react";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { PendingSellerShell } from "@/components/layout/pending-seller-shell";
-import { PortalShell } from "@/components/layout/portal-shell";
+import {
+  PortalShell,
+  type PortalNavGroup,
+} from "@/components/layout/portal-shell";
 import { ROLE_LABELS, requireUser, userHasLabel } from "@/lib/appwrite/roles";
-import { debugLog9145e1 } from "@/lib/debug-9145e1";
 import {
   blockedSellerPortalDestination,
   getOwnSellerProfile,
 } from "@/lib/services/seller-application";
 
-const SELLER_NAV = [
+const SELLER_NAV: PortalNavGroup[] = [
   {
     items: [
-      { href: "/seller", label: "Dashboard" },
-      { href: "/seller/shop", label: "Shop" },
-      { href: "/seller/listings", label: "Listings" },
-      { href: "/seller/orders", label: "Orders" },
-      { href: "/seller/messages", label: "Messages" },
-      { href: "/seller/earnings", label: "Earnings" },
-      { href: "/seller/settings", label: "Settings" },
+      { href: "/seller", label: "Dashboard", icon: "dashboard" },
+      { href: "/seller/shop", label: "Shop", icon: "shop" },
+      { href: "/seller/listings", label: "Listings", icon: "listings" },
+      { href: "/seller/orders", label: "Orders", icon: "orders" },
+      { href: "/seller/messages", label: "Messages", icon: "messages" },
+      { href: "/seller/earnings", label: "Earnings", icon: "earnings" },
+      { href: "/seller/settings", label: "Settings", icon: "settings" },
     ],
   },
 ];
@@ -48,19 +50,6 @@ export default async function SellerLayout({
   if (isPendingPage) {
     const profile = await getOwnSellerProfile();
     if (!profile) {
-      // #region agent log
-      debugLog9145e1({
-        hypothesisId: "B",
-        runId: "post-fix",
-        location: "app/seller/layout.tsx:pending-no-profile",
-        message: "pending page missing seller profile → /market",
-        data: {
-          pathname,
-          hasSellerLabel,
-          labels: Array.isArray(user.labels) ? user.labels : null,
-        },
-      });
-      // #endregion
       redirect("/market");
     }
     if (profile.status === "approved") {

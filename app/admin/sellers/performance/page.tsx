@@ -1,4 +1,19 @@
 import Link from "next/link";
+import {
+  DataTableEmpty,
+  DataTableShell,
+  LoadMoreLink,
+} from "@/components/layout/data-table-shell";
+import { PortalPageHeader } from "@/components/layout/portal-page-header";
+import { Button } from "@/components/ui/button";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { listApprovedSellerPerformance } from "@/lib/services";
 
 const PAGE_SIZE = 25;
@@ -47,96 +62,65 @@ export default async function AdminSellerPerformancePage({
     : null;
 
   return (
-    <div className="mx-auto max-w-5xl">
-      <h2 className="mt-3 text-3xl font-bold tracking-tight">
-        Seller performance
-      </h2>
-      <p className="mt-2 max-w-2xl text-sm text-muted-foreground">
-        Basic KPIs for approved sellers. Revenue matches paid payments on the
-        seller earnings view. Pending is paid through ready-for-pickup — not
-        unpaid checkout.{" "}
-        <Link
-          href="/admin/sellers"
-          className="text-accent underline-offset-2 hover:underline"
-        >
-          Seller approvals
-        </Link>
-      </p>
+    <div>
+      <PortalPageHeader
+        title="Seller performance"
+        description="Basic KPIs for approved sellers. Revenue matches paid payments on the seller earnings view. Pending is paid through ready-for-pickup, not unpaid checkout."
+        actions={
+          <Button variant="secondary" size="sm" asChild>
+            <Link href="/admin/sellers">Approvals</Link>
+          </Button>
+        }
+      />
 
       {rows.length === 0 ? (
-        <p className="mt-10 rounded-md border border-border bg-card px-4 py-5 font-mono text-sm text-muted-foreground">
-          No approved sellers yet. After an application is approved, their
-          orders, pending fulfillment, and paid revenue appear here.
-        </p>
+        <DataTableEmpty
+          className="mt-6"
+          message="No approved sellers yet. After an application is approved, their orders, pending fulfillment, and paid revenue appear here."
+        />
       ) : (
-        <div className="mt-10 overflow-x-auto rounded-md border border-border">
-          <table className="w-full min-w-[36rem] border-collapse text-left">
-            <caption className="sr-only">
-              Approved seller order counts, pending fulfillment, and paid
-              revenue
-            </caption>
-            <thead>
-              <tr className="border-b border-border bg-card font-mono text-xs text-muted-foreground">
-                <th scope="col" className="px-4 py-3 font-medium">
-                  Shop
-                </th>
-                <th scope="col" className="px-4 py-3 font-medium">
-                  Slug
-                </th>
-                <th scope="col" className="px-4 py-3 font-medium text-right">
-                  Orders
-                </th>
-                <th scope="col" className="px-4 py-3 font-medium text-right">
-                  Pending
-                </th>
-                <th scope="col" className="px-4 py-3 font-medium text-right">
-                  Revenue
-                </th>
-              </tr>
-            </thead>
-            <tbody>
+        <DataTableShell className="mt-6">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead className="px-4">Shop</TableHead>
+                <TableHead className="px-4">Slug</TableHead>
+                <TableHead className="px-4 text-right">Orders</TableHead>
+                <TableHead className="px-4 text-right">Pending</TableHead>
+                <TableHead className="px-4 text-right">Revenue</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
               {rows.map((row) => (
-                <tr
-                  key={row.sellerId}
-                  className="border-b border-border last:border-b-0"
-                >
-                  <th scope="row" className="px-4 py-3 font-bold tracking-tight">
+                <TableRow key={row.sellerId}>
+                  <TableCell className="px-4 font-medium">
                     <Link
                       href={`/shop/${row.slug}`}
                       className="hover:text-accent hover:underline hover:underline-offset-2"
                     >
                       {row.shopName}
                     </Link>
-                  </th>
-                  <td className="px-4 py-3 font-mono text-xs text-muted-foreground">
+                  </TableCell>
+                  <TableCell className="px-4 font-mono text-xs text-muted-foreground">
                     /shop/{row.slug}
-                  </td>
-                  <td className="px-4 py-3 text-right font-mono text-sm">
+                  </TableCell>
+                  <TableCell className="px-4 text-right font-mono text-sm tabular-nums">
                     {formatCount(row.orderCount)}
-                  </td>
-                  <td className="px-4 py-3 text-right font-mono text-sm">
+                  </TableCell>
+                  <TableCell className="px-4 text-right font-mono text-sm tabular-nums">
                     {formatCount(row.pendingCount)}
-                  </td>
-                  <td className="px-4 py-3 text-right font-mono text-sm">
+                  </TableCell>
+                  <TableCell className="px-4 text-right font-mono text-sm tabular-nums">
                     {formatRevenue(row.revenue, row.currency)}
-                  </td>
-                </tr>
+                  </TableCell>
+                </TableRow>
               ))}
-            </tbody>
-          </table>
-        </div>
+            </TableBody>
+          </Table>
+        </DataTableShell>
       )}
 
-      {nextHref ? (
-        <div className="mt-8">
-          <Link
-            href={nextHref}
-            className="inline-flex items-center rounded-md border border-border px-4 py-2 font-mono text-sm hover:bg-muted"
-          >
-            Next page →
-          </Link>
-        </div>
-      ) : null}
+      {nextHref ? <LoadMoreLink href={nextHref} label="Next page" /> : null}
     </div>
   );
 }

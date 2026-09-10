@@ -5,6 +5,7 @@ import { SellerBankSlipReviewActions } from "@/components/seller/seller-bank-sli
 import { SellerFulfillmentActions } from "@/components/seller/seller-fulfillment-actions";
 import { OpenSellerThreadButton } from "@/components/messaging/open-seller-thread-button";
 import { OrderTimeline } from "@/components/store/order-timeline";
+import { PortalPageHeader } from "@/components/layout/portal-page-header";
 import { Button } from "@/components/ui/button";
 import {
   formatOrderStatus,
@@ -55,8 +56,11 @@ export default async function SellerOrderDetailPage({
     : "";
 
   return (
-    <div className="mx-auto max-w-3xl">
-      <h2 className="mt-3 text-3xl font-bold tracking-tight">Order details</h2>
+    <div className="max-w-3xl">
+      <PortalPageHeader
+        title="Order details"
+        description={`${formatOrderStatus(order.status)} · ${order.$id}`}
+      />
       {msgError ? (
         <p role="alert" className="mt-4 text-sm text-destructive">
           {msgError}

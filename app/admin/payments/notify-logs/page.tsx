@@ -1,4 +1,19 @@
-import Link from "next/link";
+import {
+  DataTableEmpty,
+  DataTableShell,
+  FilterTabs,
+  LoadMoreLink,
+} from "@/components/layout/data-table-shell";
+import { PortalPageHeader } from "@/components/layout/portal-page-header";
+import { StatusPill } from "@/components/layout/status-pill";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import {
   listNotifyLogs,
   parseNotifyLogCursor,
@@ -7,6 +22,7 @@ import {
   type NotifyLogSource,
   type NotifyLogView,
 } from "@/lib/services";
+import { notifyLogOutcomeTone } from "@/lib/ui/status-tone";
 
 const PAGE_SIZE = 25;
 
@@ -80,119 +96,108 @@ export default async function AdminNotifyLogsPage({ searchParams }: PageProps) {
       }).toString()}`
     : null;
 
-  const showEmpty = entries.length === 0;
-
   return (
-    <div className="mx-auto max-w-3xl">
-      <h2 className="mt-3 text-3xl font-bold tracking-tight">
-        PayHere notify logs
-      </h2>
-      <p className="mt-2 max-w-xl text-sm text-muted-foreground">
-        Read-only view of <code className="font-mono text-xs">payhere-notify</code>{" "}
-        Function execution logs. Signatures, merchant secret, and card data are
-        redacted. This does not change payment state.
-      </p>
+    <div>
+      <PortalPageHeader
+        title="PayHere notify logs"
+        description="Read-only view of payhere-notify Function execution logs. Signatures, merchant secret, and card data are redacted. This does not change payment state."
+      />
 
-      <nav className="mt-8 flex flex-wrap gap-2 font-mono text-sm">
-        {VIEW_TABS.map((tab) => {
-          const href = `/admin/payments/notify-logs?view=${tab.value}`;
-          const active = view === tab.value;
-          return (
-            <Link
-              key={tab.value}
-              href={href}
-              className={
-                active
-                  ? "rounded-md border border-accent bg-accent/10 px-3 py-1.5 text-accent"
-                  : "rounded-md border border-border px-3 py-1.5 text-muted-foreground hover:bg-muted"
-              }
-            >
-              {tab.label}
-            </Link>
-          );
-        })}
-      </nav>
+      <FilterTabs
+        className="mt-6"
+        tabs={VIEW_TABS.map((tab) => ({
+          href: `/admin/payments/notify-logs?view=${tab.value}`,
+          label: tab.label,
+          active: view === tab.value,
+        }))}
+      />
 
-      {showEmpty ? (
-        <p className="mt-10 rounded-md border border-border bg-card px-4 py-5 font-mono text-sm text-muted-foreground">
-          {view === "issues" && source === "ready"
-            ? "No ignored, rejected, or failed notify executions on this page."
-            : SOURCE_EMPTY[source]}
-        </p>
+      {entries.length === 0 ? (
+        <DataTableEmpty
+          className="mt-6"
+          message={
+            view === "issues" && source === "ready"
+              ? "No ignored, rejected, or failed notify executions on this page."
+              : SOURCE_EMPTY[source]
+          }
+        />
       ) : (
-        <ul className="mt-10 space-y-4">
-          {entries.map((entry) => {
-            const details = [entry.logs, entry.errors]
-              .filter((part) => part.trim().length > 0)
-              .join("\n");
-            return (
-              <li
-                key={entry.$id}
-                className="rounded-md border border-border bg-card px-4 py-5"
-              >
-                <div className="flex flex-wrap items-start justify-between gap-3">
-                  <div>
-                    <p className="font-mono text-xs text-muted-foreground">
-                      {entry.$id}
-                    </p>
-                    <p className="mt-1 text-lg font-bold tracking-tight">
-                      {OUTCOME_LABELS[entry.outcome]}
-                      {entry.isIssue ? (
-                        <span className="ml-2 font-mono text-xs font-normal text-accent">
-                          issue
-                        </span>
-                      ) : null}
-                    </p>
-                  </div>
-                  <p className="font-mono text-xs text-muted-foreground">
-                    {formatCreatedAt(entry.$createdAt)}
-                  </p>
-                </div>
-
-                <p className="mt-3 font-mono text-xs text-muted-foreground">
-                  Execution: {entry.executionStatus} · HTTP{" "}
-                  {entry.responseStatusCode} · {entry.requestMethod} ·{" "}
-                  {entry.trigger} · {formatDuration(entry.duration)}
-                </p>
-
-                {entry.orderId ? (
-                  <p className="mt-1 font-mono text-xs text-muted-foreground">
-                    Order: {entry.orderId}
-                    {entry.statusCode ? ` · PayHere status ${entry.statusCode}` : ""}
-                    {entry.reason ? ` · reason ${entry.reason}` : ""}
-                  </p>
-                ) : entry.reason ? (
-                  <p className="mt-1 font-mono text-xs text-muted-foreground">
-                    Reason: {entry.reason}
-                  </p>
-                ) : null}
-
-                {details ? (
-                  <details className="mt-3">
-                    <summary className="cursor-pointer font-mono text-xs text-muted-foreground hover:text-foreground">
-                      Logs
-                    </summary>
-                    <pre className="mt-2 max-h-64 overflow-auto rounded-md border border-border bg-muted/30 p-3 font-mono text-xs whitespace-pre-wrap break-all">
-                      {details}
-                    </pre>
-                  </details>
-                ) : null}
-              </li>
-            );
-          })}
-        </ul>
+        <DataTableShell className="mt-6">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead className="px-4">When</TableHead>
+                <TableHead className="px-4">Outcome</TableHead>
+                <TableHead className="px-4">Order</TableHead>
+                <TableHead className="px-4">Execution</TableHead>
+                <TableHead className="px-4">Duration</TableHead>
+                <TableHead className="px-4">Logs</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {entries.map((entry) => {
+                const details = [entry.logs, entry.errors]
+                  .filter((part) => part.trim().length > 0)
+                  .join("\n");
+                return (
+                  <TableRow key={entry.$id}>
+                    <TableCell className="px-4 font-mono text-xs text-muted-foreground whitespace-nowrap">
+                      {formatCreatedAt(entry.$createdAt)}
+                    </TableCell>
+                    <TableCell className="px-4">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <StatusPill
+                          label={OUTCOME_LABELS[entry.outcome]}
+                          tone={notifyLogOutcomeTone(entry.outcome)}
+                        />
+                        {entry.isIssue ? (
+                          <span className="font-mono text-[11px] text-accent">
+                            issue
+                          </span>
+                        ) : null}
+                      </div>
+                    </TableCell>
+                    <TableCell className="px-4 whitespace-normal font-mono text-xs text-muted-foreground">
+                      {entry.orderId
+                        ? `${entry.orderId}${
+                            entry.statusCode
+                              ? ` · PayHere ${entry.statusCode}`
+                              : ""
+                          }${entry.reason ? ` · ${entry.reason}` : ""}`
+                        : entry.reason
+                          ? `Reason: ${entry.reason}`
+                          : "—"}
+                    </TableCell>
+                    <TableCell className="px-4 whitespace-normal font-mono text-xs text-muted-foreground">
+                      {entry.executionStatus} · HTTP {entry.responseStatusCode} ·{" "}
+                      {entry.requestMethod} · {entry.trigger}
+                    </TableCell>
+                    <TableCell className="px-4 font-mono text-xs tabular-nums">
+                      {formatDuration(entry.duration)}
+                    </TableCell>
+                    <TableCell className="px-4 whitespace-normal">
+                      {details ? (
+                        <details>
+                          <summary className="cursor-pointer font-mono text-xs text-muted-foreground hover:text-foreground">
+                            Logs
+                          </summary>
+                          <pre className="mt-2 max-h-64 max-w-md overflow-auto rounded-md border border-border bg-muted/30 p-3 font-mono text-xs whitespace-pre-wrap break-all">
+                            {details}
+                          </pre>
+                        </details>
+                      ) : (
+                        <span className="text-xs text-muted-foreground">—</span>
+                      )}
+                    </TableCell>
+                  </TableRow>
+                );
+              })}
+            </TableBody>
+          </Table>
+        </DataTableShell>
       )}
 
-      {nextHref ? (
-        <div className="mt-8">
-          <Link
-            href={nextHref}
-            className="inline-flex items-center rounded-md border border-border px-4 py-2 font-mono text-sm hover:bg-muted"
-          >
-            Next page →
-          </Link>
-        </div>
-      ) : null}
+      {nextHref ? <LoadMoreLink href={nextHref} label="Next page" /> : null}
     </div>
   );
 }

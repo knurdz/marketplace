@@ -3,6 +3,20 @@ import {
   SellerApproveButton,
   SellerRejectForm,
 } from "@/components/admin/seller-approval-actions";
+import {
+  DataTableEmpty,
+  DataTableShell,
+} from "@/components/layout/data-table-shell";
+import { PortalPageHeader } from "@/components/layout/portal-page-header";
+import { Button } from "@/components/ui/button";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { listPendingSellerApplications } from "@/lib/services";
 
 function formatAppliedAt(iso: string | undefined): string {
@@ -21,70 +35,72 @@ export default async function AdminSellersPage() {
   const pending = await listPendingSellerApplications();
 
   return (
-    <div className="mx-auto max-w-3xl">
-      <h2 className="mt-3 text-3xl font-bold tracking-tight">
-        Seller approvals
-      </h2>
-      <p className="mt-2 max-w-xl text-sm text-muted-foreground">
-        Review pending applications. Approving grants the seller label and
-        unlocks the seller portal.{" "}
-        <Link
-          href="/admin/sellers/performance"
-          className="text-accent underline-offset-2 hover:underline"
-        >
-          Approved seller performance
-        </Link>
-      </p>
+    <div>
+      <PortalPageHeader
+        title="Seller approvals"
+        description="Review pending applications. Approving grants the seller label and unlocks the seller portal."
+        actions={
+          <Button variant="secondary" size="sm" asChild>
+            <Link href="/admin/sellers/performance">Performance</Link>
+          </Button>
+        }
+      />
 
       {pending.length === 0 ? (
-        <p className="mt-10 rounded-md border border-border bg-card px-4 py-5 font-mono text-sm text-muted-foreground">
-          No pending applications. New seller registrations appear here until
-          you approve or reject them.
-        </p>
+        <DataTableEmpty
+          className="mt-6"
+          message="No pending applications. New seller registrations appear here until you approve or reject them."
+        />
       ) : (
-        <ul className="mt-10 space-y-4">
-          {pending.map((app) => (
-            <li
-              key={app.$id}
-              className="rounded-md border border-border bg-card px-4 py-5"
-            >
-              <div className="flex flex-wrap items-start justify-between gap-3">
-                <div>
-                  <p className="text-lg font-bold tracking-tight">
-                    {app.shopName}
-                  </p>
-                  <p className="mt-1 font-mono text-xs text-muted-foreground">
-                    /shop/{app.slug}
-                  </p>
-                </div>
-                <p className="font-mono text-xs text-muted-foreground">
-                  Applied {formatAppliedAt(app.$createdAt)}
-                </p>
-              </div>
-
-              {app.bio ? (
-                <p className="mt-3 text-sm text-muted-foreground">{app.bio}</p>
-              ) : null}
-
-              {app.bankName || app.maskedBankAccountNumber ? (
-                <p className="mt-3 font-mono text-xs text-muted-foreground">
-                  Bank: {app.bankName ?? "—"}
-                  {app.maskedBankAccountNumber
-                    ? ` · ${app.maskedBankAccountNumber}`
-                    : null}
-                </p>
-              ) : null}
-
-              <div className="mt-4 flex flex-wrap items-start gap-3">
-                <SellerApproveButton sellerProfileId={app.$id} />
-                <SellerRejectForm
-                  sellerProfileId={app.$id}
-                  shopName={app.shopName}
-                />
-              </div>
-            </li>
-          ))}
-        </ul>
+        <DataTableShell className="mt-6">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead className="px-4">Shop</TableHead>
+                <TableHead className="px-4">Bank</TableHead>
+                <TableHead className="px-4">Applied</TableHead>
+                <TableHead className="px-4">Actions</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {pending.map((app) => (
+                <TableRow key={app.$id} className="align-top">
+                  <TableCell className="max-w-[420px] px-4 py-3 whitespace-normal">
+                    <p className="font-medium tracking-tight">{app.shopName}</p>
+                    <p className="mt-0.5 font-mono text-xs text-muted-foreground">
+                      /shop/{app.slug}
+                    </p>
+                    {app.bio ? (
+                      <p className="mt-2 text-sm text-muted-foreground">
+                        {app.bio}
+                      </p>
+                    ) : null}
+                  </TableCell>
+                  <TableCell className="px-4 py-3 font-mono text-xs text-muted-foreground">
+                    {app.bankName ?? "—"}
+                    {app.maskedBankAccountNumber ? (
+                      <span className="block">
+                        {app.maskedBankAccountNumber}
+                      </span>
+                    ) : null}
+                  </TableCell>
+                  <TableCell className="px-4 py-3 font-mono text-xs text-muted-foreground">
+                    {formatAppliedAt(app.$createdAt)}
+                  </TableCell>
+                  <TableCell className="w-[260px] max-w-[260px] px-4 py-3 whitespace-normal">
+                    <div className="flex flex-wrap items-start gap-2">
+                      <SellerApproveButton sellerProfileId={app.$id} />
+                      <SellerRejectForm
+                        sellerProfileId={app.$id}
+                        shopName={app.shopName}
+                      />
+                    </div>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </DataTableShell>
       )}
     </div>
   );

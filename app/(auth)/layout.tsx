@@ -1,6 +1,7 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
 import { SkipToContent } from "@/components/layout/skip-to-content";
+import { ThemeToggle } from "@/components/theme/theme-toggle";
 
 export default function AuthLayout({ children }: { children: ReactNode }) {
   return (
@@ -36,6 +37,9 @@ export default function AuthLayout({ children }: { children: ReactNode }) {
           </div>
         </aside>
         <div className="relative flex min-h-screen items-center justify-center px-6 py-16">
+          <div className="absolute top-4 right-4">
+            <ThemeToggle />
+          </div>
           <div className="w-full max-w-md">
             <Link
               href="/"
