@@ -16,7 +16,19 @@ export function Reveal({ children, className, delayMs = 0 }: RevealProps) {
   useEffect(() => {
     const node = ref.current;
     if (!node) return;
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+    if (typeof window !== "undefined" && window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      requestAnimationFrame(() => setVisible(true));
+      return;
+    }
+
+    if (typeof IntersectionObserver === "undefined") {
+      requestAnimationFrame(() => setVisible(true));
+      return;
+    }
+
+    const rect = node.getBoundingClientRect();
+    if (rect.top < window.innerHeight + 300) {
+      requestAnimationFrame(() => setVisible(true));
       return;
     }
 
@@ -27,11 +39,21 @@ export function Reveal({ children, className, delayMs = 0 }: RevealProps) {
           observer.disconnect();
         }
       },
-      { threshold: 0.12, rootMargin: "0px 0px -8% 0px" },
+      { threshold: 0, rootMargin: "0px 0px 250px 0px" },
     );
 
     observer.observe(node);
-    return () => observer.disconnect();
+
+    // Fallback safety timeout so content is never stuck invisible
+    const safetyTimer = setTimeout(() => {
+      setVisible(true);
+      observer.disconnect();
+    }, 600);
+
+    return () => {
+      observer.disconnect();
+      clearTimeout(safetyTimer);
+    };
   }, []);
 
   return (

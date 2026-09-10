@@ -75,12 +75,18 @@ export function CategoryRail({
           <Link
             href="/market"
             className={cn(
-              "inline-flex h-9 shrink-0 snap-start items-center rounded-full border px-4 text-sm transition-colors",
+              "group/pill inline-flex h-9 shrink-0 snap-start items-center gap-1.5 rounded-full border px-4 text-sm font-medium transition-all duration-200",
               !activeSlug
-                ? "border-foreground bg-primary text-primary-foreground"
-                : "border-border bg-card text-muted-foreground hover:border-foreground/30 hover:text-foreground",
+                ? "border-accent bg-accent text-accent-foreground shadow-[0_0_16px_-2px_rgba(0,199,88,0.4)]"
+                : "border-border bg-card text-foreground/80 hover:border-accent/50 hover:bg-card-hover hover:text-foreground hover:-translate-y-0.5 shadow-xs",
             )}
           >
+            <span
+              className={cn(
+                "size-1.5 rounded-full transition-colors",
+                !activeSlug ? "bg-accent-foreground" : "bg-muted-foreground group-hover/pill:bg-accent",
+              )}
+            />
             All
           </Link>
           {categories.map((category) => {
@@ -91,12 +97,18 @@ export function CategoryRail({
                 href={`/categories/${category.slug}`}
                 aria-current={active ? "page" : undefined}
                 className={cn(
-                  "inline-flex h-9 shrink-0 snap-start items-center rounded-full border px-4 text-sm whitespace-nowrap transition-colors",
+                  "group/pill inline-flex h-9 shrink-0 snap-start items-center gap-1.5 rounded-full border px-4 text-sm font-medium whitespace-nowrap transition-all duration-200",
                   active
-                    ? "border-foreground bg-primary text-primary-foreground"
-                    : "border-border bg-card text-muted-foreground hover:border-foreground/30 hover:text-foreground",
+                    ? "border-accent bg-accent text-accent-foreground shadow-[0_0_16px_-2px_rgba(0,199,88,0.4)]"
+                    : "border-border bg-card text-foreground/80 hover:border-accent/50 hover:bg-card-hover hover:text-foreground hover:-translate-y-0.5 shadow-xs",
                 )}
               >
+                <span
+                  className={cn(
+                    "size-1.5 rounded-full transition-colors",
+                    active ? "bg-accent-foreground" : "bg-muted-foreground group-hover/pill:bg-accent",
+                  )}
+                />
                 {category.name}
               </Link>
             );

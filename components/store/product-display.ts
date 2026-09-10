@@ -26,7 +26,7 @@ export function coverPreviewUrl(cover: ProductCover, size = 640): string {
 
 export function productCardClassName(className?: string): string {
   return cn(
-    "group/card block overflow-hidden rounded-xl border border-border bg-card transition-all hover:border-foreground/25 hover:bg-card-hover hover:shadow-md",
+    "group/card block overflow-hidden rounded-xl border border-border bg-card transition-all duration-300 ease-out hover:-translate-y-1.5 hover:border-accent/45 hover:bg-card-hover hover:shadow-[0_12px_28px_-6px_rgba(0,199,88,0.18)] dark:hover:border-accent/50 dark:hover:shadow-[0_14px_35px_-8px_rgba(0,199,88,0.22)]",
     className,
   );
 }

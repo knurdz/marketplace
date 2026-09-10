@@ -5,7 +5,15 @@ import { PromoCarousel, type PromoSlide } from "@/components/store/promo-carouse
 import { SectionHeading } from "@/components/store/section-heading";
 import { coverPreviewUrl, formatProductPrice } from "@/components/store/product-display";
 import { Reveal } from "@/components/motion/reveal";
+import { MarqueeBanner } from "@/components/landing/marquee-banner";
 import {
+  AmbientMarketplaceGlow,
+  FloatingMarketBadges,
+} from "@/components/landing/floating-objects";
+import { MarketStatsTicker } from "@/components/landing/market-stats-ticker";
+import { CreatorCtaBanner } from "@/components/landing/creator-cta-banner";
+import {
+  listActiveProducts,
   listCategories,
   listCoverImagesByProductIds,
   listFeaturedProducts,
@@ -14,17 +22,30 @@ import {
 import type { ProductCoverMap } from "@/lib/services/products";
 import type { Product } from "@/lib/types";
 
-const PROMO_SLIDE_LIMIT = 5;
+const PROMO_SLIDE_LIMIT = 8;
 
 function buildPromoSlides(
   featured: Product[],
+  trending: Product[],
+  active: Product[],
   covers: ProductCoverMap,
 ): PromoSlide[] {
-  const slides = featured.slice(0, PROMO_SLIDE_LIMIT).map((product) => {
+  // Combine featured + trending + active to ensure multiple cards move across
+  const pool = [
+    ...featured,
+    ...trending.filter((t) => !featured.some((f) => f.$id === t.$id)),
+    ...active.filter(
+      (a) =>
+        !featured.some((f) => f.$id === a.$id) &&
+        !trending.some((t) => t.$id === a.$id),
+    ),
+  ];
+
+  const slides = pool.slice(0, PROMO_SLIDE_LIMIT).map((product) => {
     const cover = covers[product.$id];
     return {
       id: product.$id,
-      eyebrow: "Featured listing",
+      eyebrow: product.featured ? "Featured Drop" : "Trending on Market",
       title: product.title,
       detail: `${formatProductPrice(product)} · ${
         product.stock > 0 ? `${product.stock} in stock` : "Out of stock"
@@ -52,26 +73,46 @@ function buildPromoSlides(
 }
 
 export default async function Home() {
-  const [categories, featured, trending] = await Promise.all([
+  const [categories, featured, trending, active] = await Promise.all([
     listCategories(),
     listFeaturedProducts({ limit: 12 }),
     listTrendingProducts({ limit: 8 }),
+    listActiveProducts({ limit: 12 }),
   ]);
 
-  const covers = await listCoverImagesByProductIds([
-    ...featured.map((product) => product.$id),
-    ...trending.map((product) => product.$id),
-  ]);
+  const allProductIds = Array.from(
+    new Set([
+      ...featured.map((p) => p.$id),
+      ...trending.map((p) => p.$id),
+      ...active.map((p) => p.$id),
+    ]),
+  );
 
-  const slides = buildPromoSlides(featured, covers);
+  const covers = await listCoverImagesByProductIds(allProductIds);
+
+  const slides = buildPromoSlides(featured, trending, active, covers);
   const featuredGrid = featured.slice(0, 8);
 
   return (
-    <main className="mx-auto w-full max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
-      <PromoCarousel slides={slides} />
+    <main className="relative mx-auto w-full max-w-7xl px-4 py-6 sm:px-6 lg:px-8 space-y-10 sm:space-y-12">
+      {/* Ambient glowing atmosphere to eliminate pitch-black void */}
+      <AmbientMarketplaceGlow />
 
+      {/* Moving continuous marquee banner (live ticker) */}
+      <MarqueeBanner className="mb-2" />
+
+      {/* Featured listings moving card carousel */}
+      <section className="space-y-4">
+        <PromoCarousel slides={slides} />
+        {/* 3 static objects under featured listing horizontally aligned */}
+        <div className="flex items-center px-1">
+          <FloatingMarketBadges />
+        </div>
+      </section>
+
+      {/* Shop by Category */}
       {categories.length > 0 ? (
-        <section className="mt-8">
+        <section className="pt-2">
           <SectionHeading
             title="Shop by category"
             href="/categories"
@@ -81,9 +122,15 @@ export default async function Home() {
         </section>
       ) : null}
 
+      {/* Live Marketplace Value / Stats Strip */}
+      <section className="pt-2">
+        <MarketStatsTicker />
+      </section>
+
+      {/* Hand-picked listings */}
       {featuredGrid.length > 0 ? (
         <Reveal>
-          <section className="mt-12">
+          <section className="pt-2">
             <SectionHeading
               title="Hand-picked"
               description="Listings the team is highlighting right now."
@@ -99,9 +146,10 @@ export default async function Home() {
         </Reveal>
       ) : null}
 
+      {/* Moving now / Trending listings */}
       {trending.length > 0 ? (
         <Reveal>
-          <section className="mt-12">
+          <section className="pt-2">
             <SectionHeading
               title="Moving now"
               description="Most viewed listings this week."
@@ -113,7 +161,15 @@ export default async function Home() {
         </Reveal>
       ) : null}
 
-      <section className="mt-14 mb-4">
+      {/* Creator & Seller Community Callout Banner */}
+      <Reveal>
+        <section className="pt-2">
+          <CreatorCtaBanner />
+        </section>
+      </Reveal>
+
+      {/* How buying works */}
+      <section className="pt-2 pb-6">
         <SectionHeading title="How buying works" />
         <div className="mt-5">
           <HowItWorksStrip />
