@@ -103,13 +103,14 @@ export function asOrder(row: Record<string, unknown>): Order | null {
     $id,
     buyerId,
     sellerId,
-    status: statusRaw,
-    totalAmount: asNumber(row.totalAmount),
-    currency,
     shippingAddress,
+    currency,
+    status: statusRaw,
     paymentMethod: paymentMethodRaw,
+    totalAmount: asNumber(row.totalAmount),
     couponCode: asNullableString(row.couponCode),
-    discountAmount: Math.max(0, asNumber(row.discountAmount)),
+    discountAmount: asNumber(row.discountAmount),
+    $createdAt: asNullableString(row.$createdAt) ?? undefined,
   };
 }
 

@@ -3,6 +3,7 @@ import { notFound, redirect } from "next/navigation";
 import { OrderCancelForm } from "@/components/store/order-cancel-form";
 import { OrderTimeline } from "@/components/store/order-timeline";
 import { ReorderButton } from "@/components/store/reorder-button";
+import { DownloadReceiptButton } from "@/components/store/download-receipt-button";
 import { OpenBuyerThreadButton } from "@/components/messaging/open-buyer-thread-button";
 import { Button } from "@/components/ui/button";
 import { getLoggedInUser } from "@/lib/appwrite/session";
@@ -54,7 +55,12 @@ export default async function OrderDetailPage({
 
   return (
     <main className="relative mx-auto w-full max-w-3xl px-6 py-16 sm:px-10">
-      <h1 className="mt-4 text-3xl font-bold tracking-tight">Order details</h1>
+      <div className="mt-4 flex flex-wrap items-center justify-between gap-4">
+        <h1 className="text-3xl font-bold tracking-tight">Order details</h1>
+        {payment?.status === "paid" || order.status === "completed" || order.status === "shipped" || order.status === "processing" ? (
+          <DownloadReceiptButton order={order} items={items} />
+        ) : null}
+      </div>
       {msgError ? (
         <p role="alert" className="mt-4 text-sm text-destructive">
           {msgError}
