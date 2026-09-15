@@ -1,4 +1,4 @@
-import { AppwriteException, ID, Permission, Query, Role } from "node-appwrite";
+import { AppwriteException, ID, Permission, Role } from "node-appwrite";
 import {
   DATABASE_ID,
   TABLE_REPORTS,
@@ -153,7 +153,9 @@ export async function createProductReport(
       };
     }
 
-    const reason = String(input.reason ?? "").trim().slice(0, 200);
+    const reason = String(input.reason ?? "")
+      .trim()
+      .slice(0, 200);
     if (!reason) {
       return {
         error: "Please provide a reason for your report.",

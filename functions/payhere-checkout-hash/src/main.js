@@ -1,5 +1,8 @@
 import { Account, Client, Query, TablesDB } from "node-appwrite";
-import { evaluateSandboxCheckoutPolicy, parseOrderIdFromBody } from "./hash.js";
+import {
+  evaluateSandboxCheckoutPolicy,
+  parseCheckoutRequestFromBody,
+} from "./hash.js";
 import { buildPayHereCheckoutPayload } from "./payload.js";
 
 const DATABASE_ID = process.env.DATABASE_ID?.trim() || "marketplace";
@@ -53,16 +56,6 @@ async function handleCheckoutHash({ req, res, log, error }) {
   }
 
   const env = readFunctionEnv();
-  if (
-    !env.merchantId ||
-    !env.merchantSecret.trim() ||
-    !env.appUrl ||
-    !env.notifyUrl
-  ) {
-    log("payhere-checkout-hash missing Function env (no secrets logged)");
-    return fail(res, NOT_CONFIGURED, 501);
-  }
-
   const sandboxPolicy = evaluateSandboxCheckoutPolicy(env.sandboxRaw);
   if (!sandboxPolicy.ok) {
     log("payhere-checkout-hash refused live PayHere (not authorized)");
@@ -75,11 +68,25 @@ async function handleCheckoutHash({ req, res, log, error }) {
     return fail(res, SIGN_IN, 401);
   }
 
-  const orderId = parseOrderIdFromBody(
+  const parsedRequest = parseCheckoutRequestFromBody(
     req.bodyJson ?? req.bodyText ?? req.body,
   );
-  if (!orderId) {
+  if (!parsedRequest?.orderId) {
     return fail(res, "Invalid order id.", 400);
+  }
+  const { orderId } = parsedRequest;
+  // Security: never trust client-supplied appUrl — always use server-configured APP_URL.
+  // Accepting client appUrl would let attackers redirect buyers to malicious sites after payment.
+  const targetAppUrl = env.appUrl;
+
+  if (
+    !env.merchantId ||
+    !env.merchantSecret.trim() ||
+    !targetAppUrl ||
+    !env.notifyUrl
+  ) {
+    log("payhere-checkout-hash missing Function env (no secrets logged)");
+    return fail(res, NOT_CONFIGURED, 501);
   }
 
   const endpoint = process.env.APPWRITE_FUNCTION_API_ENDPOINT?.trim();
@@ -188,7 +195,7 @@ async function handleCheckoutHash({ req, res, log, error }) {
       items,
       merchantId: env.merchantId,
       merchantSecret: env.merchantSecret,
-      appUrl: env.appUrl,
+      appUrl: targetAppUrl,
       notifyUrl: env.notifyUrl,
       sandbox: true,
       email: String(user.email ?? "").trim(),

@@ -133,13 +133,31 @@ export function getAppwriteProjectId(): string {
 
 /** Public app origin for recovery/verify redirect URLs (must match a Web platform hostname). */
 export function getAppUrl(): string {
+  if (typeof window !== "undefined" && window.location?.origin) {
+    return window.location.origin;
+  }
   const appUrl = process.env.NEXT_PUBLIC_APP_URL?.trim().replace(/\/$/, "");
-  if (!appUrl) {
+  if (appUrl) {
+    return appUrl;
+  }
+  if (process.env.VERCEL_PROJECT_PRODUCTION_URL) {
+    return `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL.trim().replace(/\/$/, "")}`;
+  }
+  if (process.env.VERCEL_URL) {
+    return `https://${process.env.VERCEL_URL.trim().replace(/\/$/, "")}`;
+  }
+  if (process.env.NEXT_PUBLIC_VERCEL_URL) {
+    return `https://${process.env.NEXT_PUBLIC_VERCEL_URL.trim().replace(/\/$/, "")}`;
+  }
+  // In production, APP_URL must be set. Falling back to localhost would cause
+  // email verification links, OAuth callbacks, and recovery links to break.
+  if (process.env.NODE_ENV === "production") {
     throw new Error(
-      "Missing NEXT_PUBLIC_APP_URL. Set it in .env.local (e.g. http://localhost:3000).",
+      "NEXT_PUBLIC_APP_URL must be set in production. " +
+      "Set it to your public domain (e.g. https://marketplace-two-liart.vercel.app).",
     );
   }
-  return appUrl;
+  return "http://localhost:3000";
 }
 
 /** True when public Appwrite env is present (does not check API key). */

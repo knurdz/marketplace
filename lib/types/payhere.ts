@@ -16,12 +16,12 @@ export type PayHereFunctionId = (typeof PAYHERE_FUNCTION_IDS)[number];
 
 export const PAYHERE_CHECKOUT_SANDBOX_URL =
   "https://sandbox.payhere.lk/pay/checkout";
-export const PAYHERE_CHECKOUT_LIVE_URL =
-  "https://www.payhere.lk/pay/checkout";
+export const PAYHERE_CHECKOUT_LIVE_URL = "https://www.payhere.lk/pay/checkout";
 
 /** Request body sent to `payhere-checkout-hash`. */
 export type PayHereCheckoutHashRequest = {
   orderId: string;
+  appUrl?: string;
 };
 
 /** Hidden form fields for POST to PayHere checkout (no secret). */
@@ -51,8 +51,7 @@ export type PayHereCheckoutPayload = {
 };
 
 export type PayHereCheckoutHashResult =
-  | { ok: true; payload: PayHereCheckoutPayload }
-  | { ok: false; error: string };
+  { ok: true; payload: PayHereCheckoutPayload } | { ok: false; error: string };
 
 /**
  * Notify POST field names from PayHere (form-urlencoded).
@@ -103,8 +102,7 @@ export type ConfirmFreeOrderRequest = {
 };
 
 export type ConfirmFreeOrderResult =
-  | { ok: true }
-  | { ok: false; error: string };
+  { ok: true } | { ok: false; error: string };
 
 const FIELD_KEYS = [
   "merchant_id",

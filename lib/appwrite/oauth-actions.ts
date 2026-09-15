@@ -2,11 +2,12 @@
 
 import { redirect, unstable_rethrow } from "next/navigation";
 import {
-  assertRateLimit,
   getClientIp,
   RATE_LIMITS,
 } from "@/lib/security/rate-limit";
+import { assertDurableRateLimit } from "@/lib/security/durable-rate-limit";
 import { logError } from "@/lib/observability/log-error";
+import { getRequestOrigin } from "./server-origin";
 import {
   buildOAuthSuccessUrl,
   createOAuthRedirectUrl,
@@ -28,8 +29,9 @@ function oauthFrom(raw: string): "login" | "register" {
  * Provider secrets stay in Appwrite Console — never in Next.js env.
  */
 export async function startOAuth(formData: FormData): Promise<void> {
+  const origin = await getRequestOrigin();
   const from = oauthFrom(readString(formData, "from"));
-  const failUrl = oauthFailureUrl(from);
+  const failUrl = oauthFailureUrl(from, "oauth", origin);
   const provider = parseOAuthProvider(readString(formData, "provider"));
   if (!provider) {
     redirect(failUrl);
@@ -37,7 +39,7 @@ export async function startOAuth(formData: FormData): Promise<void> {
   }
 
   const ip = await getClientIp();
-  const limit = assertRateLimit({
+  const limit = await assertDurableRateLimit({
     bucket: "auth.login",
     key: `oauth:${ip}`,
     ...RATE_LIMITS.login,
@@ -53,7 +55,7 @@ export async function startOAuth(formData: FormData): Promise<void> {
   try {
     const redirectUrl = await createOAuthRedirectUrl({
       provider,
-      success: buildOAuthSuccessUrl({ next, intent }),
+      success: buildOAuthSuccessUrl({ next, intent, origin }),
       failure: failUrl,
     });
     redirect(redirectUrl);

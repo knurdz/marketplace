@@ -71,11 +71,15 @@ export function EditListingForm({
   useActionToasts(addImagesState);
   useActionToasts(archiveState);
 
-  useEffect(() => {
+  const [prevArchiveSuccess, setPrevArchiveSuccess] = useState(
+    archiveState.success,
+  );
+  if (archiveState.success !== prevArchiveSuccess) {
+    setPrevArchiveSuccess(archiveState.success);
     if (archiveState.success) {
       setShowArchiveConfirm(false);
     }
-  }, [archiveState.success]);
+  }
 
   return (
     <div className="mt-8 space-y-10">
@@ -102,16 +106,23 @@ export function EditListingForm({
                 <div className="relative aspect-square overflow-hidden bg-muted/20">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
-                    src={getFilePreviewUrl(BUCKET_PRODUCT_IMAGES, image.fileId, {
-                      width: 240,
-                      height: 240,
-                    })}
+                    src={getFilePreviewUrl(
+                      BUCKET_PRODUCT_IMAGES,
+                      image.fileId,
+                      {
+                        width: 240,
+                        height: 240,
+                      },
+                    )}
                     alt={image.alt ?? product.title}
                     className="h-full w-full object-cover"
                   />
                 </div>
                 {!isArchived ? (
-                  <DeleteImageButton productId={product.$id} imageId={image.$id} />
+                  <DeleteImageButton
+                    productId={product.$id}
+                    imageId={image.$id}
+                  />
                 ) : null}
               </li>
             ))}
@@ -132,7 +143,8 @@ export function EditListingForm({
                 disabled={addImagesPending}
               />
               <p className="text-xs text-muted-foreground">
-                {images.length} of 8 images used. JPG, PNG, or WebP. Max 5MB each.
+                {images.length} of 8 images used. JPG, PNG, or WebP. Max 5MB
+                each.
               </p>
             </div>
             <Button type="submit" size="sm" disabled={addImagesPending}>
@@ -265,7 +277,12 @@ export function EditListingForm({
             <Button type="submit" disabled={updatePending}>
               {updatePending ? "Saving…" : "Save changes"}
             </Button>
-            <Button variant="outline" type="button" disabled={updatePending} asChild>
+            <Button
+              variant="outline"
+              type="button"
+              disabled={updatePending}
+              asChild
+            >
               <Link href="/seller/listings">Back to listings</Link>
             </Button>
           </div>
@@ -278,10 +295,12 @@ export function EditListingForm({
 
       {!isArchived ? (
         <section className="rounded-md border border-border bg-card px-4 py-4">
-          <h3 className="mt-2 text-lg font-bold tracking-tight">Archive listing</h3>
+          <h3 className="mt-2 text-lg font-bold tracking-tight">
+            Archive listing
+          </h3>
           <p className="mt-2 text-sm text-muted-foreground">
-            Archived listings are hidden from buyers and cannot be edited. This cannot
-            be undone.
+            Archived listings are hidden from buyers and cannot be edited. This
+            cannot be undone.
           </p>
 
           {archiveState.error ? (
@@ -309,7 +328,11 @@ export function EditListingForm({
                 Confirm archive for &ldquo;{product.title}&rdquo;?
               </p>
               <div className="flex flex-wrap gap-2">
-                <Button type="submit" variant="outline" disabled={archivePending}>
+                <Button
+                  type="submit"
+                  variant="outline"
+                  disabled={archivePending}
+                >
                   {archivePending ? "Archiving…" : "Confirm archive"}
                 </Button>
                 <Button
@@ -347,7 +370,13 @@ function DeleteImageButton({
     <form action={formAction}>
       <input type="hidden" name="productId" value={productId} />
       <input type="hidden" name="imageId" value={imageId} />
-      <Button type="submit" variant="outline" size="sm" className="w-full" disabled={pending}>
+      <Button
+        type="submit"
+        variant="outline"
+        size="sm"
+        className="w-full"
+        disabled={pending}
+      >
         {pending ? "Removing…" : "Remove"}
       </Button>
     </form>

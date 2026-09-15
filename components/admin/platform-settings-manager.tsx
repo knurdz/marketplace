@@ -25,7 +25,8 @@ const KEY_LABELS: Record<string, string> = {
   [PLATFORM_SETTING_KEYS.siteName]: "Site name",
   [PLATFORM_SETTING_KEYS.siteSupportEmail]: "Support email",
   [PLATFORM_SETTING_KEYS.checkoutCurrencyDefault]: "Default currency",
-  [PLATFORM_SETTING_KEYS.checkoutBankInstructions]: "Bank transfer instructions",
+  [PLATFORM_SETTING_KEYS.checkoutBankInstructions]:
+    "Bank transfer instructions",
   [PLATFORM_SETTING_KEYS.checkoutSandboxModeDisplay]: "Sandbox mode banner",
   [PLATFORM_SETTING_KEYS.checkoutFeePercent]: "Platform fee (%)",
   [PLATFORM_SETTING_KEYS.featuresFreeListings]: "Free listings enabled",
@@ -84,11 +85,13 @@ function SettingFieldForm({ item }: { item: PlatformSettingListItem }) {
   const isBankInstructions =
     item.key === PLATFORM_SETTING_KEYS.checkoutBankInstructions;
 
+  const [prevValue, setPrevValue] = useState(currentValue);
   const [boolChecked, setBoolChecked] = useState(currentValue === "true");
 
-  useEffect(() => {
+  if (prevValue !== currentValue) {
+    setPrevValue(currentValue);
     setBoolChecked(currentValue === "true");
-  }, [currentValue]);
+  }
 
   return (
     <form
@@ -111,7 +114,11 @@ function SettingFieldForm({ item }: { item: PlatformSettingListItem }) {
       <div className="mt-4">
         {isBoolean ? (
           <div className="flex items-center gap-3">
-            <input type="hidden" name="value" value={boolChecked ? "true" : "false"} />
+            <input
+              type="hidden"
+              name="value"
+              value={boolChecked ? "true" : "false"}
+            />
             <input
               id={`setting-${item.key}`}
               type="checkbox"
@@ -171,7 +178,9 @@ type PlatformSettingsManagerProps = {
   items: PlatformSettingListItem[];
 };
 
-export function PlatformSettingsManager({ items }: PlatformSettingsManagerProps) {
+export function PlatformSettingsManager({
+  items,
+}: PlatformSettingsManagerProps) {
   return (
     <div className="mt-10 space-y-4">
       {items.map((item) => (
