@@ -146,6 +146,11 @@ function objectHasSecretKey(value) {
 }
 
 export function parseOrderIdFromBody(raw) {
+  const req = parseCheckoutRequestFromBody(raw);
+  return req?.orderId ?? null;
+}
+
+export function parseCheckoutRequestFromBody(raw) {
   let body = raw;
   if (typeof body === "string") {
     const trimmed = body.trim();
@@ -159,5 +164,9 @@ export function parseOrderIdFromBody(raw) {
   if (!body || typeof body !== "object") return null;
   const orderId =
     typeof body.orderId === "string" ? body.orderId.trim().slice(0, 36) : "";
-  return orderId.length > 0 ? orderId : null;
+  if (!orderId) return null;
+
+  // Security: appUrl is intentionally NOT read from the client body.
+  // All redirect URLs must use the server-configured APP_URL env var.
+  return { orderId };
 }

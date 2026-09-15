@@ -10,9 +10,7 @@ import { ROLE_LABELS, postLoginPath, safeNextPath } from "./roles";
 import { createAdminClient } from "./server";
 import { logError } from "@/lib/observability/log-error";
 import type { OAuthErrorCode } from "./oauth-errors";
-import {
-  type OAuthProviderId,
-} from "./oauth-providers";
+import { type OAuthProviderId } from "./oauth-providers";
 import { isSellerStatus, type SellerStatus } from "@/lib/types/status";
 
 export type { OAuthProviderId } from "./oauth-providers";
@@ -47,23 +45,29 @@ export type OAuthCompleteFail = {
 
 export type OAuthCompleteResult = OAuthCompleteOk | OAuthCompleteFail;
 
-export function oauthFailPath(intent: string | null | undefined): "/login" | "/register" {
+export function oauthFailPath(
+  intent: string | null | undefined,
+): "/login" | "/register" {
   return intent === "seller" ? "/register" : "/login";
 }
 
 export function oauthFailureUrl(
   from: "login" | "register",
   error: OAuthErrorCode = "oauth",
+  origin?: string,
 ): string {
   const path = from === "register" ? "/register" : "/login";
-  return `${getAppUrl()}${path}?error=${error}`;
+  const base = (origin || getAppUrl()).replace(/\/$/, "");
+  return `${base}${path}?error=${error}`;
 }
 
 export function buildOAuthSuccessUrl(params: {
   next?: string | null;
   intent?: string | null;
+  origin?: string;
 }): string {
-  const success = new URL(`${getAppUrl()}/oauth/callback`);
+  const base = (params.origin || getAppUrl()).replace(/\/$/, "");
+  const success = new URL(`${base}/oauth/callback`);
   const next = safeNextPath(params.next ?? undefined);
   if (next) success.searchParams.set("next", next);
   if (params.intent === "seller") success.searchParams.set("intent", "seller");
@@ -100,7 +104,9 @@ async function profileRowExists(userId: string): Promise<boolean> {
   }
 }
 
-async function getSellerStatusForUser(userId: string): Promise<SellerStatus | null> {
+async function getSellerStatusForUser(
+  userId: string,
+): Promise<SellerStatus | null> {
   const { tables } = await createAdminClient();
   const result = await tables.listRows({
     databaseId: DATABASE_ID,
@@ -169,7 +175,10 @@ export async function completeOAuthLogin(params: {
 
     if (user.status === false) {
       try {
-        await users.deleteSession({ userId: session.userId, sessionId: session.$id });
+        await users.deleteSession({
+          userId: session.userId,
+          sessionId: session.$id,
+        });
       } catch (deleteError) {
         logError("auth.oauth.disabled-session", deleteError, {
           userId: session.userId,

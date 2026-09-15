@@ -3,14 +3,14 @@
 import { redirect, unstable_rethrow } from "next/navigation";
 import { AppwriteException, ID, Query } from "node-appwrite";
 import {
-  assertRateLimit,
-  assertRateLimits,
   getClientIp,
   normalizeEmailKey,
   RATE_LIMIT_MESSAGE,
   RATE_LIMITS,
 } from "@/lib/security/rate-limit";
-import { DATABASE_ID, TABLE_PROFILES, TABLE_SELLER_PROFILES, getAppUrl } from "./config";
+import { assertDurableRateLimit } from "@/lib/security/durable-rate-limit";
+import { DATABASE_ID, TABLE_PROFILES, TABLE_SELLER_PROFILES } from "./config";
+import { getRequestOrigin } from "./server-origin";
 import { createProfileForUser } from "./profiles";
 import { resolveHomePath, resolvePostLoginPath } from "./home-path";
 import { ROLE_LABELS } from "./roles";
@@ -143,7 +143,7 @@ export async function signUpWithEmail(
   }
 
   const ip = await getClientIp();
-  const registerLimit = assertRateLimit({
+  const registerLimit = await assertDurableRateLimit({
     bucket: "auth.register",
     key: `ip:${ip}`,
     ...RATE_LIMITS.register,
@@ -205,8 +205,9 @@ export async function signUpWithEmail(
 
     try {
       const { account: sessionAccount } = await createSessionClient();
+      const origin = await getRequestOrigin();
       await sessionAccount.createVerification({
-        url: `${getAppUrl()}/verify-email`,
+        url: `${origin}/verify-email`,
       });
     } catch (verifyError) {
       unstable_rethrow(verifyError);
@@ -238,19 +239,20 @@ export async function signInWithEmail(
 
   const ip = await getClientIp();
   const emailKey = normalizeEmailKey(email);
-  const loginLimit = assertRateLimits([
-    {
-      bucket: "auth.login",
-      key: `email:${emailKey}`,
-      ...RATE_LIMITS.login,
-    },
-    {
-      bucket: "auth.login",
-      key: `ip:${ip}`,
-      ...RATE_LIMITS.login,
-    },
-  ]);
-  if (!loginLimit.ok) {
+  const emailLimit = await assertDurableRateLimit({
+    bucket: "auth.login",
+    key: `email:${emailKey}`,
+    ...RATE_LIMITS.login,
+  });
+  if (!emailLimit.ok) {
+    return { error: RATE_LIMIT_MESSAGE };
+  }
+  const ipLimit = await assertDurableRateLimit({
+    bucket: "auth.login",
+    key: `ip:${ip}`,
+    ...RATE_LIMITS.login,
+  });
+  if (!ipLimit.ok) {
     return { error: RATE_LIMIT_MESSAGE };
   }
 

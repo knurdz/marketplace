@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { SellerOrderListRow } from "@/components/seller/seller-order-list-row";
 import {
   DataTableEmpty,
@@ -14,10 +13,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import {
-  listSellerOrders,
-  SELLER_PENDING_STATUSES,
-} from "@/lib/services";
+import { listSellerOrders, SELLER_PENDING_STATUSES } from "@/lib/services";
 
 type SellerOrdersPageProps = {
   searchParams: Promise<{ filter?: string; cursor?: string }>;

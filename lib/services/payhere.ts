@@ -11,6 +11,7 @@ import {
   FUNCTION_PAYHERE_CHECKOUT_HASH,
   hasAppwritePublicConfig,
 } from "@/lib/appwrite/config";
+import { getRequestOrigin } from "@/lib/appwrite/server-origin";
 import { createSessionClient } from "@/lib/appwrite/server";
 import { getLoggedInUser } from "@/lib/appwrite/session";
 import { isPayHereCheckoutEnabled } from "@/lib/services/platform-settings";
@@ -100,7 +101,11 @@ export async function requestPayHereCheckout(
     return { ok: false, error: RATE_LIMIT_MESSAGE };
   }
 
-  const body: PayHereCheckoutHashRequest = { orderId: normalized };
+  const origin = await getRequestOrigin();
+  const body: PayHereCheckoutHashRequest = {
+    orderId: normalized,
+    appUrl: origin,
+  };
 
   try {
     const { functions } = await createSessionClient();

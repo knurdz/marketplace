@@ -2,6 +2,8 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import { ROLE_LABELS, userHasLabel } from "@/lib/appwrite/roles";
+import { getLoggedInUser } from "@/lib/appwrite/session";
 import {
   addOwnProductImagesCore,
   archiveOwnProductCore,
@@ -10,6 +12,15 @@ import {
   submitListingForReviewCore,
   updateOwnProductCore,
 } from "@/lib/services/seller-listings";
+
+async function assertSeller(): Promise<{ ok: true } | { ok: false; error: string }> {
+  const user = await getLoggedInUser();
+  if (!user) return { ok: false, error: "You must be signed in." };
+  if (!userHasLabel(user, ROLE_LABELS.seller)) {
+    return { ok: false, error: "Seller access is required." };
+  }
+  return { ok: true };
+}
 
 export type CreateListingActionState = {
   error?: string;
@@ -75,6 +86,9 @@ export async function createDraftListing(
   _prev: CreateListingActionState,
   formData: FormData,
 ): Promise<CreateListingActionState> {
+  const auth = await assertSeller();
+  if (!auth.ok) return { error: auth.error };
+
   const intent = readCreateIntent(formData);
   const result = await createDraftProductCore(
     readListingFields(formData),
@@ -104,6 +118,9 @@ export async function submitListingForReview(
   _prev: SubmitListingActionState,
   formData: FormData,
 ): Promise<SubmitListingActionState> {
+  const auth = await assertSeller();
+  if (!auth.ok) return { error: auth.error };
+
   const productId = readString(formData, "productId");
   if (!productId) {
     return { error: "Missing listing." };
@@ -124,6 +141,9 @@ export async function updateOwnListing(
   _prev: EditListingActionState,
   formData: FormData,
 ): Promise<EditListingActionState> {
+  const auth = await assertSeller();
+  if (!auth.ok) return { error: auth.error };
+
   const productId = readString(formData, "productId");
   if (!productId) {
     return { error: "Missing listing." };
@@ -142,6 +162,9 @@ export async function addOwnListingImages(
   _prev: EditListingActionState,
   formData: FormData,
 ): Promise<EditListingActionState> {
+  const auth = await assertSeller();
+  if (!auth.ok) return { error: auth.error };
+
   const productId = readString(formData, "productId");
   if (!productId) {
     return { error: "Missing listing." };
@@ -160,6 +183,9 @@ export async function deleteOwnListingImage(
   _prev: EditListingActionState,
   formData: FormData,
 ): Promise<EditListingActionState> {
+  const auth = await assertSeller();
+  if (!auth.ok) return { error: auth.error };
+
   const productId = readString(formData, "productId");
   const imageId = readString(formData, "imageId");
   if (!productId || !imageId) {
@@ -179,6 +205,9 @@ export async function archiveOwnListing(
   _prev: EditListingActionState,
   formData: FormData,
 ): Promise<EditListingActionState> {
+  const auth = await assertSeller();
+  if (!auth.ok) return { error: auth.error };
+
   const productId = readString(formData, "productId");
   if (!productId) {
     return { error: "Missing listing." };

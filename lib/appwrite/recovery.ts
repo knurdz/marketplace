@@ -3,14 +3,13 @@
 import { redirect, unstable_rethrow } from "next/navigation";
 import { AppwriteException } from "node-appwrite";
 import {
-  assertRateLimit,
-  assertRateLimits,
   getClientIp,
   normalizeEmailKey,
   RATE_LIMIT_MESSAGE,
   RATE_LIMITS,
 } from "@/lib/security/rate-limit";
-import { getAppUrl } from "./config";
+import { assertDurableRateLimit } from "@/lib/security/durable-rate-limit";
+import { getRequestOrigin } from "./server-origin";
 import { createPublicClient, createSessionClient } from "./server";
 import { getLoggedInUser } from "./session";
 
@@ -60,27 +59,29 @@ export async function requestPasswordRecovery(
 
   const ip = await getClientIp();
   const emailKey = normalizeEmailKey(email);
-  const recoveryLimit = assertRateLimits([
-    {
-      bucket: "auth.recovery",
-      key: `email:${emailKey}`,
-      ...RATE_LIMITS.recovery,
-    },
-    {
-      bucket: "auth.recovery",
-      key: `ip:${ip}`,
-      ...RATE_LIMITS.recovery,
-    },
-  ]);
-  if (!recoveryLimit.ok) {
+  const emailLimit = await assertDurableRateLimit({
+    bucket: "auth.recovery",
+    key: `email:${emailKey}`,
+    ...RATE_LIMITS.recovery,
+  });
+  if (!emailLimit.ok) {
+    return { success: RECOVERY_SUCCESS };
+  }
+  const ipLimit = await assertDurableRateLimit({
+    bucket: "auth.recovery",
+    key: `ip:${ip}`,
+    ...RATE_LIMITS.recovery,
+  });
+  if (!ipLimit.ok) {
     return { success: RECOVERY_SUCCESS };
   }
 
   try {
     const { account } = await createPublicClient();
+    const origin = await getRequestOrigin();
     await account.createRecovery({
       email,
-      url: `${getAppUrl()}/reset-password`,
+      url: `${origin}/reset-password`,
     });
   } catch (error) {
     unstable_rethrow(error);
@@ -119,7 +120,7 @@ export async function completePasswordRecovery(
   }
 
   const ip = await getClientIp();
-  const completeLimit = assertRateLimit({
+  const completeLimit = await assertDurableRateLimit({
     bucket: "auth.recovery_complete",
     key: `ip:${ip}`,
     ...RATE_LIMITS.recoveryComplete,
@@ -155,7 +156,7 @@ export async function requestEmailVerification(
     return { error: "You must be signed in to verify your email." };
   }
 
-  const verifyLimit = assertRateLimit({
+  const verifyLimit = await assertDurableRateLimit({
     bucket: "auth.verify_resend",
     key: `user:${user.$id}`,
     ...RATE_LIMITS.verifyResend,
@@ -166,8 +167,9 @@ export async function requestEmailVerification(
 
   try {
     const { account } = await createSessionClient();
+    const origin = await getRequestOrigin();
     await account.createVerification({
-      url: `${getAppUrl()}/verify-email`,
+      url: `${origin}/verify-email`,
     });
   } catch (error) {
     unstable_rethrow(error);
@@ -194,7 +196,7 @@ export async function completeEmailVerification(
   }
 
   const ip = await getClientIp();
-  const verifyLimit = assertRateLimit({
+  const verifyLimit = await assertDurableRateLimit({
     bucket: "auth.verify_complete",
     key: `ip:${ip}`,
     ...RATE_LIMITS.verifyComplete,

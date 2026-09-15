@@ -37,12 +37,21 @@ export async function GET(_request: Request, { params }: RouteParams) {
         ? meta.mimeType
         : "application/octet-stream";
 
+    // Sanitize filename to prevent Response Header Injection:
+    // strip quotes, newlines, backslashes, and non-printable characters.
+    const rawName = meta.name || "bank-slip";
+    const safeName = String(rawName)
+      .replace(/[\r\n\0]/g, "")
+      .replace(/["\\/]/g, "_")
+      .replace(/[^\x20-\x7E]/g, "_")
+      .slice(0, 200) || "bank-slip";
+
     return new NextResponse(bytes, {
       status: 200,
       headers: {
         "Content-Type": mimeType,
         "Cache-Control": "private, no-store",
-        "Content-Disposition": `inline; filename="${meta.name || "bank-slip"}"`,
+        "Content-Disposition": `inline; filename="${safeName}"`,
       },
     });
   } catch {
