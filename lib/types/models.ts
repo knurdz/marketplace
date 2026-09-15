@@ -133,6 +133,7 @@ export type Order = {
   paymentMethod: PaymentMethod;
   couponCode: string | null;
   discountAmount: number;
+  $createdAt?: string;
 };
 
 export type OrderItem = {
