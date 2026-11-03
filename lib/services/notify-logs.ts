@@ -1,4 +1,4 @@
-import { AppwriteException, Query } from "node-appwrite";
+import { AppwriteException, Query } from "@/lib/db/appwrite-shim";
 import {
   DATABASE_ID,
   hasAppwritePublicConfig,
@@ -52,7 +52,7 @@ export type ListNotifyLogsResult = {
 
 function adminSdkAvailable(): boolean {
   return (
-    hasAppwritePublicConfig() && Boolean(process.env.APPWRITE_API_KEY?.trim())
+    hasAppwritePublicConfig() && Boolean(process.env.DATABASE_URL?.trim())
   );
 }
 
@@ -237,38 +237,5 @@ export async function listNotifyLogs(opts?: {
   const fromTable = await listNotifyLogsFromTable({ view, limit, cursor });
   if (fromTable) return fromTable;
 
-  try {
-    const { functions } = await createAdminClient();
-    const queries = [Query.orderDesc("$createdAt"), Query.limit(limit)];
-    if (cursor) {
-      queries.push(Query.cursorAfter(cursor));
-    }
-
-    const result = await functions.listExecutions({
-      functionId: FUNCTION_PAYHERE_NOTIFY,
-      queries,
-      total: false,
-    });
-
-    const mapped = result.executions.map((execution) =>
-      asNotifyLogEntry(execution),
-    );
-    const entries =
-      view === "issues" ? mapped.filter((row) => row.isIssue) : mapped;
-    const last = mapped.at(-1);
-    const nextCursor =
-      result.executions.length === limit && last ? last.$id : null;
-
-    return {
-      source: mapped.length === 0 && !cursor ? "empty" : "ready",
-      entries,
-      nextCursor,
-    };
-  } catch (err) {
-    const code = appwriteCode(err);
-    if (code === 404) {
-      return { source: "not_deployed", entries: [], nextCursor: null };
-    }
-    return { source: "unavailable", entries: [], nextCursor: null };
-  }
+  return { source: "empty", entries: [], nextCursor: null };
 }

@@ -1,4 +1,4 @@
-import { ID, Permission, Query, Role } from "node-appwrite";
+import { ID, Permission, Query, Role } from "@/lib/db/appwrite-shim";
 import {
   DATABASE_ID,
   TABLE_MESSAGES,
@@ -177,7 +177,7 @@ export async function getOrCreateBuyerThread(
       },
       permissions: threadPermissions(order.buyerId, order.sellerId),
     });
-    return { ok: true, threadId: row.$id };
+    return { ok: true, threadId: String(row.$id) };
   } catch (error) {
     logError("threads.createBuyer", error, { orderId: order.$id });
     return { ok: false, error: "Could not start conversation." };
@@ -226,7 +226,7 @@ export async function getOrCreateSellerThread(
       },
       permissions: threadPermissions(order.buyerId, order.sellerId),
     });
-    return { ok: true, threadId: row.$id };
+    return { ok: true, threadId: String(row.$id) };
   } catch (error) {
     logError("threads.createSeller", error, { orderId: order.$id });
     return { ok: false, error: "Could not start conversation." };
@@ -412,7 +412,7 @@ export async function sendThreadMessage(
       portal,
     });
 
-    return { ok: true, messageId: messageRow.$id };
+    return { ok: true, messageId: String(messageRow.$id) };
   } catch (error) {
     logError("threads.send", error, { threadId });
     return { ok: false, error: "Could not send message." };

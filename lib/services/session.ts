@@ -1,4 +1,4 @@
-import type { Models } from "node-appwrite";
+import type { Models } from "@/lib/db/appwrite-shim";
 import { getLoggedInUser } from "@/lib/appwrite/session";
 
 /**

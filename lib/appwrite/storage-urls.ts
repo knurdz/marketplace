@@ -1,31 +1,20 @@
-import {
-  BUCKET_AVATARS,
-  getAppwriteEndpoint,
-  getAppwriteProjectId,
-} from "./config";
+import { BUCKET_AVATARS } from "./config";
+import { getAppUrl } from "@/lib/config/app";
 
-/** Public view URL (no secret). Safe for client when file has read(any). */
+/** Public file URL served by Next.js disk storage. */
 export function getFileViewUrl(bucketId: string, fileId: string): string {
-  const endpoint = getAppwriteEndpoint().replace(/\/$/, "");
-  const projectId = getAppwriteProjectId();
-  return `${endpoint}/storage/buckets/${bucketId}/files/${fileId}/view?project=${encodeURIComponent(projectId)}`;
+  const base = getAppUrl().replace(/\/$/, "");
+  return `${base}/api/files/${encodeURIComponent(bucketId)}/${encodeURIComponent(fileId)}`;
 }
 
-/** Public preview URL for images (bucket must allow transformations). */
 export function getFilePreviewUrl(
   bucketId: string,
   fileId: string,
-  opts?: { width?: number; height?: number },
+  _opts?: { width?: number; height?: number },
 ): string {
-  const endpoint = getAppwriteEndpoint().replace(/\/$/, "");
-  const projectId = getAppwriteProjectId();
-  const params = new URLSearchParams({ project: projectId });
-  if (opts?.width) params.set("width", String(opts.width));
-  if (opts?.height) params.set("height", String(opts.height));
-  return `${endpoint}/storage/buckets/${bucketId}/files/${fileId}/preview?${params.toString()}`;
+  return getFileViewUrl(bucketId, fileId);
 }
 
-/** Public avatar preview URL for a profile (null if no avatar). */
 export function getAvatarPreviewUrl(
   avatarFileId: string | null,
 ): string | null {
@@ -41,7 +30,6 @@ export function getAvatarViewUrl(avatarFileId: string | null): string | null {
   return getFileViewUrl(BUCKET_AVATARS, avatarFileId);
 }
 
-/** Public shop banner preview (avatars bucket, read(any)). */
 export function getShopBannerPreviewUrl(
   bannerFileId: string | null,
 ): string | null {

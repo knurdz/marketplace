@@ -1,4 +1,4 @@
-import { AppwriteException, ID, Permission, Role } from "node-appwrite";
+import { AppwriteException, ID, Permission, Role } from "@/lib/db/appwrite-shim";
 import {
   DATABASE_ID,
   TABLE_REPORTS,

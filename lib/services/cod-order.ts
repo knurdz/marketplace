@@ -6,7 +6,7 @@
  * and leaves payment `pending` until the seller collects cash on delivery.
  */
 
-import { Query } from "node-appwrite";
+import { Query } from "@/lib/db/appwrite-shim";
 import {
   DATABASE_ID,
   TABLE_ORDER_ITEMS,
@@ -46,7 +46,7 @@ export type ConfirmCodOrderResult =
 
 function adminSdkAvailable(): boolean {
   return (
-    hasAppwritePublicConfig() && Boolean(process.env.APPWRITE_API_KEY?.trim())
+    hasAppwritePublicConfig() && Boolean(process.env.DATABASE_URL?.trim())
   );
 }
 

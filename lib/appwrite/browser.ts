@@ -1,22 +1,8 @@
-import { Account, Client } from "appwrite";
-import { getAppwriteEndpoint, getAppwriteProjectId } from "./config";
-
-/**
- * Browser / Client Component Appwrite client.
- * Uses only endpoint + project id — never the API key.
- * Lazy so importing this module does not throw when env is unset at build time.
- */
-let client: Client | null = null;
-
-export function getBrowserClient(): Client {
-  if (!client) {
-    client = new Client()
-      .setEndpoint(getAppwriteEndpoint())
-      .setProject(getAppwriteProjectId());
-  }
-  return client;
+/** Browser Appwrite client removed — auth uses Better Auth + server actions. */
+export function getBrowserClient(): never {
+  throw new Error("Browser Appwrite client is not available after MariaDB cutover.");
 }
 
-export function getBrowserAccount(): Account {
-  return new Account(getBrowserClient());
+export function getBrowserAccount(): never {
+  throw new Error("Browser Appwrite account is not available after MariaDB cutover.");
 }

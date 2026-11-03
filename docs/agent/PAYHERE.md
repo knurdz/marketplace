@@ -27,8 +27,8 @@ Shared TypeScript: [`lib/types/payhere.ts`](../../lib/types/payhere.ts) · clien
 
 | ID | Role | Caller |
 |----|------|--------|
-| `payhere-checkout-hash` | Build checkout form fields + MD5 `hash` from **DB** order/payment | Next server via session (`requestPayHereCheckout`) |
-| `payhere-notify` | Verify `md5sig`, mark payment/order paid **once**, adjust stock once | **PayHere only** (HTTP `notify_url`) — never from browser |
+| `lib/payhere/checkout-hash.ts` | Build checkout form fields + MD5 `hash` from **DB** order/payment | `requestPayHereCheckout` (in-process) |
+| `POST /api/payhere/notify` | Verify `md5sig`, mark payment/order paid **once**, adjust stock once | **PayHere only** (`PAYHERE_NOTIFY_URL`) — never from browser |
 
 Constants: `FUNCTION_PAYHERE_CHECKOUT_HASH`, `FUNCTION_PAYHERE_NOTIFY` in `lib/types/payhere.ts` (re-exported from `lib/appwrite/config.ts`).
 

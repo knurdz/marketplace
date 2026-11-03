@@ -1,4 +1,4 @@
-import type { Models } from "node-appwrite";
+import type { SessionUser } from "./session";
 
 /** Plain session user safe to pass across the React server/client boundary. */
 export type SessionUserView = {
@@ -7,9 +7,7 @@ export type SessionUserView = {
   labels: string[];
 };
 
-export function toSessionUserView(
-  user: Models.User<Models.Preferences>,
-): SessionUserView {
+export function toSessionUserView(user: SessionUser): SessionUserView {
   return {
     email: user.email,
     name: user.name ?? "",

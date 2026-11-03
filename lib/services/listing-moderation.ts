@@ -1,4 +1,4 @@
-import { ID, Query } from "node-appwrite";
+import { ID, Query } from "@/lib/db/appwrite-shim";
 import {
   DATABASE_ID,
   TABLE_AUDIT_LOGS,
@@ -48,7 +48,7 @@ async function writeAuditLog(params: {
 }
 
 function adminSdkAvailable(): boolean {
-  return hasAppwritePublicConfig() && Boolean(process.env.APPWRITE_API_KEY?.trim());
+  return hasAppwritePublicConfig() && Boolean(process.env.DATABASE_URL?.trim());
 }
 
 async function loadProduct(

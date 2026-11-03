@@ -1,0 +1,21 @@
+services:
+  mariadb:
+    image: mariadb:11
+    restart: unless-stopped
+    ports:
+      - "3306:3306"
+    environment:
+      MARIADB_ROOT_PASSWORD: knurdz_root
+      MARIADB_DATABASE: marketplace
+      MARIADB_USER: knurdz
+      MARIADB_PASSWORD: knurdz_dev
+    volumes:
+      - knurdz_mariadb_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  knurdz_mariadb_data:

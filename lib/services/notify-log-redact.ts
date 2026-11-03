@@ -92,6 +92,98 @@ const ISSUE_OUTCOMES = new Set<NotifyLogOutcome>([
   "error",
 ]);
 
+const NOTIFY_PAYLOAD_ALLOWLIST = [
+  "merchant_id",
+  "order_id",
+  "payment_id",
+  "payhere_amount",
+  "payhere_currency",
+  "status_code",
+  "method",
+  "status_message",
+  "custom_1",
+  "custom_2",
+] as const;
+
+function sanitizeNotifyPayload(posted: Record<string, string>) {
+  const out: Record<string, string> = {};
+  for (const key of NOTIFY_PAYLOAD_ALLOWLIST) {
+    const value = posted[key];
+    if (typeof value === "string" && value.trim()) {
+      out[key] = value.trim().slice(0, 255);
+    }
+  }
+  return out;
+}
+
+function compactString(value: unknown, max: number): string | null {
+  if (value == null) return null;
+  const trimmed = String(value).trim();
+  if (!trimmed) return null;
+  return trimmed.slice(0, max);
+}
+
+export function notifyLogRowFromDecision(params: {
+  posted?: Record<string, string>;
+  decision?: { action?: string; reason?: string; payherePaymentId?: string };
+  kind?: string;
+  reason?: string;
+  httpStatus?: number;
+  paymentStatus?: string;
+}) {
+  const posted =
+    params?.posted && typeof params.posted === "object" ? params.posted : {};
+  const decision = params?.decision;
+  const kind = String(params?.kind ?? "").trim();
+  let outcome: NotifyLogOutcome = "unknown";
+  let reason = compactString(params?.reason, 64);
+
+  if (kind === "ignored") {
+    outcome = "ignored";
+    reason = reason ?? "bad_sig";
+  } else if (kind === "config_error") {
+    outcome = "config_error";
+    reason = reason ?? "missing_env";
+  } else if (decision?.action === "reject") {
+    outcome = "rejected";
+    reason = reason ?? compactString(decision.reason, 64);
+  } else if (decision?.action === "mark_failed") {
+    outcome = "payment_failed";
+  } else if (decision?.action === "mark_refunded") {
+    outcome = "refunded";
+  } else if (decision?.action === "settle") {
+    outcome = "settled";
+  } else if (decision?.action === "noop") {
+    outcome = params?.paymentStatus === "paid" ? "already_paid" : "noop";
+  }
+
+  const sanitizedPayload = JSON.stringify(sanitizeNotifyPayload(posted)).slice(
+    0,
+    2000,
+  );
+  const httpStatus = Number(params?.httpStatus);
+  const row: Record<string, unknown> = {
+    outcome: outcome.slice(0, 32),
+    httpStatus: Number.isFinite(httpStatus) ? httpStatus : 200,
+    sanitizedPayload,
+  };
+
+  const orderId = compactString(posted.order_id, 36);
+  if (orderId) row.orderId = orderId;
+
+  const payherePaymentId =
+    compactString(decision?.payherePaymentId, 64) ??
+    compactString(posted.payment_id, 64);
+  if (payherePaymentId) row.payherePaymentId = payherePaymentId;
+
+  const statusCode = compactString(posted.status_code, 8);
+  if (statusCode) row.statusCode = statusCode;
+
+  if (reason) row.reason = reason;
+
+  return row;
+}
+
 export function isNotifyLogIssue(
   outcome: NotifyLogOutcome,
   executionStatus: string,

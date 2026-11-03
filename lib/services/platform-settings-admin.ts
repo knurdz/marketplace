@@ -1,4 +1,4 @@
-import { ID, Query } from "node-appwrite";
+import { ID, Query } from "@/lib/db/appwrite-shim";
 import {
   DATABASE_ID,
   TABLE_AUDIT_LOGS,

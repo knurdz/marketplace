@@ -1,13 +1,16 @@
-import type { Models } from "node-appwrite";
-import type { SellerStatus } from "@/lib/types";
-import { getOwnSellerProfile } from "@/lib/services/seller-application";
+import { eq } from "drizzle-orm";
+import type { Models } from "@/lib/db/appwrite-shim";
+import { getDb } from "@/lib/db/client";
+import { sellerProfiles } from "@/lib/db/schema";
+import { isSellerStatus, type SellerStatus } from "@/lib/types/status";
 import { homePathForUser, postLoginPath, userHasLabel } from "./roles";
 
 type LabeledUser = { $id?: string; labels?: string[] };
 
 /**
- * Pending seller status is stored on seller_profiles, not Auth labels.
- * Skip the extra read when labels already decide the home path.
+ * Pending seller status is stored on seller_profiles, not role labels.
+ * Looked up by the caller's verified user id (not the request cookie), so it
+ * also works right after sign-in, before the new session cookie is readable.
  */
 export async function loadSellerStatus(
   user: LabeledUser,
@@ -15,8 +18,18 @@ export async function loadSellerStatus(
   if (userHasLabel(user, "admin") || userHasLabel(user, "seller")) {
     return null;
   }
-  const profile = await getOwnSellerProfile();
-  return profile?.status ?? null;
+  if (!user.$id) return null;
+  try {
+    const rows = await getDb()
+      .select({ status: sellerProfiles.status })
+      .from(sellerProfiles)
+      .where(eq(sellerProfiles.userId, user.$id))
+      .limit(1);
+    const status = rows[0]?.status;
+    return isSellerStatus(status) ? status : null;
+  } catch {
+    return null;
+  }
 }
 
 export async function resolveHomePath(

@@ -4,7 +4,7 @@
 > Agents: after each implementation, check off every **relevant** box below for your change.  
 > Detailed step plans + agent how-to: `[docs/agent/](./docs/agent/)` (start with `docs/agent/INDEX.md`).
 
-**Stack:** Next.js · Appwrite · PayHere sandbox · bank transfer · free selling  
+**Stack:** Next.js · MariaDB (Drizzle) · Better Auth · PayHere sandbox · bank transfer · free selling  
 **Roles:** Admin · Seller · Buyer
 
 **Sources merged:** prior Knurdz analysis + team “Full Feature Analysis” report (keep stronger options; no duplicate tasks).

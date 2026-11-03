@@ -1,5 +1,15 @@
 import type { NextConfig } from "next";
 
+// React dev tooling needs eval(); production never does, so keep it out of the prod CSP.
+const isDev = process.env.NODE_ENV !== "production";
+const scriptSrc = [
+  "'self'",
+  "'unsafe-inline'",
+  ...(isDev ? ["'unsafe-eval'"] : []),
+  "https://sandbox.payhere.lk",
+  "https://www.payhere.lk",
+].join(" ");
+
 const securityHeaders = [
   {
     key: "Strict-Transport-Security",
@@ -27,7 +37,7 @@ const securityHeaders = [
     key: "Content-Security-Policy",
     value: [
       "default-src 'self'",
-      "script-src 'self' 'unsafe-inline' https://sandbox.payhere.lk https://www.payhere.lk",
+      `script-src ${scriptSrc}`,
       "style-src 'self' 'unsafe-inline'",
       "img-src 'self' data: blob: https://sgp.cloud.appwrite.io https://*.cloud.appwrite.io",
       "font-src 'self'",
