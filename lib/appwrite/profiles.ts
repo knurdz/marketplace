@@ -1,6 +1,6 @@
 "use server";
 
-import { AppwriteException, Permission, Role } from "node-appwrite";
+import { AppwriteException, Permission, Role } from "@/lib/db/appwrite-shim";
 import { revalidatePath } from "next/cache";
 import { BUCKET_AVATARS, DATABASE_ID, TABLE_PROFILES } from "./config";
 import { createAdminClient, createSessionClient } from "./server";

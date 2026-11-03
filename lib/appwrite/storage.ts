@@ -1,5 +1,6 @@
-import { AppwriteException, ID, Permission, Role } from "node-appwrite";
-import { InputFile } from "node-appwrite/file";
+import { AppwriteException } from "@/lib/db/appwrite-shim";
+import { newId } from "@/lib/db/client";
+import { putStoredFile } from "@/lib/storage/disk";
 import {
   assertRateLimit,
   RATE_LIMIT_MESSAGE,
@@ -17,7 +18,7 @@ import {
   IMAGE_MIME_TYPES,
   PRODUCT_IMAGE_MAX_BYTES,
 } from "./config";
-import { createAdminClient, createSessionClient } from "./server";
+import { deleteStoredFile } from "@/lib/storage/disk";
 import { getLoggedInUser } from "./session";
 
 export type UploadValidationError = {
@@ -39,10 +40,6 @@ function extensionOf(filename: string): string {
   return parts[parts.length - 1] ?? "";
 }
 
-/**
- * Validate a FormData File before upload (size, mime, extension).
- * Rejects empty/missing files and mismatched extension vs allowlist.
- */
 export function validateUpload(params: {
   file: FormDataEntryValue | null;
   maxBytes: number;
@@ -77,18 +74,10 @@ export function validateUpload(params: {
   return { ok: true, file, extension };
 }
 
-async function toInputFile(file: File): Promise<InputFile> {
-  const buffer = new Uint8Array(await file.arrayBuffer());
-  return InputFile.fromBuffer(buffer, file.name);
-}
-
-/**
- * Upload with the signed-in user's session. Caller supplies file-level permissions.
- */
 export async function uploadFile(params: {
   bucketId: string;
   file: File;
-  permissions: string[];
+  permissions?: string[];
 }): Promise<{ fileId: string }> {
   const user = await getLoggedInUser();
   if (!user) {
@@ -104,57 +93,34 @@ export async function uploadFile(params: {
     throw new Error(RATE_LIMIT_MESSAGE);
   }
 
-  const { storage } = await createSessionClient();
-  const input = await toInputFile(params.file);
-  const created = await storage.createFile({
+  void params.permissions;
+  return putStoredFile({
     bucketId: params.bucketId,
-    fileId: ID.unique(),
-    file: input,
-    permissions: params.permissions,
+    ownerId: user.$id,
+    file: params.file,
+    fileId: newId(),
   });
-  return { fileId: created.$id };
 }
 
-/** Delete a file as the session user (must have delete permission on the file). */
 export async function deleteFile(
   bucketId: string,
   fileId: string,
 ): Promise<void> {
-  const { storage } = await createSessionClient();
-  await storage.deleteFile({ bucketId, fileId });
+  const user = await getLoggedInUser();
+  if (!user) {
+    throw new Error("You must be signed in.");
+  }
+  await deleteStoredFile(bucketId, fileId);
 }
 
-/** Admin delete (e.g. cleanup orphan after failed profile update). */
 export async function deleteFileAsAdmin(
   bucketId: string,
   fileId: string,
 ): Promise<void> {
-  const { storage } = await createAdminClient();
-  await storage.deleteFile({ bucketId, fileId });
-}
-
-function publicImagePermissions(userId: string): string[] {
-  return [
-    Permission.read(Role.any()),
-    Permission.update(Role.user(userId)),
-    Permission.delete(Role.user(userId)),
-  ];
-}
-
-/** Private bank slip — uploader only; sellers/admin read via server proxy + admin SDK. */
-function bankSlipPermissions(userId: string): string[] {
-  return [
-    Permission.read(Role.user(userId)),
-    Permission.update(Role.user(userId)),
-    Permission.delete(Role.user(userId)),
-  ];
+  await deleteStoredFile(bucketId, fileId);
 }
 
 export async function uploadAvatar(file: File): Promise<{ fileId: string }> {
-  const user = await getLoggedInUser();
-  if (!user) {
-    throw new Error("You must be signed in to upload an avatar.");
-  }
   const validated = validateUpload({
     file,
     maxBytes: AVATAR_MAX_BYTES,
@@ -167,17 +133,12 @@ export async function uploadAvatar(file: File): Promise<{ fileId: string }> {
   return uploadFile({
     bucketId: BUCKET_AVATARS,
     file: validated.file,
-    permissions: publicImagePermissions(user.$id),
   });
 }
 
 export async function uploadProductImage(
   file: File,
 ): Promise<{ fileId: string }> {
-  const user = await getLoggedInUser();
-  if (!user) {
-    throw new Error("You must be signed in to upload a product image.");
-  }
   const validated = validateUpload({
     file,
     maxBytes: PRODUCT_IMAGE_MAX_BYTES,
@@ -190,15 +151,10 @@ export async function uploadProductImage(
   return uploadFile({
     bucketId: BUCKET_PRODUCT_IMAGES,
     file: validated.file,
-    permissions: publicImagePermissions(user.$id),
   });
 }
 
 export async function uploadBankSlip(file: File): Promise<{ fileId: string }> {
-  const user = await getLoggedInUser();
-  if (!user) {
-    throw new Error("You must be signed in to upload a bank slip.");
-  }
   const validated = validateUpload({
     file,
     maxBytes: BANK_SLIP_MAX_BYTES,
@@ -208,15 +164,9 @@ export async function uploadBankSlip(file: File): Promise<{ fileId: string }> {
   if (!validated.ok) {
     throw new Error(validated.error);
   }
-  const perms = bankSlipPermissions(user.$id);
-  // Defense: never allow public read on bank slips.
-  if (perms.some((p) => p.includes("any"))) {
-    throw new Error("Refusing to upload bank slip with public permissions.");
-  }
   return uploadFile({
     bucketId: BUCKET_BANK_SLIPS,
     file: validated.file,
-    permissions: perms,
   });
 }
 

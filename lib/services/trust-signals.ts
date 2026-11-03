@@ -1,4 +1,4 @@
-import { Query } from "node-appwrite";
+import { Query } from "@/lib/db/appwrite-shim";
 import {
   DATABASE_ID,
   TABLE_BANK_SLIPS,
@@ -55,7 +55,7 @@ function asNullableString(value: unknown): string | null {
 }
 
 function adminSdkAvailable(): boolean {
-  return hasAppwritePublicConfig() && Boolean(process.env.APPWRITE_API_KEY?.trim());
+  return hasAppwritePublicConfig() && Boolean(process.env.DATABASE_URL?.trim());
 }
 
 function chunk<T>(items: T[], size: number): T[][] {

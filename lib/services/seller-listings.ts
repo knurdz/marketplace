@@ -1,4 +1,4 @@
-import { AppwriteException, ID, Permission, Query, Role } from "node-appwrite";
+import { AppwriteException, ID, Permission, Query, Role } from "@/lib/db/appwrite-shim";
 import {
   BUCKET_PRODUCT_IMAGES,
   DATABASE_ID,

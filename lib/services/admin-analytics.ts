@@ -1,5 +1,5 @@
-import { Query } from "node-appwrite";
-import type { Models } from "node-appwrite";
+import { Query } from "@/lib/db/appwrite-shim";
+import type { Models } from "@/lib/db/appwrite-shim";
 import {
   DATABASE_ID,
   TABLE_ORDERS,
@@ -47,7 +47,7 @@ function asNullableString(value: unknown): string | null {
 }
 
 function adminSdkAvailable(): boolean {
-  return hasAppwritePublicConfig() && Boolean(process.env.APPWRITE_API_KEY?.trim());
+  return hasAppwritePublicConfig() && Boolean(process.env.DATABASE_URL?.trim());
 }
 
 function resolveRange(range?: AnalyticsRange): {
@@ -244,7 +244,7 @@ function userRegistrationIso(user: Models.User<Models.Preferences>): string | nu
 
 /**
  * Aggregate paid revenue + order counts per time bucket (bounded range only).
- * Server-only; admin label + APPWRITE_API_KEY required. Never throws.
+ * Server-only; admin label + DATABASE_URL required. Never throws.
  */
 export async function getSalesOverTime(opts?: {
   range?: AnalyticsRange;
@@ -297,7 +297,7 @@ export async function getSalesOverTime(opts?: {
 
 /**
  * Aggregate new user signups + approved seller profiles per time bucket.
- * Server-only; admin label + APPWRITE_API_KEY required. Never throws.
+ * Server-only; admin label + DATABASE_URL required. Never throws.
  */
 export async function getUserGrowthOverTime(opts?: {
   range?: AnalyticsRange;

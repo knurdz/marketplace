@@ -1,6 +1,6 @@
 # Knurdz Marketplace
 
-Multi-role marketplace web app built with **Next.js** (frontend) and **Appwrite** (auth, database, storage, functions).
+Multi-role marketplace web app built with **Next.js**, **MariaDB** (Drizzle), **Better Auth**, local disk storage, and in-app PayHere routes.
 
 ## Portals
 
@@ -54,9 +54,19 @@ Open [http://localhost:3000](http://localhost:3000). The UI theme matches [knurd
 | `npm run test:e2e`     | Playwright Guide §10 MVP suite (live Appwrite) |
 | `npm run test:e2e:payhere` | Same + PayHere sandbox path (`PAYHERE_E2E=1`; requires **6.17** console setup) |
 
-Fill `.env.local` with Appwrite values (see below). Do not commit secrets; only endpoint, project id, and public app URL may use `NEXT_PUBLIC_*`.
+Set `DATABASE_URL` and `NEXT_PUBLIC_APP_URL` in `.env.local` (see `.env.example`). Do not commit secrets.
 
-## Appwrite setup
+## MariaDB setup
+
+```bash
+docker compose up -d
+npm run schema    # drizzle migrate
+npm run seed      # demo users + sample product
+```
+
+Default DB URL: `mysql://knurdz:knurdz_dev@127.0.0.1:3306/marketplace`
+
+## Legacy Appwrite setup (removed)
 
 1. Copy env: `cp .env.example .env.local`
 2. In [Appwrite Console](https://cloud.appwrite.io/console) open the **Knurdz Marketplace** project.

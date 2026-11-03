@@ -1,7 +1,13 @@
 "use server";
 
+import { headers } from "next/headers";
 import { redirect, unstable_rethrow } from "next/navigation";
-import { AppwriteException } from "node-appwrite";
+import { AppwriteException } from "@/lib/db/appwrite-shim";
+import { getAuth } from "@/lib/auth";
+
+function authApi() {
+  return getAuth().api;
+}
 import {
   getClientIp,
   normalizeEmailKey,
@@ -10,7 +16,6 @@ import {
 } from "@/lib/security/rate-limit";
 import { assertDurableRateLimit } from "@/lib/security/durable-rate-limit";
 import { getRequestOrigin } from "./server-origin";
-import { createPublicClient, createSessionClient } from "./server";
 import { getLoggedInUser } from "./session";
 
 export type RecoveryActionState = {
@@ -25,17 +30,11 @@ function readString(formData: FormData, key: string): string {
 
 function mapRecoveryError(error: unknown): string {
   if (error instanceof AppwriteException) {
-    if (error.code === 400 || error.code === 401) {
-      return "This reset link is invalid or has expired. Request a new one.";
-    }
-    return "Could not reset password. Please try again.";
+    return "This reset link is invalid or has expired. Request a new one.";
   }
   if (error instanceof Error) {
     if (error.message.includes("NEXT_PUBLIC_APP_URL")) {
       return "App URL is not configured. Set NEXT_PUBLIC_APP_URL in .env.local.";
-    }
-    if (error.message.includes("NEXT_PUBLIC_APPWRITE")) {
-      return "Appwrite is not configured. Check your environment variables.";
     }
   }
   return "Something went wrong. Please try again.";
@@ -44,10 +43,6 @@ function mapRecoveryError(error: unknown): string {
 const RECOVERY_SUCCESS =
   "If an account exists for that email, a reset link has been sent. Check your inbox.";
 
-/**
- * Always returns a generic success message so we do not leak whether the email exists.
- * Rate-limited responses use the same success shape (anti-enumeration).
- */
 export async function requestPasswordRecovery(
   _prev: RecoveryActionState,
   formData: FormData,
@@ -77,18 +72,19 @@ export async function requestPasswordRecovery(
   }
 
   try {
-    const { account } = await createPublicClient();
     const origin = await getRequestOrigin();
-    await account.createRecovery({
-      email,
-      url: `${origin}/reset-password`,
+    await authApi().requestPasswordReset({
+      body: {
+        email,
+        redirectTo: `${origin}/reset-password`,
+      },
+      headers: await headers(),
     });
   } catch (error) {
     unstable_rethrow(error);
     if (
       error instanceof Error &&
-      (error.message.includes("NEXT_PUBLIC_APP_URL") ||
-        error.message.includes("NEXT_PUBLIC_APPWRITE"))
+      error.message.includes("NEXT_PUBLIC_APP_URL")
     ) {
       return { error: mapRecoveryError(error) };
     }
@@ -101,12 +97,11 @@ export async function completePasswordRecovery(
   _prev: RecoveryActionState,
   formData: FormData,
 ): Promise<RecoveryActionState> {
-  const userId = readString(formData, "userId");
-  const secret = readString(formData, "secret");
+  const token = readString(formData, "token") || readString(formData, "secret");
   const password = readString(formData, "password");
   const confirm = readString(formData, "confirm");
 
-  if (!userId || !secret) {
+  if (!token) {
     return {
       error:
         "This reset link is missing required parameters. Request a new one.",
@@ -130,11 +125,9 @@ export async function completePasswordRecovery(
   }
 
   try {
-    const { account } = await createPublicClient();
-    await account.updateRecovery({
-      userId,
-      secret,
-      password,
+    await authApi().resetPassword({
+      body: { newPassword: password, token },
+      headers: await headers(),
     });
   } catch (error) {
     unstable_rethrow(error);
@@ -166,16 +159,16 @@ export async function requestEmailVerification(
   }
 
   try {
-    const { account } = await createSessionClient();
     const origin = await getRequestOrigin();
-    await account.createVerification({
-      url: `${origin}/verify-email`,
+    await authApi().sendVerificationEmail({
+      body: {
+        email: user.email,
+        callbackURL: `${origin}/verify-email`,
+      },
+      headers: await headers(),
     });
   } catch (error) {
     unstable_rethrow(error);
-    if (error instanceof Error && error.message === "No session") {
-      return { error: "You must be signed in to verify your email." };
-    }
     return { error: mapRecoveryError(error) };
   }
 
@@ -185,10 +178,10 @@ export async function requestEmailVerification(
 }
 
 export async function completeEmailVerification(
-  userId: string,
-  secret: string,
+  _userId: string,
+  token: string,
 ): Promise<{ ok: true } | { ok: false; error: string }> {
-  if (!userId || !secret) {
+  if (!token) {
     return {
       ok: false,
       error: "This verification link is missing required parameters.",
@@ -206,16 +199,15 @@ export async function completeEmailVerification(
   }
 
   try {
-    const { account } = await createPublicClient();
-    await account.updateVerification({ userId, secret });
+    await authApi().verifyEmail({
+      query: { token },
+      headers: await headers(),
+    });
     return { ok: true };
-  } catch (error) {
-    if (error instanceof AppwriteException) {
-      return {
-        ok: false,
-        error: "This verification link is invalid or has expired.",
-      };
-    }
-    return { ok: false, error: mapRecoveryError(error) };
+  } catch {
+    return {
+      ok: false,
+      error: "This verification link is invalid or has expired.",
+    };
   }
 }

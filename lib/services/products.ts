@@ -1,4 +1,4 @@
-import { AppwriteException, Query } from "node-appwrite";
+import { AppwriteException, Query } from "@/lib/db/appwrite-shim";
 import {
   DATABASE_ID,
   TABLE_ORDER_ITEMS,
@@ -458,7 +458,7 @@ export async function listCoverImagesByProductIds(
 export async function listTrendingProducts(opts?: {
   limit?: number;
 }): Promise<Product[]> {
-  if (!hasAppwritePublicConfig() || !process.env.APPWRITE_API_KEY?.trim()) {
+  if (!hasAppwritePublicConfig() || !process.env.DATABASE_URL?.trim()) {
     return [];
   }
 

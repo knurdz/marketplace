@@ -1,4 +1,4 @@
-import { AppwriteException, ID, Query } from "node-appwrite";
+import { AppwriteException, ID, Query } from "@/lib/db/appwrite-shim";
 import {
   DATABASE_ID,
   TABLE_AUDIT_LOGS,
@@ -65,7 +65,7 @@ async function writeAuditLog(params: {
 function adminSdkAvailable(): boolean {
   return (
     hasAppwritePublicConfig() &&
-    Boolean(process.env.APPWRITE_API_KEY?.trim())
+    Boolean(process.env.DATABASE_URL?.trim())
   );
 }
 
@@ -350,7 +350,7 @@ export async function createCategoryCore(
         sortOrder,
       },
     });
-    rowId = row.$id;
+    rowId = String(row.$id);
   } catch (error) {
     if (isSlugConflict(error)) {
       return { ok: false, error: "Slug already exists." };

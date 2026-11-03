@@ -1,4 +1,4 @@
-import { ID, Permission, Query, Role } from "node-appwrite";
+import { ID, Permission, Query, Role } from "@/lib/db/appwrite-shim";
 import {
   BUCKET_BANK_SLIPS,
   DATABASE_ID,
@@ -776,7 +776,7 @@ export async function createOrder(
       transactionId,
     });
 
-    orderId = orderRow.$id;
+    orderId = String(orderRow.$id);
 
     for (const line of prepared) {
       const itemRow = await tables.createRow({
@@ -794,7 +794,7 @@ export async function createOrder(
         permissions: childPermissions,
         transactionId,
       });
-      orderItemIds.push(itemRow.$id);
+      orderItemIds.push(String(itemRow.$id));
     }
 
     const paymentRow = await tables.createRow({
@@ -811,7 +811,7 @@ export async function createOrder(
       permissions: childPermissions,
       transactionId,
     });
-    paymentId = paymentRow.$id;
+    paymentId = String(paymentRow.$id);
 
     await decrementStockForLines(tables, prepared, transactionId);
 

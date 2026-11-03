@@ -6,7 +6,7 @@
  * Stock was reserved at order placement. Never calls PayHere. See docs/agent/PAYHERE.md.
  */
 
-import { Query } from "node-appwrite";
+import { Query } from "@/lib/db/appwrite-shim";
 import {
   DATABASE_ID,
   TABLE_ORDER_ITEMS,
@@ -49,7 +49,7 @@ const GENERIC_FAILURE =
 
 function adminSdkAvailable(): boolean {
   return (
-    hasAppwritePublicConfig() && Boolean(process.env.APPWRITE_API_KEY?.trim())
+    hasAppwritePublicConfig() && Boolean(process.env.DATABASE_URL?.trim())
   );
 }
 

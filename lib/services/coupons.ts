@@ -1,4 +1,4 @@
-import { AppwriteException, ID, Query } from "node-appwrite";
+import { AppwriteException, ID, Query } from "@/lib/db/appwrite-shim";
 import {
   DATABASE_ID,
   TABLE_COUPON_REDEMPTIONS,
@@ -97,7 +97,7 @@ export async function validateCouponForCheckout(params: {
   subtotal: number;
   buyerId?: string;
 }): Promise<CouponValidationResult> {
-  if (!hasAppwritePublicConfig() || !process.env.APPWRITE_API_KEY?.trim()) {
+  if (!hasAppwritePublicConfig() || !process.env.DATABASE_URL?.trim()) {
     return { ok: false, error: "Coupons are not available right now." };
   }
 
@@ -201,7 +201,7 @@ export async function recordCouponRedemption(params: {
   transactionId?: string;
   tables?: Awaited<ReturnType<typeof createAdminClient>>["tables"];
 }): Promise<CouponRedemptionResult> {
-  if (!process.env.APPWRITE_API_KEY?.trim()) {
+  if (!process.env.DATABASE_URL?.trim()) {
     return { ok: false, error: "Coupons are not available right now." };
   }
 
@@ -279,7 +279,7 @@ export async function recordCouponRedemption(params: {
 }
 
 export async function listCouponsAdmin(): Promise<Coupon[]> {
-  if (!process.env.APPWRITE_API_KEY?.trim()) return [];
+  if (!process.env.DATABASE_URL?.trim()) return [];
 
   try {
     const { tables } = await createAdminClient();

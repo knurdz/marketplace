@@ -1,4 +1,6 @@
-# Knurdz Marketplace — Appwrite SCHEMA (frozen)
+# Knurdz Marketplace — Data SCHEMA (frozen)
+
+> **Storage:** MariaDB tables via Drizzle (`lib/db/schema.ts`). Appwrite TablesDB setup scripts are legacy.
 
 > Created in Member 1 **step 1.7**. Field names and enum strings are the contract for Members 2–4.  
 > Do not invent parallel status strings. TypeScript modules: [`lib/types/`](../../lib/types/) (step **1.10**).  

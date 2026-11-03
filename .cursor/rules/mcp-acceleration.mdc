@@ -9,7 +9,7 @@ Use **only** these MCP servers for implementation acceleration. Do **not** add o
 
 ## Preferred stack
 
-1. **Appwrite MCP** — project ops, Auth, DB, Storage, Functions, Appwrite docs
+1. **Appwrite MCP** — optional legacy; primary data plane is MariaDB/Drizzle in-repo
 2. **PayHere docs MCP** — checkout, hash, notify_url, SDK guides
 3. **PayHere Merchant MCP** (optional) — signed checkout payloads, hash verify, payment lookup; sandbox credentials only; never commit secrets
 4. **Context7** — up-to-date Next.js / React / library docs

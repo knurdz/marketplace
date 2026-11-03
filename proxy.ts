@@ -19,7 +19,10 @@ export function proxy(request: NextRequest) {
     pathname.startsWith("/admin/");
 
   if (isPortal) {
-    const session = request.cookies.get(SESSION_COOKIE)?.value;
+    // Better Auth adds the __Secure- prefix when served over HTTPS.
+    const session =
+      request.cookies.get(SESSION_COOKIE)?.value ??
+      request.cookies.get(`__Secure-${SESSION_COOKIE}`)?.value;
     if (!session) {
       const login = new URL("/login", request.url);
       login.searchParams.set(

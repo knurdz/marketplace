@@ -1,0 +1,1 @@
+ALTER TABLE `rate_limits` MODIFY COLUMN `window_start` bigint NOT NULL;

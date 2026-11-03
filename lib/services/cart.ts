@@ -1,4 +1,4 @@
-import { ID, Permission, Query, Role } from "node-appwrite";
+import { ID, Permission, Query, Role } from "@/lib/db/appwrite-shim";
 import {
   DATABASE_ID,
   TABLE_CART_ITEMS,
