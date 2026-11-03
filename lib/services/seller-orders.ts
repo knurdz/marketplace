@@ -1,4 +1,4 @@
-import { Query } from "node-appwrite";
+import { Query } from "@/lib/db/appwrite-shim";
 import {
   DATABASE_ID,
   TABLE_ORDER_ITEMS,

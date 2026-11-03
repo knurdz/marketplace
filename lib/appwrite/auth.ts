@@ -1,7 +1,12 @@
 "use server";
 
+import { headers } from "next/headers";
 import { redirect, unstable_rethrow } from "next/navigation";
-import { AppwriteException, ID, Query } from "node-appwrite";
+import { eq } from "drizzle-orm";
+import { auth } from "@/lib/auth";
+import { getDb } from "@/lib/db/client";
+import { AppwriteException } from "@/lib/db/appwrite-shim";
+import { authUser } from "@/lib/db/schema";
 import {
   getClientIp,
   normalizeEmailKey,
@@ -9,23 +14,27 @@ import {
   RATE_LIMITS,
 } from "@/lib/security/rate-limit";
 import { assertDurableRateLimit } from "@/lib/security/durable-rate-limit";
-import { DATABASE_ID, TABLE_PROFILES, TABLE_SELLER_PROFILES } from "./config";
+import {
+  DATABASE_ID,
+  TABLE_PROFILES,
+  TABLE_SELLER_PROFILES,
+} from "./config";
 import { getRequestOrigin } from "./server-origin";
 import { createProfileForUser } from "./profiles";
 import { resolveHomePath, resolvePostLoginPath } from "./home-path";
 import { ROLE_LABELS } from "./roles";
-import { createAdminClient, createSessionClient } from "./server";
-import { clearSessionCookie, setSessionCookie } from "./session-cookie";
-import { getLoggedInUser } from "./session";
+import { createAdminClient } from "./server";
+import { getActiveUserById } from "./session";
 import {
   createPendingSellerProfileForUser,
   parseSellerApplicationInput,
 } from "@/lib/services/seller-application";
 import { logError } from "@/lib/observability/log-error";
+import { Query } from "@/lib/db/query";
 
 async function rollbackSignup(userId: string) {
   try {
-    const { users, tables } = await createAdminClient();
+    const { tables, users } = await createAdminClient();
     try {
       const shops = await tables.listRows({
         databaseId: DATABASE_ID,
@@ -80,28 +89,16 @@ function mapAuthError(error: unknown): string {
     if (error.code === 401) {
       return "Invalid email or password.";
     }
-    if (error.code === 400) {
-      return "Check your email and password (password must be at least 8 characters).";
-    }
-    return "Authentication failed. Please try again.";
   }
   if (error instanceof Error) {
-    if (error.message.includes("APPWRITE_API_KEY")) {
-      return "Server auth is not configured. Ask an admin to set APPWRITE_API_KEY.";
+    if (error.message.toLowerCase().includes("already exists")) {
+      return "An account with this email already exists.";
     }
-    if (error.message.includes("NEXT_PUBLIC_APPWRITE")) {
-      return "Appwrite is not configured. Check your environment variables.";
+    if (error.message.toLowerCase().includes("invalid")) {
+      return "Invalid email or password.";
     }
-    const cause =
-      error.cause instanceof Error
-        ? error.cause.message
-        : String(error.cause ?? "");
-    if (
-      error.message.includes("fetch failed") ||
-      cause.includes("Connect Timeout") ||
-      cause.includes("UND_ERR_CONNECT_TIMEOUT")
-    ) {
-      return "Could not reach Appwrite. Check your network and try again.";
+    if (error.message.includes("DATABASE_URL")) {
+      return "Server is not configured. Ask an admin to set DATABASE_URL.";
     }
   }
   return "Something went wrong. Please try again.";
@@ -155,63 +152,55 @@ export async function signUpWithEmail(
   let createdUserId: string | null = null;
 
   try {
-    const { account, users } = await createAdminClient();
-    const user = await account.create({
-      userId: ID.unique(),
-      email,
-      password,
-      name: name || undefined,
+    const hdrs = await headers();
+    const result = await auth.api.signUpEmail({
+      body: { email, password, name: name || email.split("@")[0] || "User" },
+      headers: hdrs,
     });
-    createdUserId = user.$id;
+    const userId = result.user.id;
+    createdUserId = userId;
 
-    if (accountType === "buyer") {
-      await users.updateLabels({
-        userId: user.$id,
-        labels: [ROLE_LABELS.buyer],
-      });
-    }
+    const db = getDb();
+    await db
+      .update(authUser)
+      .set({ role: ROLE_LABELS.buyer })
+      .where(eq(authUser.id, userId));
 
     try {
       await createProfileForUser({
-        userId: user.$id,
+        userId,
         email,
         name: name || undefined,
         phone: phone || undefined,
       });
     } catch (profileError) {
-      await rollbackSignup(user.$id);
+      await rollbackSignup(userId);
       createdUserId = null;
       throw profileError;
     }
 
     if (accountType === "seller" && sellerInput?.ok) {
-      const shop = await createPendingSellerProfileForUser(user.$id, {
+      const shop = await createPendingSellerProfileForUser(userId, {
         shopName: sellerInput.shopName,
         slug: sellerInput.slug,
         bio: sellerInput.bio ?? undefined,
       });
       if (!shop.ok) {
-        await rollbackSignup(user.$id);
+        await rollbackSignup(userId);
         createdUserId = null;
         return { error: shop.error };
       }
     }
 
-    const session = await account.createEmailPasswordSession({
-      email,
-      password,
-    });
-    await setSessionCookie(session.secret, session.expire);
-
     try {
-      const { account: sessionAccount } = await createSessionClient();
       const origin = await getRequestOrigin();
-      await sessionAccount.createVerification({
-        url: `${origin}/verify-email`,
+      await auth.api.sendVerificationEmail({
+        body: { email, callbackURL: `${origin}/verify-email` },
+        headers: hdrs,
       });
     } catch (verifyError) {
       unstable_rethrow(verifyError);
-      logError("auth.signup.verify", verifyError, { userId: user.$id });
+      logError("auth.signup.verify", verifyError, { userId: createdUserId });
     }
   } catch (error) {
     unstable_rethrow(error);
@@ -221,8 +210,10 @@ export async function signUpWithEmail(
     return { error: mapAuthError(error) };
   }
 
-  const sessionUser = await getLoggedInUser();
-  redirect(sessionUser ? await resolveHomePath(sessionUser) : "/market");
+  const sessionUser = createdUserId
+    ? await getActiveUserById(createdUserId)
+    : null;
+  redirect(sessionUser ? await resolveHomePath(sessionUser) : "/login");
 }
 
 export async function signInWithEmail(
@@ -259,39 +250,41 @@ export async function signInWithEmail(
   let destination = "/market";
 
   try {
-    const { account, users } = await createAdminClient();
-    const session = await account.createEmailPasswordSession({
-      email,
-      password,
+    const hdrs = await headers();
+    const result = await auth.api.signInEmail({
+      body: { email, password },
+      headers: hdrs,
     });
-    await setSessionCookie(session.secret, session.expire);
-    try {
-      const user = await users.get({ userId: session.userId });
-      destination = await resolvePostLoginPath(user, nextRaw);
-    } catch {
-      const sessionUser = await getLoggedInUser();
-      destination = sessionUser
-        ? await resolvePostLoginPath(sessionUser, nextRaw)
-        : "/market";
+    // The new session cookie is not on this request yet, so use the returned user id.
+    const signedIn = await getActiveUserById(result.user.id);
+    if (!signedIn) {
+      await revokeSessionsFor(result.user.id);
+      return { error: "Invalid email or password." };
     }
+    destination = await resolvePostLoginPath(signedIn, nextRaw);
   } catch (error) {
     unstable_rethrow(error);
-    const mapped = mapAuthError(error);
-    return { error: mapped };
+    return { error: mapAuthError(error) };
   }
 
   redirect(destination);
 }
 
+/** Suspended accounts must not keep a session even though the password was correct. */
+async function revokeSessionsFor(userId: string) {
+  try {
+    const { users } = await createAdminClient();
+    await users.deleteSessions({ userId });
+  } catch (error) {
+    logError("auth.signin.revoke", error, { userId });
+  }
+}
+
 export async function signOut() {
   try {
-    const { account } = await createSessionClient();
-    await clearSessionCookie();
-    await account.deleteSession({ sessionId: "current" });
+    await auth.api.signOut({ headers: await headers() });
   } catch (error) {
     unstable_rethrow(error);
-    // Always clear local session cookie even if Appwrite session delete fails
-    await clearSessionCookie();
   }
 
   redirect("/login");

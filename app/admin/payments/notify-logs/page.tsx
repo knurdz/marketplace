@@ -54,7 +54,7 @@ const SOURCE_EMPTY: Record<NotifyLogSource, string> = {
   not_deployed:
     "Neither payhere_notify_logs nor the payhere-notify Function is available in this project. After the table exists and notify runs, ignored, rejected, and failed callbacks appear here. Merchant secret, hash, and card data are never shown.",
   unavailable:
-    "Could not read notify logs. Confirm APPWRITE_API_KEY can read TablesDB (payhere_notify_logs) or Function executions. No secrets are displayed on this page.",
+    "Could not read notify logs. Confirm DATABASE_URL is set and the payhere_notify_logs table exists. No secrets are displayed on this page.",
 };
 
 function formatCreatedAt(iso: string): string {

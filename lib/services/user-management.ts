@@ -1,5 +1,5 @@
-import { ID, Query } from "node-appwrite";
-import type { Models } from "node-appwrite";
+import { ID, Query } from "@/lib/db/appwrite-shim";
+import type { Models } from "@/lib/db/appwrite-shim";
 import {
   DATABASE_ID,
   TABLE_AUDIT_LOGS,
@@ -75,7 +75,8 @@ async function loadTargetUser(
 
   const { users } = await createAdminClient();
   try {
-    return await users.get({ userId: trimmed });
+    const user = await users.get({ userId: trimmed });
+    return user as Models.User<Models.Preferences>;
   } catch {
     return null;
   }

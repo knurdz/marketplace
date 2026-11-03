@@ -1,7 +1,5 @@
 import { NextResponse } from "next/server";
-import { SESSION_COOKIE } from "@/lib/appwrite/config";
 import { completeOAuthLogin } from "@/lib/appwrite/oauth";
-import { sessionCookieOptions } from "@/lib/appwrite/session-cookie";
 
 function isAllowedHost(host: string): boolean {
   const lower = host.toLowerCase().split(":")[0] ?? "";
@@ -9,7 +7,9 @@ function isAllowedHost(host: string): boolean {
   if (appUrl) {
     try {
       if (lower === new URL(appUrl).hostname) return true;
-    } catch { /* skip */ }
+    } catch {
+      /* skip */
+    }
   }
   if (lower.endsWith(".vercel.app")) return true;
   if (lower === "localhost" || lower === "127.0.0.1") return true;
@@ -33,17 +33,10 @@ function redirectTo(request: Request, path: string): NextResponse {
 
 export async function GET(request: Request) {
   const url = new URL(request.url);
-  const userId = url.searchParams.get("userId") ?? "";
-  const secret = url.searchParams.get("secret") ?? "";
   const next = url.searchParams.get("next");
   const intent = url.searchParams.get("intent");
 
-  const result = await completeOAuthLogin({
-    userId,
-    secret,
-    next,
-    intent,
-  });
+  const result = await completeOAuthLogin({ next, intent });
 
   if (!result.ok) {
     return redirectTo(request, `${result.failPath}?error=${result.error}`);
@@ -53,11 +46,5 @@ export async function GET(request: Request) {
     result.destination.startsWith("/") && !result.destination.startsWith("//")
       ? result.destination
       : "/market";
-  const response = redirectTo(request, destination);
-  response.cookies.set(
-    SESSION_COOKIE,
-    result.sessionSecret,
-    sessionCookieOptions(result.expire),
-  );
-  return response;
+  return redirectTo(request, destination);
 }

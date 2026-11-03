@@ -1,4 +1,4 @@
-import { AppwriteException, ID, Query } from "node-appwrite";
+import { AppwriteException, ID, Query } from "@/lib/db/appwrite-shim";
 import {
   DATABASE_ID,
   TABLE_AUDIT_LOGS,
@@ -81,7 +81,7 @@ type ReviewContext = {
 };
 
 function adminSdkAvailable(): boolean {
-  return hasAppwritePublicConfig() && Boolean(process.env.APPWRITE_API_KEY?.trim());
+  return hasAppwritePublicConfig() && Boolean(process.env.DATABASE_URL?.trim());
 }
 
 function clampLimit(raw?: number): number {

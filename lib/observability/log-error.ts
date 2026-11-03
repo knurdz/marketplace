@@ -3,7 +3,7 @@
  * tag. Never logs payloads, secrets, card data, or raw bank account numbers.
  */
 
-import { AppwriteException } from "node-appwrite";
+import { AppwriteException } from "@/lib/db/appwrite-shim";
 
 const SENSITIVE_KEY =
   /secret|password|token|authorization|cookie|md5sig|card|pan|cvv|account/i;

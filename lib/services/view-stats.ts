@@ -1,4 +1,4 @@
-import { ID, Query } from "node-appwrite";
+import { ID, Query } from "@/lib/db/appwrite-shim";
 import {
   DATABASE_ID,
   TABLE_VIEW_STATS,
@@ -103,7 +103,7 @@ export async function recordMarketplaceView(input: {
   kind: ViewKind;
   targetId: string;
 }): Promise<void> {
-  if (!hasAppwritePublicConfig() || !process.env.APPWRITE_API_KEY?.trim()) {
+  if (!hasAppwritePublicConfig() || !process.env.DATABASE_URL?.trim()) {
     return;
   }
 
@@ -229,7 +229,7 @@ async function listOwnViewRows(sellerId: string): Promise<ViewStatRow[]> {
 
 /** Own-only view aggregates for the seller dashboard. */
 export async function getSellerViewInsights(): Promise<SellerViewInsights> {
-  if (!hasAppwritePublicConfig() || !process.env.APPWRITE_API_KEY?.trim()) {
+  if (!hasAppwritePublicConfig() || !process.env.DATABASE_URL?.trim()) {
     return emptyInsights();
   }
 

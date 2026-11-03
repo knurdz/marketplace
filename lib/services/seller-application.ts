@@ -1,4 +1,4 @@
-import { AppwriteException, ID, Permission, Query, Role } from "node-appwrite";
+import { AppwriteException, ID, Permission, Query, Role } from "@/lib/db/appwrite-shim";
 import {
   BUCKET_AVATARS,
   DATABASE_ID,
@@ -264,7 +264,7 @@ function sellerProfilePermissions(userId: string): string[] {
 }
 
 async function slugTaken(slug: string): Promise<boolean> {
-  if (!process.env.APPWRITE_API_KEY?.trim()) return false;
+  if (!process.env.DATABASE_URL?.trim()) return false;
 
   try {
     const { tables } = await createAdminClient();
@@ -422,7 +422,7 @@ export async function createPendingSellerProfileForUser(
   userId: string,
   input: SubmitSellerApplicationInput,
 ): Promise<SellerApplicationResult> {
-  if (!hasAppwritePublicConfig() || !process.env.APPWRITE_API_KEY?.trim()) {
+  if (!hasAppwritePublicConfig() || !process.env.DATABASE_URL?.trim()) {
     return { ok: false, error: "Marketplace is not configured." };
   }
 

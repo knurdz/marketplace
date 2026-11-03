@@ -1,4 +1,4 @@
-import { Query } from "node-appwrite";
+import { Query } from "@/lib/db/appwrite-shim";
 import {
   DATABASE_ID,
   TABLE_ORDERS,
@@ -123,12 +123,12 @@ async function sumPaidPayments(): Promise<{ grossRevenue: number; currency: stri
 }
 
 /**
- * Platform-wide admin metrics (server-only; requires APPWRITE_API_KEY).
+ * Platform-wide admin metrics (server-only; requires DATABASE_URL).
  * Returns zeros on empty data or Appwrite errors — never throws to callers.
  */
 export async function getAdminMetrics(): Promise<AdminMetrics> {
   if (!hasAppwritePublicConfig()) return emptyMetrics();
-  if (!process.env.APPWRITE_API_KEY?.trim()) return emptyMetrics();
+  if (!process.env.DATABASE_URL?.trim()) return emptyMetrics();
 
   try {
     const [totalUsers, activeSellers, totalOrders, revenue] = await Promise.all([

@@ -3,7 +3,7 @@
  * Survives process restarts; falls back to in-memory if admin SDK is unavailable.
  */
 
-import { AppwriteException, ID, Query } from "node-appwrite";
+import { AppwriteException, ID, Query } from "@/lib/db/appwrite-shim";
 import {
   DATABASE_ID,
   TABLE_RATE_LIMITS,
@@ -18,7 +18,7 @@ import {
 
 function adminSdkAvailable(): boolean {
   return (
-    hasAppwritePublicConfig() && Boolean(process.env.APPWRITE_API_KEY?.trim())
+    hasAppwritePublicConfig() && Boolean(process.env.DATABASE_URL?.trim())
   );
 }
 

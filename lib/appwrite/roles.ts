@@ -1,6 +1,7 @@
-import type { Models } from "node-appwrite";
 import { redirect } from "next/navigation";
 import type { SellerStatus } from "@/lib/types";
+import type { Models } from "@/lib/db/appwrite-shim";
+import type { SessionUser } from "./session";
 import { getLoggedInUser } from "./session";
 
 /** Appwrite Auth labels used for marketplace roles. */

@@ -1,12 +1,13 @@
 /**
  * Public Appwrite config (safe for client + server).
- * Secrets (APPWRITE_API_KEY) are read only in server.ts — never here as exports for the browser.
+ * Secrets (DATABASE_URL, BETTER_AUTH_SECRET) are read only on the server — never here as exports for the browser.
  *
  * Database / table IDs are code constants that must match the Appwrite console
  * (see docs/agent/SCHEMA.md after step 1.7).
  */
 
-export const SESSION_COOKIE = "knurdz_session";
+/** Better Auth session cookie (cookiePrefix `knurdz`). */
+export const SESSION_COOKIE = "knurdz.session_token";
 
 /** TablesDB database id (console: Marketplace). */
 export const DATABASE_ID = "marketplace";
@@ -132,38 +133,9 @@ export function getAppwriteProjectId(): string {
 }
 
 /** Public app origin for recovery/verify redirect URLs (must match a Web platform hostname). */
-export function getAppUrl(): string {
-  if (typeof window !== "undefined" && window.location?.origin) {
-    return window.location.origin;
-  }
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL?.trim().replace(/\/$/, "");
-  if (appUrl) {
-    return appUrl;
-  }
-  if (process.env.VERCEL_PROJECT_PRODUCTION_URL) {
-    return `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL.trim().replace(/\/$/, "")}`;
-  }
-  if (process.env.VERCEL_URL) {
-    return `https://${process.env.VERCEL_URL.trim().replace(/\/$/, "")}`;
-  }
-  if (process.env.NEXT_PUBLIC_VERCEL_URL) {
-    return `https://${process.env.NEXT_PUBLIC_VERCEL_URL.trim().replace(/\/$/, "")}`;
-  }
-  // In production, APP_URL must be set. Falling back to localhost would cause
-  // email verification links, OAuth callbacks, and recovery links to break.
-  if (process.env.NODE_ENV === "production") {
-    throw new Error(
-      "NEXT_PUBLIC_APP_URL must be set in production. " +
-      "Set it to your public domain (e.g. https://marketplace-two-liart.vercel.app).",
-    );
-  }
-  return "http://localhost:3000";
-}
+export { getAppUrl, hasDatabaseConfig } from "@/lib/config/app";
 
-/** True when public Appwrite env is present (does not check API key). */
+/** @deprecated Use hasDatabaseConfig() */
 export function hasAppwritePublicConfig(): boolean {
-  return Boolean(
-    process.env.NEXT_PUBLIC_APPWRITE_ENDPOINT?.trim() &&
-    process.env.NEXT_PUBLIC_APPWRITE_PROJECT_ID?.trim(),
-  );
+  return Boolean(process.env.DATABASE_URL?.trim());
 }

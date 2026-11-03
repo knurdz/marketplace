@@ -6,7 +6,7 @@ alwaysApply: true
 # Stack Conventions
 
 - **Frontend**: Next.js App Router + TypeScript.
-- **Backend**: Appwrite (Auth, Database, Storage, Functions).
+- **Backend**: MariaDB (Drizzle), Better Auth, local disk storage, PayHere API routes.
 - Roles: `buyer` (default), `seller` (approved), `admin` — enforce with labels/teams **and** collection permissions.
 - Portals: storefront `/`, seller `/seller`, admin `/admin` (adjust only if project structure already differs).
 - Payments: PayHere sandbox, bank transfer, free (`amount = 0`) — single-seller orders for MVP.

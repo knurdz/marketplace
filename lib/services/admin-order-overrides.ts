@@ -1,4 +1,4 @@
-import { ID, Query } from "node-appwrite";
+import { ID, Query } from "@/lib/db/appwrite-shim";
 import {
   DATABASE_ID,
   TABLE_AUDIT_LOGS,
@@ -27,7 +27,7 @@ export type AdminOrderOverrideResult =
   | { ok: false; error: string };
 
 function adminSdkAvailable(): boolean {
-  return hasAppwritePublicConfig() && Boolean(process.env.APPWRITE_API_KEY?.trim());
+  return hasAppwritePublicConfig() && Boolean(process.env.DATABASE_URL?.trim());
 }
 
 function parseReason(raw: string): { ok: true; reason: string } | { ok: false; error: string } {

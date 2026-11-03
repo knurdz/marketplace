@@ -23,6 +23,9 @@
 # production
 /build
 
+# local file storage (MariaDB cutover)
+/uploads
+
 # misc
 .DS_Store
 *.pem
