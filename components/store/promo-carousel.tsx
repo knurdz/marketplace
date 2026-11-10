@@ -208,7 +208,7 @@ export function PromoCarousel({ slides }: { slides: PromoSlide[] }) {
                       asChild
                       className="text-xs text-muted-foreground hover:text-foreground"
                     >
-                      <Link href="/market">Explore</Link>
+                      <Link href="/">Explore</Link>
                     </Button>
                   </div>
                 </div>

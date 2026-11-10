@@ -68,7 +68,7 @@ export function aggregatePaidEarnings(payments: Payment[]): {
   };
 }
 
-// ponytail: O(orders) scan — payments have no sellerId; add column if sellers outgrow paging.
+// ponytail: O(orders) scan: payments have no sellerId; add column if sellers outgrow paging.
 async function listSellerOrders(sellerId: string): Promise<Order[]> {
   const { tables } = await createSessionClient();
   const orders: Order[] = [];
@@ -199,7 +199,7 @@ function buildEarningsLines(
 
 /**
  * Read-only seller earnings (session client; own sellerId orders + paid payments only).
- * Returns zeros on empty data or Appwrite errors — never throws to callers.
+ * Returns zeros on empty data or Appwrite errors: never throws to callers.
  */
 export async function getSellerEarnings(): Promise<SellerEarnings> {
   if (!hasAppwritePublicConfig()) return emptyEarnings();

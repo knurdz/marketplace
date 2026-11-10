@@ -9,7 +9,7 @@ const users = new UsersApi();
 const storage = new DiskStorage();
 
 /**
- * Former admin client — full data access (server-only).
+ * Former admin client: full data access (server-only).
  */
 export async function createAdminClient() {
   return {
@@ -26,7 +26,7 @@ export async function createAdminClient() {
 }
 
 /**
- * Session-scoped client — authorization enforced in services via getLoggedInUser().
+ * Session-scoped client: authorization enforced in services via getLoggedInUser().
  */
 export async function createSessionClient() {
   return {

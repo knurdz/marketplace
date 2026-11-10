@@ -247,7 +247,7 @@ export async function signInWithEmail(
     return { error: RATE_LIMIT_MESSAGE };
   }
 
-  let destination = "/market";
+  let destination = "/";
 
   try {
     const hdrs = await headers();

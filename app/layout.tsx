@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { JetBrains_Mono, Space_Grotesk } from "next/font/google";
+import { JetBrains_Mono, Nunito_Sans, Space_Grotesk } from "next/font/google";
 import type { ReactNode } from "react";
 import { ThemeProvider } from "@/components/theme/theme-provider";
 import { Toaster } from "@/components/ui/sonner";
@@ -12,6 +12,12 @@ const spaceGrotesk = Space_Grotesk({
   display: "swap",
 });
 
+const nunitoSans = Nunito_Sans({
+  subsets: ["latin"],
+  variable: "--font-nunito-sans",
+  display: "swap",
+});
+
 const jetbrainsMono = JetBrains_Mono({
   subsets: ["latin"],
   variable: "--font-jetbrains-mono",
@@ -21,7 +27,7 @@ const jetbrainsMono = JetBrains_Mono({
 export const metadata: Metadata = {
   title: "Knurdz Marketplace",
   description:
-    "Multi-role marketplace for buyers, sellers, and admins — built by Knurdz.",
+    "Multi-role marketplace for buyers, sellers, and admins. Built by Knurdz.",
 };
 
 export default function RootLayout({ children }: { children: ReactNode }) {
@@ -32,6 +38,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
       className={cn(
         "dark",
         spaceGrotesk.variable,
+        nunitoSans.variable,
         jetbrainsMono.variable,
         "font-sans",
       )}

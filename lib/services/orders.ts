@@ -195,7 +195,7 @@ export function asBankSlip(row: Record<string, unknown>): BankSlip | null {
 }
 
 function bankSlipRowPermissions(buyerId: string, sellerId: string): string[] {
-  // Assigned via admin SDK after buyer ownership checks — not limited to session assignable scopes.
+  // Assigned via admin SDK after buyer ownership checks: not limited to session assignable scopes.
   return [
     Permission.read(Role.user(buyerId)),
     Permission.read(Role.user(sellerId)),

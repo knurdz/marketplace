@@ -35,7 +35,7 @@ export default function TermsPage() {
         <p>
           Checkout may use PayHere (sandbox in development), bank transfer with
           slip verification, or free listings when price is zero. Payment status
-          is confirmed through trusted server flows — return URLs alone are not
+          is confirmed through trusted server flows. Return URLs alone are not
           proof of payment.
         </p>
       </LegalSection>

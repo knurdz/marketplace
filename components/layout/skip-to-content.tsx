@@ -1,7 +1,7 @@
 import Link from "next/link";
 
 /**
- * First focusable control — jump past chrome to #main-content.
+ * First focusable control: jump past chrome to #main-content.
  * Off-screen until focused (keyboard users).
  */
 export function SkipToContent() {

@@ -14,7 +14,7 @@ function isAllowedHost(host: string): boolean {
       const configuredHost = new URL(appUrl).hostname;
       if (lower === configuredHost) return true;
     } catch {
-      // Invalid URL in env — skip
+      // Invalid URL in env: skip
     }
   }
   // Vercel preview deployments

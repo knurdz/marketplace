@@ -86,7 +86,7 @@ export function MessageThreadPanel({
           rows={4}
           disabled={pending}
           className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm"
-          placeholder="Plain text only — no attachments in MVP."
+          placeholder="Plain text only. No attachments in MVP."
         />
         <Button type="submit" size="sm" disabled={pending}>
           {pending ? "Sending…" : "Send"}

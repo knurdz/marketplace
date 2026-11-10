@@ -1,12 +1,11 @@
 import Link from "next/link";
+import { BrandLogo } from "@/components/brand/brand-logo";
 
 const FOOTER_COLUMNS = [
   {
     title: "Market",
     links: [
-      { href: "/market", label: "Browse listings" },
-      { href: "/categories", label: "Categories" },
-      { href: "/search", label: "Search" },
+      { href: "/#browse", label: "Browse listings" },
     ],
   },
   {
@@ -36,19 +35,17 @@ const FOOTER_COLUMNS = [
 
 export function StoreFooter() {
   return (
-    <footer className="mt-auto border-t border-border">
-      <div className="mx-auto grid w-full max-w-7xl gap-10 px-4 py-12 sm:px-6 md:grid-cols-5">
+    <footer className="mt-auto border-t border-border bg-background-alt">
+      <div className="mx-auto grid w-full max-w-7xl gap-10 px-4 py-12 sm:px-6 md:grid-cols-5 lg:px-8">
         <div className="md:col-span-1">
-          <p className="text-base font-semibold tracking-tight">
-            Knurdz<span className="text-accent">.</span>
-          </p>
-          <p className="mt-3 max-w-xs text-base leading-relaxed text-muted-foreground">
+          <BrandLogo className="h-14" />
+          <p className="mt-3 max-w-xs text-sm leading-relaxed text-muted-foreground">
             A market for the community that already ships.
           </p>
         </div>
         {FOOTER_COLUMNS.map((column) => (
           <nav key={column.title} aria-label={column.title}>
-            <p className="font-mono text-sm text-accent">
+            <p className="text-sm font-semibold text-foreground">
               {column.title}
             </p>
             <ul className="mt-3 space-y-2">
@@ -56,7 +53,7 @@ export function StoreFooter() {
                 <li key={`${column.title}-${link.href}-${link.label}`}>
                   <Link
                     href={link.href}
-                    className="text-base text-muted-foreground transition hover:text-accent"
+                    className="text-sm text-muted-foreground transition hover:text-accent"
                   >
                     {link.label}
                   </Link>
@@ -67,8 +64,8 @@ export function StoreFooter() {
         ))}
       </div>
       <div className="border-t border-border">
-        <p className="mx-auto w-full max-w-7xl px-4 py-4 font-mono text-sm text-muted-foreground sm:px-6">
-          Knurdz Marketplace
+        <p className="mx-auto w-full max-w-7xl px-4 py-4 text-xs text-muted-foreground sm:px-6 lg:px-8">
+          © Knurdz Marketplace
         </p>
       </div>
     </footer>

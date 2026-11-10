@@ -1,5 +1,5 @@
 /**
- * Computed trust heuristics — transparent thresholds for human review.
+ * Computed trust heuristics: transparent thresholds for human review.
  * Source of truth for docs/agent/TRUST_RULES.md. No persisted badge/flag state.
  */
 
@@ -36,7 +36,7 @@ export const CANCELLATION_RATE_THRESHOLD = 0.5;
 /** Report statuses treated as still open (unresolved). */
 export const OPEN_REPORT_STATUSES: readonly ReportStatus[] = ["open", "reviewing"];
 
-// ── Input shapes (pre-fetched data only — no Appwrite calls here) ───────────
+// ── Input shapes (pre-fetched data only: no Appwrite calls here) ───────────
 
 export type TrustSellerProfile = {
   userId: string;
@@ -116,7 +116,7 @@ export function evaluateBadgeEligibility(input: {
   const completedCount = orders.filter((o) => o.status === "completed").length;
   if (completedCount < MIN_COMPLETED_ORDERS_FOR_BADGE) {
     reasons.push(
-      `${completedCount} completed order(s) — need at least ${MIN_COMPLETED_ORDERS_FOR_BADGE}.`,
+      `${completedCount} completed order(s); need at least ${MIN_COMPLETED_ORDERS_FOR_BADGE}.`,
     );
   } else {
     reasons.push(`${completedCount} completed order(s) meet minimum.`);
@@ -156,7 +156,7 @@ export function ruleRejectedBankSlips(input: {
     triggered,
     reason: triggered
       ? `${rejected.length} rejected bank slip(s) in the last ${FRAUD_ROLLING_WINDOW_DAYS} days (threshold: ${REJECTED_SLIP_FLAG_THRESHOLD}).`
-      : `${rejected.length} rejected bank slip(s) in window — below threshold of ${REJECTED_SLIP_FLAG_THRESHOLD}.`,
+      : `${rejected.length} rejected bank slip(s) in window; below threshold of ${REJECTED_SLIP_FLAG_THRESHOLD}.`,
   };
 }
 
@@ -172,7 +172,7 @@ export function ruleNewSellerHighFirstOrder(input: {
     return {
       rule: "new_seller_high_first_order",
       triggered: false,
-      reason: `Seller profile is ${Math.floor(profileAgeDays)}d old — outside ${NEW_SELLER_WINDOW_DAYS}d new-seller window.`,
+      reason: `Seller profile is ${Math.floor(profileAgeDays)}d old; outside ${NEW_SELLER_WINDOW_DAYS}d new-seller window.`,
     };
   }
 
@@ -185,7 +185,7 @@ export function ruleNewSellerHighFirstOrder(input: {
     return {
       rule: "new_seller_high_first_order",
       triggered: false,
-      reason: "No orders yet — cannot evaluate first-order value.",
+      reason: "No orders yet; cannot evaluate first-order value.",
     };
   }
 
@@ -227,7 +227,7 @@ export function ruleRapidCancellationRate(input: {
     return {
       rule: "rapid_cancellation_rate",
       triggered: false,
-      reason: `${total} order(s) in last ${FRAUD_ROLLING_WINDOW_DAYS}d — need at least ${MIN_ORDERS_FOR_CANCELLATION_RATE} before evaluating cancellation rate.`,
+      reason: `${total} order(s) in last ${FRAUD_ROLLING_WINDOW_DAYS}d; need at least ${MIN_ORDERS_FOR_CANCELLATION_RATE} before evaluating cancellation rate.`,
     };
   }
 
@@ -239,8 +239,8 @@ export function ruleRapidCancellationRate(input: {
     rule: "rapid_cancellation_rate",
     triggered,
     reason: triggered
-      ? `${cancelled}/${total} orders (${pct}%) cancelled in last ${FRAUD_ROLLING_WINDOW_DAYS}d — at or above ${Math.round(CANCELLATION_RATE_THRESHOLD * 100)}% threshold.`
-      : `${cancelled}/${total} orders (${pct}%) cancelled in window — below ${Math.round(CANCELLATION_RATE_THRESHOLD * 100)}% threshold.`,
+      ? `${cancelled}/${total} orders (${pct}%) cancelled in last ${FRAUD_ROLLING_WINDOW_DAYS}d; at or above ${Math.round(CANCELLATION_RATE_THRESHOLD * 100)}% threshold.`
+      : `${cancelled}/${total} orders (${pct}%) cancelled in window; below ${Math.round(CANCELLATION_RATE_THRESHOLD * 100)}% threshold.`,
   };
 }
 

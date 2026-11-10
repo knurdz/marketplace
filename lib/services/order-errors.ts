@@ -58,7 +58,7 @@ export type ConfirmFreeOrderActionState = {
   code?: OrderErrorCode;
   orderStatus?: OrderStatus;
   paymentStatus?: PaymentStatus;
-  /** Confirm API returned ok but DB not yet paid — do not Member-2-write paid. */
+  /** Confirm API returned ok but DB not yet paid: do not Member-2-write paid. */
   pendingConfirmation?: boolean;
 };
 

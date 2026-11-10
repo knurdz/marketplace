@@ -2,7 +2,7 @@
 
 /**
  * Admin-only category CRUD actions.
- * Core logic in lib/services/categories.ts — not exported here for client import safety.
+ * Core logic in lib/services/categories.ts: not exported here for client import safety.
  */
 
 import { revalidatePath } from "next/cache";

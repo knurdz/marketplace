@@ -110,7 +110,7 @@ export default async function AdminTrustPage() {
         </h3>
         <p className="mt-1 text-sm text-muted-foreground">
           Sellers who currently meet all computed Verified badge criteria. This
-          is awareness only — no badge is granted or displayed here.
+          is awareness only. No badge is granted or displayed here.
         </p>
 
         {verified.length === 0 ? (

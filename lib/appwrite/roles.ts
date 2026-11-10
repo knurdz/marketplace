@@ -79,7 +79,7 @@ export function shouldLeaveBuyerStorefront(
   user: LabeledUser,
   sellerStatus?: SellerStatus | null,
 ): boolean {
-  return homePathForUser(user, sellerStatus) !== "/market";
+  return homePathForUser(user, sellerStatus) !== "/";
 }
 
 /**
@@ -99,7 +99,7 @@ export function homePathForUser(
   if (sellerStatus === "pending" || sellerStatus === "rejected") {
     return "/seller/pending";
   }
-  return "/market";
+  return "/";
 }
 
 /**

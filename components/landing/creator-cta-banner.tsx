@@ -47,7 +47,7 @@ export function CreatorCtaBanner({ className }: { className?: string }) {
             </Button>
 
             <Button variant="ghost" size="lg" asChild className="hover:text-accent">
-              <Link href="/market">
+              <Link href="/">
                 Explore listings
               </Link>
             </Button>

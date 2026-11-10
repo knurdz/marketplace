@@ -40,7 +40,7 @@ const EMPTY_COPY: Record<ReportStatus, string> = {
 };
 
 function formatCreatedAt(iso: string | null): string {
-  if (!iso) return "—";
+  if (!iso) return "-";
   try {
     return new Intl.DateTimeFormat(undefined, {
       dateStyle: "medium",

@@ -15,6 +15,11 @@ type CategoryRailProps = {
 
 const SCROLL_STEP = 280;
 
+function categoryInitial(name: string): string {
+  const trimmed = name.trim();
+  return trimmed ? trimmed.charAt(0).toUpperCase() : "?";
+}
+
 export function CategoryRail({
   categories,
   activeSlug,
@@ -70,24 +75,30 @@ export function CategoryRail({
         <div
           ref={trackRef}
           onScroll={syncArrows}
-          className="scrollbar-none flex snap-x snap-mandatory gap-2 overflow-x-auto scroll-smooth pb-1 md:px-11"
+          className="scrollbar-none flex snap-x snap-mandatory gap-4 overflow-x-auto scroll-smooth pb-1 md:px-11"
         >
           <Link
-            href="/market"
-            className={cn(
-              "group/pill inline-flex h-9 shrink-0 snap-start items-center gap-1.5 rounded-full border px-4 text-sm font-medium transition-all duration-200",
-              !activeSlug
-                ? "border-accent bg-accent text-accent-foreground shadow-[0_0_16px_-2px_rgba(21,156,85,0.3)]"
-                : "border-border bg-card text-foreground/80 hover:border-accent/50 hover:bg-card-hover hover:text-foreground hover:-translate-y-0.5 shadow-xs",
-            )}
+            href="/"
+            className="group flex w-20 shrink-0 snap-start flex-col items-center gap-2"
           >
             <span
               className={cn(
-                "size-1.5 rounded-full transition-colors",
-                !activeSlug ? "bg-accent-foreground" : "bg-muted-foreground group-hover/pill:bg-accent",
+                "flex size-16 items-center justify-center rounded-full border text-sm font-semibold transition",
+                !activeSlug
+                  ? "border-accent bg-accent text-accent-foreground"
+                  : "border-border bg-muted text-foreground group-hover:border-accent/50 group-hover:bg-card-hover",
               )}
-            />
-            All
+            >
+              All
+            </span>
+            <span
+              className={cn(
+                "text-center text-xs font-medium",
+                !activeSlug ? "text-foreground" : "text-muted-foreground group-hover:text-foreground",
+              )}
+            >
+              All
+            </span>
           </Link>
           {categories.map((category) => {
             const active = category.slug === activeSlug;
@@ -96,20 +107,26 @@ export function CategoryRail({
                 key={category.$id}
                 href={`/categories/${category.slug}`}
                 aria-current={active ? "page" : undefined}
-                className={cn(
-                  "group/pill inline-flex h-9 shrink-0 snap-start items-center gap-1.5 rounded-full border px-4 text-sm font-medium whitespace-nowrap transition-all duration-200",
-                  active
-                    ? "border-accent bg-accent text-accent-foreground shadow-[0_0_16px_-2px_rgba(21,156,85,0.3)]"
-                    : "border-border bg-card text-foreground/80 hover:border-accent/50 hover:bg-card-hover hover:text-foreground hover:-translate-y-0.5 shadow-xs",
-                )}
+                className="group flex w-20 shrink-0 snap-start flex-col items-center gap-2"
               >
                 <span
                   className={cn(
-                    "size-1.5 rounded-full transition-colors",
-                    active ? "bg-accent-foreground" : "bg-muted-foreground group-hover/pill:bg-accent",
+                    "flex size-16 items-center justify-center rounded-full border text-base font-semibold transition",
+                    active
+                      ? "border-accent bg-accent text-accent-foreground"
+                      : "border-border bg-muted text-foreground group-hover:border-accent/50 group-hover:bg-card-hover",
                   )}
-                />
-                {category.name}
+                >
+                  {categoryInitial(category.name)}
+                </span>
+                <span
+                  className={cn(
+                    "line-clamp-2 text-center text-xs font-medium",
+                    active ? "text-foreground" : "text-muted-foreground group-hover:text-foreground",
+                  )}
+                >
+                  {category.name}
+                </span>
               </Link>
             );
           })}

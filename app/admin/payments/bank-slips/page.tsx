@@ -24,7 +24,7 @@ function formatAmount(amount: number, currency: string): string {
 }
 
 function formatUploadedAt(iso: string): string {
-  if (!iso) return "—";
+  if (!iso) return "-";
   try {
     return new Intl.DateTimeFormat(undefined, {
       dateStyle: "medium",
@@ -94,7 +94,7 @@ export default async function AdminBankSlipsPage({ searchParams }: PageProps) {
                     <dl className="mt-3 space-y-1 font-mono text-xs text-muted-foreground">
                       <div className="flex gap-2">
                         <dt className="text-foreground/70">Seller</dt>
-                        <dd>{entry.sellerId || "—"}</dd>
+                        <dd>{entry.sellerId || "-"}</dd>
                       </div>
                       <div className="flex gap-2">
                         <dt className="text-foreground/70">Buyer</dt>

@@ -2,7 +2,7 @@
 
 /**
  * Admin-only seller approval actions.
- * Core logic in lib/services/seller-approvals.ts — not exported here for client import safety.
+ * Core logic in lib/services/seller-approvals.ts: not exported here for client import safety.
  */
 
 import { revalidatePath } from "next/cache";

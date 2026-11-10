@@ -2,7 +2,7 @@
 
 /**
  * Admin-only report triage actions.
- * Core logic in lib/services/report-triage.ts — not exported here for client import safety.
+ * Core logic in lib/services/report-triage.ts: not exported here for client import safety.
  */
 
 import { revalidatePath } from "next/cache";

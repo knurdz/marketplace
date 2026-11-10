@@ -47,9 +47,8 @@ export default async function CategoryPage({
 
   return (
     <CatalogView
-      eyebrow="Category"
       title={category.name}
-      description={`Active listings in ${category.name}.`}
+      description={`Items people listed in ${category.name}.`}
       categories={categories}
       activeSlug={category.slug}
       products={products}
@@ -62,7 +61,7 @@ export default async function CategoryPage({
           ? `Nothing in ${category.name} for this range`
           : `No listings in ${category.name} yet`
       }
-      emptyDescription="Try another category or browse the full market."
+      emptyDescription="Try another category or browse All Products."
       invalidPriceRange={catalogParams.invalidPriceRange}
     />
   );

@@ -58,7 +58,7 @@ export function RecentlyViewedSection({
       </p>
       <h2 className="mt-2 text-2xl font-bold tracking-tight">On this device</h2>
       <p className="mt-2 text-sm text-muted-foreground">
-        Saved locally — not shared across accounts.
+        Saved locally, not shared across accounts.
       </p>
       <div className="mt-6">
         <ProductGrid products={products} covers={covers} />

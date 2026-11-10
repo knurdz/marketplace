@@ -271,7 +271,7 @@ export async function submitBankSlipAction(
   };
 }
 
-/** Poll own order + payment for PayHere return/cancel pages (DB only — never trust redirect params). */
+/** Poll own order + payment for PayHere return/cancel pages (DB only: never trust redirect params). */
 export async function pollPayHerePaymentStatusAction(
   orderId: string,
 ): Promise<PollPayHerePaymentStatusActionState> {

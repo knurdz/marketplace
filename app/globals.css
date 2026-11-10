@@ -2,17 +2,17 @@
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
 
-@custom-variant dark (&:is(.dark *));
+@custom-variant dark (&:is(.dark:not(:has(.storefront)) *));
 
 /*
-  Knurdz theme tokens — sourced from https://knurdz.org (Aug 2026).
+  Knurdz theme tokens. sourced from https://knurdz.org (Aug 2026).
   Dark is the default (matches the live homepage); `next-themes` swaps the
   `light` / `dark` class on <html>.
   Mapped onto shadcn semantic CSS variables for the UI kit.
 */
 
 :root {
-  /* Knurdz dark (default) — elevated obsidian surfaces for world-class contrast */
+  /* Knurdz dark (default): elevated obsidian surfaces for world-class contrast */
   --background: #000000;
   --foreground: #ffffff;
   --muted: #141926;
@@ -130,6 +130,54 @@
   --sidebar-accent-foreground: #ffffff;
   --sidebar-border: #1e2638;
   --sidebar-ring: #159c55;
+}
+
+/*
+  Public storefront: light retail palette. Applied on <html> via :has() so
+  portaled menus and sheets pick it up too; seller/admin keep the tokens above.
+*/
+html:has(.storefront) {
+  color-scheme: light;
+  /* `@theme inline` bakes font utilities to this var, so swap it at the source. */
+  --font-space-grotesk: var(--font-nunito-sans);
+  --background: #ffffff;
+  --foreground: #0f172a;
+  --muted: #f3f4f6;
+  --muted-foreground: #6b7280;
+  --background-alt: #f6f7f9;
+  --border: #e5e7eb;
+  --input: #e5e7eb;
+  --card: #ffffff;
+  --card-foreground: #0f172a;
+  --card-hover: #f9fafb;
+  --popover: #ffffff;
+  --popover-foreground: #0f172a;
+  --primary: #1d4ed8;
+  --primary-foreground: #ffffff;
+  --secondary: #f3f4f6;
+  --secondary-foreground: #0f172a;
+  --accent: #2563eb;
+  --accent-bright: #3b82f6;
+  --accent-deep: #1d4ed8;
+  --accent-foreground: #ffffff;
+  --destructive: #dc2626;
+  --ring: #2563eb;
+  --radius: 0.625rem;
+
+  --chart-1: #2563eb;
+  --chart-2: #3b82f6;
+  --chart-3: #64748b;
+  --chart-4: #0f172a;
+  --chart-5: #1d4ed8;
+
+  --sidebar: #f6f7f9;
+  --sidebar-foreground: #0f172a;
+  --sidebar-primary: #2563eb;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #ffffff;
+  --sidebar-accent-foreground: #0f172a;
+  --sidebar-border: #e5e7eb;
+  --sidebar-ring: #2563eb;
 }
 
 @theme inline {

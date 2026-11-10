@@ -65,7 +65,7 @@ async function withSessionTables(): Promise<{
     const { tables } = await createSessionClient();
     return { tables };
   } catch {
-    // No session or Appwrite unreachable — guests cannot read (table: read(users)).
+    // No session or Appwrite unreachable: guests cannot read (table: read(users)).
     return null;
   }
 }

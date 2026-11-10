@@ -86,7 +86,7 @@ function buildListQueries(opts: {
 
 /**
  * Admin-scoped, paginated audit log list (server-only; admin SDK + label gate).
- * Reads use API-key client only — audit_logs has table permissions: none.
+ * Reads use API-key client only: audit_logs has table permissions: none.
  */
 export async function listAuditLogs(opts?: {
   actorId?: string;

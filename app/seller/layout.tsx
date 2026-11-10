@@ -50,7 +50,7 @@ export default async function SellerLayout({
   if (isPendingPage) {
     const profile = await getOwnSellerProfile();
     if (!profile) {
-      redirect("/market");
+      redirect("/");
     }
     if (profile.status === "approved") {
       redirect("/seller");

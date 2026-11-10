@@ -35,7 +35,7 @@ const KEY_LABELS: Record<string, string> = {
 
 const KEY_HELP: Record<string, string> = {
   [PLATFORM_SETTING_KEYS.checkoutSandboxModeDisplay]:
-    "Shows a public “Sandbox — test mode” banner to signed-in users. Does not control PayHere Function env.",
+    "Shows a public “Sandbox (test mode)” banner to signed-in users. Does not control PayHere Function env.",
   [PLATFORM_SETTING_KEYS.checkoutFeePercent]:
     "Platform fee percentage (0–100). Stored as a numeric string.",
   [PLATFORM_SETTING_KEYS.checkoutBankInstructions]:
@@ -163,7 +163,7 @@ function SettingFieldForm({ item }: { item: PlatformSettingListItem }) {
 
       {!item.setting ? (
         <p className="mt-2 font-mono text-xs text-accent">
-          Not set yet — save to create this row.
+          Not set yet. Save to create this row.
         </p>
       ) : null}
 

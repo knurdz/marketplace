@@ -311,7 +311,7 @@ export async function listProductReviews(
   }
 }
 
-/** UI gating only — create re-validates eligibility server-side. */
+/** UI gating only: create re-validates eligibility server-side. */
 export async function canReviewProduct(
   productId: string,
 ): Promise<ReviewEligibility> {
@@ -419,7 +419,7 @@ export async function createProductReview(
       };
     }
 
-    return { success: "Thank you — your review was submitted." };
+    return { success: "Thank you. Your review was submitted." };
   } catch (err) {
     if (isUniqueConstraintError(err)) {
       return {

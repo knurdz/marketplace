@@ -1,5 +1,5 @@
 /**
- * Phase 6.16 contract pass — asserts MVP freeze in code.
+ * Phase 6.16 contract pass: asserts MVP freeze in code.
  * Run: npx tsx scripts/verify-contract-pass.ts
  */
 import { maskBankAccountNumber } from "../lib/services/seller-approvals";

@@ -45,6 +45,6 @@ export async function GET(request: Request) {
   const destination =
     result.destination.startsWith("/") && !result.destination.startsWith("//")
       ? result.destination
-      : "/market";
+      : "/";
   return redirectTo(request, destination);
 }

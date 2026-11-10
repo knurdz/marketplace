@@ -49,7 +49,7 @@ export default async function WishlistPage() {
           description="Open a listing and tap Save."
           action={
             <Button asChild>
-              <Link href="/market">Browse listings</Link>
+              <Link href="/">Browse listings</Link>
             </Button>
           }
         />

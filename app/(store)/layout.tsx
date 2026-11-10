@@ -40,7 +40,7 @@ export default async function StoreLayout({
   const user = authUser ? toSessionUserView(authUser) : null;
 
   return (
-    <div className="flex min-h-screen flex-col bg-background text-foreground">
+    <div className="storefront flex min-h-screen flex-col bg-background text-foreground">
       <SkipToContent />
       <StoreNavbar
         user={user}

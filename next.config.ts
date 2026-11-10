@@ -39,7 +39,7 @@ const securityHeaders = [
       "default-src 'self'",
       `script-src ${scriptSrc}`,
       "style-src 'self' 'unsafe-inline'",
-      "img-src 'self' data: blob: https://sgp.cloud.appwrite.io https://*.cloud.appwrite.io",
+      "img-src 'self' data: blob: https://sgp.cloud.appwrite.io https://*.cloud.appwrite.io https://images.unsplash.com",
       "font-src 'self'",
       "connect-src 'self' https://sgp.cloud.appwrite.io https://*.cloud.appwrite.io https://sandbox.payhere.lk https://www.payhere.lk",
       "frame-src https://sandbox.payhere.lk https://www.payhere.lk",

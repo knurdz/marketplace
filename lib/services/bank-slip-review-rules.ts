@@ -76,7 +76,7 @@ function isBankTransfer(order: Order, payment: Payment): boolean {
 
 /**
  * Decide whether a pending bank slip may mark payment/order paid.
- * Already-paid (including a sibling slip) is a success no-op — never a second stock drop.
+ * Already-paid (including a sibling slip) is a success no-op: never a second stock drop.
  */
 export function evaluateBankSlipApprove(params: {
   slip: BankSlip;

@@ -92,7 +92,7 @@ function SellerBankSlipRejectForm({ bankSlipId }: { bankSlipId: string }) {
         size="sm"
         onClick={() => setShowNote(true)}
       >
-        Reject — allow retry
+        Reject (allow retry)
       </Button>
     );
   }
@@ -107,13 +107,13 @@ function SellerBankSlipRejectForm({ bankSlipId }: { bankSlipId: string }) {
           required
           maxLength={500}
           rows={3}
-          placeholder="Why this slip is rejected — stored on the slip and in audit log"
+          placeholder="Why this slip is rejected (stored on the slip and in audit log)"
           className="mt-1 w-full rounded-md border border-border bg-background px-3 py-2 text-sm"
         />
       </label>
       <div className="flex gap-2">
         <Button type="submit" variant="outline" size="sm" disabled={pending}>
-          {pending ? "Rejecting…" : "Reject — allow retry"}
+          {pending ? "Rejecting…" : "Reject (allow retry)"}
         </Button>
         <Button
           type="button"
@@ -165,7 +165,7 @@ function SellerBankSlipRejectAndCancelForm({
           required
           maxLength={500}
           rows={3}
-          placeholder="Why this order is cancelled — stored on the slip and in audit log"
+          placeholder="Why this order is cancelled (stored on the slip and in audit log)"
           className="mt-1 w-full rounded-md border border-border bg-background px-3 py-2 text-sm"
         />
       </label>
