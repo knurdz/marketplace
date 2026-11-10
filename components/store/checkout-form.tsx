@@ -21,7 +21,7 @@ type CheckoutFormProps = {
 };
 
 const METHOD_LABELS: Record<(typeof PAYMENT_METHODS)[number], string> = {
-  payhere: "PayHere (sandbox — test only)",
+  payhere: "PayHere (sandbox, test only)",
   bank_transfer: "Bank transfer",
   free: "Free checkout",
   cod: "Cash on delivery",

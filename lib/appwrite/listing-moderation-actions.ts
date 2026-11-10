@@ -2,7 +2,7 @@
 
 /**
  * Admin-only listing moderation actions.
- * Core logic in lib/services/listing-moderation.ts — not exported here for client import safety.
+ * Core logic in lib/services/listing-moderation.ts: not exported here for client import safety.
  */
 
 import { revalidatePath } from "next/cache";

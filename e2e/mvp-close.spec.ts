@@ -15,7 +15,7 @@ import {
 
 test.describe.configure({ mode: "serial" });
 
-test.describe("Guide §10 — MVP close (Phase 6.18)", () => {
+test.describe("Guide §10: MVP close (Phase 6.18)", () => {
   // Unique forwarded IP per run so retries are not blocked by auth.register (5/hour/IP).
   test.use({
     extraHTTPHeaders: {

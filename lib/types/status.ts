@@ -1,6 +1,6 @@
 /**
  * Canonical marketplace status / method values.
- * Must match docs/agent/SCHEMA.md and scripts/setup-mvp-schema.mjs — do not invent parallel strings.
+ * Must match docs/agent/SCHEMA.md and scripts/setup-mvp-schema.mjs: do not invent parallel strings.
  */
 
 export const PRODUCT_STATUSES = [
@@ -88,7 +88,7 @@ export const BANK_SLIP_QUEUE_PAYMENT_STATUSES = [
 
 /**
  * Buyer cancel allowed only in early statuses (Member 2 step 2.11).
- * Not a full FSM — later members enforce transitions in services.
+ * Not a full FSM: later members enforce transitions in services.
  */
 export const ORDER_CANCELABLE_STATUSES = [
   "pending_payment",

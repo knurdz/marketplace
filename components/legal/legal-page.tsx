@@ -23,7 +23,7 @@ export function LegalPage({ title, updated, children }: LegalPageProps) {
         Last updated: {updated}
       </p>
       <p className="mt-4 max-w-2xl border-l-2 border-border pl-3 text-sm text-muted-foreground">
-        This is an MVP template for Knurdz Marketplace development — not formal
+        This is an MVP template for Knurdz Marketplace development, not formal
         legal advice. Replace with counsel-reviewed policies before production.
       </p>
       <div className="mt-10 max-w-2xl space-y-8 text-sm leading-relaxed text-foreground">

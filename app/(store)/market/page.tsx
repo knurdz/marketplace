@@ -1,56 +1,22 @@
-import { CatalogView } from "@/components/store/catalog-view";
-import {
-  listActiveProducts,
-  listCategories,
-  listCoverImagesByProductIds,
-  parseProductCatalogParams,
-} from "@/lib/services";
+import { redirect } from "next/navigation";
 
-type MarketPageProps = {
-  searchParams: Promise<{
-    minPrice?: string;
-    maxPrice?: string;
-    sort?: string;
-  }>;
+type MarketRedirectProps = {
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
 };
 
-export default async function MarketPage({ searchParams }: MarketPageProps) {
+/** Legacy /market URLs redirect to the home catalog. */
+export default async function MarketRedirect({ searchParams }: MarketRedirectProps) {
   const params = await searchParams;
-  const catalogParams = parseProductCatalogParams(params);
-  const [products, categories] = await Promise.all([
-    listActiveProducts({
-      limit: 48,
-      minPrice: catalogParams.minPrice,
-      maxPrice: catalogParams.maxPrice,
-      sort: catalogParams.sort,
-      invalidPriceRange: catalogParams.invalidPriceRange,
-    }),
-    listCategories(),
-  ]);
-  const covers = await listCoverImagesByProductIds(products.map((p) => p.$id));
+  const query = new URLSearchParams();
 
-  const hasActiveFilters =
-    catalogParams.minPrice != null ||
-    catalogParams.maxPrice != null ||
-    catalogParams.sort !== "newest";
+  for (const [key, value] of Object.entries(params)) {
+    if (typeof value === "string" && value.trim()) {
+      query.set(key, value);
+    } else if (Array.isArray(value) && value[0]) {
+      query.set(key, value[0]);
+    }
+  }
 
-  return (
-    <CatalogView
-      title="Market"
-      description="Active listings from approved sellers. Filter by price, sort, or jump into a category."
-      categories={categories}
-      products={products}
-      covers={covers}
-      filterAction="/market"
-      catalogParams={catalogParams}
-      resultLabel={`${products.length} listing${products.length === 1 ? "" : "s"}`}
-      emptyTitle={hasActiveFilters ? "Nothing in this range" : "No listings yet"}
-      emptyDescription={
-        hasActiveFilters
-          ? "Try widening the price range or clearing sort."
-          : "Check back after sellers publish."
-      }
-      invalidPriceRange={catalogParams.invalidPriceRange}
-    />
-  );
+  const qs = query.toString();
+  redirect(qs ? `/?${qs}` : "/");
 }

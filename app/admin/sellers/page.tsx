@@ -20,7 +20,7 @@ import {
 import { listPendingSellerApplications } from "@/lib/services";
 
 function formatAppliedAt(iso: string | undefined): string {
-  if (!iso) return "—";
+  if (!iso) return "-";
   try {
     return new Intl.DateTimeFormat(undefined, {
       dateStyle: "medium",
@@ -77,7 +77,7 @@ export default async function AdminSellersPage() {
                     ) : null}
                   </TableCell>
                   <TableCell className="px-4 py-3 font-mono text-xs text-muted-foreground">
-                    {app.bankName ?? "—"}
+                    {app.bankName ?? "-"}
                     {app.maskedBankAccountNumber ? (
                       <span className="block">
                         {app.maskedBankAccountNumber}

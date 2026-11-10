@@ -51,7 +51,7 @@ export function asSellerProfile(
   };
 }
 
-/** Mask bank account number — last 4 digits only; never expose full value. */
+/** Mask bank account number: last 4 digits only; never expose full value. */
 export function maskBankAccountNumber(value: string | null): string | null {
   if (!value) return null;
   const digits = value.replace(/\D/g, "");
@@ -59,7 +59,7 @@ export function maskBankAccountNumber(value: string | null): string | null {
   return `****${digits.slice(-4)}`;
 }
 
-/** Admin queue view — omits raw bank fields. */
+/** Admin queue view: omits raw bank fields. */
 export type AdminSellerApplication = {
   $id: string;
   userId: string;
@@ -91,7 +91,7 @@ function toAdminApplication(
   };
 }
 
-/** Exclusive seller role — never keep a buyer label on an approved shop. */
+/** Exclusive seller role: never keep a buyer label on an approved shop. */
 function exclusiveSellerLabels(): string[] {
   return [ROLE_LABELS.seller];
 }
@@ -235,13 +235,13 @@ export async function approveSellerApplicationCore(
       return {
         ok: false,
         error:
-          "Approval failed and could not revert status. Contact an operator — profile may be stuck in approved without seller label.",
+          "Approval failed and could not revert status. Contact an operator. The profile may be stuck in approved without a seller label.",
       };
     }
     return {
       ok: false,
       error:
-        "Could not grant seller label. Application reverted to pending — please retry.",
+        "Could not grant seller label. Application reverted to pending. Please retry.",
     };
   }
 

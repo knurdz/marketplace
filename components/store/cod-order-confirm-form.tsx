@@ -75,11 +75,11 @@ export function CodOrderConfirmForm({
           role="status"
           className="rounded-md border border-border bg-card px-3 py-2 font-mono text-sm text-accent-bright"
         >
-          Order accepted — pay cash on delivery. The seller can fulfill your
+          Order accepted. Pay cash on delivery. The seller can fulfill your
           order.
         </p>
         <Button variant="outline" size="sm" asChild>
-          <Link href="/market">Back to listings</Link>
+          <Link href="/">Back to listings</Link>
         </Button>
       </div>
     );
@@ -112,7 +112,7 @@ export function CodOrderConfirmForm({
           {pending ? "Confirming…" : "Confirm cash on delivery"}
         </Button>
         <Button type="button" variant="outline" size="sm" asChild>
-          <Link href="/market">Back to listings</Link>
+          <Link href="/">Back to listings</Link>
         </Button>
       </form>
 

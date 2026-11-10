@@ -7,7 +7,7 @@ import { getOwnOrder, getOwnPaymentForOrder } from "@/lib/services/orders";
  * PayHere cancel landing page.
  * Member 1 hash Function sets cancel_url to:
  *   {APP_URL}/checkout/payhere/cancel?orderId={orders.$id}
- * PayHere redirect query params are NOT trusted — we still poll DB in case
+ * PayHere redirect query params are NOT trusted: we still poll DB in case
  * notify marked the order paid before the cancel redirect.
  */
 type PayHereCancelPageProps = {

@@ -173,7 +173,7 @@ export function ProductReviewsPlaceholder({
           </p>
         ) : submitted ? (
           <p className="text-sm text-muted-foreground">
-            Thanks — your review was submitted.
+            Thanks. Your review was submitted.
           </p>
         ) : canReview ? (
           <form onSubmit={handleSubmit} className="space-y-5">

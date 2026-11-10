@@ -124,7 +124,7 @@ async function sumPaidPayments(): Promise<{ grossRevenue: number; currency: stri
 
 /**
  * Platform-wide admin metrics (server-only; requires DATABASE_URL).
- * Returns zeros on empty data or Appwrite errors — never throws to callers.
+ * Returns zeros on empty data or Appwrite errors: never throws to callers.
  */
 export async function getAdminMetrics(): Promise<AdminMetrics> {
   if (!hasAppwritePublicConfig()) return emptyMetrics();

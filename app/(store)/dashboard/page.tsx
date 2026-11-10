@@ -145,7 +145,7 @@ export default async function DashboardPage() {
               title="No orders yet"
               action={
                 <Button asChild>
-                  <Link href="/market">Browse listings</Link>
+                  <Link href="/">Browse listings</Link>
                 </Button>
               }
             />
@@ -186,7 +186,7 @@ export default async function DashboardPage() {
               description="Browse listings and tap Save on a product page."
               action={
                 <Button asChild>
-                  <Link href="/market">Browse listings</Link>
+                  <Link href="/">Browse listings</Link>
                 </Button>
               }
             />

@@ -241,7 +241,7 @@ async function listOrdersDirect(opts: {
 
 /**
  * Admin-scoped, paginated all-orders list (server-only; admin SDK + label gate).
- * Filters are applied server-side via Appwrite queries — never full-table JS filter.
+ * Filters are applied server-side via Appwrite queries: never full-table JS filter.
  */
 export async function listAllOrders(opts?: {
   status?: OrderStatus;

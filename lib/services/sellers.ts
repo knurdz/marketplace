@@ -7,7 +7,7 @@ import { createAdminClient } from "@/lib/appwrite/server";
 import { isSellerStatus } from "@/lib/types";
 import { getOwnOrder, getOwnPaymentForOrder } from "./orders";
 
-/** Public storefront seller card — never includes bank or rejection fields. */
+/** Public storefront seller card: never includes bank or rejection fields. */
 export type PublicSellerInfo = {
   userId: string;
   shopName: string;
@@ -52,7 +52,7 @@ export function toPublicSellerInfo(
 /**
  * Approved seller profile for storefront display.
  * Uses admin client (seller_profiles is admin-read only); returns null when
- * missing, non-approved, or on error — never exposes bank account fields.
+ * missing, non-approved, or on error: never exposes bank account fields.
  */
 export async function getPublicSellerByUserId(
   userId: string,
@@ -79,7 +79,7 @@ export async function getPublicSellerByUserId(
 
 /**
  * Approved seller profile by shop slug for `/shop/[slug]`.
- * Returns null for missing, pending, rejected, or invalid slug — same 404 UX.
+ * Returns null for missing, pending, rejected, or invalid slug: same 404 UX.
  */
 export async function getPublicSellerBySlug(
   slug: string,
@@ -109,7 +109,7 @@ const CHECKOUT_BANK_PAYMENT_STATUSES = [
   "awaiting_verification",
 ] as const;
 
-/** Bank details for an owned bank-transfer checkout — server-only, never on public seller cards. */
+/** Bank details for an owned bank-transfer checkout: server-only, never on public seller cards. */
 export type CheckoutSellerBankDetails = {
   bankAccountName: string | null;
   bankAccountNumber: string | null;

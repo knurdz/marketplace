@@ -69,7 +69,7 @@ function formatCreatedAt(iso: string): string {
 }
 
 function formatDuration(seconds: number): string {
-  if (!Number.isFinite(seconds) || seconds < 0) return "—";
+  if (!Number.isFinite(seconds) || seconds < 0) return "-";
   if (seconds < 1) return `${Math.round(seconds * 1000)} ms`;
   return `${seconds.toFixed(2)} s`;
 }
@@ -166,7 +166,7 @@ export default async function AdminNotifyLogsPage({ searchParams }: PageProps) {
                           }${entry.reason ? ` · ${entry.reason}` : ""}`
                         : entry.reason
                           ? `Reason: ${entry.reason}`
-                          : "—"}
+                          : "-"}
                     </TableCell>
                     <TableCell className="px-4 whitespace-normal font-mono text-xs text-muted-foreground">
                       {entry.executionStatus} · HTTP {entry.responseStatusCode} ·{" "}
@@ -186,7 +186,7 @@ export default async function AdminNotifyLogsPage({ searchParams }: PageProps) {
                           </pre>
                         </details>
                       ) : (
-                        <span className="text-xs text-muted-foreground">—</span>
+                        <span className="text-xs text-muted-foreground">-</span>
                       )}
                     </TableCell>
                   </TableRow>

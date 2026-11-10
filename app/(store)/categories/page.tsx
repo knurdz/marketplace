@@ -15,7 +15,7 @@ export default async function CategoriesPage() {
         description="Jump into a shelf. Every category only shows active listings."
         actions={
           <Button asChild>
-            <Link href="/market">All listings</Link>
+            <Link href="/#browse">Browse listings</Link>
           </Button>
         }
       />

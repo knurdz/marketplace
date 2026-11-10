@@ -22,7 +22,7 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
   const rawQ = typeof params.q === "string" ? params.q : "";
   const normalized = normalizeProductSearchQuery(rawQ);
   if (!normalized) {
-    redirect("/market");
+    redirect("/");
   }
 
   const catalogParams = parseProductCatalogParams(params);
@@ -46,9 +46,8 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
 
   return (
     <CatalogView
-      eyebrow="Search"
       title={`“${normalized}”`}
-      description="Active listings matching the title."
+      description="Listings matching your search."
       categories={categories}
       products={products}
       covers={covers}

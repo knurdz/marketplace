@@ -28,7 +28,7 @@ export default async function CartPage() {
 
       <p className="mt-12">
         <Button variant="secondary" asChild>
-          <Link href="/market">Continue shopping</Link>
+          <Link href="/">Continue shopping</Link>
         </Button>
       </p>
     </main>

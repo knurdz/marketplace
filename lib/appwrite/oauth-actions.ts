@@ -26,7 +26,7 @@ function oauthFrom(raw: string): "login" | "register" {
 
 /**
  * Begin Google / Apple / Facebook OAuth (Appwrite createOAuth2Token).
- * Provider secrets stay in Appwrite Console — never in Next.js env.
+ * Provider secrets stay in Appwrite Console: never in Next.js env.
  */
 export async function startOAuth(formData: FormData): Promise<void> {
   const origin = await getRequestOrigin();

@@ -130,7 +130,7 @@ export function AnalyticsCharts({
         <h3 className="font-mono text-sm text-accent">Sales over time</h3>
         <p className="mt-1 text-sm text-muted-foreground">
           Order volume and paid revenue per {isMonthly ? "month" : "day"}.
-          Aggregate counts only — no individual orders.
+          Aggregate counts only. No individual orders.
         </p>
         <div className="mt-6 h-72 w-full">
           {salesData.length === 0 ? (

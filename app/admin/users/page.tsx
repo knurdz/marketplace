@@ -23,7 +23,7 @@ import {
 import { listUsers } from "@/lib/services";
 
 function formatJoinedAt(iso: string | undefined): string {
-  if (!iso) return "—";
+  if (!iso) return "-";
   try {
     return new Intl.DateTimeFormat(undefined, {
       dateStyle: "medium",
@@ -35,7 +35,7 @@ function formatJoinedAt(iso: string | undefined): string {
 }
 
 function formatLabels(labels: string[]): string {
-  if (labels.length === 0) return "—";
+  if (labels.length === 0) return "-";
   return labels.join(", ");
 }
 
@@ -135,7 +135,7 @@ export default async function AdminUsersPage({ searchParams }: PageProps) {
                     <TableCell className="w-[260px] max-w-[260px] px-4 py-3 whitespace-normal">
                       {user.isAdmin ? (
                         <p className="font-mono text-xs text-muted-foreground">
-                          Admin — cannot suspend
+                          Admin (cannot suspend)
                         </p>
                       ) : user.suspended ? (
                         <UserUnsuspendButton userId={user.userId} />

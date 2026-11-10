@@ -408,7 +408,7 @@ export type ProductCoverMap = Record<string, ProductCover>;
 const COVER_ID_CHUNK = 50;
 
 /**
- * First image (lowest sortOrder) per product. One query per chunk — no N+1.
+ * First image (lowest sortOrder) per product. One query per chunk: no N+1.
  */
 export async function listCoverImagesByProductIds(
   productIds: string[],

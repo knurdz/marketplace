@@ -111,7 +111,7 @@ export function BankSlipUploadForm({ order, payment }: BankSlipUploadFormProps) 
             {pending ? "Uploading…" : "Upload bank slip"}
           </Button>
           <Button type="button" variant="outline" size="sm" asChild>
-            <Link href="/market">Back to listings</Link>
+            <Link href="/">Back to listings</Link>
           </Button>
         </div>
       </form>

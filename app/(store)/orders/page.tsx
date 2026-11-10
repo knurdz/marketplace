@@ -30,7 +30,7 @@ export default async function OrdersPage() {
           description="When you check out, they will land here."
           action={
             <Button asChild>
-              <Link href="/market">Browse listings</Link>
+              <Link href="/">Browse listings</Link>
             </Button>
           }
         />

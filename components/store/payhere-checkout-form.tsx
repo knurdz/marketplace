@@ -53,10 +53,10 @@ export function PayHereCheckoutForm({ order, payment }: PayHereCheckoutFormProps
           role="status"
           className="rounded-md border border-border bg-card px-3 py-2 font-mono text-sm text-accent-bright"
         >
-          Payment confirmed — your order is paid.
+          Payment confirmed. Your order is paid.
         </p>
         <Button variant="outline" size="sm" asChild>
-          <Link href="/market">Back to listings</Link>
+          <Link href="/">Back to listings</Link>
         </Button>
       </div>
     );
@@ -95,7 +95,7 @@ export function PayHereCheckoutForm({ order, payment }: PayHereCheckoutFormProps
           {isPending ? "Redirecting to PayHere…" : "Continue to PayHere"}
         </Button>
         <Button type="button" variant="outline" size="sm" asChild>
-          <Link href="/market">Back to listings</Link>
+          <Link href="/">Back to listings</Link>
         </Button>
       </div>
 

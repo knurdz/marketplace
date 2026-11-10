@@ -41,7 +41,7 @@ assert(
   "seller label allows even with pending row",
 );
 // Shop/settings pages must not redirect labeled sellers to /seller/pending
-// (pending page bounces them back to /seller — redirect loop).
+// (pending page bounces them back to /seller: redirect loop).
 assert(
   blockedSellerPortalDestination(true, profile("pending")) !== "/seller/pending",
   "labeled seller shop/settings must not redirect to pending",
@@ -74,15 +74,15 @@ assert(
   "seller home",
 );
 assert(
-  homePathForUser({ labels: ["buyer"] }) === "/market",
+  homePathForUser({ labels: ["buyer"] }) === "/",
   "buyer home",
 );
 assert(
-  homePathForUser({ labels: [] }) === "/market",
+  homePathForUser({ labels: [] }) === "/",
   "unlabeled account without seller profile → market (default buyer)",
 );
 assert(
-  homePathForUser({ labels: ["user"] }) === "/market",
+  homePathForUser({ labels: ["user"] }) === "/",
   "legacy user label is treated as buyer home",
 );
 assert(
@@ -90,7 +90,7 @@ assert(
   "pending applicant home",
 );
 assert(
-  postLoginPath({ labels: ["seller"] }, "/market") === "/seller",
+  postLoginPath({ labels: ["seller"] }, "/") === "/seller",
   "seller cannot next into market",
 );
 assert(
@@ -111,7 +111,7 @@ assert(
   "legacy user label may next into cart",
 );
 assert(
-  postLoginPath({ labels: [] }, "/market") === "/market",
+  postLoginPath({ labels: [] }, "/") === "/",
   "unlabeled may open market",
 );
 

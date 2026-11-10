@@ -170,7 +170,7 @@ export async function recordMarketplaceView(input: {
       });
     }
   } catch {
-    // Table may not exist yet, or Appwrite is unreachable — never fail the page.
+    // Table may not exist yet, or Appwrite is unreachable: never fail the page.
   }
 }
 

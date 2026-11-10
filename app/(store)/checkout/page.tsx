@@ -26,7 +26,7 @@ export default async function CheckoutPage() {
           title="Your cart is empty"
           action={
             <Button asChild>
-              <Link href="/market">Browse listings</Link>
+              <Link href="/">Browse listings</Link>
             </Button>
           }
         />

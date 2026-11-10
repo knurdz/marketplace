@@ -134,7 +134,7 @@ export default async function AdminOrdersPage({ searchParams }: PageProps) {
     <div>
       <PortalPageHeader
         title="All orders"
-        description="Platform-wide order oversight. Cancel unpaid orders or refund paid ones — both write canonical statuses and an audit log. Captured PayHere money is returned in the merchant dashboard, not here."
+        description="Platform-wide order oversight. Cancel unpaid orders or refund paid ones. Both write canonical statuses and an audit log. Captured PayHere money is returned in the merchant dashboard, not here."
       />
 
       <form method="get" className="mt-6 flex flex-wrap items-end gap-3">
@@ -259,7 +259,7 @@ export default async function AdminOrdersPage({ searchParams }: PageProps) {
                             tone={paymentStatusTone(order.paymentStatus)}
                           />
                         ) : (
-                          <span className="text-xs text-muted-foreground">—</span>
+                          <span className="text-xs text-muted-foreground">-</span>
                         )}
                       </div>
                     </TableCell>

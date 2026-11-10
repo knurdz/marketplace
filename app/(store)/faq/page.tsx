@@ -22,7 +22,7 @@ export default function FaqPage() {
         <p>
           Create an account and choose Seller at registration. An admin reviews
           your shop before you can publish listings. Buyer and seller accounts
-          are separate — buyers cannot convert later.
+          are separate: buyers cannot convert later.
         </p>
       </LegalSection>
 

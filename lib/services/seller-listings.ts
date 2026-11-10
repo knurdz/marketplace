@@ -139,7 +139,7 @@ function parseStock(raw: unknown): number | FieldParseError {
   return { ok: false, error: "Stock is required." };
 }
 
-/** Validate create-listing fields (no I/O). Ignores sellerId/status — set server-side only. */
+/** Validate create-listing fields (no I/O). Ignores sellerId/status: set server-side only. */
 export function parseCreateDraftProductInput(
   input: CreateDraftProductInput & {
     sellerId?: unknown;
@@ -824,7 +824,7 @@ async function loadOwnProduct(
 
 /**
  * Submit an own draft or rejected listing for admin moderation.
- * Sellers never write active — only pending_review.
+ * Sellers never write active: only pending_review.
  */
 export async function submitListingForReviewCore(
   productId: string,

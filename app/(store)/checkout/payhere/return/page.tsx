@@ -8,7 +8,7 @@ import { getOwnOrder, getOwnPaymentForOrder } from "@/lib/services/orders";
  * Member 1 hash Function sets return_url to:
  *   {APP_URL}/checkout/payhere/return?orderId={orders.$id}
  * PayHere redirect query params (status_code, payment_id, md5sig, etc.) are NOT
- * trusted — success/failure comes from DB polling only.
+ * trusted: success/failure comes from DB polling only.
  */
 type PayHereReturnPageProps = {
   searchParams: Promise<{ orderId?: string }>;
@@ -38,7 +38,7 @@ export default async function PayHereReturnPage({
       </h1>
       <p className="mt-4 text-muted-foreground">
         Order <span className="font-mono text-foreground">{order.$id}</span>.
-        We are checking your payment status — this may take a few seconds.
+        We are checking your payment status. This may take a few seconds.
       </p>
 
       <PayHerePaymentStatus

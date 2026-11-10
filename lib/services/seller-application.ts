@@ -21,7 +21,7 @@ const MAX_BANK_NAME_LENGTH = 128;
 const MAX_BANK_ACCOUNT_NAME_LENGTH = 128;
 const MAX_BANK_ACCOUNT_NUMBER_LENGTH = 64;
 const MAX_BANK_TRANSFER_NOTES_LENGTH = 2000;
-/** Digits, spaces, hyphens — Sri Lankan copy-paste friendly. */
+/** Digits, spaces, hyphens: Sri Lankan copy-paste friendly. */
 const BANK_ACCOUNT_NUMBER_PATTERN = /^[\d\s-]+$/;
 
 export type BlockedSellerPortalDestination = "/seller/pending" | "/" | null;
@@ -416,7 +416,7 @@ export async function submitSellerApplicationCore(
 
 /**
  * Create a pending seller_profiles row for a newly registered user (admin SDK).
- * Does not grant the seller label — admin approval does that.
+ * Does not grant the seller label: admin approval does that.
  */
 export async function createPendingSellerProfileForUser(
   userId: string,

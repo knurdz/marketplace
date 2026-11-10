@@ -24,7 +24,7 @@ export function ProductCatalogFilters({
     <form
       action={action}
       method="get"
-      className="flex flex-col gap-3 rounded-xl border border-border bg-card/50 p-3 sm:flex-row sm:flex-wrap sm:items-end"
+      className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-end"
     >
       {preserve &&
         Object.entries(preserve).map(([name, value]) => (

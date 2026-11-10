@@ -1,6 +1,6 @@
 /**
  * Public Appwrite config (safe for client + server).
- * Secrets (DATABASE_URL, BETTER_AUTH_SECRET) are read only on the server — never here as exports for the browser.
+ * Secrets (DATABASE_URL, BETTER_AUTH_SECRET) are read only on the server: never here as exports for the browser.
  *
  * Database / table IDs are code constants that must match the Appwrite console
  * (see docs/agent/SCHEMA.md after step 1.7).
@@ -12,7 +12,7 @@ export const SESSION_COOKIE = "knurdz.session_token";
 /** TablesDB database id (console: Marketplace). */
 export const DATABASE_ID = "marketplace";
 
-/** Table IDs — must match Appwrite console / docs/agent/SCHEMA.md. */
+/** Table IDs: must match Appwrite console / docs/agent/SCHEMA.md. */
 export const TABLE_PROFILES = "profiles";
 export const TABLE_SELLER_PROFILES = "seller_profiles";
 export const TABLE_CATEGORIES = "categories";
@@ -66,7 +66,7 @@ export const ALL_TABLE_IDS = [
   TABLE_RATE_LIMITS,
 ] as const;
 
-/** Storage bucket IDs — must match Appwrite console / docs/agent/SCHEMA.md. */
+/** Storage bucket IDs: must match Appwrite console / docs/agent/SCHEMA.md. */
 export const BUCKET_AVATARS = "avatars";
 export const BUCKET_PRODUCT_IMAGES = "product-images";
 export const BUCKET_BANK_SLIPS = "bank-slips";
@@ -84,7 +84,7 @@ export {
   PAYHERE_FUNCTION_IDS as ALL_PAYHERE_FUNCTION_IDS,
 } from "@/lib/types/payhere";
 
-/** Max upload sizes (bytes) — mirror bucket settings. */
+/** Max upload sizes (bytes): mirror bucket settings. */
 export const AVATAR_MAX_BYTES = 2 * 1024 * 1024; // 2MB
 export const PRODUCT_IMAGE_MAX_BYTES = 5 * 1024 * 1024; // 5MB
 export const BANK_SLIP_MAX_BYTES = 5 * 1024 * 1024; // 5MB

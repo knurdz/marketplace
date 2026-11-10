@@ -1,6 +1,6 @@
 /**
  * Pure COD confirm eligibility.
- * Amounts come from DB snapshots — never from the client body.
+ * Amounts come from DB snapshots: never from the client body.
  * Buyer acceptance moves the order to `processing` and leaves payment `pending`.
  * Cash is marked paid by the seller on delivery.
  */

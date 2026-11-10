@@ -1,6 +1,6 @@
 /**
  * Pure free-confirm eligibility (Member 1 step 1.24).
- * Amounts come from DB snapshots — never from the client body.
+ * Amounts come from DB snapshots: never from the client body.
  * See docs/agent/PAYHERE.md.
  */
 

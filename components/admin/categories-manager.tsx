@@ -75,7 +75,7 @@ function parentOptions(
     )
     .map((c) => ({
       value: c.$id,
-      label: `${"— ".repeat(depth(c.$id))}${c.name}`,
+      label: `${"- ".repeat(depth(c.$id))}${c.name}`,
     }));
 }
 
@@ -393,7 +393,7 @@ export function CategoriesManager({
 
       {tree.length === 0 ? (
         <p className="mt-10 rounded-md border border-border bg-card px-4 py-5 font-mono text-sm text-muted-foreground">
-          No categories yet. Create one above — storefront filters will read
+          No categories yet. Create one above. Storefront filters will read
           from this list once seeded.
         </p>
       ) : (

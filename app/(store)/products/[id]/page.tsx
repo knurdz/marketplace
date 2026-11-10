@@ -72,7 +72,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
         <BreadcrumbList>
           <BreadcrumbItem>
             <BreadcrumbLink asChild>
-              <Link href="/market">Market</Link>
+              <Link href="/#browse">Browse</Link>
             </BreadcrumbLink>
           </BreadcrumbItem>
           {category ? (
@@ -141,7 +141,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
               <p className="text-sm text-muted-foreground">
                 {!product.available
                   ? "This item is currently unavailable."
-                  : "Out of stock — check back later."}
+                  : "Out of stock. Check back later."}
               </p>
             )}
 
@@ -190,7 +190,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
 
       <div className="mt-10">
         <Button variant="outline" asChild className="gap-2">
-          <Link href="/market">
+          <Link href="/">
             <ArrowLeft className="size-4" />
             Back to listings
           </Link>

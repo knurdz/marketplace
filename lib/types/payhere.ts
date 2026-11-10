@@ -1,10 +1,10 @@
 /**
  * PayHere Function / free-confirm contracts (step 1.20).
- * Frozen names/payloads for Members 2 + 4 — see docs/agent/PAYHERE.md.
+ * Frozen names/payloads for Members 2 + 4: see docs/agent/PAYHERE.md.
  * Merchant secret never appears in these types or client responses.
  */
 
-/** Appwrite Function IDs — must match console when Member 1 deploys (steps 1.22–1.23). */
+/** Appwrite Function IDs: must match console when Member 1 deploys (steps 1.22–1.23). */
 export const FUNCTION_PAYHERE_CHECKOUT_HASH = "payhere-checkout-hash";
 export const FUNCTION_PAYHERE_NOTIFY = "payhere-notify";
 
@@ -94,7 +94,7 @@ export const PAYHERE_STATUS_CODES = {
 } as const;
 
 /**
- * Free checkout confirm — contract for Member 2 (server action).
+ * Free checkout confirm: contract for Member 2 (server action).
  * Not a PayHere Function; documented alongside for a single payments contract.
  */
 export type ConfirmFreeOrderRequest = {

@@ -110,7 +110,7 @@ async function countSellerOrders(
 /**
  * Read-only seller dashboard KPIs (session client; own sellerId only).
  * Revenue matches earnings: sum of payments with status paid.
- * Returns zeros on empty data or Appwrite errors — never throws to callers.
+ * Returns zeros on empty data or Appwrite errors: never throws to callers.
  */
 export async function getSellerMetrics(): Promise<SellerMetrics> {
   if (!hasAppwritePublicConfig()) return emptyMetrics();

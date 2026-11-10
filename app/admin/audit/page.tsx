@@ -217,11 +217,11 @@ export default async function AdminAuditPage({ searchParams }: PageProps) {
                       {entry.resourceId ? ` · ${entry.resourceId}` : ""}
                     </TableCell>
                     <TableCell className="px-4 font-mono text-xs text-muted-foreground">
-                      {entry.ip ?? "—"}
+                      {entry.ip ?? "-"}
                     </TableCell>
                     <TableCell className="px-4 whitespace-normal">
                       {meta.kind === "empty" ? (
-                        <span className="text-xs text-muted-foreground">—</span>
+                        <span className="text-xs text-muted-foreground">-</span>
                       ) : (
                         <details>
                           <summary className="cursor-pointer font-mono text-xs text-muted-foreground hover:text-foreground">

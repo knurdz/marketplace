@@ -179,7 +179,7 @@ async function findSettingByKey(
 
 /**
  * Admin-scoped list of all allowlisted platform settings.
- * Iterates ALL_PLATFORM_SETTING_KEYS — stray DB rows never appear.
+ * Iterates ALL_PLATFORM_SETTING_KEYS: stray DB rows never appear.
  */
 export async function listAllPlatformSettings(): Promise<
   PlatformSettingListItem[] | { error: string }

@@ -4,7 +4,7 @@ import { headers } from "next/headers";
  * In-process sliding-window rate limiter for server actions.
  *
  * Suitable for single-instance `next start` / local MVP. Multi-instance
- * hosts need a shared store (Redis, etc.) — limits are per process only.
+ * hosts need a shared store (Redis, etc.): limits are per process only.
  */
 
 export const RATE_LIMIT_MESSAGE =
@@ -13,7 +13,7 @@ export const RATE_LIMIT_MESSAGE =
 const MS_MINUTE = 60_000;
 const MS_HOUR = 60 * MS_MINUTE;
 
-/** Named presets — single source of truth for auth/upload abuse guards. */
+/** Named presets: single source of truth for auth/upload abuse guards. */
 export const RATE_LIMITS = {
   login: { limit: 5, windowMs: 15 * MS_MINUTE },
   register: { limit: 5, windowMs: MS_HOUR },
@@ -123,7 +123,7 @@ export function assertRateLimits(
   return { ok: true };
 }
 
-/** Read-only check — does not record a hit. */
+/** Read-only check: does not record a hit. */
 function peekRateLimit(params: {
   bucket: string;
   key: string;
@@ -167,7 +167,7 @@ export function normalizeEmailKey(email: string): string {
   return email.trim().toLowerCase().slice(0, 256);
 }
 
-/** Test helper — clears all buckets (dev/tests only). */
+/** Test helper: clears all buckets (dev/tests only). */
 export function __resetRateLimitStoreForTests() {
   store.clear();
   lastPruneAt = 0;

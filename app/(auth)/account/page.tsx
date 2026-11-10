@@ -67,7 +67,7 @@ export default async function AccountPage() {
 
       <div className="mt-8 flex flex-wrap gap-3">
         <Button variant="secondary" asChild>
-          <Link href="/market">Market</Link>
+          <Link href="/#browse">Browse</Link>
         </Button>
         <form action={signOut}>
           <Button type="submit">Sign out</Button>

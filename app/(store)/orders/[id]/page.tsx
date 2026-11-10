@@ -193,7 +193,7 @@ export default async function OrderDetailPage({
           <Link href="/orders">All orders</Link>
         </Button>
         <Button variant="outline" size="sm" asChild>
-          <Link href="/market">Back to listings</Link>
+          <Link href="/">Back to listings</Link>
         </Button>
       </div>
     </main>

@@ -96,7 +96,7 @@ async function verifyAppwriteLockdown(): Promise<void> {
     sessionBlocked = sessionResult.rows.length === 0;
     if (!sessionBlocked) {
       console.warn(
-        "session client returned rows without auth — unexpected; check table permissions",
+        "session client returned rows without auth: unexpected; check table permissions",
       );
     }
   } catch {
