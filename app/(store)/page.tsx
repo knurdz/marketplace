@@ -37,11 +37,20 @@ export default async function Home({ searchParams }: HomePageProps) {
   const categoryLabel = matchedCategory?.name ?? null;
   const catalog = parseProductCatalogParams(params);
 
+  const hasBrowseParams =
+    category != null ||
+    catalog.minPrice != null ||
+    catalog.maxPrice != null ||
+    catalog.sort !== "newest" ||
+    catalog.invalidPriceRange;
+
   const [justListed, browseProducts] = await Promise.all([
-    listActiveProducts({
-      limit: JUST_LISTED_LIMIT,
-      sort: "newest",
-    }),
+    hasBrowseParams
+      ? Promise.resolve([])
+      : listActiveProducts({
+          limit: JUST_LISTED_LIMIT,
+          sort: "newest",
+        }),
     listActiveProducts({
       limit: BROWSE_LIMIT,
       categoryId: matchedCategory?.$id,
@@ -68,13 +77,6 @@ export default async function Home({ searchParams }: HomePageProps) {
     covers,
   };
 
-  const hasBrowseParams =
-    category != null ||
-    catalog.minPrice != null ||
-    catalog.maxPrice != null ||
-    catalog.sort !== "newest" ||
-    catalog.invalidPriceRange;
-
   return (
     <main className="mx-auto w-full max-w-7xl space-y-12 px-4 py-8 sm:px-6 sm:py-10 lg:px-8">
       <ScrollToBrowse enabled={hasBrowseParams} />
@@ -88,7 +90,9 @@ export default async function Home({ searchParams }: HomePageProps) {
         invalidPriceRange={browseProps.invalidPriceRange}
         categoriesWithProducts={categoriesWithProducts}
       />
-      <HomeListings products={justListed} covers={covers} />
+      {hasBrowseParams ? null : (
+        <HomeListings products={justListed} covers={covers} />
+      )}
       <HomeBrowseListings {...browseProps} />
     </main>
   );
