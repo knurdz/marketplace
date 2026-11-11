@@ -1,10 +1,10 @@
 import { cn } from "@/lib/utils";
 
-/** Wishlist rose, all-requests sky, pending (requested) amber. */
+/** Wishlist reddish pink, all-requests sky, pending (requested) amber. */
 export type NavCountTone = "wishlist" | "requests" | "pending";
 
 const TONE_CLASS: Record<NavCountTone, string> = {
-  wishlist: "bg-rose-500 text-white",
+  wishlist: "bg-[#e8456a] text-white",
   requests: "bg-sky-600 text-white",
   pending: "bg-amber-500 text-amber-950",
 };

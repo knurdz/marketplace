@@ -67,6 +67,8 @@ type ShopReviewsSheetProps = {
   shopName: string;
   metrics: SellerReviewMetrics;
   reviews: Review[];
+  /** Compact rating chip used on the public shop header. */
+  triggerMode?: "button" | "rating-pill";
   triggerVariant?: ComponentProps<typeof Button>["variant"];
   triggerSize?: ComponentProps<typeof Button>["size"];
   triggerClassName?: string;
@@ -77,26 +79,52 @@ export function ShopReviewsSheet({
   shopName,
   metrics,
   reviews,
+  triggerMode = "button",
   triggerVariant = "secondary",
   triggerSize = "sm",
   triggerClassName,
   triggerLabel = "See reviews",
 }: ShopReviewsSheetProps) {
-  const averageLabel =
-    metrics.count > 0 && metrics.average != null
-      ? metrics.average.toFixed(1)
-      : "—";
+  const hasRating = metrics.count > 0 && metrics.average != null;
+  const averageLabel = hasRating ? metrics.average!.toFixed(1) : "—";
+
+  const ratingPill = (
+    <button
+      type="button"
+      className="group inline-flex max-w-full items-center gap-2 rounded-full border border-border bg-background px-3 py-1.5 text-left shadow-xs transition-colors hover:border-accent/35 hover:bg-accent/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50"
+    >
+      {hasRating ? (
+        <>
+          <span className="text-sm font-semibold tabular-nums text-foreground">
+            {averageLabel}
+          </span>
+          <StarRating rating={Math.round(metrics.average!)} size="sm" />
+          <span className="text-xs text-muted-foreground transition-colors group-hover:text-foreground">
+            {metrics.count} {metrics.count === 1 ? "review" : "reviews"}
+          </span>
+        </>
+      ) : (
+        <span className="text-xs text-muted-foreground transition-colors group-hover:text-foreground">
+          No reviews yet
+        </span>
+      )}
+    </button>
+  );
 
   return (
     <Sheet>
       <SheetTrigger asChild>
-        <Button
-          variant={triggerVariant}
-          size={triggerSize}
-          className={triggerClassName}
-        >
-          {triggerLabel}
-        </Button>
+        {triggerMode === "rating-pill" ? (
+          ratingPill
+        ) : (
+          <Button
+            variant={triggerVariant}
+            size={triggerSize}
+            className={triggerClassName}
+          >
+            {triggerLabel}
+          </Button>
+        )}
       </SheetTrigger>
       <SheetContent
         side="right"

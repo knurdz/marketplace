@@ -1,4 +1,3 @@
-import { StarRating } from "@/components/seller/star-rating";
 import { ShopReviewsSheet } from "@/components/store/shop-reviews-sheet";
 import type { PublicSellerInfo } from "@/lib/services/sellers";
 import type { SellerReviewMetrics } from "@/lib/services/reviews";
@@ -44,11 +43,9 @@ export function ShopHeader({
 }: ShopHeaderProps) {
   const initial = seller.shopName.trim().charAt(0).toUpperCase() || "?";
   const sellingSince = formatSellingSince(seller.$createdAt);
-  const hasRating = metrics.count > 0 && metrics.average != null;
 
   const stats: string[] = [
     `${listingCount} ${listingCount === 1 ? "listing" : "listings"}`,
-    `${metrics.count} ${metrics.count === 1 ? "review" : "reviews"}`,
   ];
   if (sellingSince) {
     stats.push(`Selling since ${sellingSince}`);
@@ -71,49 +68,30 @@ export function ShopHeader({
       )}
 
       <div className="px-4 pb-6 pt-0 sm:px-6">
-        <div className="-mt-8 flex flex-col gap-5 sm:-mt-10 sm:flex-row sm:items-end sm:justify-between">
-          <div className="flex min-w-0 items-end gap-4">
-            <div
-              className="flex size-16 shrink-0 items-center justify-center rounded-xl border border-border bg-background text-2xl font-bold tracking-tight text-foreground shadow-sm sm:size-20 sm:text-3xl"
-              aria-hidden
-            >
-              {initial}
-            </div>
-            <div className="min-w-0 pb-0.5">
-              <p className="font-mono text-sm text-accent">@{seller.slug}</p>
-              <h1 className="mt-1 truncate text-2xl font-bold tracking-tight sm:text-3xl">
-                {seller.shopName}
-              </h1>
-            </div>
-          </div>
-
-          <div className="flex shrink-0 flex-wrap items-center gap-3">
-            <ShopReviewsSheet
-              shopName={seller.shopName}
-              metrics={metrics}
-              reviews={reviews}
-            />
+        {/* Monogram alone overlaps the banner; name/handle sit on the card. */}
+        <div className="-mt-8 sm:-mt-10">
+          <div
+            className="flex size-16 shrink-0 items-center justify-center rounded-xl border border-border bg-background text-2xl font-bold tracking-tight text-foreground shadow-sm sm:size-20 sm:text-3xl"
+            aria-hidden
+          >
+            {initial}
           </div>
         </div>
 
-        <div className="mt-5 flex flex-wrap items-center gap-x-4 gap-y-2">
-          {hasRating ? (
-            <div className="flex flex-wrap items-center gap-2">
-              <span className="text-lg font-semibold tabular-nums tracking-tight text-foreground">
-                {metrics.average!.toFixed(1)}
-              </span>
-              <StarRating
-                rating={Math.round(metrics.average!)}
-                size="md"
-              />
-              <span className="text-sm text-muted-foreground">
-                ({metrics.count}{" "}
-                {metrics.count === 1 ? "review" : "reviews"})
-              </span>
-            </div>
-          ) : (
-            <p className="text-sm text-muted-foreground">No reviews yet</p>
-          )}
+        <div className="mt-3 min-w-0">
+          <h1 className="truncate text-2xl font-bold tracking-tight sm:text-3xl">
+            {seller.shopName}
+          </h1>
+          <p className="mt-1 font-mono text-sm text-accent">@{seller.slug}</p>
+        </div>
+
+        <div className="mt-4">
+          <ShopReviewsSheet
+            shopName={seller.shopName}
+            metrics={metrics}
+            reviews={reviews}
+            triggerMode="rating-pill"
+          />
         </div>
 
         <p className="mt-3 flex flex-wrap gap-x-3 gap-y-1 text-sm text-muted-foreground">
