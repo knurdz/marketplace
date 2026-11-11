@@ -49,28 +49,25 @@ export default async function AdminPage() {
   ]);
 
   return (
-    <div>
+    <div className="w-full">
       <PortalPageHeader
         title="Dashboard"
-        description="Platform snapshot. Open a metric or queue for the trend and the matching page."
+        description="Platform activity at a glance."
       />
 
-      <div className="mt-6">
-        <AdminDashboardCharts
-          metrics={{
-            totalUsers: formatCount(metrics.totalUsers),
-            activeSellers: formatCount(metrics.activeSellers),
-            totalOrders: formatCount(metrics.openRequests),
-            grossRevenue: formatCount(metrics.soldRequests),
-            currency: "REQ",
-          }}
-          sales30d={sales30d}
-          sales12m={sales12m}
-          growth30d={growth30d}
-          growth12m={growth12m}
-          queues={[...QUEUES]}
-        />
-      </div>
+      <AdminDashboardCharts
+        metrics={{
+          totalUsers: formatCount(metrics.totalUsers),
+          activeSellers: formatCount(metrics.activeSellers),
+          totalOrders: formatCount(metrics.openRequests),
+          grossRevenue: formatCount(metrics.soldRequests),
+        }}
+        sales30d={sales30d}
+        sales12m={sales12m}
+        growth30d={growth30d}
+        growth12m={growth12m}
+        queues={[...QUEUES]}
+      />
     </div>
   );
 }

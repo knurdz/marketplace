@@ -1,29 +1,23 @@
 "use client";
 
-import { useMemo, useState, type ReactNode } from "react";
 import Link from "next/link";
+import { useMemo, useState } from "react";
 import {
   Banknote,
   ChevronRight,
+  Flag,
+  LayoutList,
   Receipt,
   Store,
+  UserPlus,
   Users,
   type LucideIcon,
 } from "lucide-react";
-import { PortalLineChart, type PortalLineSeries } from "@/components/charts/portal-line-chart";
+import { PortalAreaChart } from "@/components/charts/portal-area-chart";
+import { PortalBarChart } from "@/components/charts/portal-bar-chart";
 import { Sparkline } from "@/components/charts/sparkline";
 import { PortalPanel } from "@/components/layout/portal-panel";
-import { Button } from "@/components/ui/button";
-import {
-  Drawer,
-  DrawerClose,
-  DrawerContent,
-  DrawerDescription,
-  DrawerFooter,
-  DrawerHeader,
-  DrawerTitle,
-} from "@/components/ui/drawer";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   formatDayBucketLabel,
   formatMonthBucketLabel,
@@ -33,8 +27,6 @@ import { cn } from "@/lib/utils";
 
 type RangeKey = "30d" | "12m";
 
-type MetricKey = "users" | "sellers" | "orders" | "revenue";
-
 type QueueItem = {
   title: string;
   body: string;
@@ -43,12 +35,12 @@ type QueueItem = {
 };
 
 type MetricCard = {
-  key: MetricKey;
   label: string;
   value: string;
-  hint?: string;
   href: string;
   icon: LucideIcon;
+  spark: { value: number }[];
+  sparkColor: string;
 };
 
 type AdminDashboardChartsProps = {
@@ -57,7 +49,6 @@ type AdminDashboardChartsProps = {
     activeSellers: string;
     totalOrders: string;
     grossRevenue: string;
-    currency: string;
   };
   sales30d: SalesBucket[];
   sales12m: SalesBucket[];
@@ -65,24 +56,6 @@ type AdminDashboardChartsProps = {
   growth12m: UserGrowthBucket[];
   queues: QueueItem[];
 };
-
-function formatCompactCurrency(value: number, currency: string): string {
-  try {
-    return new Intl.NumberFormat(undefined, {
-      style: "currency",
-      currency,
-      notation: "compact",
-      maximumFractionDigits: 1,
-    }).format(value);
-  } catch {
-    return new Intl.NumberFormat(undefined, {
-      style: "currency",
-      currency: "LKR",
-      notation: "compact",
-      maximumFractionDigits: 1,
-    }).format(value);
-  }
-}
 
 function labelSales(rows: SalesBucket[], range: RangeKey) {
   const labelFn = range === "12m" ? formatMonthBucketLabel : formatDayBucketLabel;
@@ -104,27 +77,38 @@ function sparkFromSeries<T extends Record<string, unknown>>(
   });
 }
 
-type DrawerState =
-  | { kind: "metric"; metric: MetricKey }
-  | { kind: "queue"; index: number }
-  | null;
+function MetricCardTile({ card }: { card: MetricCard }) {
+  const hasSpark = card.spark.some((p) => p.value > 0);
 
-function RangeTabs({
-  range,
-  onRangeChange,
-}: {
-  range: RangeKey;
-  onRangeChange: (value: RangeKey) => void;
-}) {
   return (
-    <Tabs value={range} onValueChange={(value) => onRangeChange(value as RangeKey)}>
-      <TabsList>
-        <TabsTrigger value="30d">30 days</TabsTrigger>
-        <TabsTrigger value="12m">12 months</TabsTrigger>
-      </TabsList>
-    </Tabs>
+    <Link
+      href={card.href}
+      className="group block rounded-xl border border-border bg-card p-4 shadow-xs transition-colors hover:border-foreground/15 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+    >
+      <div className="flex items-start justify-between gap-3">
+        <div className="flex min-w-0 items-center gap-2.5">
+          <span className="flex size-9 shrink-0 items-center justify-center rounded-lg border border-border bg-muted/25 text-foreground">
+            <card.icon className="size-4" strokeWidth={1.75} aria-hidden />
+          </span>
+          <p className="text-sm font-medium text-muted-foreground">{card.label}</p>
+        </div>
+      </div>
+      <p className="mt-3 text-2xl font-semibold tabular-nums tracking-tight text-foreground">
+        {card.value}
+      </p>
+      <div
+        className={cn(
+          "mt-3 h-10 w-full opacity-80 transition-opacity group-hover:opacity-100",
+          !hasSpark && "opacity-30",
+        )}
+      >
+        <Sparkline data={card.spark} color={card.sparkColor} className="h-full w-full" />
+      </div>
+    </Link>
   );
 }
+
+const QUEUE_ICONS: LucideIcon[] = [Store, LayoutList, Receipt, Flag];
 
 export function AdminDashboardCharts({
   metrics,
@@ -135,14 +119,11 @@ export function AdminDashboardCharts({
   queues = [],
 }: AdminDashboardChartsProps) {
   const [range, setRange] = useState<RangeKey>("30d");
-  const [drawer, setDrawer] = useState<DrawerState>(null);
 
   const salesSeries = range === "30d" ? sales30d : sales12m;
   const growthSeries = range === "30d" ? growth30d : growth12m;
   const sales = Array.isArray(salesSeries) ? salesSeries : [];
   const growth = Array.isArray(growthSeries) ? growthSeries : [];
-  const currency =
-    sales.find((row) => row.currency)?.currency ?? metrics?.currency ?? "LKR";
 
   const salesData = useMemo(() => labelSales(sales, range), [sales, range]);
   const growthData = useMemo(() => labelGrowth(growth, range), [growth, range]);
@@ -158,197 +139,81 @@ export function AdminDashboardCharts({
 
   const metricCards: MetricCard[] = [
     {
-      key: "users",
       label: "Total users",
       value: metrics.totalUsers,
       href: "/admin/buyers",
       icon: Users,
+      spark: sparkFromSeries(sparkGrowth, "newUsers"),
+      sparkColor: "var(--accent)",
     },
     {
-      key: "sellers",
       label: "Active sellers",
       value: metrics.activeSellers,
       href: "/admin/sellers/performance",
       icon: Store,
+      spark: sparkFromSeries(sparkGrowth, "newSellers"),
+      sparkColor: "var(--chart-3)",
     },
     {
-      key: "orders",
       label: "Open requests",
       value: metrics.totalOrders,
       href: "/admin/requests?filter=requested",
       icon: Receipt,
+      spark: sparkFromSeries(sparkSales, "orderCount"),
+      sparkColor: "var(--chart-2)",
     },
     {
-      key: "revenue",
       label: "Sold requests",
       value: metrics.grossRevenue,
-      hint: "Completed sales",
       href: "/admin/requests?filter=sold",
       icon: Banknote,
+      spark: sparkFromSeries(sparkSales, "orderCount"),
+      sparkColor: "var(--accent)",
     },
   ];
 
-  function sparkValues(card: MetricCard): { value: number }[] {
-    switch (card.key) {
-      case "users":
-        return sparkFromSeries(sparkGrowth, "newUsers");
-      case "sellers":
-        return sparkFromSeries(sparkGrowth, "newSellers");
-      case "orders":
-        return sparkFromSeries(sparkSales, "orderCount");
-      case "revenue":
-        return sparkFromSeries(sparkSales, "revenue");
-    }
-  }
-
-  function metricDrawerChart(metric: MetricKey): ReactNode {
-    if (metric === "users" || metric === "sellers") {
-      const series: PortalLineSeries[] =
-        metric === "users"
-          ? [{ dataKey: "newUsers", name: "New users", color: "var(--accent)" }]
-          : [
-              {
-                dataKey: "newSellers",
-                name: "New sellers",
-                color: "var(--chart-3)",
-              },
-            ];
-      return (
-        <PortalLineChart
-          data={growthData}
-          series={series}
-          height={220}
-          emptyMessage="No signup activity in this range yet."
-        />
-      );
-    }
-
-    if (metric === "orders") {
-      return (
-        <PortalLineChart
-          data={salesData}
-          series={[
-            {
-              dataKey: "orderCount",
-              name: "Orders",
-              color: "var(--accent)",
-            },
-          ]}
-          height={220}
-          emptyMessage="No orders in this range yet."
-        />
-      );
-    }
-
-    return (
-      <PortalLineChart
-        data={salesData}
-        series={[
-          {
-            dataKey: "revenue",
-            name: "Revenue",
-            color: "var(--foreground)",
-          },
-        ]}
-        height={220}
-        formatLeftTick={(v) => formatCompactCurrency(v, currency)}
-        emptyMessage="No paid revenue in this range yet."
-      />
-    );
-  }
-
-  const activeMetric =
-    drawer?.kind === "metric"
-      ? metricCards.find((card) => card.key === drawer.metric)
-      : null;
-  const activeQueue =
-    drawer?.kind === "queue" ? queues[drawer.index] ?? null : null;
+  const rangeLabel = range === "30d" ? "Last 30 days" : "Last 12 months";
+  const bucketLabel = range === "30d" ? "daily" : "monthly";
 
   return (
-    <div className="flex flex-col gap-6">
+    <div className="mt-4 space-y-6">
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        {metricCards.map((card) => {
-          const Icon = card.icon;
-          return (
-            <button
-              key={card.key}
-              type="button"
-              onClick={() => setDrawer({ kind: "metric", metric: card.key })}
-              className={cn(
-                "rounded-2xl border border-border/80 bg-card p-5 text-left shadow-none transition-colors",
-                "hover:border-foreground/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
-              )}
-            >
-              <div className="flex items-center gap-2.5">
-                <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-muted text-foreground">
-                  <Icon className="size-4" strokeWidth={1.75} aria-hidden />
-                </span>
-                <p className="text-sm font-semibold tracking-tight">{card.label}</p>
-              </div>
-              <p className="mt-5 text-3xl font-semibold tracking-tight tabular-nums">
-                {card.value}
-              </p>
-              {card.hint ? (
-                <p className="mt-1 text-xs text-muted-foreground">{card.hint}</p>
-              ) : null}
-              <Sparkline
-                data={sparkValues(card)}
-                className="mt-4 h-12 w-full"
-                color={
-                  card.key === "sellers" ? "var(--chart-3)" : "var(--accent)"
-                }
-              />
-            </button>
-          );
-        })}
+        {metricCards.map((card) => (
+          <MetricCardTile key={card.label} card={card} />
+        ))}
       </div>
 
-      <PortalPanel>
-        <Tabs defaultValue="sales" className="gap-4">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <p className="text-sm text-muted-foreground">
+          Trends · {rangeLabel} · {bucketLabel} buckets
+        </p>
+        <Tabs
+          value={range}
+          onValueChange={(value) => setRange(value as RangeKey)}
+        >
           <TabsList>
-            <TabsTrigger value="sales">Sales</TabsTrigger>
-            <TabsTrigger value="signups">Signups</TabsTrigger>
-            <TabsTrigger value="queues">Queues</TabsTrigger>
+            <TabsTrigger value="30d">30 days</TabsTrigger>
+            <TabsTrigger value="12m">12 months</TabsTrigger>
           </TabsList>
+        </Tabs>
+      </div>
 
-          <TabsContent value="sales" className="mt-2 flex flex-col gap-4">
-            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-              <p className="text-sm text-muted-foreground">
-                Paid revenue and orders created ·{" "}
-                {range === "30d" ? "daily" : "monthly"} buckets.
+      <div className="grid gap-6 xl:grid-cols-2">
+        <PortalPanel>
+          <div className="flex flex-wrap items-end justify-between gap-3">
+            <div>
+              <h3 className="text-base font-semibold tracking-tight">Signups</h3>
+              <p className="mt-1 text-sm text-muted-foreground">
+                New accounts and approved sellers per {bucketLabel === "daily" ? "day" : "month"}
               </p>
-              <RangeTabs range={range} onRangeChange={setRange} />
             </div>
-            <PortalLineChart
-              data={salesData}
-              series={[
-                {
-                  dataKey: "orderCount",
-                  name: "Orders",
-                  color: "var(--accent)",
-                  yAxisId: "left",
-                },
-                {
-                  dataKey: "revenue",
-                  name: "Revenue",
-                  color: "var(--foreground)",
-                  yAxisId: "right",
-                },
-              ]}
-              formatRightTick={(v) => formatCompactCurrency(v, currency)}
-            />
-          </TabsContent>
-
-          <TabsContent value="signups" className="mt-2 flex flex-col gap-4">
-            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-              <p className="text-sm text-muted-foreground">
-                New accounts and approved sellers ·{" "}
-                {range === "30d" ? "daily" : "monthly"} buckets.
-              </p>
-              <RangeTabs range={range} onRangeChange={setRange} />
-            </div>
-            <PortalLineChart
+            <UserPlus className="size-4 text-muted-foreground" aria-hidden />
+          </div>
+          <div className="mt-6">
+            <PortalAreaChart
               data={growthData}
+              height={300}
+              emptyMessage="Signups appear as buyers and sellers join the platform."
               series={[
                 {
                   dataKey: "newUsers",
@@ -359,97 +224,71 @@ export function AdminDashboardCharts({
                   dataKey: "newSellers",
                   name: "New sellers",
                   color: "var(--chart-3)",
-                  strokeDasharray: "4 4",
                 },
               ]}
             />
-          </TabsContent>
+          </div>
+        </PortalPanel>
 
-          <TabsContent value="queues" className="mt-2">
-            <ul className="divide-y divide-border rounded-xl border border-border/80">
-              {queues.map((queue, index) => (
-                <li key={queue.href}>
-                  <button
-                    type="button"
-                    className="flex w-full items-center justify-between gap-3 px-4 py-3.5 text-left transition-colors hover:bg-muted/60"
-                    onClick={() => setDrawer({ kind: "queue", index })}
-                  >
-                    <div className="min-w-0">
-                      <p className="text-sm font-semibold tracking-tight">
-                        {queue.title}
-                      </p>
-                      <p className="mt-0.5 truncate text-sm text-muted-foreground">
-                        {queue.body}
-                      </p>
-                    </div>
-                    <ChevronRight
-                      className="size-4 shrink-0 text-muted-foreground"
-                      aria-hidden
-                    />
-                  </button>
-                </li>
-              ))}
-            </ul>
-          </TabsContent>
-        </Tabs>
-      </PortalPanel>
+        <PortalPanel>
+          <div className="flex flex-wrap items-end justify-between gap-3">
+            <div>
+              <h3 className="text-base font-semibold tracking-tight">
+                Sold requests
+              </h3>
+              <p className="mt-1 text-sm text-muted-foreground">
+                Completed sales marked by sellers · aggregate counts only
+              </p>
+            </div>
+            <Banknote className="size-4 text-muted-foreground" aria-hidden />
+          </div>
+          <div className="mt-6">
+            <PortalBarChart
+              data={salesData}
+              height={300}
+              emptyMessage="Charts fill in as sellers mark requests sold."
+              series={[
+                {
+                  dataKey: "orderCount",
+                  name: "Sold",
+                  color: "var(--accent)",
+                  radius: 3,
+                },
+              ]}
+            />
+          </div>
+        </PortalPanel>
+      </div>
 
-      <Drawer
-        contained
-        direction="bottom"
-        open={drawer !== null}
-        onOpenChange={(open) => {
-          if (!open) setDrawer(null);
-        }}
-      >
-        <DrawerContent>
-          {activeMetric ? (
-            <>
-              <DrawerHeader>
-                <DrawerTitle>{activeMetric.label}</DrawerTitle>
-                <DrawerDescription>
-                  {activeMetric.value}
-                  {activeMetric.hint ? ` · ${activeMetric.hint}` : null}
-                  {" · "}
-                  {range === "30d" ? "Last 30 days" : "Last 12 months"}
-                </DrawerDescription>
-              </DrawerHeader>
-              <div className="flex-1 overflow-y-auto px-6 pb-2">
-                {metricDrawerChart(activeMetric.key)}
-              </div>
-              <DrawerFooter>
-                <DrawerClose asChild>
-                  <Button size="sm" variant="outline">
-                    Close
-                  </Button>
-                </DrawerClose>
-                <Button size="sm" asChild>
-                  <Link href={activeMetric.href}>Open page</Link>
-                </Button>
-              </DrawerFooter>
-            </>
-          ) : null}
-
-          {activeQueue ? (
-            <>
-              <DrawerHeader>
-                <DrawerTitle>{activeQueue.title}</DrawerTitle>
-                <DrawerDescription>{activeQueue.body}</DrawerDescription>
-              </DrawerHeader>
-              <DrawerFooter>
-                <DrawerClose asChild>
-                  <Button size="sm" variant="outline">
-                    Close
-                  </Button>
-                </DrawerClose>
-                <Button size="sm" asChild>
-                  <Link href={activeQueue.href}>{activeQueue.cta}</Link>
-                </Button>
-              </DrawerFooter>
-            </>
-          ) : null}
-        </DrawerContent>
-      </Drawer>
+      {queues.length > 0 ? (
+        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+          {queues.map((queue, index) => {
+            const Icon = QUEUE_ICONS[index] ?? ChevronRight;
+            return (
+              <Link
+                key={queue.href}
+                href={queue.href}
+                className="group flex flex-col rounded-xl border border-border bg-card p-4 shadow-xs transition-colors hover:border-foreground/15 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              >
+                <div className="flex items-start justify-between gap-3">
+                  <span className="flex size-9 shrink-0 items-center justify-center rounded-lg border border-border bg-muted/25 text-foreground">
+                    <Icon className="size-4" strokeWidth={1.75} aria-hidden />
+                  </span>
+                  <ChevronRight
+                    className="size-4 shrink-0 text-muted-foreground opacity-60 transition-opacity group-hover:opacity-100"
+                    aria-hidden
+                  />
+                </div>
+                <p className="mt-3 text-sm font-semibold tracking-tight">
+                  {queue.title}
+                </p>
+                <p className="mt-1 text-sm text-muted-foreground">{queue.body}</p>
+                <p className="mt-3 text-xs font-medium text-accent">{queue.cta}</p>
+              </Link>
+            );
+          })}
+        </div>
+      ) : null}
     </div>
   );
 }

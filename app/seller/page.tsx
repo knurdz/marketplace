@@ -39,7 +39,7 @@ export default async function SellerPage() {
         title="Dashboard"
         description="Traffic, requests, and listings at a glance."
         actions={
-          <Button size="sm" asChild>
+          <Button size="sm" variant="info" asChild>
             <Link href="/seller/listings?compose=new">New listing</Link>
           </Button>
         }
@@ -66,7 +66,7 @@ export default async function SellerPage() {
               Contact buyers from each request, then mark sold or cancelled.
             </p>
           </div>
-          <Button variant="secondary" size="sm" asChild>
+          <Button variant="info" size="sm" asChild>
             <Link href="/seller/requests">All requests</Link>
           </Button>
         </div>
@@ -99,11 +99,10 @@ export default async function SellerPage() {
                       />
                     </TableCell>
                     <TableCell>
-                      <Button variant="outline" size="xs" asChild>
+                      <Button variant="info" size="xs" asChild>
                         <Link href={`/seller/requests/${request.$id}`}>
                           <ExternalLink
                             data-icon="inline-start"
-                            className="size-3"
                           />
                           Open
                         </Link>

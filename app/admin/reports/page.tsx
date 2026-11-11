@@ -90,7 +90,7 @@ export default async function AdminReportsPage({ searchParams }: PageProps) {
     <div className="w-full">
       <PortalPageHeader
         title="Reports"
-        description="Triage listing reports. Resolving or dismissing records the outcome in the audit log; take down a listing from Listings if needed."
+        description="Triage listing reports. Take down a listing or ban a shop from here; outcomes are recorded in the audit log."
       />
 
       {reports.length === 0 ? (
@@ -137,6 +137,12 @@ export default async function AdminReportsPage({ searchParams }: PageProps) {
                       {report.productId}
                       {report.productStatus ? ` · ${report.productStatus}` : ""}
                     </p>
+                    <p className="mt-1 text-xs text-muted-foreground">
+                      Shop:{" "}
+                      {report.shopName?.trim() ||
+                        report.sellerId ||
+                        "Unknown"}
+                    </p>
                     <p className="mt-1 text-xs">
                       <Link
                         href={`/products/${report.productId}`}
@@ -152,10 +158,15 @@ export default async function AdminReportsPage({ searchParams }: PageProps) {
                       tone={reportStatusTone(report.status)}
                     />
                   </TableCell>
-                  <TableCell className="w-[240px] max-w-[240px] whitespace-normal">
+                  <TableCell className="w-[280px] max-w-[320px] whitespace-normal">
                     <ReportRowActions
                       reportId={report.$id}
                       status={report.status}
+                      productId={report.productId}
+                      productTitle={report.productTitle}
+                      productStatus={report.productStatus}
+                      sellerId={report.sellerId}
+                      shopName={report.shopName}
                     />
                   </TableCell>
                 </TableRow>

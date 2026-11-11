@@ -72,7 +72,7 @@ export default async function AdminBuyersPage({ searchParams }: PageProps) {
           maxLength={256}
           className="h-9 min-w-[12rem] flex-1"
         />
-        <Button type="submit" size="sm" variant="secondary">
+        <Button type="submit" size="sm" variant="info">
           Search
         </Button>
         {search ? (

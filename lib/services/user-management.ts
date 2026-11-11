@@ -1,12 +1,9 @@
-import { ID, Query } from "@/lib/db/appwrite-shim";
+import { Query } from "@/lib/db/appwrite-shim";
 import type { Models } from "@/lib/db/appwrite-shim";
-import {
-  DATABASE_ID,
-  TABLE_AUDIT_LOGS,
-  hasAppwritePublicConfig,
-} from "@/lib/appwrite/config";
+import { hasAppwritePublicConfig } from "@/lib/appwrite/config";
 import { ROLE_LABELS, userHasLabel } from "@/lib/appwrite/roles";
 import { createAdminClient } from "@/lib/appwrite/server";
+import { writeAuditLog } from "./audit-logs";
 
 const PAGE_SIZE = 25;
 const MAX_SUSPEND_REASON = 500;
@@ -42,29 +39,6 @@ function toAdminUserView(user: Models.User<Models.Preferences>): AdminUserView {
     isAdmin: userHasLabel(user, ROLE_LABELS.admin),
     $createdAt: user.$createdAt,
   };
-}
-
-async function writeAuditLog(params: {
-  actorId: string;
-  event: string;
-  resourceType: string;
-  resourceId: string;
-  meta: Record<string, string>;
-}): Promise<void> {
-  const { tables } = await createAdminClient();
-  await tables.createRow({
-    databaseId: DATABASE_ID,
-    tableId: TABLE_AUDIT_LOGS,
-    rowId: ID.unique(),
-    data: {
-      actorId: params.actorId,
-      event: params.event.slice(0, 128),
-      resourceType: params.resourceType.slice(0, 64),
-      resourceId: params.resourceId,
-      meta: JSON.stringify(params.meta).slice(0, 4000),
-    },
-    permissions: [],
-  });
 }
 
 async function loadTargetUser(

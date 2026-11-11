@@ -20,7 +20,7 @@ import {
   userHasLabel,
 } from "@/lib/appwrite/roles";
 import { getLoggedInUser } from "@/lib/appwrite/session";
-import { getAvatarPreviewUrl } from "@/lib/appwrite/storage-urls";
+import { resolveAvatarUrl } from "@/lib/appwrite/storage-urls";
 
 function roleLabel(user: {
   labels?: string[];
@@ -48,9 +48,10 @@ export default async function AccountPage() {
   }
 
   const profile = await getOwnProfile();
-  const avatarPreviewUrl = profile
-    ? getAvatarPreviewUrl(profile.avatarFileId)
-    : null;
+  const avatarPreviewUrl = resolveAvatarUrl(
+    profile?.avatarFileId,
+    user.image,
+  );
   const { label: accountRole, showBuyerNav } = roleLabel(user);
   const displayName =
     profile?.displayName?.trim() || user.name?.trim() || user.email;

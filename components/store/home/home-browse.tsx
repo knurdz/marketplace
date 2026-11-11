@@ -1,22 +1,19 @@
 import Link from "next/link";
-import { DemoListingCard } from "@/components/store/demo-listing-card";
 import { MarketCategoryCircles } from "@/components/store/market/market-category-circles";
 import { MarketFilters } from "@/components/store/market/market-filters";
+import { ProductGrid } from "@/components/store/product-grid";
 import { EmptyState } from "@/components/layout/empty-state";
 import { SectionHeading } from "@/components/store/section-heading";
 import { Button } from "@/components/ui/button";
-import {
-  filterMarketListings,
-  type MarketListingSort,
-} from "@/lib/store/home-demo";
-import type { Category } from "@/lib/types";
+import type { ProductCatalogSort, ProductCoverMap } from "@/lib/services/products";
+import type { Category, Product } from "@/lib/types";
 
 type HomeBrowseSharedProps = {
   category: string | null;
   categoryLabel: string | null;
   minPrice: number | null;
   maxPrice: number | null;
-  sort: MarketListingSort;
+  sort: ProductCatalogSort;
   invalidPriceRange: boolean;
 };
 
@@ -48,7 +45,7 @@ export function HomeBrowseControls({
   );
 }
 
-/** Filtered multi-row product grid (demo showcase listings). */
+/** Filtered multi-row product grid from the live catalog. */
 export function HomeBrowseListings({
   category,
   categoryLabel,
@@ -56,11 +53,12 @@ export function HomeBrowseListings({
   maxPrice,
   sort,
   invalidPriceRange,
-}: HomeBrowseSharedProps) {
-  const listings = invalidPriceRange
-    ? []
-    : filterMarketListings({ category, minPrice, maxPrice, sort });
-
+  products,
+  covers,
+}: HomeBrowseSharedProps & {
+  products: Product[];
+  covers?: ProductCoverMap;
+}) {
   const hasFilters =
     category != null ||
     minPrice != null ||
@@ -74,7 +72,7 @@ export function HomeBrowseListings({
         description={
           invalidPriceRange
             ? undefined
-            : `${listings.length} listing${listings.length === 1 ? "" : "s"}`
+            : `${products.length} listing${products.length === 1 ? "" : "s"}`
         }
       />
 
@@ -83,7 +81,7 @@ export function HomeBrowseListings({
           title="Check the price range"
           description="The minimum cannot be higher than the maximum."
         />
-      ) : listings.length === 0 ? (
+      ) : products.length === 0 ? (
         <EmptyState
           title={hasFilters ? "Nothing in this range" : "No listings yet"}
           description={
@@ -98,14 +96,7 @@ export function HomeBrowseListings({
           }
         />
       ) : (
-        <ul className="grid grid-cols-2 gap-x-4 gap-y-8 sm:grid-cols-3 lg:grid-cols-4">
-          {listings.map((listing) => (
-            <DemoListingCard
-              key={`${listing.categorySlug}-${listing.id}`}
-              listing={listing}
-            />
-          ))}
-        </ul>
+        <ProductGrid products={products} covers={covers} />
       )}
     </section>
   );

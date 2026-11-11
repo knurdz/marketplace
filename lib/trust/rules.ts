@@ -98,20 +98,47 @@ export function evaluateBadgeEligibility(params: {
   now?: Date;
 }): BadgeEligibilityResult {
   const now = params.now ?? new Date();
-  const reasons: string[] = [];
+  const failures: string[] = [];
+  const passed: string[] = [];
+
+  if (params.profile.status !== "approved") {
+    failures.push(`Seller status is ${params.profile.status}`);
+  } else {
+    passed.push("Seller status is approved");
+  }
+
   const ageDays = daysSince(params.profile.createdAt, now);
   if (ageDays < MIN_ACCOUNT_AGE_DAYS_FOR_BADGE) {
-    reasons.push(
+    failures.push(
       `Account age ${ageDays}d is below ${MIN_ACCOUNT_AGE_DAYS_FOR_BADGE}d`,
     );
+  } else {
+    passed.push(`Account age ${ageDays}d meets ${MIN_ACCOUNT_AGE_DAYS_FOR_BADGE}d`);
   }
+
   const completed = params.orders.filter((o) => o.status === "completed").length;
   if (completed < MIN_COMPLETED_ORDERS_FOR_BADGE) {
-    reasons.push(
+    failures.push(
       `Sold requests ${completed} is below ${MIN_COMPLETED_ORDERS_FOR_BADGE}`,
     );
+  } else {
+    passed.push(
+      `Sold requests ${completed} meets ${MIN_COMPLETED_ORDERS_FOR_BADGE}`,
+    );
   }
-  return { verified: reasons.length === 0, reasons };
+
+  const openCount = params.openReportCount ?? 0;
+  if (openCount > 0) {
+    failures.push(`${openCount} open report(s) need triage`);
+  } else {
+    passed.push("No open reports");
+  }
+
+  if (failures.length > 0) {
+    return { verified: false, reasons: failures };
+  }
+
+  return { verified: true, reasons: passed };
 }
 
 export function evaluateFraudFlags(params: {

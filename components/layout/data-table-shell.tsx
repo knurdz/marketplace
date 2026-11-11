@@ -86,7 +86,7 @@ export function LoadMoreLink({
 }) {
   return (
     <div className="mt-6">
-      <Button variant="secondary" size="sm" asChild>
+      <Button variant="info" size="sm" asChild>
         <Link href={href}>{label}</Link>
       </Button>
     </div>

@@ -1,17 +1,25 @@
-import { ID, Query } from "@/lib/db/appwrite-shim";
+import { Query } from "@/lib/db/appwrite-shim";
 import {
   DATABASE_ID,
-  TABLE_AUDIT_LOGS,
   TABLE_PRODUCTS,
   TABLE_REPORTS,
+  TABLE_SELLER_PROFILES,
   hasAppwritePublicConfig,
 } from "@/lib/appwrite/config";
 import { requireLabel } from "@/lib/appwrite/roles";
 import { createAdminClient } from "@/lib/appwrite/server";
+import { notifyUserEvent } from "@/lib/email/events";
 import type { Product, ProductStatus, Report, ReportStatus } from "@/lib/types";
-import { isReportStatus } from "@/lib/types";
+import {
+  ACTIVE_PRODUCT_STATUS,
+  ARCHIVED_PRODUCT_STATUS,
+  isReportStatus,
+} from "@/lib/types";
+import { writeAuditLog } from "./audit-logs";
+import { removeListingCore } from "./listing-moderation";
 import { asProduct } from "./products";
 import { asReport } from "./reports";
+import { suspendUserCore } from "./user-management";
 
 const OPEN_STATUS = "open" as const;
 const REVIEWING_STATUS = "reviewing" as const;
@@ -35,30 +43,8 @@ export type AdminReportView = {
   productTitle: string | null;
   productStatus: ProductStatus | null;
   sellerId: string | null;
+  shopName: string | null;
 };
-
-async function writeAuditLog(params: {
-  actorId: string;
-  event: string;
-  resourceType: string;
-  resourceId: string;
-  meta: Record<string, string>;
-}): Promise<void> {
-  const { tables } = await createAdminClient();
-  await tables.createRow({
-    databaseId: DATABASE_ID,
-    tableId: TABLE_AUDIT_LOGS,
-    rowId: ID.unique(),
-    data: {
-      actorId: params.actorId,
-      event: params.event.slice(0, 128),
-      resourceType: params.resourceType.slice(0, 64),
-      resourceId: params.resourceId,
-      meta: JSON.stringify(params.meta).slice(0, 4000),
-    },
-    permissions: [],
-  });
-}
 
 function adminSdkAvailable(): boolean {
   return (
@@ -75,6 +61,7 @@ function toAdminView(
   report: Report,
   createdAt: string | null,
   product: Product | null,
+  shopName: string | null,
 ): AdminReportView {
   return {
     $id: report.$id,
@@ -87,7 +74,110 @@ function toAdminView(
     productTitle: product?.title ?? null,
     productStatus: product?.status ?? null,
     sellerId: product?.sellerId ?? null,
+    shopName,
   };
+}
+
+function asNullableString(value: unknown): string | null {
+  if (typeof value !== "string") return null;
+  return value.length > 0 ? value : null;
+}
+
+async function loadShopNameBySellerId(
+  sellerId: string,
+): Promise<string | null> {
+  const trimmed = sellerId?.trim();
+  if (!trimmed) return null;
+
+  const { tables } = await createAdminClient();
+  try {
+    const result = await tables.listRows({
+      databaseId: DATABASE_ID,
+      tableId: TABLE_SELLER_PROFILES,
+      queries: [Query.equal("userId", trimmed), Query.limit(1)],
+    });
+    const row = result.rows[0] as unknown as Record<string, unknown> | undefined;
+    if (!row) return null;
+    return asNullableString(row.shopName);
+  } catch {
+    return null;
+  }
+}
+
+async function loadSellerProfileByUserId(sellerId: string): Promise<{
+  $id: string;
+  status: string;
+  shopName: string | null;
+} | null> {
+  const trimmed = sellerId?.trim();
+  if (!trimmed) return null;
+
+  const { tables } = await createAdminClient();
+  try {
+    const result = await tables.listRows({
+      databaseId: DATABASE_ID,
+      tableId: TABLE_SELLER_PROFILES,
+      queries: [Query.equal("userId", trimmed), Query.limit(1)],
+    });
+    const row = result.rows[0] as unknown as Record<string, unknown> | undefined;
+    if (!row) return null;
+    const $id = asNullableString(row.$id);
+    const status = asNullableString(row.status);
+    if (!$id || !status) return null;
+    return {
+      $id,
+      status,
+      shopName: asNullableString(row.shopName),
+    };
+  } catch {
+    return null;
+  }
+}
+
+async function listActiveProductIdsForSeller(
+  sellerId: string,
+): Promise<string[]> {
+  const trimmed = sellerId?.trim();
+  if (!trimmed) return [];
+
+  const { tables } = await createAdminClient();
+  const ids: string[] = [];
+  let cursor: string | undefined;
+
+  for (;;) {
+    const queries = [
+      Query.equal("sellerId", trimmed),
+      Query.equal("status", ACTIVE_PRODUCT_STATUS),
+      Query.limit(100),
+    ];
+    if (cursor) queries.push(Query.cursorAfter(cursor));
+
+    const result = await tables.listRows({
+      databaseId: DATABASE_ID,
+      tableId: TABLE_PRODUCTS,
+      queries,
+      total: false,
+    });
+
+    if (result.rows.length === 0) break;
+
+    for (const row of result.rows) {
+      const id = asNullableString(
+        (row as unknown as Record<string, unknown>).$id,
+      );
+      if (id) ids.push(id);
+    }
+
+    if (result.rows.length < 100) break;
+    const lastId = asNullableString(
+      (result.rows[result.rows.length - 1] as unknown as Record<string, unknown>)
+        .$id,
+    );
+    if (!lastId) break;
+    cursor = lastId;
+  }
+
+  return ids;
 }
 
 async function loadReport(reportId: string): Promise<{
@@ -219,13 +309,28 @@ export async function listReports(opts?: {
     );
     const productById = new Map(productEntries);
 
-    return reports.map(({ report, $createdAt }) =>
-      toAdminView(
-        report,
-        $createdAt,
-        productById.get(report.productId) ?? null,
+    const sellerIds = [
+      ...new Set(
+        [...productById.values()]
+          .map((product) => product?.sellerId)
+          .filter((id): id is string => Boolean(id)),
       ),
+    ];
+    const shopEntries = await Promise.all(
+      sellerIds.map(async (id) => {
+        const shopName = await loadShopNameBySellerId(id);
+        return [id, shopName] as const;
+      }),
     );
+    const shopBySellerId = new Map(shopEntries);
+
+    return reports.map(({ report, $createdAt }) => {
+      const product = productById.get(report.productId) ?? null;
+      const shopName = product?.sellerId
+        ? (shopBySellerId.get(product.sellerId) ?? null)
+        : null;
+      return toAdminView(report, $createdAt, product, shopName);
+    });
   } catch {
     return [];
   }
@@ -346,6 +451,13 @@ export async function resolveReportCore(
     };
   }
 
+  await notifyUserEvent(report.reporterId, {
+    type: "report.resolved",
+    title: "Report resolved",
+    body: "An admin resolved the listing report you submitted. Thank you for helping keep the marketplace safe.",
+    link: `/products/${report.productId}`,
+  });
+
   return { ok: true, message: "Report resolved." };
 }
 
@@ -408,5 +520,171 @@ export async function dismissReportCore(
     };
   }
 
+  await notifyUserEvent(report.reporterId, {
+    type: "report.dismissed",
+    title: "Report dismissed",
+    body: "An admin reviewed the listing report you submitted and dismissed it.",
+    link: `/products/${report.productId}`,
+  });
+
   return { ok: true, message: "Report dismissed." };
+}
+
+/**
+ * Archive the reported listing (active → archived), then resolve the report.
+ * Already-archived listings continue to resolve. Non-active, non-archived fail.
+ */
+export async function takeDownListingFromReportCore(
+  adminUserId: string,
+  reportId: string,
+  note: string,
+): Promise<ReportTriageResult> {
+  const parsedNote = parseNote(note);
+  if (typeof parsedNote !== "string") return parsedNote;
+
+  const loaded = await loadReport(reportId);
+  if (!loaded) {
+    return { ok: false, error: "Report not found." };
+  }
+
+  const { report } = loaded;
+  if (report.status !== OPEN_STATUS && report.status !== REVIEWING_STATUS) {
+    return {
+      ok: false,
+      error: `Report is ${report.status}. Only open or reviewing reports can be actioned.`,
+    };
+  }
+
+  const product = await loadProduct(report.productId);
+  if (!product) {
+    return { ok: false, error: "Reported listing was not found." };
+  }
+
+  if (
+    product.status !== ACTIVE_PRODUCT_STATUS &&
+    product.status !== ARCHIVED_PRODUCT_STATUS
+  ) {
+    return {
+      ok: false,
+      error: `Listing is ${product.status}. Only active listings can be taken down.`,
+    };
+  }
+
+  if (product.status === ACTIVE_PRODUCT_STATUS) {
+    const removed = await removeListingCore(
+      adminUserId,
+      product.$id,
+      parsedNote,
+    );
+    if (!removed.ok) return removed;
+  }
+
+  return resolveReportCore(adminUserId, report.$id, parsedNote);
+}
+
+/**
+ * Ban the reported listing's seller: suspend account, archive active listings,
+ * reject approved seller profile, then resolve the report.
+ */
+export async function banShopFromReportCore(
+  adminUserId: string,
+  reportId: string,
+  note: string,
+): Promise<ReportTriageResult> {
+  const parsedNote = parseNote(note);
+  if (typeof parsedNote !== "string") return parsedNote;
+
+  const loaded = await loadReport(reportId);
+  if (!loaded) {
+    return { ok: false, error: "Report not found." };
+  }
+
+  const { report } = loaded;
+  if (report.status !== OPEN_STATUS && report.status !== REVIEWING_STATUS) {
+    return {
+      ok: false,
+      error: `Report is ${report.status}. Only open or reviewing reports can be actioned.`,
+    };
+  }
+
+  const product = await loadProduct(report.productId);
+  if (!product?.sellerId) {
+    return { ok: false, error: "Reported listing or seller was not found." };
+  }
+
+  const sellerId = product.sellerId;
+  if (sellerId === adminUserId) {
+    return { ok: false, error: "You cannot ban your own shop." };
+  }
+
+  const suspended = await suspendUserCore(adminUserId, sellerId, parsedNote);
+  if (!suspended.ok) return suspended;
+
+  let archivedCount = 0;
+  try {
+    const activeIds = await listActiveProductIdsForSeller(sellerId);
+    const { tables } = await createAdminClient();
+    for (const productId of activeIds) {
+      await tables.updateRow({
+        databaseId: DATABASE_ID,
+        tableId: TABLE_PRODUCTS,
+        rowId: productId,
+        data: { status: ARCHIVED_PRODUCT_STATUS, featured: false },
+      });
+      archivedCount += 1;
+    }
+  } catch {
+    return {
+      ok: false,
+      error:
+        "Seller suspended but listing archive failed. Contact an operator.",
+    };
+  }
+
+  const profile = await loadSellerProfileByUserId(sellerId);
+  if (profile?.status === "approved") {
+    const { tables } = await createAdminClient();
+    try {
+      await tables.updateRow({
+        databaseId: DATABASE_ID,
+        tableId: TABLE_SELLER_PROFILES,
+        rowId: profile.$id,
+        data: {
+          status: "rejected",
+          rejectionReason: parsedNote.slice(0, 500),
+        },
+      });
+    } catch {
+      return {
+        ok: false,
+        error:
+          "Seller suspended and listings archived, but shop profile could not be rejected. Contact an operator.",
+      };
+    }
+  }
+
+  try {
+    await writeAuditLog({
+      actorId: adminUserId,
+      event: "shop.banned",
+      resourceType: "seller_profile",
+      resourceId: profile?.$id ?? sellerId,
+      meta: {
+        sellerId,
+        shopName: profile?.shopName ?? "",
+        reportId: report.$id,
+        productId: report.productId,
+        archivedCount: String(archivedCount),
+        note: parsedNote,
+      },
+    });
+  } catch {
+    return {
+      ok: false,
+      error:
+        "Shop banned but audit log failed. Please notify an operator.",
+    };
+  }
+
+  return resolveReportCore(adminUserId, report.$id, parsedNote);
 }

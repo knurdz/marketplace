@@ -186,6 +186,7 @@ export function EditListingForm({
                   <Button
                     type="submit"
                     size="sm"
+                    variant="info"
                     className="self-stretch sm:self-end"
                     disabled={addImagesPending}
                   >
@@ -324,10 +325,11 @@ export function EditListingForm({
                   <div>
                     <Button
                       type="button"
-                      variant="outline"
+                      variant="destructive"
                       size="sm"
                       onClick={() => setShowArchiveConfirm(true)}
                     >
+                      <Trash2 data-icon="inline-start" />
                       Archive listing
                     </Button>
                   </div>
@@ -362,6 +364,7 @@ export function EditListingForm({
         {!isArchived ? (
           <Button
             type="submit"
+            variant="info"
             size="sm"
             form={DETAILS_FORM_ID}
             disabled={updatePending}
@@ -394,12 +397,12 @@ function DeleteImageButton({
       <input type="hidden" name="imageId" value={imageId} />
       <Button
         type="submit"
-        variant="ghost"
+        variant="destructive"
         size="xs"
         className="h-8 w-full rounded-none"
         disabled={pending}
       >
-        <Trash2 data-icon="inline-start" className="size-3" />
+        {!pending ? <Trash2 data-icon="inline-start" /> : null}
         {pending ? "Removing…" : "Remove"}
       </Button>
     </form>

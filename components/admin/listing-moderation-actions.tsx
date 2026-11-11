@@ -1,5 +1,6 @@
 "use client";
 
+import { Check, Star, Trash2, X } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useActionState, useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
@@ -61,7 +62,14 @@ export function ListingApproveButton({ productId }: { productId: string }) {
   return (
     <form action={formAction}>
       <input type="hidden" name="productId" value={productId} />
-      <Button type="submit" disabled={pending} size="sm" data-testid="admin-approve-listing">
+      <Button
+        type="submit"
+        variant="success"
+        disabled={pending}
+        size="sm"
+        data-testid="admin-approve-listing"
+      >
+        {!pending ? <Check data-icon="inline-start" /> : null}
         {pending ? "Approving…" : "Approve"}
       </Button>
     </form>
@@ -84,10 +92,11 @@ export function ListingRejectForm({
     <>
       <Button
         type="button"
-        variant="outline"
+        variant="destructive"
         size="sm"
         onClick={() => setOpen(true)}
       >
+        <X data-icon="inline-start" />
         Reject
       </Button>
       <ConfirmActionDialog
@@ -97,7 +106,7 @@ export function ListingRejectForm({
         description={`Reject “${title}”? A reason is required for the audit log.`}
         confirmLabel="Confirm reject"
         pendingLabel="Rejecting…"
-        confirmVariant="outline"
+        confirmVariant="destructive"
         pending={pending}
         formAction={formAction}
         hiddenFields={{ productId }}
@@ -127,10 +136,11 @@ export function ListingRemoveForm({
     <>
       <Button
         type="button"
-        variant="outline"
+        variant="destructive"
         size="sm"
         onClick={() => setOpen(true)}
       >
+        <Trash2 data-icon="inline-start" />
         Remove
       </Button>
       <ConfirmActionDialog
@@ -173,11 +183,12 @@ export function ListingFeaturedToggle({
       <input type="hidden" name="featured" value={featured ? "0" : "1"} />
       <Button
         type="submit"
-        variant="outline"
+        variant={featured ? "warning" : "success"}
         size="sm"
         disabled={pending}
         data-testid={featured ? "admin-unfeature-listing" : "admin-feature-listing"}
       >
+        {!pending ? <Star data-icon="inline-start" /> : null}
         {pending
           ? "Saving…"
           : featured

@@ -101,7 +101,7 @@ Use after every change that touches code or schema:
 | ------------ | --------------------------- | ------------------------------------------------------------------- | ------------------------------------------------------ |
 | [x] **1.14** | Auth/upload rate limits     | In-process sliding window on auth + upload server actions           | Burst login/recovery blocked; recovery non-enumerating |
 | [x] **1.15** | Notifications badge         | Own-only service + polling bell in store/portal nav + demo seed     | Unread badge; mark read; guest has no bell             |
-| [x] **1.16** | Global product search       | `title_fulltext` + `searchActiveProducts` + `/search` verify UI     | Active-only results; empty q → []; demo “sticker” hits |
+| [x] **1.16** | Global product search       | Token `searchActiveProducts` (title/desc/category/shop) + `/search` | Active-only; multi-word AND; empty→/; 1-char too_short |
 | [x] **1.17** | Legal / FAQ pages           | Static Terms, Privacy, FAQ + store footer links                     | Routes render; footer links work                       |
 | [x] **1.18** | Toasts + errors + loading   | Sonner toasts, segment error.tsx / loading.tsx, profile-form sample | Toast on profile save; error/loading UI present        |
 | [x] **1.19** | Platform settings reader    | `getPlatformSetting(s)` + seeded MVP keys                           | Signed-in read; guest → null; unknown key → null       |
@@ -283,6 +283,7 @@ Complete payment infrastructure so Members 2–4 only consume APIs / admin UI.
 - [x] Seller approval queue (approve/reject + reason)
 - [x] User management: view, ban/suspend, role tools
 - [x] Monitor seller performance (basic metrics) — **Phase 6.12**
+- [x] Per-shop admin detail (`/admin/sellers/[profileId]`): seller analytics + account/moderation extras
 - [x] Listing moderation (approve/reject/remove inappropriate)
 - [x] Categories CRUD
 - [x] All-orders oversight + payment filters
@@ -333,7 +334,7 @@ Complete payment infrastructure so Members 2–4 only consume APIs / admin UI.
 
 **Claimed by Member 1.** Original Member 3/4/2 leftover boxes stay canonical — tick **both** the **6.x** row and the mapped **3.x / 4.x / 2.x** item when a step lands.
 
-**Do not rebuild:** Member 1 Phase 0 + **1.14–1.28**, Member 2 **2.1–2.15**, Member 4 **4.1–4.13**, seller apply/status/shop (**3.1–3.3**). Catalog today is seed-only (`seed_demo_product` / `seed_demo_free_product`).
+**Do not rebuild:** Member 1 Phase 0 + **1.14–1.28**, Member 2 **2.1–2.15**, Member 4 **4.1–4.13**, seller apply/status/shop (**3.1–3.3**). Catalog seed: 18 showcase products under `seller@knurdz.demo` / `amaya@knurdz.demo` (`npm run seed`).
 
 **MVP close gate:** an approved seller can publish listings (not only seeds), fulfill paid orders, and a human can run free / bank / PayHere sandbox end-to-end.
 

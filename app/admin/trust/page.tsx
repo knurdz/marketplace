@@ -19,7 +19,6 @@ import {
 } from "@/lib/services/trust-signals";
 
 const RULE_LABELS: Record<string, string> = {
-  rejected_bank_slips: "Rejected slips (retired)",
   new_seller_high_first_order: "New seller, high first sale",
   open_unresolved_reports: "Open reports",
   rapid_cancellation_rate: "High cancellation rate",
@@ -60,10 +59,10 @@ export default async function AdminTrustPage() {
           </Link>{" "}
           or{" "}
           <Link
-            href="/admin/buyers"
+            href="/admin/reports"
             className="text-accent underline-offset-2 hover:underline"
           >
-            Buyers
+            Reports
           </Link>{" "}
           for follow-up actions.
         </p>

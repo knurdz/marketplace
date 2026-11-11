@@ -1,8 +1,6 @@
 import { AppwriteException, ID, Permission, Query, Role } from "@/lib/db/appwrite-shim";
-import { createNotificationForUser } from "@/lib/appwrite/notifications";
 import {
   DATABASE_ID,
-  TABLE_AUDIT_LOGS,
   TABLE_REVIEWS,
   hasAppwritePublicConfig,
 } from "@/lib/appwrite/config";
@@ -13,6 +11,7 @@ import {
   createSessionClient,
 } from "@/lib/appwrite/server";
 import { getLoggedInUser } from "@/lib/appwrite/session";
+import { notifyAdminsEvent, notifyUserEvent } from "@/lib/email/events";
 import {
   assertRateLimit,
   getClientIp,
@@ -22,6 +21,7 @@ import {
 import { logError } from "@/lib/observability/log-error";
 import type { Review, ReviewStatus } from "@/lib/types";
 import { isReviewStatus } from "@/lib/types";
+import { writeAuditLog } from "./audit-logs";
 import { getOwnPurchaseRequestDetail } from "./purchase-requests";
 import {
   REVIEW_ERROR_CODES,
@@ -218,42 +218,6 @@ async function findReviewForRequest(requestId: string): Promise<Review | null> {
     logError("reviews.findForRequest", error, { requestId });
     return null;
   }
-}
-
-async function notifyUserSafe(params: {
-  userId: string;
-  type: string;
-  title: string;
-  body: string;
-  link?: string | null;
-}): Promise<void> {
-  try {
-    await createNotificationForUser(params);
-  } catch (error) {
-    logError("reviews.notify", error, { type: params.type, userId: params.userId });
-  }
-}
-
-async function writeAuditLog(params: {
-  actorId: string;
-  event: string;
-  resourceId: string;
-  meta: Record<string, string>;
-}): Promise<void> {
-  const { tables } = await createAdminClient();
-  await tables.createRow({
-    databaseId: DATABASE_ID,
-    tableId: TABLE_AUDIT_LOGS,
-    rowId: ID.unique(),
-    data: {
-      actorId: params.actorId,
-      event: params.event.slice(0, 128),
-      resourceType: "review",
-      resourceId: params.resourceId,
-      meta: JSON.stringify(params.meta).slice(0, 4000),
-    },
-    permissions: [],
-  });
 }
 
 const APPROVED_REVIEW_PAGE = 100;
@@ -538,6 +502,26 @@ export async function createSellerReview(
       };
     }
 
+    await Promise.all([
+      notifyUserEvent(user.$id, {
+        type: "review.submitted",
+        title: "Review submitted",
+        body: "Thanks. Your seller review was submitted and is waiting for admin approval.",
+        link: `/requests/${requestId}`,
+      }),
+      notifyAdminsEvent({
+        type: "review.submitted.admin",
+        title: "New seller review to moderate",
+        body: `A buyer submitted a ${rating}-star seller review.`,
+        link: "/admin/reviews",
+        detailLines: [
+          `Review: ${created.$id}`,
+          `Request: ${requestId}`,
+          `Seller: ${detail.request.sellerId}`,
+        ],
+      }),
+    ]);
+
     return {
       success: "Thanks. Your review was submitted and is waiting for admin approval.",
     };
@@ -645,6 +629,7 @@ async function moderateReview(
     await writeAuditLog({
       actorId: admin.$id,
       event: nextStatus === "approved" ? "review.approved" : "review.rejected",
+      resourceType: "review",
       resourceId: review.$id,
       meta: {
         requestId: review.requestId,
@@ -653,17 +638,29 @@ async function moderateReview(
       },
     });
 
-    await notifyUserSafe({
-      userId: review.buyerId,
-      type: nextStatus === "approved" ? "review.approved" : "review.rejected",
-      title:
-        nextStatus === "approved" ? "Review approved" : "Review not approved",
-      body:
-        nextStatus === "approved"
-          ? "Your seller review is now visible on their shop."
-          : "An admin did not approve your seller review.",
-      link: `/requests/${review.requestId}`,
-    });
+    if (nextStatus === "approved") {
+      await Promise.all([
+        notifyUserEvent(review.buyerId, {
+          type: "review.approved",
+          title: "Review approved",
+          body: "Your seller review is now visible on their shop.",
+          link: `/requests/${review.requestId}`,
+        }),
+        notifyUserEvent(review.sellerId, {
+          type: "review.approved.seller",
+          title: "New review on your shop",
+          body: `A buyer left a ${review.rating}-star review. It is now visible on your shop.`,
+          link: "/seller/reviews",
+        }),
+      ]);
+    } else {
+      await notifyUserEvent(review.buyerId, {
+        type: "review.rejected",
+        title: "Review not approved",
+        body: "An admin did not approve your seller review.",
+        link: `/requests/${review.requestId}`,
+      });
+    }
 
     return {
       ok: true,

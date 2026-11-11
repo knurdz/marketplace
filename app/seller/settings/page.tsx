@@ -36,17 +36,17 @@ export default async function SellerSettingsPage() {
         description={`Policies for ${profile.shopName} — shown on your shop and listing pages when filled in.`}
         actions={
           <>
-            <Button variant="outline" size="sm" asChild>
+            <Button variant="info" size="sm" asChild>
               <Link href="/seller/shop">Shop profile</Link>
             </Button>
-            <Button variant="outline" size="sm" asChild>
+            <Button variant="info" size="sm" asChild>
               <Link
                 href={publicShopHref}
                 target="_blank"
                 rel="noopener noreferrer"
               >
                 View shop
-                <ExternalLink data-icon="inline-end" className="size-3.5" />
+                <ExternalLink data-icon="inline-end" />
               </Link>
             </Button>
           </>

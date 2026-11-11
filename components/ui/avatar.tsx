@@ -30,6 +30,7 @@ function AvatarImage({
       data-slot="avatar-image"
       className={cn("aspect-square size-full object-cover", className)}
       {...props}
+      referrerPolicy="no-referrer"
     />
   )
 }

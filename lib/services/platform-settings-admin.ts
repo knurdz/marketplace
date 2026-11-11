@@ -1,7 +1,6 @@
 import { ID, Query } from "@/lib/db/appwrite-shim";
 import {
   DATABASE_ID,
-  TABLE_AUDIT_LOGS,
   TABLE_PLATFORM_SETTINGS,
   hasAppwritePublicConfig,
 } from "@/lib/appwrite/config";
@@ -14,6 +13,7 @@ import {
   type PlatformSettingKey,
 } from "@/lib/platform-settings/keys";
 import type { PlatformSetting } from "@/lib/types";
+import { writeAuditLog } from "./audit-logs";
 import {
   asPlatformSetting,
   normalizePlatformSettingKey,
@@ -118,29 +118,6 @@ export function validatePlatformSettingInput(
 /** Defense-in-depth: reject keys containing sensitive substrings. */
 export function isPlatformSettingKeyDenied(key: string): boolean {
   return keyMatchesDenylist(key);
-}
-
-async function writeAuditLog(params: {
-  actorId: string;
-  event: string;
-  resourceType: string;
-  resourceId: string;
-  meta: Record<string, string>;
-}): Promise<void> {
-  const { tables } = await createAdminClient();
-  await tables.createRow({
-    databaseId: DATABASE_ID,
-    tableId: TABLE_AUDIT_LOGS,
-    rowId: ID.unique(),
-    data: {
-      actorId: params.actorId,
-      event: params.event.slice(0, 128),
-      resourceType: params.resourceType.slice(0, 64),
-      resourceId: params.resourceId,
-      meta: JSON.stringify(params.meta).slice(0, 4000),
-    },
-    permissions: [],
-  });
 }
 
 async function assertAdminUser(): Promise<

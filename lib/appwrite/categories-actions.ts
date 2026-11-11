@@ -6,12 +6,16 @@
  */
 
 import { revalidatePath } from "next/cache";
+import { BUCKET_CATEGORIES } from "@/lib/appwrite/config";
 import { ROLE_LABELS, userHasLabel } from "@/lib/appwrite/roles";
 import { getLoggedInUser } from "@/lib/appwrite/session";
 import {
+  deleteFileAsAdmin,
+  uploadCategoryImage,
+} from "@/lib/appwrite/storage";
+import {
   createCategoryCore,
   deleteCategoryCore,
-  reorderCategoriesCore,
   updateCategoryCore,
 } from "@/lib/services/categories";
 
@@ -36,13 +40,31 @@ async function assertAdmin(): Promise<
 function revalidateCategoryPaths(): void {
   revalidatePath("/admin/categories");
   revalidatePath("/admin");
+  revalidatePath("/");
+  revalidatePath("/categories");
+}
+
+async function cleanupCategoryImage(fileId: string | null | undefined) {
+  const id = fileId?.trim();
+  if (!id) return;
+  try {
+    await deleteFileAsAdmin(BUCKET_CATEGORIES, id);
+  } catch {
+    // Best-effort cleanup
+  }
+}
+
+function readOptionalImage(formData: FormData): File | null {
+  const entry = formData.get("image");
+  if (!(entry instanceof File) || entry.size <= 0) return null;
+  return entry;
 }
 
 export async function createCategory(input: {
   name: string;
   slug?: string;
   parentId?: string | null;
-  sortOrder?: number;
+  imageFileId?: string | null;
 }): Promise<CategoryActionState> {
   const auth = await assertAdmin();
   if (!auth.ok) return { error: auth.error };
@@ -64,7 +86,7 @@ export async function updateCategory(
     name?: string;
     slug?: string;
     parentId?: string | null;
-    sortOrder?: number;
+    imageFileId?: string | null;
   },
 ): Promise<CategoryActionState> {
   const auth = await assertAdmin();
@@ -77,18 +99,9 @@ export async function updateCategory(
   const result = await updateCategoryCore(auth.userId, categoryId.trim(), patch);
   if (!result.ok) return { error: result.error };
 
-  revalidateCategoryPaths();
-  return { success: result.message };
-}
-
-export async function reorderCategories(
-  updates: { categoryId: string; sortOrder: number }[],
-): Promise<CategoryActionState> {
-  const auth = await assertAdmin();
-  if (!auth.ok) return { error: auth.error };
-
-  const result = await reorderCategoriesCore(auth.userId, updates);
-  if (!result.ok) return { error: result.error };
+  if (result.replacedImageFileId) {
+    await cleanupCategoryImage(result.replacedImageFileId);
+  }
 
   revalidateCategoryPaths();
   return { success: result.message };
@@ -106,6 +119,10 @@ export async function deleteCategory(
 
   const result = await deleteCategoryCore(auth.userId, categoryId.trim());
   if (!result.ok) return { error: result.error };
+
+  if (result.replacedImageFileId) {
+    await cleanupCategoryImage(result.replacedImageFileId);
+  }
 
   revalidateCategoryPaths();
   return { success: result.message };
@@ -130,18 +147,34 @@ export async function createCategoryFormAction(
       ? parentRaw.trim()
       : null;
 
-  const sortRaw = formData.get("sortOrder");
-  const sortOrder =
-    typeof sortRaw === "string" && sortRaw.trim()
-      ? Number(sortRaw)
-      : undefined;
+  const image = readOptionalImage(formData);
+  let imageFileId: string | undefined;
+  if (image) {
+    try {
+      const uploaded = await uploadCategoryImage(image);
+      imageFileId = uploaded.fileId;
+    } catch (error) {
+      return {
+        error:
+          error instanceof Error
+            ? error.message
+            : "Could not upload category image.",
+      };
+    }
+  }
 
-  return createCategory({
+  const result = await createCategory({
     name,
     slug,
     parentId,
-    sortOrder: Number.isFinite(sortOrder) ? sortOrder : undefined,
+    imageFileId,
   });
+
+  if (result.error && imageFileId) {
+    await cleanupCategoryImage(imageFileId);
+  }
+
+  return result;
 }
 
 export async function updateCategoryFormAction(
@@ -156,13 +189,12 @@ export async function updateCategoryFormAction(
   const name = formData.get("name");
   const slugRaw = formData.get("slug");
   const parentRaw = formData.get("parentId");
-  const sortRaw = formData.get("sortOrder");
 
   const patch: {
     name?: string;
     slug?: string;
     parentId?: string | null;
-    sortOrder?: number;
+    imageFileId?: string | null;
   } = {};
 
   if (typeof name === "string" && name.trim()) {
@@ -177,12 +209,29 @@ export async function updateCategoryFormAction(
         ? parentRaw.trim()
         : null;
   }
-  if (typeof sortRaw === "string" && sortRaw.trim()) {
-    const n = Number(sortRaw);
-    if (Number.isFinite(n)) patch.sortOrder = n;
+
+  const image = readOptionalImage(formData);
+  let uploadedFileId: string | undefined;
+  if (image) {
+    try {
+      const uploaded = await uploadCategoryImage(image);
+      uploadedFileId = uploaded.fileId;
+      patch.imageFileId = uploadedFileId;
+    } catch (error) {
+      return {
+        error:
+          error instanceof Error
+            ? error.message
+            : "Could not upload category image.",
+      };
+    }
   }
 
-  return updateCategory(categoryId.trim(), patch);
+  const result = await updateCategory(categoryId.trim(), patch);
+  if (result.error && uploadedFileId) {
+    await cleanupCategoryImage(uploadedFileId);
+  }
+  return result;
 }
 
 export async function deleteCategoryFormAction(
@@ -194,42 +243,4 @@ export async function deleteCategoryFormAction(
     return { error: "Missing category." };
   }
   return deleteCategory(categoryId.trim());
-}
-
-export async function reorderCategoriesFormAction(
-  _prev: CategoryActionState,
-  formData: FormData,
-): Promise<CategoryActionState> {
-  const payload = formData.get("updates");
-  if (typeof payload !== "string" || !payload.trim()) {
-    return { error: "Missing reorder data." };
-  }
-
-  try {
-    const parsed = JSON.parse(payload) as unknown;
-    if (!Array.isArray(parsed)) {
-      return { error: "Invalid reorder data." };
-    }
-    const updates: { categoryId: string; sortOrder: number }[] = [];
-    for (const item of parsed) {
-      if (
-        typeof item === "object" &&
-        item !== null &&
-        "categoryId" in item &&
-        "sortOrder" in item &&
-        typeof (item as { categoryId: unknown }).categoryId === "string" &&
-        typeof (item as { sortOrder: unknown }).sortOrder === "number"
-      ) {
-        updates.push({
-          categoryId: (item as { categoryId: string }).categoryId,
-          sortOrder: (item as { sortOrder: number }).sortOrder,
-        });
-      } else {
-        return { error: "Invalid reorder entry." };
-      }
-    }
-    return reorderCategories(updates);
-  } catch {
-    return { error: "Invalid reorder data." };
-  }
 }

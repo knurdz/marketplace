@@ -68,7 +68,7 @@ export function ProfileForm({
         <CardHeader>
           <CardTitle>Avatar</CardTitle>
           <CardDescription>
-            JPG, PNG, or WebP · max 2MB. Shown on your account menu.
+            JPG, PNG, or WebP · max 2MB. Google and GitHub photos are used until you upload one.
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -92,6 +92,7 @@ export function ProfileForm({
                   alt=""
                   width={72}
                   height={72}
+                  referrerPolicy="no-referrer"
                   className="size-[72px] rounded-xl border border-border object-cover"
                 />
               ) : (
@@ -117,7 +118,7 @@ export function ProfileForm({
               </div>
             </div>
 
-            <Button type="submit" variant="secondary" disabled={avatarPending}>
+            <Button type="submit" variant="info" disabled={avatarPending}>
               {avatarPending ? "Uploading…" : "Upload avatar"}
             </Button>
           </form>
@@ -187,7 +188,7 @@ export function ProfileForm({
               />
             </div>
 
-            <Button type="submit" disabled={pending}>
+            <Button type="submit" variant="info" disabled={pending}>
               {pending ? "Saving…" : "Save profile"}
             </Button>
           </form>

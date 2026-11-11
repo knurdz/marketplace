@@ -1,5 +1,6 @@
 "use client";
 
+import { Check, X } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useActionState, useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
@@ -64,7 +65,14 @@ export function SellerApproveButton({
   return (
     <form action={formAction}>
       <input type="hidden" name="sellerProfileId" value={sellerProfileId} />
-      <Button type="submit" disabled={pending} size="sm" data-testid="admin-approve-seller">
+      <Button
+        type="submit"
+        variant="success"
+        disabled={pending}
+        size="sm"
+        data-testid="admin-approve-seller"
+      >
+        {!pending ? <Check data-icon="inline-start" /> : null}
         {pending ? "Approving…" : "Approve"}
       </Button>
     </form>
@@ -87,10 +95,11 @@ export function SellerRejectForm({
     <>
       <Button
         type="button"
-        variant="outline"
+        variant="destructive"
         size="sm"
         onClick={() => setOpen(true)}
       >
+        <X data-icon="inline-start" />
         Reject
       </Button>
       <ConfirmActionDialog
@@ -100,7 +109,7 @@ export function SellerRejectForm({
         description={`Reject “${shopName}”? The reason is visible to the applicant.`}
         confirmLabel="Confirm reject"
         pendingLabel="Rejecting…"
-        confirmVariant="outline"
+        confirmVariant="destructive"
         pending={pending}
         formAction={formAction}
         hiddenFields={{ sellerProfileId }}

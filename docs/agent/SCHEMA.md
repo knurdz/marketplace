@@ -76,9 +76,19 @@ Owner-only saved products.
 | `comment` | Optional |
 | `status` | `pending` \| `approved` \| `rejected` |
 
+### `categories`
+
+| Column | Notes |
+|--------|-------|
+| `name`, `slug` | Display name + unique slug |
+| `parentId` | Optional parent for nesting |
+| `imageFileId` | Optional Hostinger `categories` bucket file id |
+
+Storefront/admin lists rank categories by live product count (`status=active` and `available=true`), then name.
+
 ### Also retained
 
-`categories`, `reports`, `notifications`, `platform_settings`, `audit_logs`, `view_stats`, `rate_limits`, `stored_files`, Better Auth `user` / `session` / `account` / `verification`.
+`reports`, `notifications`, `platform_settings`, `audit_logs`, `view_stats`, `rate_limits`, `stored_files`, Better Auth `user` / `session` / `account` / `verification`.
 
 ## Removed
 

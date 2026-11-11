@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { ProductGrid } from "@/components/store/product-grid";
+import { SectionHeading } from "@/components/store/section-heading";
 import { fetchPublicProductsByIds } from "@/lib/services/product-actions";
 import { readRecentlyViewedIds } from "@/lib/storefront/recently-viewed";
 import type { ProductCoverMap } from "@/lib/services/products";
@@ -10,7 +11,7 @@ import type { Product } from "@/lib/types";
 type RecentlyViewedSectionProps = {
   /** Exclude the current product page id from the strip when set. */
   excludeProductId?: string;
-  /** Drop outer max-width padding when nested in buyer account shell. */
+  /** Drop outer max-width padding when nested in a page that already has it. */
   embedded?: boolean;
 };
 
@@ -58,25 +59,11 @@ export function RecentlyViewedSection({
     <section
       className={
         embedded
-          ? "w-full"
-          : "mx-auto w-full max-w-6xl px-4 py-12 sm:px-6 lg:px-8"
+          ? "mt-14 w-full"
+          : "mx-auto w-full max-w-7xl px-4 py-12 sm:px-6 lg:px-8"
       }
     >
-      <p className="text-xs font-medium tracking-[0.18em] text-muted-foreground uppercase">
-        Recently viewed
-      </p>
-      <h2
-        className={
-          embedded
-            ? "mt-2 text-lg font-semibold tracking-tight"
-            : "mt-2 text-2xl font-bold tracking-tight"
-        }
-      >
-        On this device
-      </h2>
-      <p className="mt-2 text-sm text-muted-foreground">
-        Saved locally, not shared across accounts.
-      </p>
+      <SectionHeading title="Recently viewed" />
       <div className="mt-6">
         <ProductGrid products={products} covers={covers} />
       </div>

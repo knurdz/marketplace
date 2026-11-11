@@ -1,4 +1,6 @@
 import type { ReactNode } from "react";
+import { BUCKET_CATEGORIES } from "@/lib/appwrite/config";
+import { getFileViewUrl } from "@/lib/appwrite/storage-urls";
 import { categoryImagePath } from "@/lib/store/category-catalog";
 import { cn } from "@/lib/utils";
 
@@ -10,25 +12,30 @@ function categoryInitial(name: string): string {
 type CategoryImageProps = {
   name: string;
   slug: string;
+  imageFileId?: string | null;
   className?: string;
   imgClassName?: string;
   fallbackClassName?: string;
   children?: ReactNode;
 };
 
-/** Local catalog photo when present; otherwise initial-letter fallback. */
+/** Uploaded category image, then catalog asset, then initial-letter fallback. */
 export function CategoryImage({
   name,
   slug,
+  imageFileId,
   className,
   imgClassName,
   fallbackClassName,
 }: CategoryImageProps) {
-  const src = categoryImagePath(slug);
+  const uploadedId = imageFileId?.trim() || null;
+  const src = uploadedId
+    ? getFileViewUrl(BUCKET_CATEGORIES, uploadedId)
+    : categoryImagePath(slug);
 
   if (src) {
     return (
-      // eslint-disable-next-line @next/next/no-img-element -- static public category asset
+      // eslint-disable-next-line @next/next/no-img-element -- remote storage or static public asset
       <img
         src={src}
         alt=""

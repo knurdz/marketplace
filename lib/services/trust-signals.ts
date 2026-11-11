@@ -303,19 +303,37 @@ async function fetchOpenReportsForProductIds(
   const reports: TrustReport[] = [];
 
   for (const batch of chunk(productIds, QUERY_CHUNK)) {
-    const result = await tables.listRows({
-      databaseId: DATABASE_ID,
-      tableId: TABLE_REPORTS,
-      queries: [
+    let cursor: string | undefined;
+    for (;;) {
+      const queries = [
         Query.equal("productId", batch),
         Query.equal("status", [...OPEN_REPORT_STATUSES]),
         Query.limit(PAGE_SIZE),
-      ],
-    });
+      ];
+      if (cursor) queries.push(Query.cursorAfter(cursor));
 
-    for (const row of result.rows) {
-      const r = toTrustReport(row as unknown as Record<string, unknown>);
-      if (r && isOpenReportStatus(r.status)) reports.push(r);
+      const result = await tables.listRows({
+        databaseId: DATABASE_ID,
+        tableId: TABLE_REPORTS,
+        queries,
+      });
+
+      if (result.rows.length === 0) break;
+
+      for (const row of result.rows) {
+        const r = toTrustReport(row as unknown as Record<string, unknown>);
+        if (r && isOpenReportStatus(r.status)) reports.push(r);
+      }
+
+      if (result.rows.length < PAGE_SIZE) break;
+      const lastId = asNullableString(
+        (result.rows[result.rows.length - 1] as unknown as Record<
+          string,
+          unknown
+        >).$id,
+      );
+      if (!lastId) break;
+      cursor = lastId;
     }
   }
 

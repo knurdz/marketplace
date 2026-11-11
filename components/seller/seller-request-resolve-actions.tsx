@@ -1,5 +1,6 @@
 "use client";
 
+import { BadgeCheck, X } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useActionState, useEffect, useRef, useState } from "react";
 import {
@@ -69,11 +70,13 @@ export function SellerRequestResolveActions({
     >
       <Button
         type="button"
+        variant="success"
         size="sm"
         disabled={soldPending || cancelPending}
         data-testid="seller-mark-sold"
         onClick={() => setSoldOpen(true)}
       >
+        <BadgeCheck data-icon="inline-start" />
         Mark sold
       </Button>
       <ConfirmActionDialog
@@ -83,6 +86,7 @@ export function SellerRequestResolveActions({
         description="Stock will decrease by the requested quantity. This cannot be undone."
         confirmLabel="Mark sold"
         pendingLabel="Saving…"
+        confirmVariant="success"
         pending={soldPending}
         confirmTestId="seller-mark-sold-confirm"
         formAction={soldAction}
@@ -91,12 +95,13 @@ export function SellerRequestResolveActions({
 
       <Button
         type="button"
-        variant="outline"
+        variant="warning"
         size="sm"
         disabled={soldPending || cancelPending}
         data-testid="seller-mark-cancelled"
         onClick={() => setCancelOpen(true)}
       >
+        <X data-icon="inline-start" />
         Cancel request
       </Button>
       <ConfirmActionDialog
@@ -106,7 +111,7 @@ export function SellerRequestResolveActions({
         description="Stock will stay the same. The buyer will be notified."
         confirmLabel="Cancel request"
         pendingLabel="Saving…"
-        confirmVariant="outline"
+        confirmVariant="warning"
         pending={cancelPending}
         confirmTestId="seller-mark-cancelled-confirm"
         formAction={cancelAction}

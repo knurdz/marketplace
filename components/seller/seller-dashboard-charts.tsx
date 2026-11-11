@@ -37,6 +37,10 @@ type SellerDashboardChartsProps = {
   viewProducts: Array<{ productId: string; title: string; count: number }>;
   shopName: string | null;
   reviewInsights: OwnSellerReviewInsights;
+  /** When false, metric cards are static (admin shop detail). */
+  linkMetrics?: boolean;
+  /** Override for reviews summary “All reviews” link. */
+  reviewsHref?: string | null;
 };
 
 function formatCount(value: number): string {
@@ -48,7 +52,7 @@ function formatCount(value: number): string {
 type MetricCard = {
   label: string;
   value: string;
-  href: string;
+  href: string | null;
   icon: LucideIcon;
   spark: { value: number }[];
   sparkColor: string;
@@ -56,12 +60,8 @@ type MetricCard = {
 
 function MetricCardTile({ card }: { card: MetricCard }) {
   const hasSpark = card.spark.some((p) => p.value > 0);
-
-  return (
-    <Link
-      href={card.href}
-      className="group block rounded-xl border border-border bg-card p-4 shadow-xs transition-colors hover:border-foreground/15 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-    >
+  const body = (
+    <>
       <div className="flex items-start justify-between gap-3">
         <div className="flex min-w-0 items-center gap-2.5">
           <span className="flex size-9 shrink-0 items-center justify-center rounded-lg border border-border bg-muted/25 text-foreground">
@@ -81,6 +81,23 @@ function MetricCardTile({ card }: { card: MetricCard }) {
       >
         <Sparkline data={card.spark} color={card.sparkColor} className="h-full w-full" />
       </div>
+    </>
+  );
+
+  if (!card.href) {
+    return (
+      <div className="rounded-xl border border-border bg-card p-4 shadow-xs">
+        {body}
+      </div>
+    );
+  }
+
+  return (
+    <Link
+      href={card.href}
+      className="group block rounded-xl border border-border bg-card p-4 shadow-xs transition-colors hover:border-foreground/15 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+    >
+      {body}
     </Link>
   );
 }
@@ -158,6 +175,8 @@ export function SellerDashboardCharts({
   viewProducts,
   shopName,
   reviewInsights,
+  linkMetrics = true,
+  reviewsHref = "/seller/reviews",
 }: SellerDashboardChartsProps) {
   const trafficData = useMemo(() => mergeTrafficRows(views), [views]);
   const requestData = useMemo(
@@ -172,10 +191,6 @@ export function SellerDashboardCharts({
   const sparkSold = useMemo(
     () => requestData.map((row) => ({ value: row.sold })),
     [requestData],
-  );
-  const sparkShopViews = useMemo(
-    () => trafficData.map((row) => ({ value: row.shopViews })),
-    [trafficData],
   );
   const sparkListingViews = useMemo(
     () => trafficData.map((row) => ({ value: row.listingViews })),
@@ -196,7 +211,7 @@ export function SellerDashboardCharts({
     {
       label: "Open requests",
       value: formatCount(metrics.openCount),
-      href: "/seller/requests?filter=open",
+      href: linkMetrics ? "/seller/requests?filter=open" : null,
       icon: Clock,
       spark: sparkNewRequests,
       sparkColor: "var(--chart-3)",
@@ -204,7 +219,7 @@ export function SellerDashboardCharts({
     {
       label: "Sold",
       value: formatCount(metrics.soldCount),
-      href: "/seller/requests",
+      href: linkMetrics ? "/seller/requests" : null,
       icon: CheckCircle2,
       spark: sparkSold,
       sparkColor: "var(--accent)",
@@ -212,7 +227,7 @@ export function SellerDashboardCharts({
     {
       label: "Cancelled",
       value: formatCount(metrics.cancelledCount),
-      href: "/seller/requests",
+      href: linkMetrics ? "/seller/requests" : null,
       icon: XCircle,
       spark: sparkSold.map(() => ({ value: 0 })),
       sparkColor: "var(--destructive)",
@@ -220,7 +235,7 @@ export function SellerDashboardCharts({
     {
       label: "Active listings",
       value: formatCount(listingCounts.active),
-      href: "/seller/listings",
+      href: linkMetrics ? "/seller/listings" : null,
       icon: Package,
       spark: sparkListingViews,
       sparkColor: "var(--chart-2)",
@@ -316,6 +331,7 @@ export function SellerDashboardCharts({
         reviews={reviewInsights.reviews.slice(0, 2)}
         shopSlug={null}
         variant="summary"
+        allReviewsHref={reviewsHref}
       />
 
       {topProductRows.length > 0 ? (

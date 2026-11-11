@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { ClipboardCheck } from "lucide-react";
 import {
   DataTableEmpty,
   DataTableShell,
@@ -28,22 +29,6 @@ function formatCount(value: number): string {
   }).format(value);
 }
 
-function formatRevenue(amount: number, currency: string): string {
-  try {
-    return new Intl.NumberFormat(undefined, {
-      style: "currency",
-      currency,
-      maximumFractionDigits: 2,
-    }).format(amount);
-  } catch {
-    return new Intl.NumberFormat(undefined, {
-      style: "currency",
-      currency: "LKR",
-      maximumFractionDigits: 2,
-    }).format(amount);
-  }
-}
-
 export default async function AdminSellerPerformancePage({
   searchParams,
 }: PageProps) {
@@ -65,10 +50,13 @@ export default async function AdminSellerPerformancePage({
     <div className="w-full">
       <PortalPageHeader
         title="Seller performance"
-        description="Basic KPIs for approved sellers. Revenue matches paid payments on the seller earnings view. Pending is paid through ready-for-pickup, not unpaid checkout."
+        description="Purchase-request KPIs for approved sellers. Sold, open, and cancelled counts come from buy requests on each shop."
         actions={
-          <Button variant="secondary" size="sm" asChild>
-            <Link href="/admin/sellers">Approvals</Link>
+          <Button variant="info" size="sm" asChild>
+            <Link href="/admin/sellers">
+              <ClipboardCheck data-icon="inline-start" />
+              Approvals
+            </Link>
           </Button>
         }
       />
@@ -76,28 +64,18 @@ export default async function AdminSellerPerformancePage({
       {rows.length === 0 ? (
         <DataTableEmpty
           className="mt-6"
-          message="No approved sellers yet. After an application is approved, their orders, pending fulfillment, and paid revenue appear here."
+          message="No approved sellers yet. After an application is approved, their sold, open, and cancelled requests appear here."
         />
       ) : (
         <DataTableShell className="mt-6">
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>
-                  Shop
-                </TableHead>
-                <TableHead>
-                  Slug
-                </TableHead>
-                <TableHead>
-                  Orders
-                </TableHead>
-                <TableHead>
-                  Pending
-                </TableHead>
-                <TableHead>
-                  Revenue
-                </TableHead>
+                <TableHead>Shop</TableHead>
+                <TableHead>Slug</TableHead>
+                <TableHead>Sold</TableHead>
+                <TableHead>Open</TableHead>
+                <TableHead>Cancelled</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -105,7 +83,7 @@ export default async function AdminSellerPerformancePage({
                 <TableRow key={row.sellerId}>
                   <TableCell className="font-medium">
                     <Link
-                      href={`/shop/${row.slug}`}
+                      href={`/admin/sellers/${row.profileId}`}
                       className="hover:text-accent hover:underline hover:underline-offset-2"
                     >
                       {row.shopName}
@@ -120,8 +98,8 @@ export default async function AdminSellerPerformancePage({
                   <TableCell className="text-sm tabular-nums">
                     {formatCount(row.pendingCount)}
                   </TableCell>
-                  <TableCell className="text-sm font-medium tabular-nums">
-                    {formatRevenue(row.revenue, row.currency)}
+                  <TableCell className="text-sm tabular-nums">
+                    {formatCount(row.cancelledCount)}
                   </TableCell>
                 </TableRow>
               ))}

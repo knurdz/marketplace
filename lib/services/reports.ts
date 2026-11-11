@@ -6,6 +6,7 @@ import {
 } from "@/lib/appwrite/config";
 import { createSessionClient } from "@/lib/appwrite/server";
 import { getLoggedInUser } from "@/lib/appwrite/session";
+import { notifyAdminsEvent, notifyUserEvent } from "@/lib/email/events";
 import {
   assertRateLimit,
   getClientIp,
@@ -176,6 +177,13 @@ export async function createProductReport(
       };
     }
 
+    if (product.sellerId === user.$id) {
+      return {
+        error: "You cannot report your own listing.",
+        errorCode: REPORT_ERROR_CODES.NOT_ALLOWED,
+      };
+    }
+
     const { tables } = await createSessionClient();
     const row = await tables.createRow({
       databaseId: DATABASE_ID,
@@ -198,6 +206,26 @@ export async function createProductReport(
         errorCode: REPORT_ERROR_CODES.NOT_ALLOWED,
       };
     }
+
+    await Promise.all([
+      notifyUserEvent(user.$id, {
+        type: "report.submitted",
+        title: "Report submitted",
+        body: `Thanks. We received your report about "${product.title}" and will review it.`,
+        link: `/products/${product.$id}`,
+      }),
+      notifyAdminsEvent({
+        type: "report.submitted.admin",
+        title: "New listing report",
+        body: `A listing was reported: "${product.title}".`,
+        link: "/admin/reports",
+        detailLines: [
+          `Report: ${created.$id}`,
+          `Product: ${product.$id}`,
+          `Reason: ${reason}`,
+        ],
+      }),
+    ]);
 
     return {
       success: "Report submitted. Our team will review it.",

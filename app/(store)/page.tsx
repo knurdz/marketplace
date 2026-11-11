@@ -5,14 +5,17 @@ import {
 import { HomeIntro } from "@/components/store/home/home-intro";
 import { HomeListings } from "@/components/store/home/home-listings";
 import { ScrollToBrowse } from "@/components/store/home/scroll-to-browse";
-import { listCategoriesWithActiveProducts } from "@/lib/services";
 import {
-  HOME_LISTINGS,
-  type MarketListingSort,
-} from "@/lib/store/home-demo";
+  listActiveProducts,
+  listCategoriesWithActiveProducts,
+  listCoverImagesByProductIds,
+  parseProductCatalogParams,
+} from "@/lib/services";
 
 /** One horizontal row of recent listings. */
 const JUST_LISTED_LIMIT = 8;
+/** Browse grid page size. */
+const BROWSE_LIMIT = 48;
 
 type HomePageProps = {
   searchParams: Promise<{
@@ -23,18 +26,6 @@ type HomePageProps = {
   }>;
 };
 
-function parseOptionalPrice(raw: string | undefined): number | null {
-  if (raw == null || raw.trim() === "") return null;
-  const value = Number(raw);
-  if (!Number.isFinite(value) || value < 0) return null;
-  return value;
-}
-
-function parseSort(raw: string | undefined): MarketListingSort {
-  if (raw === "price_asc" || raw === "price_desc") return raw;
-  return "newest";
-}
-
 export default async function Home({ searchParams }: HomePageProps) {
   const params = await searchParams;
   const categoriesWithProducts = await listCategoriesWithActiveProducts();
@@ -44,37 +35,60 @@ export default async function Home({ searchParams }: HomePageProps) {
     : null;
   const category = matchedCategory?.slug ?? null;
   const categoryLabel = matchedCategory?.name ?? null;
-  const minPrice = parseOptionalPrice(params.minPrice);
-  const maxPrice = parseOptionalPrice(params.maxPrice);
-  const sort = parseSort(params.sort);
-  const invalidPriceRange =
-    minPrice != null && maxPrice != null && minPrice > maxPrice;
+  const catalog = parseProductCatalogParams(params);
+
+  const [justListed, browseProducts] = await Promise.all([
+    listActiveProducts({
+      limit: JUST_LISTED_LIMIT,
+      sort: "newest",
+    }),
+    listActiveProducts({
+      limit: BROWSE_LIMIT,
+      categoryId: matchedCategory?.$id,
+      minPrice: catalog.minPrice,
+      maxPrice: catalog.maxPrice,
+      sort: catalog.sort,
+      invalidPriceRange: catalog.invalidPriceRange,
+    }),
+  ]);
+
+  const covers = await listCoverImagesByProductIds([
+    ...justListed.map((p) => p.$id),
+    ...browseProducts.map((p) => p.$id),
+  ]);
 
   const browseProps = {
     category,
     categoryLabel,
-    minPrice,
-    maxPrice,
-    sort,
-    invalidPriceRange,
+    minPrice: catalog.minPrice ?? null,
+    maxPrice: catalog.maxPrice ?? null,
+    sort: catalog.sort,
+    invalidPriceRange: catalog.invalidPriceRange,
+    products: browseProducts,
+    covers,
   };
 
   const hasBrowseParams =
     category != null ||
-    minPrice != null ||
-    maxPrice != null ||
-    sort !== "newest" ||
-    invalidPriceRange;
+    catalog.minPrice != null ||
+    catalog.maxPrice != null ||
+    catalog.sort !== "newest" ||
+    catalog.invalidPriceRange;
 
   return (
     <main className="mx-auto w-full max-w-7xl space-y-12 px-4 py-8 sm:px-6 sm:py-10 lg:px-8">
       <ScrollToBrowse enabled={hasBrowseParams} />
       <HomeIntro />
       <HomeBrowseControls
-        {...browseProps}
+        category={browseProps.category}
+        categoryLabel={browseProps.categoryLabel}
+        minPrice={browseProps.minPrice}
+        maxPrice={browseProps.maxPrice}
+        sort={browseProps.sort}
+        invalidPriceRange={browseProps.invalidPriceRange}
         categoriesWithProducts={categoriesWithProducts}
       />
-      <HomeListings listings={HOME_LISTINGS.slice(0, JUST_LISTED_LIMIT)} />
+      <HomeListings products={justListed} covers={covers} />
       <HomeBrowseListings {...browseProps} />
     </main>
   );

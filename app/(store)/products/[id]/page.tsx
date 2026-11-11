@@ -6,8 +6,9 @@ import { ProductImageGallery } from "@/components/store/product-image-gallery";
 import { RecordRecentlyViewed } from "@/components/store/record-recently-viewed";
 import { RecentlyViewedSection } from "@/components/store/recently-viewed-section";
 import { ReportListingButton } from "@/components/store/report-listing-button";
-import { SellerInfoCard } from "@/components/store/seller-info-card";
+import { SimilarItemsSection } from "@/components/store/similar-items-section";
 import { WishlistToggleButton } from "@/components/store/wishlist-toggle-button";
+import { StarRating } from "@/components/seller/star-rating";
 import { formatProductPrice } from "@/components/store/product-display";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -26,9 +27,12 @@ import {
   getProduct,
   getPublicSellerByUserId,
   getSellerPhoneForBuy,
+  getSellerRatingSummary,
   isProductInOwnWishlist,
   isProductPurchasable,
+  listActiveProducts,
   listCategories,
+  listCoverImagesByProductIds,
   listProductImages,
   recordMarketplaceView,
 } from "@/lib/services";
@@ -52,13 +56,32 @@ export default async function ProductPage({ params }: ProductPageProps) {
     targetId: product.$id,
   });
 
-  const [images, seller, saved, profile, sellerPhone] = await Promise.all([
+  const [
+    images,
+    seller,
+    saved,
+    profile,
+    sellerPhone,
+    sellerRating,
+    categoryProducts,
+  ] = await Promise.all([
     listProductImages(product.$id),
     getPublicSellerByUserId(product.sellerId),
     user ? isProductInOwnWishlist(product.$id) : Promise.resolve(false),
     user ? getOwnProfile() : Promise.resolve(null),
     getSellerPhoneForBuy(product.sellerId),
+    getSellerRatingSummary(product.sellerId),
+    listActiveProducts({
+      categoryId: product.categoryId,
+      limit: 12,
+    }),
   ]);
+  const similarProducts = categoryProducts
+    .filter((entry) => entry.$id !== product.$id)
+    .slice(0, 8);
+  const similarCovers = await listCoverImagesByProductIds(
+    similarProducts.map((entry) => entry.$id),
+  );
 
   const category = categories.find((entry) => entry.$id === product.categoryId);
   const priceLabel = formatProductPrice(product);
@@ -107,9 +130,9 @@ export default async function ProductPage({ params }: ProductPageProps) {
           <h1 className="mt-2 text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
             {product.title}
           </h1>
-          <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
+          <div className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-1.5 text-sm text-muted-foreground">
             {seller ? (
-              <>
+              <p>
                 Listed by{" "}
                 <Link
                   href={`/shop/${seller.slug}`}
@@ -117,12 +140,26 @@ export default async function ProductPage({ params }: ProductPageProps) {
                 >
                   {seller.shopName}
                 </Link>
-                . A person in the community, not a brand.
-              </>
+              </p>
             ) : (
-              "Listed by someone in the community, not a brand."
+              <p>Seller unavailable</p>
             )}
-          </p>
+            {sellerRating.count > 0 && sellerRating.average != null ? (
+              <span className="inline-flex items-center gap-1.5">
+                <span className="font-medium tabular-nums text-foreground">
+                  {sellerRating.average.toFixed(1)}
+                </span>
+                <StarRating rating={Math.round(sellerRating.average)} />
+                <span className="text-xs">
+                  ({sellerRating.count})
+                </span>
+              </span>
+            ) : (
+              <span className="text-xs text-muted-foreground">
+                No ratings yet
+              </span>
+            )}
+          </div>
 
           {/* Price & Stock status aligned together */}
           <div className="mt-4 flex flex-wrap items-center gap-3">
@@ -205,10 +242,6 @@ export default async function ProductPage({ params }: ProductPageProps) {
         </div>
       </div>
 
-      <div className="mt-14 max-w-lg">
-        <SellerInfoCard seller={seller} />
-      </div>
-
       <div className="mt-10">
         <Button variant="outline" asChild className="gap-2">
           <Link href="/">
@@ -218,7 +251,17 @@ export default async function ProductPage({ params }: ProductPageProps) {
         </Button>
       </div>
 
-      <RecentlyViewedSection excludeProductId={product.$id} />
+      <SimilarItemsSection
+        products={similarProducts}
+        covers={similarCovers}
+        categoryName={category?.name ?? null}
+        categoryHref={category ? `/categories/${category.slug}` : null}
+      />
+
+      <RecentlyViewedSection
+        excludeProductId={product.$id}
+        embedded
+      />
     </main>
   );
 }

@@ -7,6 +7,8 @@ export type MarketplaceUser = {
   $id: string;
   email: string;
   name: string;
+  /** Provider profile photo (Google/GitHub) stored by Better Auth. */
+  image: string | null;
   labels: string[];
   status: boolean;
   emailVerification: boolean;
@@ -24,15 +26,18 @@ export function rowToMarketplaceUser(row: {
   id: string;
   email: string;
   name: string;
+  image?: string | null;
   role: string;
   disabled: boolean;
   emailVerified: boolean;
   createdAt?: Date;
 }): MarketplaceUser {
+  const image = row.image?.trim();
   return {
     $id: row.id,
     email: row.email,
     name: row.name,
+    image: image ? image : null,
     labels: roleToLabels(row.role),
     status: !row.disabled,
     emailVerification: row.emailVerified,

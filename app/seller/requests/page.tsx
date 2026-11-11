@@ -102,15 +102,12 @@ export default async function SellerRequestsPage({
                     />
                   </TableCell>
                   <TableCell>
-                    <Button variant="outline" size="xs" asChild>
+                    <Button variant="info" size="xs" asChild>
                       <Link
                         href={`/seller/requests/${request.$id}`}
                         data-testid="seller-request-link"
                       >
-                        <ExternalLink
-                          data-icon="inline-start"
-                          className="size-3"
-                        />
+                        <ExternalLink data-icon="inline-start" />
                         View
                       </Link>
                     </Button>

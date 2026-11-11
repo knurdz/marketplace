@@ -66,11 +66,17 @@ export function ConfirmActionDialog({
   const titleTone =
     confirmVariant === "destructive"
       ? "text-destructive"
-      : confirmVariant === "secondary"
-        ? "text-secondary-foreground"
-        : confirmVariant === "outline"
-          ? "text-foreground"
-          : "text-primary";
+      : confirmVariant === "success"
+        ? "text-success"
+        : confirmVariant === "warning"
+          ? "text-warning"
+          : confirmVariant === "info"
+            ? "text-info"
+            : confirmVariant === "secondary"
+              ? "text-secondary-foreground"
+              : confirmVariant === "outline"
+                ? "text-foreground"
+                : "text-primary";
 
   return (
     <AlertDialog open={open} onOpenChange={onOpenChange}>

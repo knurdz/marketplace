@@ -1,5 +1,6 @@
 "use client";
 
+import { Ban, ShieldCheck } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useActionState, useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
@@ -61,11 +62,12 @@ export function UserSuspendForm({ userId, displayLabel }: UserSuspendFormProps) 
     <>
       <Button
         type="button"
-        variant="outline"
+        variant="warning"
         size="sm"
         onClick={() => setOpen(true)}
         data-testid="admin-suspend-user"
       >
+        <Ban data-icon="inline-start" />
         Suspend
       </Button>
       <ConfirmActionDialog
@@ -75,7 +77,7 @@ export function UserSuspendForm({ userId, displayLabel }: UserSuspendFormProps) 
         description={`Suspend ${displayLabel}? A reason is required for the audit log.`}
         confirmLabel="Confirm suspend"
         pendingLabel="Suspending…"
-        confirmVariant="destructive"
+        confirmVariant="warning"
         pending={pending}
         formAction={formAction}
         hiddenFields={{ userId }}
@@ -100,7 +102,8 @@ export function UserUnsuspendButton({ userId }: { userId: string }) {
   return (
     <form action={formAction}>
       <input type="hidden" name="userId" value={userId} />
-      <Button type="submit" size="sm" disabled={pending}>
+      <Button type="submit" variant="success" size="sm" disabled={pending}>
+        {!pending ? <ShieldCheck data-icon="inline-start" /> : null}
         {pending ? "Unsuspending…" : "Unsuspend"}
       </Button>
     </form>

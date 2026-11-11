@@ -26,23 +26,51 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
   }
 
   const catalogParams = parseProductCatalogParams(params);
-  const [products, categories] = await Promise.all([
-    catalogParams.invalidPriceRange
-      ? Promise.resolve([])
-      : searchActiveProducts(normalized, {
-          limit: 48,
-          minPrice: catalogParams.minPrice,
-          maxPrice: catalogParams.maxPrice,
-          sort: catalogParams.sort,
-        }),
+  const [searchResult, categories] = await Promise.all([
+    searchActiveProducts(normalized, {
+      limit: 48,
+      minPrice: catalogParams.minPrice,
+      maxPrice: catalogParams.maxPrice,
+      sort: catalogParams.sort,
+      invalidPriceRange: catalogParams.invalidPriceRange,
+    }),
     listCategories(),
   ]);
+
+  const products = searchResult.ok ? searchResult.products : [];
   const covers = await listCoverImagesByProductIds(products.map((p) => p.$id));
 
   const hasActiveFilters =
     catalogParams.minPrice != null ||
     catalogParams.maxPrice != null ||
     catalogParams.sort !== "newest";
+
+  let emptyTitle = "No matches";
+  let emptyDescription = `Nothing active matched “${normalized}”.`;
+  let resultLabel = `${products.length} result${products.length === 1 ? "" : "s"}`;
+
+  if (!searchResult.ok) {
+    if (searchResult.reason === "too_short") {
+      emptyTitle = "Add a longer search";
+      emptyDescription =
+        "Use at least one word with 2 or more characters.";
+      resultLabel = "0 results";
+    } else if (
+      searchResult.reason === "failed" ||
+      searchResult.reason === "unavailable"
+    ) {
+      emptyTitle = "Search unavailable";
+      emptyDescription =
+        "We could not run that search right now. Try again in a moment.";
+      resultLabel = "Search failed";
+    } else if (searchResult.reason === "invalid_range") {
+      emptyTitle = "Check the price range";
+      emptyDescription = "The minimum cannot be higher than the maximum.";
+    }
+  } else if (hasActiveFilters && products.length === 0) {
+    emptyTitle = "No matches in this range";
+    emptyDescription = `Nothing active matched “${normalized}” with these filters.`;
+  }
 
   return (
     <CatalogView
@@ -54,9 +82,9 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
       filterAction="/search"
       catalogParams={catalogParams}
       preserve={{ q: normalized }}
-      resultLabel={`${products.length} result${products.length === 1 ? "" : "s"}`}
-      emptyTitle={hasActiveFilters ? "No matches in this range" : "No matches"}
-      emptyDescription={`Nothing active matched “${normalized}”.`}
+      resultLabel={resultLabel}
+      emptyTitle={emptyTitle}
+      emptyDescription={emptyDescription}
       invalidPriceRange={catalogParams.invalidPriceRange}
     />
   );

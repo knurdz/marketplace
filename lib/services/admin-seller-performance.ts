@@ -15,22 +15,22 @@ const APPROVED_SELLER_STATUS: SellerStatus = "approved";
 const DEFAULT_PAGE_SIZE = 25;
 const MAX_PAGE_SIZE = 100;
 const QUERY_CHUNK = 100;
-const DEFAULT_CURRENCY = "LKR";
 
 export type SellerPerformanceInput = {
+  profileId: string;
   sellerId: string;
   shopName: string;
   slug: string;
 };
 
 export type SellerPerformanceRow = {
+  profileId: string;
   sellerId: string;
   shopName: string;
   slug: string;
   orderCount: number;
   pendingCount: number;
-  revenue: number;
-  currency: string;
+  cancelledCount: number;
 };
 
 export type ListApprovedSellerPerformanceResult = {
@@ -64,7 +64,8 @@ function emptyList(): ListApprovedSellerPerformanceResult {
 }
 
 /**
- * Pure per-seller KPI rollup (no I/O). orderCount = sold requests; pendingCount = open (requested).
+ * Pure per-seller KPI rollup (no I/O).
+ * orderCount = sold; pendingCount = open (requested); cancelledCount = cancelled.
  */
 export function aggregateSellerPerformanceRows(
   sellers: SellerPerformanceInput[],
@@ -81,15 +82,18 @@ export function aggregateSellerPerformanceRows(
     const sellerRequests = requestsBySeller.get(seller.sellerId) ?? [];
     const sold = sellerRequests.filter((r) => r.status === "sold").length;
     const open = sellerRequests.filter((r) => r.status === "requested").length;
+    const cancelled = sellerRequests.filter(
+      (r) => r.status === "cancelled",
+    ).length;
 
     return {
+      profileId: seller.profileId,
       sellerId: seller.sellerId,
       shopName: seller.shopName,
       slug: seller.slug,
       orderCount: sold,
       pendingCount: open,
-      revenue: 0,
-      currency: DEFAULT_CURRENCY,
+      cancelledCount: cancelled,
     };
   });
 }
@@ -120,6 +124,7 @@ async function listApprovedSellerPage(opts: {
     const profile = asSellerProfile(record);
     if (!profile || profile.status !== APPROVED_SELLER_STATUS) continue;
     sellers.push({
+      profileId: profile.$id,
       sellerId: profile.userId,
       shopName: profile.shopName,
       slug: profile.slug,

@@ -1,11 +1,11 @@
-import { ID, Query } from "@/lib/db/appwrite-shim";
+import { Query } from "@/lib/db/appwrite-shim";
 import {
   DATABASE_ID,
-  TABLE_AUDIT_LOGS,
   TABLE_PRODUCTS,
   hasAppwritePublicConfig,
 } from "@/lib/appwrite/config";
 import { createAdminClient } from "@/lib/appwrite/server";
+import { notifyUserEvent } from "@/lib/email/events";
 import type { Product } from "@/lib/types";
 import type { ProductStatus } from "@/lib/types";
 import {
@@ -14,6 +14,7 @@ import {
   PENDING_REVIEW_PRODUCT_STATUS,
   REJECTED_PRODUCT_STATUS,
 } from "@/lib/types/status";
+import { writeAuditLog } from "./audit-logs";
 import { asProduct } from "./products";
 
 const MAX_REASON_LENGTH = 500;
@@ -23,29 +24,6 @@ const MAX_PAGE_SIZE = 100;
 export type ListingModerationResult =
   | { ok: true; message: string }
   | { ok: false; error: string };
-
-async function writeAuditLog(params: {
-  actorId: string;
-  event: string;
-  resourceType: string;
-  resourceId: string;
-  meta: Record<string, string>;
-}): Promise<void> {
-  const { tables } = await createAdminClient();
-  await tables.createRow({
-    databaseId: DATABASE_ID,
-    tableId: TABLE_AUDIT_LOGS,
-    rowId: ID.unique(),
-    data: {
-      actorId: params.actorId,
-      event: params.event.slice(0, 128),
-      resourceType: params.resourceType.slice(0, 64),
-      resourceId: params.resourceId,
-      meta: JSON.stringify(params.meta).slice(0, 4000),
-    },
-    permissions: [],
-  });
-}
 
 function adminSdkAvailable(): boolean {
   return hasAppwritePublicConfig() && Boolean(process.env.DATABASE_URL?.trim());
@@ -192,6 +170,13 @@ export async function approveListingCore(
     };
   }
 
+  await notifyUserEvent(product.sellerId, {
+    type: "listing.approved",
+    title: "Listing approved",
+    body: `"${product.title}" was approved and is now live on the storefront.`,
+    link: `/seller/listings/${product.$id}`,
+  });
+
   return { ok: true, message: `"${product.title}" approved and is now live.` };
 }
 
@@ -256,6 +241,14 @@ export async function rejectListingCore(
         "Listing rejected but audit log failed. Please notify an operator.",
     };
   }
+
+  await notifyUserEvent(product.sellerId, {
+    type: "listing.rejected",
+    title: "Listing rejected",
+    body: `"${product.title}" was not approved.`,
+    link: `/seller/listings/${product.$id}`,
+    detailLines: [`Reason: ${parsedReason}`],
+  });
 
   return { ok: true, message: `"${product.title}" rejected.` };
 }
@@ -322,6 +315,14 @@ export async function removeListingCore(
         "Listing removed but audit log failed. Please notify an operator.",
     };
   }
+
+  await notifyUserEvent(product.sellerId, {
+    type: "listing.removed",
+    title: "Listing removed",
+    body: `"${product.title}" was removed from the storefront by an admin.`,
+    link: `/seller/listings/${product.$id}`,
+    detailLines: [`Reason: ${parsedReason}`],
+  });
 
   return { ok: true, message: `"${product.title}" removed from the storefront.` };
 }

@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { Suspense } from "react";
 import {
   Heart,
   LayoutDashboard,
@@ -13,6 +14,7 @@ import {
 } from "@/lib/appwrite/session-user";
 import { BrandLogo, BrandLogoLink } from "@/components/brand/brand-logo";
 import { AccountMenu } from "@/components/layout/account-menu";
+import { ProductSearchForm } from "@/components/layout/product-search-form";
 import { NotificationBell } from "@/components/notifications/notification-bell";
 import { Button } from "@/components/ui/button";
 import {
@@ -29,10 +31,10 @@ type StoreNavbarProps = {
   avatarUrl?: string | null;
 };
 
-function SearchForm({ className }: { className?: string }) {
+function SearchFormFallback({ className }: { className?: string }) {
   return (
     <form action="/search" method="get" className={className} role="search">
-      <div className="relative flex w-full items-center rounded-full border border-border bg-muted/70 transition focus-within:border-accent focus-within:bg-background">
+      <div className="relative flex w-full items-center rounded-full border border-border bg-muted/70">
         <Search
           className="pointer-events-none absolute left-4 size-4 text-muted-foreground"
           aria-hidden
@@ -48,12 +50,20 @@ function SearchForm({ className }: { className?: string }) {
         <button
           type="submit"
           aria-label="Search"
-          className="absolute right-1 flex size-8 items-center justify-center rounded-full bg-accent text-accent-foreground transition hover:bg-accent-deep"
+          className="absolute right-1 flex size-8 items-center justify-center rounded-full bg-accent text-accent-foreground"
         >
           <Search className="size-4" aria-hidden />
         </button>
       </div>
     </form>
+  );
+}
+
+function SearchForm({ className }: { className?: string }) {
+  return (
+    <Suspense fallback={<SearchFormFallback className={className} />}>
+      <ProductSearchForm className={className} />
+    </Suspense>
   );
 }
 

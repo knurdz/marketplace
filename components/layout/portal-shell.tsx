@@ -6,7 +6,7 @@ import type { PortalNavGroup } from "@/components/layout/portal-side-nav";
 import { getOwnProfile } from "@/lib/appwrite/profiles";
 import { getLoggedInUser } from "@/lib/appwrite/session";
 import { toSessionUserView } from "@/lib/appwrite/session-user";
-import { getAvatarPreviewUrl } from "@/lib/appwrite/storage-urls";
+import { resolveAvatarUrl } from "@/lib/appwrite/storage-urls";
 
 export type {
   PortalNavGroup,
@@ -33,7 +33,7 @@ export async function PortalShell({
   }
   const profile = await getOwnProfile();
   const user = toSessionUserView(authUser);
-  const avatarUrl = profile ? getAvatarPreviewUrl(profile.avatarFileId) : null;
+  const avatarUrl = resolveAvatarUrl(profile?.avatarFileId, authUser.image);
   const settingsHref = title === "Admin" ? "/admin/settings" : "/seller/settings";
 
   return (

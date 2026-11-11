@@ -69,6 +69,7 @@ export { getLoggedInUser } from "./session";
 export {
   deleteFile,
   uploadAvatar,
+  uploadCategoryImage,
   uploadFile,
   uploadProductImage,
   validateUpload,
@@ -76,6 +77,8 @@ export {
 export {
   getAvatarPreviewUrl,
   getAvatarViewUrl,
+  resolveAvatarUrl,
+  safeOAuthAvatarUrl,
   getFilePreviewUrl,
   getFileViewUrl,
   getShopBannerPreviewUrl,

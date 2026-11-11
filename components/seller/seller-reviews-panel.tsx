@@ -61,6 +61,8 @@ type SellerReviewsPanelProps = {
   reviews: Review[];
   shopSlug: string | null;
   variant?: "page" | "summary";
+  /** Defaults to seller reviews page; pass null to hide the link. */
+  allReviewsHref?: string | null;
 };
 
 export function SellerReviewsPanel({
@@ -68,6 +70,7 @@ export function SellerReviewsPanel({
   reviews,
   shopSlug,
   variant = "page",
+  allReviewsHref = "/seller/reviews",
 }: SellerReviewsPanelProps) {
   const chartRows = metrics.distribution
     .filter((row) => row.count > 0)
@@ -88,9 +91,11 @@ export function SellerReviewsPanel({
               Public averages from admin-approved reviews only
             </p>
           </div>
-          <Button variant="outline" size="sm" asChild>
-            <Link href="/seller/reviews">All reviews</Link>
-          </Button>
+          {allReviewsHref ? (
+            <Button variant="info" size="sm" asChild>
+              <Link href={allReviewsHref}>All reviews</Link>
+            </Button>
+          ) : null}
         </div>
 
         {metrics.count === 0 ? (
@@ -164,10 +169,10 @@ export function SellerReviewsPanel({
               {metrics.count === 1 ? "review" : "reviews"}
             </p>
             {shopSlug ? (
-              <Button variant="outline" size="sm" className="mt-5 w-full" asChild>
+              <Button variant="info" size="sm" className="mt-5 w-full" asChild>
                 <Link href={`/shop/${shopSlug}`} target="_blank" rel="noopener noreferrer">
                   View on shop
-                  <ExternalLink data-icon="inline-end" className="size-3.5" />
+                  <ExternalLink data-icon="inline-end" />
                 </Link>
               </Button>
             ) : null}
