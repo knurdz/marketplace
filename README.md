@@ -1,6 +1,8 @@
 # Knurdz Marketplace
 
-Multi-role marketplace web app built with **Next.js**, **MariaDB** (Drizzle), **Better Auth**, and local disk storage. The platform connects buyers and sellers; it does **not** process payments.
+Multi-role marketplace web app built with **Next.js**, **MariaDB** (Drizzle), **Better Auth**, and file storage (local disk in dev; Hostinger Laravel API in production). The platform connects buyers and sellers; it does **not** process payments.
+
+**Production file hosting:** [`storage-api/README.md`](./storage-api/README.md) — deploy/update steps for `marketplace-storage.knurdz.org` on Hostinger.
 
 ## Portals
 

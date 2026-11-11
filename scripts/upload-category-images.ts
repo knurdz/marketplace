@@ -2,8 +2,7 @@
  * Upload public/categories/{slug}.jpg to the Hostinger storage API.
  * Usage: npx tsx --env-file=.env.local scripts/upload-category-images.ts
  *
- * Tries the `categories` bucket first; falls back to `product-images` when
- * the remote API has not been redeployed with the new bucket yet.
+ * Uses the `categories` bucket (falls back to `product-images` if missing).
  * File IDs are deterministic: category-{slug}. Existing files (409) are skipped.
  */
 import { readFile } from "node:fs/promises";
@@ -164,7 +163,7 @@ async function main() {
     `Done. bucket=${bucket} created=${created} exists=${exists} failed=${failed}`,
   );
   console.log(
-    `Set NEXT_PUBLIC_CATEGORY_IMAGE_BUCKET=${bucket} (optional; app defaults to product-images).`,
+    `Uploaded to bucket="${bucket}". App defaults to categories; override with NEXT_PUBLIC_CATEGORY_IMAGE_BUCKET if needed.`,
   );
   if (failed > 0) process.exitCode = 1;
 }
