@@ -3,6 +3,7 @@ import {
   BuyerAccountMobileNav,
   BuyerAccountNav,
 } from "@/components/store/buyer-account-nav";
+import { getOwnBuyerCommerceCounts } from "@/lib/services/buyer-commerce-counts";
 import { cn } from "@/lib/utils";
 
 type BuyerAccountShellProps = {
@@ -15,7 +16,7 @@ type BuyerAccountShellProps = {
   className?: string;
 };
 
-export function BuyerAccountShell({
+export async function BuyerAccountShell({
   title,
   description,
   actions,
@@ -23,6 +24,11 @@ export function BuyerAccountShell({
   children,
   className,
 }: BuyerAccountShellProps) {
+  const commerce = showBuyerNav ? await getOwnBuyerCommerceCounts() : null;
+  const counts = commerce
+    ? { wishlist: commerce.wishlist, requests: commerce.requests }
+    : undefined;
+
   return (
     <div
       className={cn(
@@ -32,7 +38,7 @@ export function BuyerAccountShell({
     >
       {showBuyerNav ? (
         <div className="mb-6 lg:hidden">
-          <BuyerAccountMobileNav />
+          <BuyerAccountMobileNav counts={counts} />
         </div>
       ) : null}
 
@@ -48,7 +54,7 @@ export function BuyerAccountShell({
               <p className="px-3 pt-2 pb-1 text-xs font-medium tracking-[0.14em] text-muted-foreground uppercase">
                 Account
               </p>
-              <BuyerAccountNav className="mt-1" />
+              <BuyerAccountNav className="mt-1" counts={counts} />
             </div>
           </aside>
         ) : null}

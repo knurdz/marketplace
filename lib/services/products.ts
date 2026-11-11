@@ -445,6 +445,83 @@ export async function searchActiveProducts(
   }
 }
 
+const SEARCH_SUGGESTION_PRODUCT_LIMIT = 400;
+
+export type SearchSuggestionIndex = {
+  products: { id: string; title: string }[];
+  categories: string[];
+  shops: string[];
+};
+
+/**
+ * Compact public catalog index for client-side typeahead.
+ * Newest active+available products (capped), plus distinct category and approved shop names.
+ * No LIKE — one indexed read for CDN caching.
+ */
+export async function getSearchSuggestionIndex(): Promise<SearchSuggestionIndex> {
+  const empty: SearchSuggestionIndex = {
+    products: [],
+    categories: [],
+    shops: [],
+  };
+  if (!hasDatabaseConfig()) return empty;
+
+  try {
+    const db = getDb();
+    const rows = await db
+      .select({
+        id: productsTable.id,
+        title: productsTable.title,
+        categoryName: categoriesTable.name,
+        shopName: sellerProfilesTable.shopName,
+      })
+      .from(productsTable)
+      .leftJoin(
+        categoriesTable,
+        eq(productsTable.categoryId, categoriesTable.id),
+      )
+      .leftJoin(
+        sellerProfilesTable,
+        and(
+          eq(productsTable.sellerId, sellerProfilesTable.userId),
+          eq(sellerProfilesTable.status, "approved"),
+        ),
+      )
+      .where(
+        and(
+          eq(productsTable.status, ACTIVE_PRODUCT_STATUS),
+          eq(productsTable.available, true),
+        ),
+      )
+      .orderBy(desc(productsTable.createdAt))
+      .limit(SEARCH_SUGGESTION_PRODUCT_LIMIT);
+
+    const products: { id: string; title: string }[] = [];
+    const categorySet = new Set<string>();
+    const shopSet = new Set<string>();
+
+    for (const row of rows) {
+      const id = row.id?.trim();
+      const title = row.title?.trim();
+      if (id && title) {
+        products.push({ id, title });
+      }
+      const categoryName = row.categoryName?.trim();
+      if (categoryName) categorySet.add(categoryName);
+      const shopName = row.shopName?.trim();
+      if (shopName) shopSet.add(shopName);
+    }
+
+    return {
+      products,
+      categories: [...categorySet].sort((a, b) => a.localeCompare(b)),
+      shops: [...shopSet].sort((a, b) => a.localeCompare(b)),
+    };
+  } catch {
+    return empty;
+  }
+}
+
 /**
  * Public product by id. Returns active rows even when `available=false`
  * so the detail page can hide the buy CTA. Draft/pending/rejected/archived stay hidden.

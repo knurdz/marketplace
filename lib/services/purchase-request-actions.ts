@@ -20,6 +20,9 @@ function readString(formData: FormData, key: string): string {
 function revalidateRequestPaths(requestId: string) {
   revalidatePath("/requests");
   revalidatePath(`/requests/${requestId}`);
+  revalidatePath("/dashboard");
+  revalidatePath("/account", "layout");
+  revalidatePath("/", "layout");
   revalidatePath("/seller/requests");
   revalidatePath(`/seller/requests/${requestId}`);
   revalidatePath("/seller");

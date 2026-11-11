@@ -15,8 +15,9 @@ import {
 } from "@/lib/appwrite/roles";
 import { redirectIfRegistrationIncomplete } from "@/lib/appwrite/registration-complete";
 import { getLoggedInUser } from "@/lib/appwrite/session";
-import { toSessionUserView } from "@/lib/appwrite/session-user";
+import { portalHomeForSessionUser, toSessionUserView } from "@/lib/appwrite/session-user";
 import { resolveAvatarUrl } from "@/lib/appwrite/storage-urls";
+import { getOwnBuyerCommerceCounts } from "@/lib/services/buyer-commerce-counts";
 
 export default async function StoreLayout({
   children,
@@ -46,6 +47,10 @@ export default async function StoreLayout({
     ? resolveAvatarUrl(profile?.avatarFileId, authUser.image)
     : null;
   const user = authUser ? toSessionUserView(authUser) : null;
+  const counts =
+    user && !portalHomeForSessionUser(user)
+      ? await getOwnBuyerCommerceCounts()
+      : null;
 
   return (
     <div className="storefront flex min-h-screen flex-col bg-background text-foreground">
@@ -54,6 +59,7 @@ export default async function StoreLayout({
         user={user}
         displayName={profile?.displayName}
         avatarUrl={avatarUrl}
+        counts={counts}
       />
       <div
         id="main-content"

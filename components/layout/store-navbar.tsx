@@ -14,8 +14,10 @@ import {
 } from "@/lib/appwrite/session-user";
 import { BrandLogo, BrandLogoLink } from "@/components/brand/brand-logo";
 import { AccountMenu } from "@/components/layout/account-menu";
+import { NavCountBadge } from "@/components/layout/nav-count-badge";
 import { ProductSearchForm } from "@/components/layout/product-search-form";
 import { NotificationBell } from "@/components/notifications/notification-bell";
+import type { BuyerCommerceCounts } from "@/lib/services/buyer-commerce-counts";
 import { Button } from "@/components/ui/button";
 import {
   Sheet,
@@ -29,7 +31,20 @@ type StoreNavbarProps = {
   user: SessionUserView | null;
   displayName?: string | null;
   avatarUrl?: string | null;
+  counts?: BuyerCommerceCounts | null;
 };
+
+function wishlistAriaLabel(count: number): string {
+  return count > 0 ? `Wishlist, ${count} saved` : "Wishlist";
+}
+
+function pendingRequestsAriaLabel(count: number): string {
+  return count > 0 ? `Requests, ${count} pending` : "Requests";
+}
+
+function allRequestsAriaLabel(count: number): string {
+  return count > 0 ? `Requests, ${count}` : "Requests";
+}
 
 function SearchFormFallback({ className }: { className?: string }) {
   return (
@@ -71,7 +86,11 @@ export function StoreNavbar({
   user,
   displayName,
   avatarUrl,
+  counts,
 }: StoreNavbarProps) {
+  const wishlistCount = counts?.wishlist ?? 0;
+  const requestCount = counts?.requests ?? 0;
+  const pendingCount = counts?.pendingRequests ?? 0;
   const portalHome = user ? portalHomeForSessionUser(user) : null;
   const portalLabel =
     portalHome === "/admin"
@@ -101,14 +120,27 @@ export function StoreNavbar({
                 </Button>
               ) : (
                 <>
-                  <Button variant="ghost" size="icon" asChild>
-                    <Link href="/wishlist" aria-label="Wishlist">
+                  <Button variant="ghost" size="icon" className="relative" asChild>
+                    <Link href="/wishlist" aria-label={wishlistAriaLabel(wishlistCount)}>
                       <Heart className="size-5" aria-hidden />
+                      <NavCountBadge
+                        count={wishlistCount}
+                        tone="wishlist"
+                        className="absolute -top-1 -right-1 ring-2 ring-background"
+                      />
                     </Link>
                   </Button>
-                  <Button variant="ghost" size="icon" asChild>
-                    <Link href="/requests" aria-label="Requests">
+                  <Button variant="ghost" size="icon" className="relative" asChild>
+                    <Link
+                      href="/requests?filter=open"
+                      aria-label={pendingRequestsAriaLabel(pendingCount)}
+                    >
                       <Package className="size-5" aria-hidden />
+                      <NavCountBadge
+                        count={pendingCount}
+                        tone="pending"
+                        className="absolute -top-1 -right-1 ring-2 ring-background"
+                      />
                     </Link>
                   </Button>
                 </>
@@ -138,9 +170,27 @@ export function StoreNavbar({
         <div className="flex items-center justify-end gap-1 md:hidden">
           {user && !portalHome ? (
             <>
-              <Button variant="ghost" size="icon" asChild>
-                <Link href="/requests" aria-label="Requests">
+              <Button variant="ghost" size="icon" className="relative" asChild>
+                <Link href="/wishlist" aria-label={wishlistAriaLabel(wishlistCount)}>
+                  <Heart className="size-5" aria-hidden />
+                  <NavCountBadge
+                    count={wishlistCount}
+                    tone="wishlist"
+                    className="absolute -top-1 -right-1 ring-2 ring-background"
+                  />
+                </Link>
+              </Button>
+              <Button variant="ghost" size="icon" className="relative" asChild>
+                <Link
+                  href="/requests?filter=open"
+                  aria-label={pendingRequestsAriaLabel(pendingCount)}
+                >
                   <Package className="size-5" aria-hidden />
+                  <NavCountBadge
+                    count={pendingCount}
+                    tone="pending"
+                    className="absolute -top-1 -right-1 ring-2 ring-background"
+                  />
                 </Link>
               </Button>
               <NotificationBell className="size-10" />
@@ -169,11 +219,17 @@ export function StoreNavbar({
                       </Button>
                     ) : (
                       <>
-                        <Button variant="secondary" asChild>
-                          <Link href="/requests">Requests</Link>
+                        <Button variant="secondary" className="justify-between" asChild>
+                          <Link href="/requests" aria-label={allRequestsAriaLabel(requestCount)}>
+                            Requests
+                            <NavCountBadge count={requestCount} tone="requests" />
+                          </Link>
                         </Button>
-                        <Button variant="secondary" asChild>
-                          <Link href="/wishlist">Wishlist</Link>
+                        <Button variant="secondary" className="justify-between" asChild>
+                          <Link href="/wishlist" aria-label={wishlistAriaLabel(wishlistCount)}>
+                            Wishlist
+                            <NavCountBadge count={wishlistCount} tone="wishlist" />
+                          </Link>
                         </Button>
                         <Button variant="secondary" asChild>
                           <Link href="/dashboard">Dashboard</Link>

@@ -18,35 +18,16 @@ import { getOwnProfile } from "@/lib/appwrite/profiles";
 import { getLoggedInUser } from "@/lib/appwrite/session";
 import { toSessionUserView } from "@/lib/appwrite/session-user";
 import { getFilePreviewUrl } from "@/lib/appwrite/storage-urls";
+import { getOwnBuyerCommerceCounts } from "@/lib/services/buyer-commerce-counts";
 import {
   getOwnWishlistView,
   listCoverImagesByProductIds,
   listOwnPurchaseRequests,
 } from "@/lib/services";
-import type { PurchaseRequest, WishlistLine } from "@/lib/types";
+import type { WishlistLine } from "@/lib/types";
 
 const RECENT_REQUESTS_LIMIT = 5;
 const WISHLIST_PREVIEW_LIMIT = 4;
-
-type RequestSummaryCounts = {
-  open: number;
-  sold: number;
-  cancelled: number;
-};
-
-function countRequests(requests: PurchaseRequest[]): RequestSummaryCounts {
-  const counts: RequestSummaryCounts = {
-    open: 0,
-    sold: 0,
-    cancelled: 0,
-  };
-  for (const request of requests) {
-    if (request.status === "requested") counts.open += 1;
-    else if (request.status === "sold") counts.sold += 1;
-    else if (request.status === "cancelled") counts.cancelled += 1;
-  }
-  return counts;
-}
 
 function wishlistIssueLabel(issue: WishlistLine["issue"]): string | null {
   switch (issue) {
@@ -67,13 +48,12 @@ export default async function DashboardPage() {
     redirect("/login?next=/dashboard");
   }
 
-  const [requests, wishlistView, profile] = await Promise.all([
+  const [requests, wishlistView, profile, commerce] = await Promise.all([
     listOwnPurchaseRequests({ limit: 50 }),
     getOwnWishlistView(),
     getOwnProfile(),
+    getOwnBuyerCommerceCounts(),
   ]);
-
-  const summary = countRequests(requests);
   const recentRequests = requests.slice(0, RECENT_REQUESTS_LIMIT);
   const wishlistPreview = wishlistView.lines.slice(0, WISHLIST_PREVIEW_LIMIT);
   const coverProductIds = [
@@ -111,28 +91,28 @@ export default async function DashboardPage() {
         cards={[
           {
             label: "Open",
-            value: String(summary.open),
+            value: String(commerce.pendingRequests),
             hint: "Waiting on seller",
             href: "/requests?filter=open",
             icon: Package,
           },
           {
             label: "Sold",
-            value: String(summary.sold),
+            value: String(commerce.soldRequests),
             hint: "Completed deals",
             href: "/requests?filter=sold",
             icon: CheckCircle2,
           },
           {
             label: "Cancelled",
-            value: String(summary.cancelled),
+            value: String(commerce.cancelledRequests),
             hint: "Closed without sale",
             href: "/requests?filter=cancelled",
             icon: XCircle,
           },
           {
             label: "Saved",
-            value: String(wishlistView.itemCount),
+            value: String(commerce.wishlist),
             hint: "Wishlist items",
             href: "/wishlist",
             icon: Heart,
