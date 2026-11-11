@@ -54,11 +54,11 @@ export function SubmitListingButton({
       <Button
         type="submit"
         size="xs"
-        variant="outline"
+        variant="info"
         disabled={pending}
         data-testid="listing-submit-review"
       >
-        <Send data-icon="inline-start" className="size-3" />
+        {!pending ? <Send data-icon="inline-start" /> : null}
         {pending ? "Submitting…" : label}
       </Button>
     </form>

@@ -199,7 +199,7 @@ export function CreateListingForm({
         <Button
           type="submit"
           size="sm"
-          variant="secondary"
+          variant="info"
           name="intent"
           value="draft"
           disabled={pending || categories.length === 0}
@@ -210,6 +210,7 @@ export function CreateListingForm({
         <Button
           type="submit"
           size="sm"
+          variant="info"
           name="intent"
           value="list"
           disabled={pending || categories.length === 0}

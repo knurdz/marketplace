@@ -155,7 +155,7 @@ export default async function AdminAuditPage({ searchParams }: PageProps) {
         />
       </div>
 
-      <Button type="submit" size="xs" variant="outline" className="h-8 px-3">
+      <Button type="submit" size="xs" variant="info" className="h-8 px-3">
         Apply filters
       </Button>
 

@@ -18,6 +18,7 @@ import {
   uploadProductImage,
   validateUpload,
 } from "@/lib/appwrite/storage";
+import { notifyAdminsEvent, notifyUserEvent } from "@/lib/email/events";
 import {
   assertRateLimit,
   RATE_LIMIT_MESSAGE,
@@ -880,6 +881,25 @@ export async function submitListingForReviewCore(
   } catch {
     return { ok: false, error: "Could not submit listing. Please try again." };
   }
+
+  await Promise.all([
+    notifyUserEvent(user.$id, {
+      type: "listing.submitted",
+      title: "Listing submitted for review",
+      body: `"${product.title}" was submitted for review. An admin will approve it before it goes live.`,
+      link: `/seller/listings/${product.$id}`,
+    }),
+    notifyAdminsEvent({
+      type: "listing.submitted.admin",
+      title: "Listing awaiting review",
+      body: `A seller submitted "${product.title}" for moderation.`,
+      link: "/admin/listings",
+      detailLines: [
+        `Product: ${product.$id}`,
+        `Seller: ${user.$id}`,
+      ],
+    }),
+  ]);
 
   return {
     ok: true,

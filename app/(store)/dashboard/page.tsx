@@ -153,7 +153,7 @@ export default async function DashboardPage() {
               Contact sellers from each request detail.
             </p>
           </div>
-          <Button variant="secondary" size="sm" asChild>
+          <Button variant="info" size="sm" asChild>
             <Link href="/requests">View all</Link>
           </Button>
         </div>
@@ -195,7 +195,7 @@ export default async function DashboardPage() {
               Products you saved for later.
             </p>
           </div>
-          <Button variant="secondary" size="sm" asChild>
+          <Button variant="info" size="sm" asChild>
             <Link href="/wishlist">View wishlist</Link>
           </Button>
         </div>

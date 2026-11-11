@@ -1,5 +1,6 @@
 "use client";
 
+import { Check, X } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useActionState, useEffect, useRef } from "react";
 import {
@@ -58,9 +59,11 @@ export function ReviewModerationActions({ reviewId }: { reviewId: string }) {
         <Button
           type="submit"
           size="sm"
+          variant="success"
           disabled={busy}
           data-testid="admin-approve-review"
         >
+          {!approvePending ? <Check data-icon="inline-start" /> : null}
           {approvePending ? "Approving…" : "Approve"}
         </Button>
       </form>
@@ -69,10 +72,11 @@ export function ReviewModerationActions({ reviewId }: { reviewId: string }) {
         <Button
           type="submit"
           size="sm"
-          variant="outline"
+          variant="destructive"
           disabled={busy}
           data-testid="admin-reject-review"
         >
+          {!rejectPending ? <X data-icon="inline-start" /> : null}
           {rejectPending ? "Rejecting…" : "Reject"}
         </Button>
       </form>

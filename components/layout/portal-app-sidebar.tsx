@@ -93,7 +93,7 @@ function NavMenuItem({
             <span className="relative inline-flex size-4 shrink-0 items-center justify-center">
               <Icon
                 strokeWidth={1.75}
-                className={cn("size-4", active && "text-accent")}
+                className={cn("size-4", active && "text-info")}
               />
               {item.showDot ? (
                 <span

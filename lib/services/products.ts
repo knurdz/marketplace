@@ -1,3 +1,4 @@
+import { and, asc, desc, eq, gte, lte, or, sql, type SQL } from "drizzle-orm";
 import { AppwriteException, Query } from "@/lib/db/appwrite-shim";
 import {
   DATABASE_ID,
@@ -7,6 +8,12 @@ import {
   hasAppwritePublicConfig,
 } from "@/lib/appwrite/config";
 import { createAdminClient, createPublicClient } from "@/lib/appwrite/server";
+import { getDb, hasDatabaseConfig } from "@/lib/db/client";
+import {
+  categories as categoriesTable,
+  products as productsTable,
+  sellerProfiles as sellerProfilesTable,
+} from "@/lib/db/schema";
 import type { Product, ProductImage } from "@/lib/types";
 import {
   ACTIVE_PRODUCT_STATUS,
@@ -271,9 +278,63 @@ export function normalizeProductSearchQuery(
 }
 
 /**
- * Fulltext search active, available products by `title`.
- * Empty/whitespace query returns [] (never dumps the full catalog).
- * Requires `title_fulltext` index (setup-mvp-schema).
+ * Split a normalized query into searchable tokens (length ≥ 2).
+ * One-character tokens are dropped when any longer token exists;
+ * an all-one-character query yields [].
+ */
+export function tokenizeProductSearchQuery(normalized: string): string[] {
+  const parts = normalized.split(" ").filter((part) => part.length > 0);
+  return parts.filter((part) => part.length >= 2);
+}
+
+/** Escape `%`, `_`, and `\` so LIKE treats them as literals (ESCAPE '\\'). */
+export function escapeLikeWildcards(value: string): string {
+  return value.replace(/\\/g, "\\\\").replace(/%/g, "\\%").replace(/_/g, "\\_");
+}
+
+function likePatternForToken(token: string): string {
+  return `%${escapeLikeWildcards(token.toLowerCase())}%`;
+}
+
+/** One token must hit title, description, category name, or approved shop name. */
+function tokenMatchSql(token: string): SQL {
+  const pattern = likePatternForToken(token);
+  return or(
+    sql`LOWER(${productsTable.title}) LIKE ${pattern} ESCAPE ${"\\"}`,
+    sql`LOWER(${productsTable.description}) LIKE ${pattern} ESCAPE ${"\\"}`,
+    sql`LOWER(${categoriesTable.name}) LIKE ${pattern} ESCAPE ${"\\"}`,
+    sql`LOWER(${sellerProfilesTable.shopName}) LIKE ${pattern} ESCAPE ${"\\"}`,
+  )!;
+}
+
+/**
+ * Higher title hits rank above category/shop, which rank above description.
+ * Summed across tokens for multi-word queries.
+ */
+export function productSearchRelevanceSql(tokens: string[]): SQL {
+  const parts = tokens.map((token) => {
+    const pattern = likePatternForToken(token);
+    return sql`(
+      CASE WHEN LOWER(${productsTable.title}) LIKE ${pattern} ESCAPE ${"\\"} THEN 100 ELSE 0 END
+      + CASE WHEN LOWER(${categoriesTable.name}) LIKE ${pattern} ESCAPE ${"\\"}
+          OR LOWER(${sellerProfilesTable.shopName}) LIKE ${pattern} ESCAPE ${"\\"}
+        THEN 10 ELSE 0 END
+      + CASE WHEN LOWER(${productsTable.description}) LIKE ${pattern} ESCAPE ${"\\"} THEN 1 ELSE 0 END
+    )`;
+  });
+  return sql`(${sql.join(parts, sql` + `)})`;
+}
+
+export type SearchActiveProductsResult =
+  | { ok: true; products: Product[] }
+  | {
+      ok: false;
+      reason: "empty" | "too_short" | "invalid_range" | "unavailable" | "failed";
+    };
+
+/**
+ * Token search across title, description, category name, and approved shop name.
+ * Empty/whitespace → empty; only 1-char tokens → too_short (never dumps the catalog).
  */
 export async function searchActiveProducts(
   query: string,
@@ -284,37 +345,103 @@ export async function searchActiveProducts(
     sort?: ProductCatalogSort;
     invalidPriceRange?: boolean;
   },
-): Promise<Product[]> {
+): Promise<SearchActiveProductsResult> {
   const normalized = normalizeProductSearchQuery(query);
-  if (
-    !normalized ||
-    !hasAppwritePublicConfig() ||
-    opts?.invalidPriceRange
-  ) {
-    return [];
+  if (!normalized) {
+    return { ok: false, reason: "empty" };
+  }
+  if (opts?.invalidPriceRange) {
+    return { ok: false, reason: "invalid_range" };
+  }
+  if (!hasDatabaseConfig() && !hasAppwritePublicConfig()) {
+    return { ok: false, reason: "unavailable" };
+  }
+
+  const tokens = tokenizeProductSearchQuery(normalized);
+  if (tokens.length === 0) {
+    return { ok: false, reason: "too_short" };
   }
 
   const limit = Math.min(Math.max(opts?.limit ?? 24, 1), 48);
+  const sort = opts?.sort ?? "newest";
 
   try {
-    const { tables } = await createPublicClient();
-    const result = await tables.listRows({
-      databaseId: DATABASE_ID,
-      tableId: TABLE_PRODUCTS,
-      queries: [
-        Query.search("title", normalized),
-        ...buildProductCatalogQueries({
-          minPrice: opts?.minPrice,
-          maxPrice: opts?.maxPrice,
-          sort: opts?.sort,
-        }),
-        Query.limit(limit),
-      ],
-    });
+    const db = getDb();
+    const tokenConditions = tokens.map((token) => tokenMatchSql(token));
+    const filters: SQL[] = [
+      eq(productsTable.status, ACTIVE_PRODUCT_STATUS),
+      eq(productsTable.available, true),
+      ...tokenConditions,
+    ];
+    if (opts?.minPrice != null) {
+      filters.push(gte(productsTable.price, String(opts.minPrice)));
+    }
+    if (opts?.maxPrice != null) {
+      filters.push(lte(productsTable.price, String(opts.maxPrice)));
+    }
 
-    return mapPublicProductRows(result.rows);
+    const relevance = productSearchRelevanceSql(tokens);
+    const orderBy =
+      sort === "price_asc"
+        ? [asc(productsTable.price), desc(productsTable.createdAt)]
+        : sort === "price_desc"
+          ? [desc(productsTable.price), desc(productsTable.createdAt)]
+          : [desc(relevance), desc(productsTable.createdAt)];
+
+    const rows = await db
+      .select({
+        id: productsTable.id,
+        sellerId: productsTable.sellerId,
+        categoryId: productsTable.categoryId,
+        title: productsTable.title,
+        description: productsTable.description,
+        price: productsTable.price,
+        isFree: productsTable.isFree,
+        status: productsTable.status,
+        stock: productsTable.stock,
+        available: productsTable.available,
+        currency: productsTable.currency,
+        featured: productsTable.featured,
+      })
+      .from(productsTable)
+      .leftJoin(
+        categoriesTable,
+        eq(productsTable.categoryId, categoriesTable.id),
+      )
+      .leftJoin(
+        sellerProfilesTable,
+        and(
+          eq(productsTable.sellerId, sellerProfilesTable.userId),
+          eq(sellerProfilesTable.status, "approved"),
+        ),
+      )
+      .where(and(...filters))
+      .orderBy(...orderBy)
+      .limit(limit);
+
+    const products: Product[] = [];
+    for (const row of rows) {
+      const product = asProduct({
+        $id: row.id,
+        sellerId: row.sellerId,
+        categoryId: row.categoryId,
+        title: row.title,
+        description: row.description,
+        price: row.price,
+        isFree: row.isFree,
+        status: row.status,
+        stock: row.stock,
+        available: row.available,
+        currency: row.currency,
+        featured: row.featured,
+      });
+      if (product && isPubliclyListed(product)) {
+        products.push(product);
+      }
+    }
+    return { ok: true, products };
   } catch {
-    return [];
+    return { ok: false, reason: "failed" };
   }
 }
 

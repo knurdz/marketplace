@@ -39,6 +39,7 @@ export default async function CategoriesPage() {
                   <CategoryImage
                     name={category.name}
                     slug={category.slug}
+                    imageFileId={category.imageFileId}
                     fallbackClassName="bg-muted text-foreground"
                   />
                 </span>

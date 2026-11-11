@@ -1,5 +1,6 @@
 "use client";
 
+import { Trash2 } from "lucide-react";
 import { useTransition } from "react";
 import { Button } from "@/components/ui/button";
 import { removeFromWishlist } from "@/lib/services/wishlist-actions";
@@ -33,7 +34,7 @@ export function WishlistRemoveButton({
   return (
     <Button
       type="button"
-      variant="outline"
+      variant="destructive"
       size="sm"
       disabled={pending}
       onClick={handleRemove}
@@ -43,6 +44,7 @@ export function WishlistRemoveButton({
           : "Remove from wishlist"
       }
     >
+      {!pending ? <Trash2 data-icon="inline-start" /> : null}
       {pending ? "Removing…" : "Remove"}
     </Button>
   );

@@ -99,7 +99,7 @@ function SettingRow({ item }: { item: PlatformSettingListItem }) {
           onChange={(e) => setValue(e.target.value)}
         />
       )}
-      <Button type="submit" size="sm" disabled={pending}>
+      <Button type="submit" variant="info" size="sm" disabled={pending}>
         {pending ? "Saving…" : "Save"}
       </Button>
     </form>

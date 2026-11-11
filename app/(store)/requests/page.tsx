@@ -73,7 +73,7 @@ export default async function BuyerRequestsPage({
       title="Your requests"
       description="Buy requests you sent to sellers. Contact details stay on each request."
       actions={
-        <Button variant="secondary" size="sm" asChild>
+        <Button variant="info" size="sm" asChild>
           <Link href="/market">Browse market</Link>
         </Button>
       }

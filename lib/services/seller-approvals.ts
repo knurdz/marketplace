@@ -1,14 +1,15 @@
-import { ID, Query } from "@/lib/db/appwrite-shim";
+import { Query } from "@/lib/db/appwrite-shim";
 import {
   DATABASE_ID,
-  TABLE_AUDIT_LOGS,
   TABLE_SELLER_PROFILES,
   hasAppwritePublicConfig,
 } from "@/lib/appwrite/config";
 import { ROLE_LABELS } from "@/lib/appwrite/roles";
 import { createAdminClient } from "@/lib/appwrite/server";
+import { notifyUserEvent } from "@/lib/email/events";
 import type { SellerProfile } from "@/lib/types";
 import { isSellerStatus } from "@/lib/types";
+import { writeAuditLog } from "./audit-logs";
 
 const PENDING_STATUS = "pending" as const;
 const APPROVED_STATUS = "approved" as const;
@@ -107,29 +108,6 @@ function toAdminSellerRow(
 /** Exclusive seller role: never keep a buyer label on an approved shop. */
 function exclusiveSellerLabels(): string[] {
   return [ROLE_LABELS.seller];
-}
-
-async function writeAuditLog(params: {
-  actorId: string;
-  event: string;
-  resourceType: string;
-  resourceId: string;
-  meta: Record<string, string>;
-}): Promise<void> {
-  const { tables } = await createAdminClient();
-  await tables.createRow({
-    databaseId: DATABASE_ID,
-    tableId: TABLE_AUDIT_LOGS,
-    rowId: ID.unique(),
-    data: {
-      actorId: params.actorId,
-      event: params.event.slice(0, 128),
-      resourceType: params.resourceType.slice(0, 64),
-      resourceId: params.resourceId,
-      meta: JSON.stringify(params.meta).slice(0, 4000),
-    },
-    permissions: [],
-  });
 }
 
 async function loadSellerProfileRow(
@@ -314,6 +292,13 @@ export async function approveSellerApplicationCore(
     };
   }
 
+  await notifyUserEvent(profile.userId, {
+    type: "seller.approved",
+    title: "Seller application approved",
+    body: `Your shop "${profile.shopName}" was approved. You can open the seller portal and start listing.`,
+    link: "/seller",
+  });
+
   return { ok: true, message: `${profile.shopName} approved as seller.` };
 }
 
@@ -386,6 +371,14 @@ export async function rejectSellerApplicationCore(
         "Application rejected but audit log failed. Please notify an operator.",
     };
   }
+
+  await notifyUserEvent(profile.userId, {
+    type: "seller.rejected",
+    title: "Seller application not approved",
+    body: `Your application for "${profile.shopName}" was not approved.`,
+    link: "/become-seller",
+    detailLines: [`Reason: ${trimmedReason}`],
+  });
 
   return { ok: true, message: `${profile.shopName} rejected.` };
 }

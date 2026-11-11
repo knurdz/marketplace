@@ -35,7 +35,11 @@ async function uploadOne(
   const form = new FormData();
   form.set("bucket", bucket);
   form.set("fileId", fileId);
-  form.set("file", new Blob([bytes], { type: "image/jpeg" }), filename);
+  form.set(
+    "file",
+    new Blob([new Uint8Array(bytes)], { type: "image/jpeg" }),
+    filename,
+  );
 
   const res = await fetch(`${cfg.baseUrl}/api/v1/files`, {
     method: "POST",

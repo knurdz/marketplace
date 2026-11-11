@@ -86,7 +86,7 @@ export default async function AdminSellersPage({ searchParams }: PageProps) {
         title="Sellers"
         description="Browse all seller profiles or review pending applications. Approving grants the seller label and unlocks the seller portal."
         actions={
-          <Button variant="secondary" size="sm" asChild>
+          <Button variant="info" size="sm" asChild>
             <Link href="/admin/sellers/performance">Performance</Link>
           </Button>
         }
@@ -125,7 +125,12 @@ export default async function AdminSellersPage({ searchParams }: PageProps) {
               {sellers.map((app) => (
                 <TableRow key={app.$id} className="align-top">
                   <TableCell className="max-w-[420px] whitespace-normal">
-                    <p className="font-medium tracking-tight">{app.shopName}</p>
+                    <Link
+                      href={`/admin/sellers/${app.$id}`}
+                      className="font-medium tracking-tight hover:text-accent hover:underline hover:underline-offset-2"
+                    >
+                      {app.shopName}
+                    </Link>
                     <p className="mt-0.5 text-xs text-muted-foreground">
                       /shop/{app.slug}
                     </p>
@@ -140,6 +145,9 @@ export default async function AdminSellersPage({ searchParams }: PageProps) {
                   </TableCell>
                   <TableCell className="w-[260px] max-w-[260px] whitespace-normal">
                     <div className="flex flex-wrap items-start gap-2">
+                      <Button variant="info" size="xs" asChild>
+                        <Link href={`/admin/sellers/${app.$id}`}>Details</Link>
+                      </Button>
                       <SellerApproveButton sellerProfileId={app.$id} />
                       <SellerRejectForm
                         sellerProfileId={app.$id}
@@ -178,7 +186,12 @@ export default async function AdminSellersPage({ searchParams }: PageProps) {
               {sellers.map((row) => (
                 <TableRow key={row.$id} className="align-top">
                   <TableCell className="max-w-[420px] whitespace-normal">
-                    <p className="font-medium tracking-tight">{row.shopName}</p>
+                    <Link
+                      href={`/admin/sellers/${row.$id}`}
+                      className="font-medium tracking-tight hover:text-accent hover:underline hover:underline-offset-2"
+                    >
+                      {row.shopName}
+                    </Link>
                     <p className="mt-0.5 text-xs text-muted-foreground">
                       /shop/{row.slug}
                     </p>
@@ -205,6 +218,9 @@ export default async function AdminSellersPage({ searchParams }: PageProps) {
                   <TableCell className="w-[260px] max-w-[260px] whitespace-normal">
                     {row.status === "pending" ? (
                       <div className="flex flex-wrap items-start gap-2">
+                        <Button variant="info" size="xs" asChild>
+                          <Link href={`/admin/sellers/${row.$id}`}>Details</Link>
+                        </Button>
                         <SellerApproveButton sellerProfileId={row.$id} />
                         <SellerRejectForm
                           sellerProfileId={row.$id}
@@ -212,17 +228,24 @@ export default async function AdminSellersPage({ searchParams }: PageProps) {
                         />
                       </div>
                     ) : row.status === "approved" ? (
-                      <Button variant="outline" size="xs" asChild>
-                        <Link href={`/shop/${row.slug}`}>
-                          <ExternalLink
-                            data-icon="inline-start"
-                            className="size-3"
-                          />
-                          View shop
-                        </Link>
-                      </Button>
+                      <div className="flex flex-wrap items-start gap-2">
+                        <Button variant="info" size="xs" asChild>
+                          <Link href={`/admin/sellers/${row.$id}`}>Details</Link>
+                        </Button>
+                        <Button variant="info" size="xs" asChild>
+                          <Link href={`/shop/${row.slug}`}>
+                            <ExternalLink data-icon="inline-start" />
+                            View shop
+                          </Link>
+                        </Button>
+                      </div>
                     ) : (
-                      <p className="text-xs text-muted-foreground">Rejected</p>
+                      <div className="flex flex-wrap items-start gap-2">
+                        <Button variant="info" size="xs" asChild>
+                          <Link href={`/admin/sellers/${row.$id}`}>Details</Link>
+                        </Button>
+                        <p className="text-xs text-muted-foreground">Rejected</p>
+                      </div>
                     )}
                   </TableCell>
                 </TableRow>

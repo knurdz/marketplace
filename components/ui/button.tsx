@@ -17,7 +17,13 @@ const buttonVariants = cva(
         ghost:
           "hover:bg-muted hover:text-foreground aria-expanded:bg-muted aria-expanded:text-foreground dark:hover:bg-muted/50",
         destructive:
-          "bg-destructive/10 text-destructive hover:bg-destructive/20 focus-visible:border-destructive/40 focus-visible:ring-destructive/20 dark:bg-destructive/20 dark:hover:bg-destructive/30 dark:focus-visible:ring-destructive/40",
+          "border-destructive/20 bg-destructive/10 text-destructive hover:border-destructive/30 hover:bg-destructive/20 hover:text-destructive focus-visible:border-destructive/40 focus-visible:ring-destructive/20 dark:border-destructive/30 dark:bg-destructive/20 dark:hover:bg-destructive/30 dark:focus-visible:ring-destructive/40",
+        success:
+          "border-success/25 bg-success/10 text-success hover:border-success/35 hover:bg-success/20 hover:text-success-deep focus-visible:border-success/40 focus-visible:ring-success/25 dark:border-success/30 dark:bg-success/15 dark:hover:bg-success/25 dark:hover:text-success-bright",
+        warning:
+          "border-warning/25 bg-warning/10 text-warning hover:border-warning/35 hover:bg-warning/20 hover:text-warning-deep focus-visible:border-warning/40 focus-visible:ring-warning/25 dark:border-warning/30 dark:bg-warning/15 dark:hover:bg-warning/25 dark:hover:text-warning-bright",
+        info:
+          "border-info/25 bg-info/10 text-info hover:border-info/35 hover:bg-info/20 hover:text-info-deep focus-visible:border-info/40 focus-visible:ring-info/25 dark:border-info/30 dark:bg-info/15 dark:hover:bg-info/25 dark:hover:text-info-bright",
         link: "text-primary underline-offset-4 hover:underline",
       },
       size: {

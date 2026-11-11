@@ -1,4 +1,4 @@
-import { Query } from "@/lib/db/appwrite-shim";
+import { ID, Query } from "@/lib/db/appwrite-shim";
 import {
   DATABASE_ID,
   TABLE_AUDIT_LOGS,
@@ -6,11 +6,53 @@ import {
 } from "@/lib/appwrite/config";
 import { requireLabel } from "@/lib/appwrite/roles";
 import { createAdminClient } from "@/lib/appwrite/server";
+import { getClientIp } from "@/lib/security/rate-limit";
 import type { AuditLogEntry } from "@/lib/types";
 
 const DEFAULT_PAGE_SIZE = 25;
 const MAX_PAGE_SIZE = 100;
 const MAX_RESOURCE_HISTORY = 100;
+
+export type WriteAuditLogParams = {
+  actorId: string;
+  event: string;
+  resourceType: string;
+  resourceId: string;
+  meta?: Record<string, string>;
+};
+
+/**
+ * Append one audit_logs row with client IP (server-only; admin SDK).
+ * Used by admin mutation services so the audit page can show IP.
+ */
+async function resolveClientIp(): Promise<string> {
+  try {
+    return await getClientIp();
+  } catch {
+    return "unknown";
+  }
+}
+
+export async function writeAuditLog(
+  params: WriteAuditLogParams,
+): Promise<void> {
+  const ip = await resolveClientIp();
+  const { tables } = await createAdminClient();
+  await tables.createRow({
+    databaseId: DATABASE_ID,
+    tableId: TABLE_AUDIT_LOGS,
+    rowId: ID.unique(),
+    data: {
+      actorId: params.actorId,
+      event: params.event.slice(0, 128),
+      resourceType: params.resourceType.slice(0, 64),
+      resourceId: params.resourceId,
+      meta: JSON.stringify(params.meta ?? {}).slice(0, 4000),
+      ip: ip.slice(0, 64),
+    },
+    permissions: [],
+  });
+}
 
 export type ListAuditLogsResult = {
   entries: AuditLogEntry[];

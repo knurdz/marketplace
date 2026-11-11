@@ -12,6 +12,38 @@ const scriptSrc = [
   ...(isDev ? ["'unsafe-eval'"] : []),
 ].join(" ");
 
+const DEFAULT_STORAGE_HOST = "marketplace-storage.knurdz.org";
+
+function storageImageOrigins(): string[] {
+  const hosts = new Set<string>([`https://${DEFAULT_STORAGE_HOST}`]);
+  const raw =
+    process.env.NEXT_PUBLIC_STORAGE_URL?.trim() ||
+    process.env.STORAGE_API_URL?.trim();
+  if (raw) {
+    try {
+      const origin = new URL(raw.includes("://") ? raw : `https://${raw}`)
+        .origin;
+      hosts.add(origin);
+    } catch {
+      // ignore invalid env
+    }
+  }
+  return [...hosts];
+}
+
+const storageOrigins = storageImageOrigins();
+const imgSrc = [
+  "'self'",
+  "data:",
+  "blob:",
+  "https://sgp.cloud.appwrite.io",
+  "https://*.cloud.appwrite.io",
+  "https://images.unsplash.com",
+  "https://*.googleusercontent.com",
+  "https://avatars.githubusercontent.com",
+  ...storageOrigins,
+].join(" ");
+
 const securityHeaders = [
   {
     key: "Strict-Transport-Security",
@@ -39,7 +71,7 @@ const securityHeaders = [
       "default-src 'self'",
       `script-src ${scriptSrc}`,
       "style-src 'self' 'unsafe-inline'",
-      "img-src 'self' data: blob: https://sgp.cloud.appwrite.io https://*.cloud.appwrite.io https://images.unsplash.com",
+      `img-src ${imgSrc}`,
       "font-src 'self'",
       "connect-src 'self' https://sgp.cloud.appwrite.io https://*.cloud.appwrite.io",
       "frame-ancestors 'none'",
@@ -71,6 +103,27 @@ const nextConfig: NextConfig = {
         protocol: "https",
         hostname: "*.cloud.appwrite.io",
       },
+      {
+        protocol: "https",
+        hostname: DEFAULT_STORAGE_HOST,
+      },
+      ...storageOrigins
+        .map((origin) => {
+          try {
+            const url = new URL(origin);
+            if (url.hostname === DEFAULT_STORAGE_HOST) return null;
+            return {
+              protocol: url.protocol.replace(":", "") as "http" | "https",
+              hostname: url.hostname,
+            };
+          } catch {
+            return null;
+          }
+        })
+        .filter(
+          (p): p is { protocol: "http" | "https"; hostname: string } =>
+            p != null,
+        ),
     ],
   },
 };

@@ -9,6 +9,7 @@ import {
 import {
   AVATAR_MAX_BYTES,
   BUCKET_AVATARS,
+  BUCKET_CATEGORIES,
   BUCKET_PRODUCT_IMAGES,
   IMAGE_EXTENSIONS,
   IMAGE_MIME_TYPES,
@@ -154,6 +155,24 @@ export async function uploadProductImage(
   }
   return uploadFile({
     bucketId: BUCKET_PRODUCT_IMAGES,
+    file: validated.file,
+  });
+}
+
+export async function uploadCategoryImage(
+  file: File,
+): Promise<{ fileId: string }> {
+  const validated = validateUpload({
+    file,
+    maxBytes: AVATAR_MAX_BYTES,
+    allowedMime: IMAGE_MIME_TYPES,
+    allowedExt: IMAGE_EXTENSIONS,
+  });
+  if (!validated.ok) {
+    throw new Error(validated.error);
+  }
+  return uploadFile({
+    bucketId: BUCKET_CATEGORIES,
     file: validated.file,
   });
 }

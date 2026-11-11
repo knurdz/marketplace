@@ -9,6 +9,7 @@ import {
 import { getDb } from "@/lib/db/client";
 import * as schema from "@/lib/db/schema";
 import { sendSmtpMail } from "@/lib/email/smtp";
+import { renderMarketplaceEmail } from "@/lib/email/template";
 import { logError } from "@/lib/observability/log-error";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -22,17 +23,18 @@ async function sendVerificationEmail({
   url: string;
 }) {
   try {
+    const rendered = renderMarketplaceEmail({
+      greetingName: user.name,
+      title: "Verify your Knurdz Marketplace email",
+      body: "Confirm your email for Knurdz Marketplace by opening the button below. If you did not create an account, you can ignore this message.",
+      ctaLabel: "Verify email",
+      ctaHref: url,
+    });
     await sendSmtpMail({
       to: user.email,
-      subject: "Verify your Knurdz Marketplace email",
-      text: [
-        `Hi${user.name ? ` ${user.name}` : ""},`,
-        "",
-        "Confirm your email for Knurdz Marketplace by opening this link:",
-        url,
-        "",
-        "If you did not create an account, you can ignore this message.",
-      ].join("\n"),
+      subject: rendered.subject,
+      text: rendered.text,
+      html: rendered.html,
     });
   } catch (error) {
     logError("auth.email.verify_send", error, { email: user.email });
@@ -48,17 +50,18 @@ async function sendResetPassword({
   url: string;
 }) {
   try {
+    const rendered = renderMarketplaceEmail({
+      greetingName: user.name,
+      title: "Reset your Knurdz Marketplace password",
+      body: "Reset your password by opening the button below. If you did not request a reset, you can ignore this message.",
+      ctaLabel: "Reset password",
+      ctaHref: url,
+    });
     await sendSmtpMail({
       to: user.email,
-      subject: "Reset your Knurdz Marketplace password",
-      text: [
-        `Hi${user.name ? ` ${user.name}` : ""},`,
-        "",
-        "Reset your password by opening this link:",
-        url,
-        "",
-        "If you did not request a reset, you can ignore this message.",
-      ].join("\n"),
+      subject: rendered.subject,
+      text: rendered.text,
+      html: rendered.html,
     });
   } catch (error) {
     logError("auth.email.reset_send", error, { email: user.email });
@@ -98,11 +101,14 @@ export function getAuth() {
           clientId: process.env.GOOGLE_CLIENT_ID ?? "",
           clientSecret: process.env.GOOGLE_CLIENT_SECRET ?? "",
           enabled: Boolean(process.env.GOOGLE_CLIENT_ID?.trim()),
+          // Refresh name and Google profile photo on each sign-in.
+          overrideUserInfoOnSignIn: true,
         },
         github: {
           clientId: process.env.GITHUB_CLIENT_ID ?? "",
           clientSecret: process.env.GITHUB_CLIENT_SECRET ?? "",
           enabled: Boolean(process.env.GITHUB_CLIENT_ID?.trim()),
+          overrideUserInfoOnSignIn: true,
         },
       },
       user: {

@@ -43,7 +43,6 @@ function buildAdminNav(pendingSellers: boolean): PortalNavGroup[] {
     {
       title: "System",
       items: [
-        { href: "/admin/analytics", label: "Analytics", icon: "analytics" },
         { href: "/admin/settings", label: "Settings", icon: "settings" },
         { href: "/admin/audit", label: "Audit", icon: "audit" },
       ],

@@ -1,5 +1,4 @@
 import { ID, Permission, Query, Role } from "@/lib/db/appwrite-shim";
-import { createNotificationForUser } from "@/lib/appwrite/notifications";
 import { getOwnProfile } from "@/lib/appwrite/profiles";
 import {
   DATABASE_ID,
@@ -13,6 +12,11 @@ import { createAdminClient, createSessionClient } from "@/lib/appwrite/server";
 import { getActiveUserById, getLoggedInUser } from "@/lib/appwrite/session";
 import { getDb } from "@/lib/db/client";
 import { purchaseRequests } from "@/lib/db/schema";
+import {
+  formatContactLines,
+  notifyAdminsEvent,
+  notifyUserEvent,
+} from "@/lib/email/events";
 import { logError } from "@/lib/observability/log-error";
 import {
   assertRateLimit,
@@ -105,23 +109,6 @@ export function asPurchaseRequest(
       ? { $updatedAt: asNullableString(row.$updatedAt)! }
       : {}),
   };
-}
-
-async function notifyUserSafe(params: {
-  userId: string;
-  type: string;
-  title: string;
-  body: string;
-  link?: string | null;
-}): Promise<void> {
-  try {
-    await createNotificationForUser(params);
-  } catch (error) {
-    logError("purchaseRequest.notify", error, {
-      type: params.type,
-      userId: params.userId,
-    });
-  }
 }
 
 async function loadProfileContact(
@@ -312,13 +299,43 @@ export async function createPurchaseRequest(input: {
       };
     }
 
-    await notifyUserSafe({
-      userId: product.sellerId,
-      type: "request.created",
-      title: "New buy request",
-      body: `A buyer requested ${quantity}× ${product.title}. Contact them to arrange the sale.`,
-      link: `/seller/requests/${request.$id}`,
+    const buyerContact = await loadProfileContact(user.$id);
+    const sellerLines = formatContactLines({
+      ...buyerContact,
+      label: "Buyer contact",
     });
+    const buyerLines = formatContactLines({
+      ...sellerContact,
+      label: "Seller contact",
+    });
+
+    await Promise.all([
+      notifyUserEvent(product.sellerId, {
+        type: "request.created",
+        title: "New buy request",
+        body: `A buyer requested ${quantity}× ${product.title}. Contact them to arrange the sale.`,
+        link: `/seller/requests/${request.$id}`,
+        detailLines: sellerLines,
+      }),
+      notifyUserEvent(user.$id, {
+        type: "request.created.buyer",
+        title: "Buy request sent",
+        body: `Your request for ${quantity}× ${product.title} was sent. Use the seller contact below to arrange the sale.`,
+        link: `/requests/${request.$id}`,
+        detailLines: buyerLines,
+      }),
+      notifyAdminsEvent({
+        type: "request.created.admin",
+        title: "New buy request",
+        body: `A buyer requested ${quantity}× ${product.title}.`,
+        link: `/admin/requests`,
+        detailLines: [
+          `Request: ${request.$id}`,
+          `Buyer: ${user.$id}`,
+          `Seller: ${product.sellerId}`,
+        ],
+      }),
+    ]);
 
     return { ok: true, requestId: request.$id };
   } catch (error) {
@@ -630,16 +647,59 @@ async function resolvePurchaseRequest(
     await tables.updateTransaction({ transactionId, commit: true });
     transactionId = null;
 
-    await notifyUserSafe({
-      userId: request.buyerId,
-      type: nextStatus === "sold" ? "request.sold" : "request.cancelled",
-      title: nextStatus === "sold" ? "Request marked sold" : "Request cancelled",
-      body:
-        nextStatus === "sold"
-          ? `The seller marked your request for ${request.title} as sold. You can rate this seller on the request page.`
-          : `The seller cancelled your request for ${request.title}.`,
-      link: `/requests/${request.$id}`,
-    });
+    if (nextStatus === "sold") {
+      await Promise.all([
+        notifyUserEvent(request.buyerId, {
+          type: "request.sold",
+          title: "Request marked sold",
+          body: `The seller marked your request for ${request.title} as sold. You can rate this seller on the request page.`,
+          link: `/requests/${request.$id}`,
+        }),
+        notifyUserEvent(request.sellerId, {
+          type: "request.sold.seller",
+          title: "You marked a request sold",
+          body: `You marked the request for ${request.quantity}× ${request.title} as sold. Stock was updated.`,
+          link: `/seller/requests/${request.$id}`,
+        }),
+        notifyAdminsEvent({
+          type: "request.sold.admin",
+          title: "Buy request marked sold",
+          body: `A seller marked ${request.quantity}× ${request.title} as sold.`,
+          link: `/admin/requests`,
+          detailLines: [
+            `Request: ${request.$id}`,
+            `Buyer: ${request.buyerId}`,
+            `Seller: ${request.sellerId}`,
+          ],
+        }),
+      ]);
+    } else {
+      await Promise.all([
+        notifyUserEvent(request.buyerId, {
+          type: "request.cancelled",
+          title: "Request cancelled",
+          body: `The seller cancelled your request for ${request.title}.`,
+          link: `/requests/${request.$id}`,
+        }),
+        notifyUserEvent(request.sellerId, {
+          type: "request.cancelled.seller",
+          title: "You cancelled a request",
+          body: `You cancelled the request for ${request.quantity}× ${request.title}.`,
+          link: `/seller/requests/${request.$id}`,
+        }),
+        notifyAdminsEvent({
+          type: "request.cancelled.admin",
+          title: "Buy request cancelled",
+          body: `A seller cancelled a request for ${request.quantity}× ${request.title}.`,
+          link: `/admin/requests`,
+          detailLines: [
+            `Request: ${request.$id}`,
+            `Buyer: ${request.buyerId}`,
+            `Seller: ${request.sellerId}`,
+          ],
+        }),
+      ]);
+    }
 
     return { ok: true, status: nextStatus };
   } catch (error) {

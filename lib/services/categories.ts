@@ -1,8 +1,7 @@
-import { and, eq } from "drizzle-orm";
+import { and, count, eq } from "drizzle-orm";
 import { AppwriteException, ID, Query } from "@/lib/db/appwrite-shim";
 import {
   DATABASE_ID,
-  TABLE_AUDIT_LOGS,
   TABLE_CATEGORIES,
   TABLE_PRODUCTS,
   hasAppwritePublicConfig,
@@ -15,6 +14,7 @@ import {
 import { getDb, hasDatabaseConfig } from "@/lib/db/client";
 import { products as productsTable } from "@/lib/db/schema";
 import type { Category } from "@/lib/types";
+import { writeAuditLog } from "./audit-logs";
 
 const MAX_NAME_LENGTH = 128;
 const MAX_SLUG_LENGTH = 128;
@@ -25,44 +25,18 @@ export type CategoryTreeNode = Category & {
 };
 
 export type CategoryMutationResult =
-  | { ok: true; message: string; categoryId?: string }
+  | {
+      ok: true;
+      message: string;
+      categoryId?: string;
+      /** Prior custom image to delete after a successful replace/delete. */
+      replacedImageFileId?: string | null;
+    }
   | { ok: false; error: string };
 
 function asNullableString(value: unknown): string | null {
   if (typeof value !== "string") return null;
   return value.length > 0 ? value : null;
-}
-
-function asNumber(value: unknown, fallback = 0): number {
-  if (typeof value === "number" && Number.isFinite(value)) return value;
-  if (typeof value === "string" && value.trim() !== "") {
-    const n = Number(value);
-    if (Number.isFinite(n)) return n;
-  }
-  return fallback;
-}
-
-async function writeAuditLog(params: {
-  actorId: string;
-  event: string;
-  resourceType: string;
-  resourceId: string;
-  meta: Record<string, string>;
-}): Promise<void> {
-  const { tables } = await createAdminClient();
-  await tables.createRow({
-    databaseId: DATABASE_ID,
-    tableId: TABLE_AUDIT_LOGS,
-    rowId: ID.unique(),
-    data: {
-      actorId: params.actorId,
-      event: params.event.slice(0, 128),
-      resourceType: params.resourceType.slice(0, 64),
-      resourceId: params.resourceId,
-      meta: JSON.stringify(params.meta).slice(0, 4000),
-    },
-    permissions: [],
-  });
 }
 
 function adminSdkAvailable(): boolean {
@@ -84,7 +58,7 @@ export function asCategory(row: Record<string, unknown>): Category | null {
     name,
     slug,
     parentId: asNullableString(row.parentId),
-    sortOrder: Math.floor(asNumber(row.sortOrder)),
+    imageFileId: asNullableString(row.imageFileId),
   };
 }
 
@@ -133,12 +107,48 @@ function parseSlug(
   return raw;
 }
 
-function parseSortOrder(value: unknown): number | CategoryMutationResult {
-  const n = Math.floor(asNumber(value));
-  if (!Number.isFinite(n)) {
-    return { ok: false, error: "Sort order must be a number." };
+/** Live listings per category: status=active and available=true. */
+async function loadLiveProductCounts(): Promise<Map<string, number>> {
+  const counts = new Map<string, number>();
+  if (!hasDatabaseConfig()) return counts;
+
+  try {
+    const db = getDb();
+    const rows = await db
+      .select({
+        categoryId: productsTable.categoryId,
+        liveCount: count(),
+      })
+      .from(productsTable)
+      .where(
+        and(
+          eq(productsTable.status, "active"),
+          eq(productsTable.available, true),
+        ),
+      )
+      .groupBy(productsTable.categoryId);
+
+    for (const row of rows) {
+      const id = row.categoryId?.trim();
+      if (!id) continue;
+      counts.set(id, Number(row.liveCount) || 0);
+    }
+  } catch {
+    // Fall through with empty counts (name-only sort).
   }
-  return n;
+  return counts;
+}
+
+function sortCategoriesByLiveCount(
+  categories: Category[],
+  liveCounts: Map<string, number>,
+): Category[] {
+  return [...categories].sort((a, b) => {
+    const countDiff =
+      (liveCounts.get(b.$id) ?? 0) - (liveCounts.get(a.$id) ?? 0);
+    if (countDiff !== 0) return countDiff;
+    return a.name.localeCompare(b.name);
+  });
 }
 
 function isSlugConflict(error: unknown): boolean {
@@ -212,7 +222,10 @@ async function wouldCreateCycle(
   return false;
 }
 
-function buildCategoryTree(flat: Category[]): CategoryTreeNode[] {
+function buildCategoryTree(
+  flat: Category[],
+  liveCounts: Map<string, number>,
+): CategoryTreeNode[] {
   const byId = new Map<string, CategoryTreeNode>();
   for (const c of flat) {
     byId.set(c.$id, { ...c, children: [] });
@@ -228,9 +241,12 @@ function buildCategoryTree(flat: Category[]): CategoryTreeNode[] {
   }
 
   const sortNodes = (nodes: CategoryTreeNode[]) => {
-    nodes.sort(
-      (a, b) => a.sortOrder - b.sortOrder || a.name.localeCompare(b.name),
-    );
+    nodes.sort((a, b) => {
+      const countDiff =
+        (liveCounts.get(b.$id) ?? 0) - (liveCounts.get(a.$id) ?? 0);
+      if (countDiff !== 0) return countDiff;
+      return a.name.localeCompare(b.name);
+    });
     for (const n of nodes) sortNodes(n.children);
   };
   sortNodes(roots);
@@ -239,7 +255,7 @@ function buildCategoryTree(flat: Category[]): CategoryTreeNode[] {
 
 /**
  * List categories for storefront browse (table has read(any)).
- * Ordered by sortOrder ascending, then name.
+ * Ordered by live product count descending, then name.
  */
 export async function listCategories(opts?: {
   limit?: number;
@@ -253,11 +269,7 @@ export async function listCategories(opts?: {
     const result = await tables.listRows({
       databaseId: DATABASE_ID,
       tableId: TABLE_CATEGORIES,
-      queries: [
-        Query.orderAsc("sortOrder"),
-        Query.orderAsc("name"),
-        Query.limit(limit),
-      ],
+      queries: [Query.orderAsc("name"), Query.limit(MAX_LIST_LIMIT)],
     });
 
     const categories: Category[] = [];
@@ -265,7 +277,9 @@ export async function listCategories(opts?: {
       const category = asCategory(row as unknown as Record<string, unknown>);
       if (category) categories.push(category);
     }
-    return categories;
+
+    const liveCounts = await loadLiveProductCounts();
+    return sortCategoriesByLiveCount(categories, liveCounts).slice(0, limit);
   } catch {
     return [];
   }
@@ -274,6 +288,7 @@ export async function listCategories(opts?: {
 /**
  * Categories that currently have at least one publicly listed product
  * (`status=active` and `available=true`). Used for home category circles.
+ * Ordered by live product count descending, then name.
  */
 export async function listCategoriesWithActiveProducts(opts?: {
   limit?: number;
@@ -283,37 +298,36 @@ export async function listCategoriesWithActiveProducts(opts?: {
   const limit = Math.min(Math.max(opts?.limit ?? 50, 1), MAX_LIST_LIMIT);
 
   try {
-    const db = getDb();
-    const activeCategoryRows = await db
-      .selectDistinct({ categoryId: productsTable.categoryId })
-      .from(productsTable)
-      .where(
-        and(
-          eq(productsTable.status, "active"),
-          eq(productsTable.available, true),
-        ),
-      );
+    const liveCounts = await loadLiveProductCounts();
+    if (liveCounts.size === 0) return [];
 
-    const categoryIds = new Set(
-      activeCategoryRows
-        .map((row) => row.categoryId?.trim())
-        .filter((id): id is string => Boolean(id)),
-    );
-    if (categoryIds.size === 0) return [];
+    const { tables } = await createPublicClient();
+    const result = await tables.listRows({
+      databaseId: DATABASE_ID,
+      tableId: TABLE_CATEGORIES,
+      queries: [Query.orderAsc("name"), Query.limit(MAX_LIST_LIMIT)],
+    });
 
-    const all = await listCategories({ limit: MAX_LIST_LIMIT });
-    return all
-      .filter((category) => categoryIds.has(category.$id))
-      .slice(0, limit);
+    const categories: Category[] = [];
+    for (const row of result.rows) {
+      const category = asCategory(row as unknown as Record<string, unknown>);
+      if (category && (liveCounts.get(category.$id) ?? 0) > 0) {
+        categories.push(category);
+      }
+    }
+    return sortCategoriesByLiveCount(categories, liveCounts).slice(0, limit);
   } catch {
     return [];
   }
 }
 
-/** Nested category tree built from flat list (parentId → children). */
+/** Nested category tree; siblings ranked by live product count. */
 export async function listCategoryTree(): Promise<CategoryTreeNode[]> {
-  const flat = await listCategories({ limit: MAX_LIST_LIMIT });
-  return buildCategoryTree(flat);
+  const [flat, liveCounts] = await Promise.all([
+    listCategories({ limit: MAX_LIST_LIMIT }),
+    loadLiveProductCounts(),
+  ]);
+  return buildCategoryTree(flat, liveCounts);
 }
 
 /** Public category by unique slug. Returns null if missing. */
@@ -347,7 +361,7 @@ export async function createCategoryCore(
     name: string;
     slug?: string;
     parentId?: string | null;
-    sortOrder?: number;
+    imageFileId?: string | null;
   },
 ): Promise<CategoryMutationResult> {
   const parsedName = parseName(input.name);
@@ -356,12 +370,6 @@ export async function createCategoryCore(
   const parsedSlug = parseSlug(input.slug, parsedName);
   if (typeof parsedSlug !== "string") return parsedSlug;
 
-  const sortOrder =
-    input.sortOrder !== undefined
-      ? parseSortOrder(input.sortOrder)
-      : 0;
-  if (typeof sortOrder !== "number") return sortOrder;
-
   const parentId = input.parentId?.trim() || null;
   if (parentId) {
     const parent = await loadCategoryById(parentId);
@@ -369,6 +377,8 @@ export async function createCategoryCore(
       return { ok: false, error: "Parent category not found." };
     }
   }
+
+  const imageFileId = input.imageFileId?.trim() || null;
 
   try {
     if (await slugExists(parsedSlug)) {
@@ -389,7 +399,7 @@ export async function createCategoryCore(
         name: parsedName,
         slug: parsedSlug,
         ...(parentId ? { parentId } : {}),
-        sortOrder,
+        ...(imageFileId ? { imageFileId } : {}),
       },
     });
     rowId = String(row.$id);
@@ -429,7 +439,7 @@ export async function updateCategoryCore(
     name?: string;
     slug?: string;
     parentId?: string | null;
-    sortOrder?: number;
+    imageFileId?: string | null;
   },
 ): Promise<CategoryMutationResult> {
   const trimmedId = categoryId?.trim();
@@ -444,6 +454,7 @@ export async function updateCategoryCore(
 
   const data: Record<string, unknown> = {};
   const changedFields: Record<string, string> = {};
+  let replacedImageFileId: string | null = null;
 
   if (patch.name !== undefined) {
     const parsedName = parseName(patch.name);
@@ -491,12 +502,12 @@ export async function updateCategoryCore(
     }
   }
 
-  if (patch.sortOrder !== undefined) {
-    const sortOrder = parseSortOrder(patch.sortOrder);
-    if (typeof sortOrder !== "number") return sortOrder;
-    if (sortOrder !== existing.sortOrder) {
-      data.sortOrder = sortOrder;
-      changedFields.sortOrder = String(sortOrder);
+  if (patch.imageFileId !== undefined) {
+    const imageFileId = patch.imageFileId?.trim() || null;
+    if (imageFileId !== existing.imageFileId) {
+      data.imageFileId = imageFileId;
+      changedFields.imageFileId = imageFileId ?? "";
+      replacedImageFileId = existing.imageFileId;
     }
   }
 
@@ -539,76 +550,8 @@ export async function updateCategoryCore(
     ok: true,
     message: `Category "${displayName}" updated.`,
     categoryId: trimmedId,
+    replacedImageFileId,
   };
-}
-
-export async function reorderCategoriesCore(
-  actorId: string,
-  updates: { categoryId: string; sortOrder: number }[],
-): Promise<CategoryMutationResult> {
-  if (!Array.isArray(updates) || updates.length === 0) {
-    return { ok: false, error: "No reorder updates provided." };
-  }
-
-  const normalized: { categoryId: string; sortOrder: number }[] = [];
-  const seen = new Set<string>();
-
-  for (const u of updates) {
-    const categoryId = u.categoryId?.trim();
-    if (!categoryId) {
-      return { ok: false, error: "Invalid category in reorder batch." };
-    }
-    if (seen.has(categoryId)) {
-      return { ok: false, error: "Duplicate category in reorder batch." };
-    }
-    seen.add(categoryId);
-
-    const sortOrder = parseSortOrder(u.sortOrder);
-    if (typeof sortOrder !== "number") return sortOrder;
-    normalized.push({ categoryId, sortOrder });
-  }
-
-  for (const u of normalized) {
-    const exists = await loadCategoryById(u.categoryId);
-    if (!exists) {
-      return {
-        ok: false,
-        error: `Category not found: ${u.categoryId}. No changes applied.`,
-      };
-    }
-  }
-
-  const { tables } = await createSessionClient();
-  try {
-    for (const u of normalized) {
-      await tables.updateRow({
-        databaseId: DATABASE_ID,
-        tableId: TABLE_CATEGORIES,
-        rowId: u.categoryId,
-        data: { sortOrder: u.sortOrder },
-      });
-    }
-  } catch {
-    return { ok: false, error: "Failed to reorder categories." };
-  }
-
-  const affectedIds = normalized.map((u) => u.categoryId).join(",");
-  try {
-    await writeAuditLog({
-      actorId,
-      event: "category.reordered",
-      resourceType: "category",
-      resourceId: normalized[0]!.categoryId,
-      meta: { categoryIds: affectedIds },
-    });
-  } catch {
-    return {
-      ok: false,
-      error: "Categories reordered but audit log failed. Please notify an operator.",
-    };
-  }
-
-  return { ok: true, message: "Category order updated." };
 }
 
 export async function deleteCategoryCore(
@@ -693,5 +636,6 @@ export async function deleteCategoryCore(
     ok: true,
     message: `Category "${existing.name}" deleted.`,
     categoryId: trimmedId,
+    replacedImageFileId: existing.imageFileId,
   };
 }

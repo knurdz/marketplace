@@ -9,6 +9,7 @@ import { ROLE_LABELS, userHasLabel } from "@/lib/appwrite/roles";
 import { createAdminClient, createSessionClient } from "@/lib/appwrite/server";
 import { deleteFile, uploadAvatar } from "@/lib/appwrite/storage";
 import { getLoggedInUser } from "@/lib/appwrite/session";
+import { notifyAdminsEvent, notifyUserEvent } from "@/lib/email/events";
 import type { SellerProfile } from "@/lib/types";
 import { generateSlug } from "./categories";
 import { asSellerProfile } from "./seller-approvals";
@@ -286,6 +287,26 @@ export async function submitSellerApplicationCore(
       return { ok: false, error: "Application was created but could not be verified." };
     }
 
+    await Promise.all([
+      notifyUserEvent(user.$id, {
+        type: "seller.application.submitted",
+        title: "Seller application submitted",
+        body: `Your application for "${profile.shopName}" was submitted. An admin will review your shop details.`,
+        link: "/seller/pending",
+      }),
+      notifyAdminsEvent({
+        type: "seller.application.submitted.admin",
+        title: "New seller application",
+        body: `"${profile.shopName}" applied to become a seller.`,
+        link: "/admin/sellers",
+        detailLines: [
+          `Profile: ${profile.$id}`,
+          `Applicant: ${user.$id}`,
+          `Slug: ${profile.slug}`,
+        ],
+      }),
+    ]);
+
     return {
       ok: true,
       message: "Application submitted. An admin will review your shop details.",
@@ -365,6 +386,26 @@ export async function createPendingSellerProfileForUser(
     if (!profile || profile.userId !== trimmedUserId) {
       return { ok: false, error: "Application was created but could not be verified." };
     }
+
+    await Promise.all([
+      notifyUserEvent(trimmedUserId, {
+        type: "seller.application.submitted",
+        title: "Seller application submitted",
+        body: `Your application for "${profile.shopName}" was submitted. An admin will review your shop details.`,
+        link: "/seller/pending",
+      }),
+      notifyAdminsEvent({
+        type: "seller.application.submitted.admin",
+        title: "New seller application",
+        body: `"${profile.shopName}" applied to become a seller.`,
+        link: "/admin/sellers",
+        detailLines: [
+          `Profile: ${profile.$id}`,
+          `Applicant: ${trimmedUserId}`,
+          `Slug: ${profile.slug}`,
+        ],
+      }),
+    ]);
 
     return {
       ok: true,

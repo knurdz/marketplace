@@ -58,7 +58,6 @@ const PUBLIC_CATALOG_PREFIXES = [
   "/categories/",
   "/products/",
   "/shop/",
-  "/showcase/",
   "/legal/",
 ] as const;
 

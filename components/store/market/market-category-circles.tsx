@@ -81,6 +81,7 @@ function CategoryCircle({
       <CategoryImage
         name={category.name}
         slug={category.slug}
+        imageFileId={category.imageFileId}
         imgClassName="transition duration-300 group-hover:scale-105"
         fallbackClassName="bg-muted text-foreground"
       />

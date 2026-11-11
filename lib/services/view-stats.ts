@@ -189,7 +189,7 @@ function lastNDays(n: number): string[] {
   return keys;
 }
 
-async function listOwnViewRows(sellerId: string): Promise<ViewStatRow[]> {
+async function listViewRowsForSeller(sellerId: string): Promise<ViewStatRow[]> {
   const { tables } = await createAdminClient();
   const rows: ViewStatRow[] = [];
   let cursor: string | undefined;
@@ -229,6 +229,82 @@ async function listOwnViewRows(sellerId: string): Promise<ViewStatRow[]> {
   return rows;
 }
 
+/** Pure 30-day aggregates from already-loaded view rows. */
+export function aggregateSellerViewInsights(
+  rows: ViewStatRow[],
+): SellerViewInsights {
+  const days = lastNDays(30);
+  const shopByDay = new Map(days.map((day) => [day, 0]));
+  const productByDay = new Map(days.map((day) => [day, 0]));
+  const productTotals = new Map<string, number>();
+  let shopTotal = 0;
+  let productTotal = 0;
+
+  for (const row of rows) {
+    if (row.kind === "shop") {
+      shopTotal += row.count;
+      if (shopByDay.has(row.day)) {
+        shopByDay.set(row.day, (shopByDay.get(row.day) ?? 0) + row.count);
+      }
+    } else if (row.kind === "product") {
+      productTotal += row.count;
+      if (productByDay.has(row.day)) {
+        productByDay.set(
+          row.day,
+          (productByDay.get(row.day) ?? 0) + row.count,
+        );
+      }
+      productTotals.set(
+        row.targetId,
+        (productTotals.get(row.targetId) ?? 0) + row.count,
+      );
+    }
+  }
+
+  const topProducts = [...productTotals.entries()]
+    .map(([productId, count]) => ({ productId, count }))
+    .sort((a, b) => b.count - a.count)
+    .slice(0, 8);
+
+  return {
+    shopTotal,
+    productTotal,
+    shopSeries: days.map((bucket) => ({
+      bucket,
+      count: shopByDay.get(bucket) ?? 0,
+    })),
+    productSeries: days.map((bucket) => ({
+      bucket,
+      count: productByDay.get(bucket) ?? 0,
+    })),
+    topProducts,
+  };
+}
+
+/**
+ * View aggregates for a seller user id (admin SDK reads).
+ * Callers must enforce auth (seller self or admin).
+ */
+export async function getSellerViewInsightsForSellerId(
+  sellerId: string,
+): Promise<SellerViewInsights> {
+  const trimmed = sellerId?.trim();
+  if (
+    !trimmed ||
+    !hasAppwritePublicConfig() ||
+    !process.env.DATABASE_URL?.trim()
+  ) {
+    return emptyInsights();
+  }
+
+  try {
+    const rows = await listViewRowsForSeller(trimmed);
+    return aggregateSellerViewInsights(rows);
+  } catch {
+    return emptyInsights();
+  }
+}
+
 /** Own-only view aggregates for the seller dashboard. */
 export async function getSellerViewInsights(): Promise<SellerViewInsights> {
   if (!hasAppwritePublicConfig() || !process.env.DATABASE_URL?.trim()) {
@@ -240,55 +316,5 @@ export async function getSellerViewInsights(): Promise<SellerViewInsights> {
     return emptyInsights();
   }
 
-  try {
-    const rows = await listOwnViewRows(user.$id);
-    const days = lastNDays(30);
-    const shopByDay = new Map(days.map((day) => [day, 0]));
-    const productByDay = new Map(days.map((day) => [day, 0]));
-    const productTotals = new Map<string, number>();
-    let shopTotal = 0;
-    let productTotal = 0;
-
-    for (const row of rows) {
-      if (row.kind === "shop") {
-        shopTotal += row.count;
-        if (shopByDay.has(row.day)) {
-          shopByDay.set(row.day, (shopByDay.get(row.day) ?? 0) + row.count);
-        }
-      } else if (row.kind === "product") {
-        productTotal += row.count;
-        if (productByDay.has(row.day)) {
-          productByDay.set(
-            row.day,
-            (productByDay.get(row.day) ?? 0) + row.count,
-          );
-        }
-        productTotals.set(
-          row.targetId,
-          (productTotals.get(row.targetId) ?? 0) + row.count,
-        );
-      }
-    }
-
-    const topProducts = [...productTotals.entries()]
-      .map(([productId, count]) => ({ productId, count }))
-      .sort((a, b) => b.count - a.count)
-      .slice(0, 8);
-
-    return {
-      shopTotal,
-      productTotal,
-      shopSeries: days.map((bucket) => ({
-        bucket,
-        count: shopByDay.get(bucket) ?? 0,
-      })),
-      productSeries: days.map((bucket) => ({
-        bucket,
-        count: productByDay.get(bucket) ?? 0,
-      })),
-      topProducts,
-    };
-  } catch {
-    return emptyInsights();
-  }
+  return getSellerViewInsightsForSellerId(user.$id);
 }

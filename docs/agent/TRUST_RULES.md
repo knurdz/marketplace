@@ -1,6 +1,6 @@
 # Trust rules (Knurdz Marketplace)
 
-Computed heuristics for **admin human review** — not automated enforcement. No account is auto-suspended by these rules; admins act via existing tools (`/admin/users`, `/admin/sellers`, `/admin/payments/bank-slips`).
+Computed heuristics for **admin human review** — not automated enforcement. No account is auto-suspended by these rules; admins act via existing tools (`/admin/sellers`, `/admin/buyers`, `/admin/reports`).
 
 **Implementation:** [`lib/trust/rules.ts`](../../lib/trust/rules.ts) (source of truth for thresholds)  
 **Service:** [`lib/services/trust-signals.ts`](../../lib/services/trust-signals.ts)  
@@ -8,7 +8,7 @@ Computed heuristics for **admin human review** — not automated enforcement. No
 
 ## No persisted state
 
-- There is **no** `verified`, `badge`, or `fraud_flags` column or collection in Appwrite.
+- There is **no** `verified`, `badge`, or `fraud_flags` column or collection.
 - Badge eligibility and fraud flags are **computed on read** from existing data.
 - This step is **read-only** — no admin toggle to grant, dismiss, or override signals.
 
@@ -24,10 +24,10 @@ A seller is **Verified-eligible** when **all** of the following are true:
 |-----------|-----------|
 | Seller status | `approved` |
 | Account age | ≥ **14** days since `seller_profiles.$createdAt` |
-| Completed orders | ≥ **3** orders with `orders.status === "completed"` |
+| Completed sales | ≥ **3** purchase requests with `status === "sold"` |
 | Open reports | **0** reports with `status` in `open` or `reviewing` against any of the seller's products |
 
-When eligible, admins see the seller in **Verified-eligible sellers** on `/admin/trust` with human-readable reasons. The badge is **not** displayed on the storefront in this step.
+When eligible, admins see the seller in **Verified-eligible sellers** on `/admin/trust` with the criteria that passed. When not eligible, failures are used only internally for computation; the Verified list shows eligible sellers only. The badge is **not** displayed on the storefront in this step.
 
 ---
 
@@ -35,17 +35,11 @@ When eligible, admins see the seller in **Verified-eligible sellers** on `/admin
 
 Each rule is independent. A seller may trigger multiple flags. Only triggered flags appear in the **Flagged sellers** list.
 
-### `rejected_bank_slips`
-
-**Triggers when:** ≥ **2** `bank_slips` with `status === "rejected"` in the last **30** days, attributed to the seller via `bank_slips.orderId` → `orders.sellerId`.
-
-**Intent:** Repeated rejected payment proofs may indicate fraud or policy abuse.
-
 ### `new_seller_high_first_order`
 
-**Triggers when:** Seller profile age ≤ **14** days **and** the seller's earliest order (by `$createdAt`) has `totalAmount` ≥ **50,000** LKR.
+**Triggers when:** Seller profile age ≤ **14** days **and** the seller's earliest sold request (by `$createdAt`) has `unitPrice * quantity` ≥ **50,000** LKR.
 
-**Intent:** New accounts with unusually large first orders warrant review.
+**Intent:** New accounts with unusually large first sales warrant review.
 
 ### `open_unresolved_reports`
 
@@ -55,11 +49,15 @@ Each rule is independent. A seller may trigger multiple flags. Only triggered fl
 
 ### `rapid_cancellation_rate`
 
-**Triggers when:** In the last **30** days, the seller has ≥ **5** orders **and** the proportion with `orders.status === "cancelled"` is ≥ **50%**.
+**Triggers when:** In the last **30** days, the seller has ≥ **5** purchase requests **and** the proportion with `status === "cancelled"` is ≥ **50%**.
 
-**Small-sample guard:** Sellers with fewer than **5** orders in the window are **not** flagged (e.g. 1 order and 1 cancellation does not fire this rule).
+**Small-sample guard:** Sellers with fewer than **5** requests in the window are **not** flagged (e.g. 1 request and 1 cancellation does not fire this rule).
 
 **Intent:** Sustained high cancellation rates may indicate fulfillment or trust issues.
+
+### `rejected_bank_slips` (retired)
+
+Bank slips are not used on this marketplace. The rule remains in code as a no-op so older callers stay stable; it never triggers.
 
 ---
 
@@ -68,18 +66,15 @@ Each rule is independent. A seller may trigger multiple flags. Only triggered fl
 | Collection | Fields used |
 |------------|-------------|
 | `seller_profiles` | `userId`, `shopName`, `status`, `$createdAt` |
-| `orders` | `sellerId`, `status`, `totalAmount`, `$createdAt` |
-| `bank_slips` | `orderId`, `status`, `$createdAt` |
+| `purchase_requests` | `sellerId`, `status`, `unitPrice`, `quantity`, `$createdAt` (sold → completed, cancelled → cancelled) |
 | `products` | `$id`, `sellerId` (join for reports) |
 | `reports` | `productId`, `status` |
-
-`payments` is **not** used for these rules; order totals and statuses are sufficient.
 
 ---
 
 ## List scan limits
 
-`listSellersWithFlags()` and `listVerifiedSellers()` evaluate up to **100** most recently created **approved** sellers per request. Query pattern is bulk batched (sellers → orders → rejected slips in window → products → open reports), not N+1 per seller.
+`listSellersWithFlags()` and `listVerifiedSellers()` evaluate up to **100** most recently created **approved** sellers per request. Query pattern is bulk batched (sellers → purchase requests → products → open reports), not N+1 per seller.
 
 ---
 

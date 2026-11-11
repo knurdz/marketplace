@@ -339,10 +339,10 @@ export function ShopProfileForm({
               /shop/{profile.slug}
             </p>
           </div>
-          <Button asChild variant="outline" className="shrink-0">
+          <Button asChild variant="info" className="shrink-0">
             <Link href={publicShopHref} target="_blank" rel="noopener noreferrer">
               View public shop
-              <ExternalLink data-icon="inline-end" className="size-3.5" />
+              <ExternalLink data-icon="inline-end" />
             </Link>
           </Button>
         </CardContent>
@@ -376,12 +376,16 @@ export function ShopProfileForm({
               />
             </CardContent>
             <CardFooter className="justify-end border-t border-border pt-4">
-              <Button type="submit" disabled={bannerPending || !bannerReady}>
+              <Button
+                type="submit"
+                variant="info"
+                disabled={bannerPending || !bannerReady}
+              >
                 {bannerPending ? (
                   <>
                     <Loader2
                       data-icon="inline-start"
-                      className="size-4 animate-spin"
+                      className="animate-spin"
                     />
                     Uploading…
                   </>
@@ -445,7 +449,7 @@ export function ShopProfileForm({
               </div>
             </CardContent>
             <CardFooter className="justify-end border-t border-border pt-4">
-              <Button type="submit" disabled={profilePending}>
+              <Button type="submit" variant="info" disabled={profilePending}>
                 {profilePending ? "Saving…" : "Save shop details"}
               </Button>
             </CardFooter>

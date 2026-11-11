@@ -16,7 +16,7 @@ import {
 import { redirectIfRegistrationIncomplete } from "@/lib/appwrite/registration-complete";
 import { getLoggedInUser } from "@/lib/appwrite/session";
 import { toSessionUserView } from "@/lib/appwrite/session-user";
-import { getAvatarPreviewUrl } from "@/lib/appwrite/storage-urls";
+import { resolveAvatarUrl } from "@/lib/appwrite/storage-urls";
 
 export default async function StoreLayout({
   children,
@@ -42,7 +42,9 @@ export default async function StoreLayout({
   }
 
   const profile = authUser ? await getOwnProfile() : null;
-  const avatarUrl = profile ? getAvatarPreviewUrl(profile.avatarFileId) : null;
+  const avatarUrl = authUser
+    ? resolveAvatarUrl(profile?.avatarFileId, authUser.image)
+    : null;
   const user = authUser ? toSessionUserView(authUser) : null;
 
   return (

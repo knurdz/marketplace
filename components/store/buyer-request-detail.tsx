@@ -90,9 +90,9 @@ export function BuyerRequestDetail({
           : "Seller contact for this purchase request."
       }
       actions={
-        <Button variant="outline" size="sm" asChild>
+        <Button variant="info" size="sm" asChild>
           <Link href="/requests">
-            <ArrowLeft data-icon="inline-start" className="size-3.5" />
+            <ArrowLeft data-icon="inline-start" />
             Back to requests
           </Link>
         </Button>
@@ -140,9 +140,9 @@ export function BuyerRequestDetail({
             </dl>
 
             <div className="mt-5">
-              <Button variant="outline" size="sm" className="w-full" asChild>
+              <Button variant="info" size="sm" className="w-full" asChild>
                 <Link href={`/products/${request.productId}`}>
-                  <ExternalLink data-icon="inline-start" className="size-3.5" />
+                  <ExternalLink data-icon="inline-start" />
                   View product
                 </Link>
               </Button>

@@ -2,6 +2,7 @@ import Link from "next/link";
 import { Package } from "lucide-react";
 import type { ProductCover } from "@/lib/services/products";
 import type { Product } from "@/lib/types";
+import { cn } from "@/lib/utils";
 import {
   coverPreviewUrl,
   formatProductPrice,
@@ -10,14 +11,15 @@ import {
 type ProductCardProps = {
   product: Product;
   cover?: ProductCover;
+  className?: string;
 };
 
-export function ProductCard({ product, cover }: ProductCardProps) {
+export function ProductCard({ product, cover, className }: ProductCardProps) {
   const price = formatProductPrice(product);
   const outOfStock = product.stock <= 0 || !product.available;
 
   return (
-    <li>
+    <li className={cn(className)}>
       <Link
         href={`/products/${product.$id}`}
         className="group flex h-full flex-col gap-3"

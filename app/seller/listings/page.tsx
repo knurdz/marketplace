@@ -73,7 +73,7 @@ export default async function SellerListingsPage({
         title="Listings"
         description="Drafts stay private until you submit for review. Approved listings appear on the storefront."
         actions={
-          <Button asChild disabled={categories.length === 0}>
+          <Button variant="info" asChild disabled={categories.length === 0}>
             <Link href="/seller/listings?compose=new">New listing</Link>
           </Button>
         }
@@ -86,7 +86,7 @@ export default async function SellerListingsPage({
           description="Create your first draft to get started."
           action={
             categories.length > 0 ? (
-              <Button asChild>
+              <Button variant="info" asChild>
                 <Link href="/seller/listings?compose=new">Create draft listing</Link>
               </Button>
             ) : null
@@ -165,9 +165,9 @@ export default async function SellerListingsPage({
                     </TableCell>
                     <TableCell>
                       <div className="flex flex-wrap items-center gap-1.5">
-                        <Button variant="outline" size="xs" asChild>
+                        <Button variant="info" size="xs" asChild>
                           <Link href={editHref(product.$id)}>
-                            <Pencil data-icon="inline-start" className="size-3" />
+                            <Pencil data-icon="inline-start" />
                             Edit
                           </Link>
                         </Button>

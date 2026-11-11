@@ -168,6 +168,60 @@ function shopCompleteness(profile: SellerProfile | null): SellerDashboardSnapsho
   };
 }
 
+/** Pure assembly shared by seller session and admin shop detail loaders. */
+export function buildSellerDashboardSnapshot(input: {
+  metrics: SellerMetrics;
+  products: Product[];
+  recentRequests: PurchaseRequest[];
+  profile: SellerProfile | null;
+  views: SellerViewInsights;
+  soldRequests: PurchaseRequest[];
+  allRequests: PurchaseRequest[];
+  reviewInsights: OwnSellerReviewInsights;
+}): SellerDashboardSnapshot {
+  const { products, views } = input;
+
+  const listingCounts = {
+    total: products.length,
+    active: products.filter((p) => p.status === "active").length,
+    draft: products.filter((p) => p.status === "draft").length,
+    pendingReview: products.filter((p) => p.status === "pending_review").length,
+  };
+
+  const lowStock = products
+    .filter(
+      (p) =>
+        p.status !== "archived" &&
+        p.available &&
+        p.stock >= 0 &&
+        p.stock <= LOW_STOCK_THRESHOLD,
+    )
+    .slice(0, 5);
+
+  return {
+    metrics: input.metrics,
+    listingCounts,
+    recentRequests: input.recentRequests,
+    lowStock,
+    shop: shopCompleteness(input.profile),
+    earningsSeries: bucketSoldRequests(input.soldRequests, "30d"),
+    requestSeries: bucketNewAndSoldRequests(
+      input.allRequests,
+      input.soldRequests,
+      "30d",
+    ),
+    views,
+    viewProducts: views.topProducts.map((row) => ({
+      productId: row.productId,
+      count: row.count,
+      title:
+        products.find((product) => product.$id === row.productId)?.title ??
+        "Listing",
+    })),
+    reviewInsights: input.reviewInsights,
+  };
+}
+
 export async function getSellerDashboardSnapshot(): Promise<SellerDashboardSnapshot> {
   const [
     metrics,
@@ -189,41 +243,16 @@ export async function getSellerDashboardSnapshot(): Promise<SellerDashboardSnaps
     getOwnSellerReviewInsights(),
   ]);
 
-  const listingCounts = {
-    total: products.length,
-    active: products.filter((p) => p.status === "active").length,
-    draft: products.filter((p) => p.status === "draft").length,
-    pendingReview: products.filter((p) => p.status === "pending_review").length,
-  };
-
-  const lowStock = products
-    .filter(
-      (p) =>
-        p.status !== "archived" &&
-        p.available &&
-        p.stock >= 0 &&
-        p.stock <= LOW_STOCK_THRESHOLD,
-    )
-    .slice(0, 5);
-
-  return {
+  return buildSellerDashboardSnapshot({
     metrics,
-    listingCounts,
+    products,
     recentRequests,
-    lowStock,
-    shop: shopCompleteness(profile),
-    earningsSeries: bucketSoldRequests(soldRequests, "30d"),
-    requestSeries: bucketNewAndSoldRequests(allRequests, soldRequests, "30d"),
+    profile,
     views,
-    viewProducts: views.topProducts.map((row) => ({
-      productId: row.productId,
-      count: row.count,
-      title:
-        products.find((product) => product.$id === row.productId)?.title ??
-        "Listing",
-    })),
+    soldRequests,
+    allRequests,
     reviewInsights,
-  };
+  });
 }
 
 export function parseSellerAnalyticsRange(

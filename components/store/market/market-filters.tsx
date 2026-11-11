@@ -1,16 +1,16 @@
 import Link from "next/link";
-import type { MarketListingSort } from "@/lib/store/home-demo";
+import type { ProductCatalogSort } from "@/lib/services/products";
 import { cn } from "@/lib/utils";
 
 type MarketFiltersProps = {
   category?: string | null;
   minPrice?: number | null;
   maxPrice?: number | null;
-  sort: MarketListingSort;
+  sort: ProductCatalogSort;
   invalidPriceRange?: boolean;
 };
 
-const SORT_OPTIONS: { value: MarketListingSort; label: string }[] = [
+const SORT_OPTIONS: { value: ProductCatalogSort; label: string }[] = [
   { value: "newest", label: "Newest" },
   { value: "price_asc", label: "Price ↑" },
   { value: "price_desc", label: "Price ↓" },
@@ -20,7 +20,7 @@ function buildMarketHref(params: {
   category?: string | null;
   minPrice?: number | null;
   maxPrice?: number | null;
-  sort?: MarketListingSort;
+  sort?: ProductCatalogSort;
 }): string {
   const query = new URLSearchParams();
   if (params.category) query.set("category", params.category);

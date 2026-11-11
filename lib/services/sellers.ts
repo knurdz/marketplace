@@ -15,6 +15,8 @@ export type PublicSellerInfo = {
   bannerFileId: string | null;
   returnPolicy: string | null;
   shippingPolicy: string | null;
+  /** Profile creation time for “Selling since” on the public shop. */
+  $createdAt: string | null;
 };
 
 function asNullableString(value: unknown): string | null {
@@ -45,6 +47,8 @@ export function toPublicSellerInfo(
     bannerFileId: asNullableString(record.bannerFileId),
     returnPolicy: asNullableString(record.returnPolicy),
     shippingPolicy: asNullableString(record.shippingPolicy),
+    $createdAt:
+      typeof record.$createdAt === "string" ? record.$createdAt : null,
   };
 }
 

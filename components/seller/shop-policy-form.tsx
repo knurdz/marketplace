@@ -165,7 +165,13 @@ export function ShopPolicyForm({ profile }: ShopPolicyFormProps) {
           <p className="text-sm text-muted-foreground">
             Changes apply to your public shop and active listings.
           </p>
-          <Button type="submit" size="sm" className="shrink-0" disabled={pending}>
+          <Button
+            type="submit"
+            variant="info"
+            size="sm"
+            className="shrink-0"
+            disabled={pending}
+          >
             {pending ? "Saving…" : "Save policies"}
           </Button>
         </div>

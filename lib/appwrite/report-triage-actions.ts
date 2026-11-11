@@ -9,9 +9,11 @@ import { revalidatePath } from "next/cache";
 import { ROLE_LABELS, userHasLabel } from "@/lib/appwrite/roles";
 import { getLoggedInUser } from "@/lib/appwrite/session";
 import {
+  banShopFromReportCore,
   dismissReportCore,
   resolveReportCore,
   startReviewCore,
+  takeDownListingFromReportCore,
 } from "@/lib/services/report-triage";
 
 export type ReportTriageActionState = {
@@ -35,6 +37,13 @@ async function assertAdmin(): Promise<
 function revalidateReportPaths(): void {
   revalidatePath("/admin/reports");
   revalidatePath("/admin");
+}
+
+function revalidateModerationPaths(): void {
+  revalidateReportPaths();
+  revalidatePath("/admin/listings");
+  revalidatePath("/admin/buyers");
+  revalidatePath("/");
 }
 
 export async function startReportReview(
@@ -98,6 +107,58 @@ export async function dismissReport(
   return { success: result.message };
 }
 
+export async function takeDownListingFromReport(
+  reportId: string,
+  note: string,
+): Promise<ReportTriageActionState> {
+  const auth = await assertAdmin();
+  if (!auth.ok) return { error: auth.error };
+
+  if (typeof reportId !== "string" || !reportId.trim()) {
+    return { error: "Missing report." };
+  }
+
+  if (typeof note !== "string" || !note.trim()) {
+    return { error: "Note is required." };
+  }
+
+  const result = await takeDownListingFromReportCore(
+    auth.userId,
+    reportId.trim(),
+    note,
+  );
+  if (!result.ok) return { error: result.error };
+
+  revalidateModerationPaths();
+  return { success: result.message };
+}
+
+export async function banShopFromReport(
+  reportId: string,
+  note: string,
+): Promise<ReportTriageActionState> {
+  const auth = await assertAdmin();
+  if (!auth.ok) return { error: auth.error };
+
+  if (typeof reportId !== "string" || !reportId.trim()) {
+    return { error: "Missing report." };
+  }
+
+  if (typeof note !== "string" || !note.trim()) {
+    return { error: "Note is required." };
+  }
+
+  const result = await banShopFromReportCore(
+    auth.userId,
+    reportId.trim(),
+    note,
+  );
+  if (!result.ok) return { error: result.error };
+
+  revalidateModerationPaths();
+  return { success: result.message };
+}
+
 export async function startReportReviewFormAction(
   _prev: ReportTriageActionState,
   formData: FormData,
@@ -137,4 +198,34 @@ export async function dismissReportFormAction(
     return { error: "Note is required." };
   }
   return dismissReport(reportId.trim(), note);
+}
+
+export async function takeDownListingFromReportFormAction(
+  _prev: ReportTriageActionState,
+  formData: FormData,
+): Promise<ReportTriageActionState> {
+  const reportId = formData.get("reportId");
+  if (typeof reportId !== "string" || !reportId.trim()) {
+    return { error: "Missing report." };
+  }
+  const note = formData.get("note");
+  if (typeof note !== "string" || !note.trim()) {
+    return { error: "Note is required." };
+  }
+  return takeDownListingFromReport(reportId.trim(), note);
+}
+
+export async function banShopFromReportFormAction(
+  _prev: ReportTriageActionState,
+  formData: FormData,
+): Promise<ReportTriageActionState> {
+  const reportId = formData.get("reportId");
+  if (typeof reportId !== "string" || !reportId.trim()) {
+    return { error: "Missing report." };
+  }
+  const note = formData.get("note");
+  if (typeof note !== "string" || !note.trim()) {
+    return { error: "Note is required." };
+  }
+  return banShopFromReport(reportId.trim(), note);
 }

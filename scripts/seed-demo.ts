@@ -1,5 +1,5 @@
 /**
- * MariaDB demo seed (replaces Appwrite seed).
+ * MariaDB demo seed + showcase catalog.
  * Usage: npx tsx --env-file=.env.local scripts/seed-demo.ts
  */
 import { hashPassword } from "better-auth/crypto";
@@ -10,47 +10,86 @@ import {
   authUser,
   categories,
   platformSettings,
+  productImages,
   products,
   profiles,
   sellerProfiles,
 } from "../lib/db/schema";
-import { CATEGORY_CATALOG } from "../lib/store/category-catalog";
+import { CATEGORY_CATALOG, unsplashDownloadUrl } from "../lib/store/category-catalog";
+import {
+  SEED_PRODUCTS,
+  seedImageFileId,
+  seedProductId,
+} from "./seed-catalog-data";
 
 const DEMO_PASSWORD = "DemoPass123!";
 
-const USERS = [
+type DemoUser = {
+  key: string;
+  email: string;
+  name: string;
+  role: "admin" | "seller" | "buyer";
+  displayName: string;
+  phone: string;
+  shop?: {
+    shopName: string;
+    slug: string;
+    status: "approved";
+    /** Free Unsplash photo id for a wide shop banner. */
+    bannerPhotoId: string;
+  };
+};
+
+const USERS: DemoUser[] = [
   {
     key: "admin",
     email: "admin@knurdz.demo",
     name: "Demo Admin",
-    role: "admin" as const,
+    role: "admin",
     displayName: "Demo Admin",
     phone: "0770000001",
   },
   {
     key: "seller",
     email: "seller@knurdz.demo",
-    name: "Demo Seller",
-    role: "seller" as const,
-    displayName: "Demo Seller",
+    name: "Nimal Perera",
+    role: "seller",
+    displayName: "Nimal Perera",
     phone: "0770000002",
     shop: {
-      shopName: "Demo Shop",
-      slug: "demo-shop",
-      status: "approved" as const,
+      shopName: "Nimal Studio",
+      slug: "nimal-studio",
+      status: "approved",
+      // Desk / creative workspace — landscape Unsplash sample
+      bannerPhotoId: "1497366216548-37526070297c",
+    },
+  },
+  {
+    key: "seller2",
+    email: "amaya@knurdz.demo",
+    name: "Amaya Fernando",
+    role: "seller",
+    displayName: "Amaya Fernando",
+    phone: "0770000004",
+    shop: {
+      shopName: "Amaya Atelier",
+      slug: "amaya-atelier",
+      status: "approved",
+      // Soft fashion retail — landscape Unsplash sample
+      bannerPhotoId: "1441986300917-64674bd600d8",
     },
   },
   {
     key: "buyer",
     email: "buyer@knurdz.demo",
     name: "Demo Buyer",
-    role: "buyer" as const,
+    role: "buyer",
     displayName: "Demo Buyer",
     phone: "0770000003",
   },
 ];
 
-async function ensureUser(u: (typeof USERS)[number]) {
+async function ensureUser(u: DemoUser) {
   const db = getDb();
   const existing = await db
     .select()
@@ -58,11 +97,46 @@ async function ensureUser(u: (typeof USERS)[number]) {
     .where(eq(authUser.email, u.email))
     .limit(1);
   if (existing[0]) {
+    const userId = existing[0].id;
     await db
       .update(profiles)
-      .set({ phone: u.phone, registrationComplete: true })
-      .where(eq(profiles.userId, existing[0].id));
-    return existing[0].id;
+      .set({
+        phone: u.phone,
+        displayName: u.displayName,
+        registrationComplete: true,
+      })
+      .where(eq(profiles.userId, userId));
+    await db
+      .update(authUser)
+      .set({ name: u.name, role: u.role, disabled: false })
+      .where(eq(authUser.id, userId));
+
+    if (u.shop) {
+      const shop = await db
+        .select()
+        .from(sellerProfiles)
+        .where(eq(sellerProfiles.userId, userId))
+        .limit(1);
+      if (shop[0]) {
+        await db
+          .update(sellerProfiles)
+          .set({
+            shopName: u.shop.shopName,
+            slug: u.shop.slug,
+            status: u.shop.status,
+          })
+          .where(eq(sellerProfiles.userId, userId));
+      } else {
+        await db.insert(sellerProfiles).values({
+          id: newId(),
+          userId,
+          shopName: u.shop.shopName,
+          slug: u.shop.slug,
+          status: u.shop.status,
+        });
+      }
+    }
+    return userId;
   }
 
   const userId = newId();
@@ -103,6 +177,90 @@ async function ensureUser(u: (typeof USERS)[number]) {
   return userId;
 }
 
+function sleep(ms: number) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+function seedShopBannerFileId(slug: string): string {
+  return `seed-banner-${slug.trim()}`.slice(0, 64);
+}
+
+async function uploadSeedPhoto(opts: {
+  fileId: string;
+  photoId: string;
+  bucket: "product-images" | "avatars";
+  width?: number;
+}): Promise<"created" | "exists" | "error"> {
+  const baseUrl = process.env.STORAGE_API_URL?.trim().replace(/\/$/, "") ?? "";
+  const token = process.env.STORAGE_API_TOKEN?.trim() ?? "";
+  if (!baseUrl || !token) {
+    throw new Error("STORAGE_API_URL and STORAGE_API_TOKEN are required to seed images.");
+  }
+
+  const imageRes = await fetch(unsplashDownloadUrl(opts.photoId, opts.width ?? 800));
+  if (!imageRes.ok) {
+    console.error("Failed to download Unsplash", opts.photoId, imageRes.status);
+    return "error";
+  }
+  const bytes = new Uint8Array(await imageRes.arrayBuffer());
+
+  for (let attempt = 0; attempt < 6; attempt += 1) {
+    const form = new FormData();
+    form.set("bucket", opts.bucket);
+    form.set("fileId", opts.fileId);
+    form.set(
+      "file",
+      new Blob([bytes], { type: "image/jpeg" }),
+      `${opts.fileId}.jpg`,
+    );
+
+    const res = await fetch(`${baseUrl}/api/v1/files`, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        Accept: "application/json",
+      },
+      body: form,
+    });
+
+    if (res.status === 201) return "created";
+    if (res.status === 409) return "exists";
+    if (res.status === 429) {
+      const waitMs = 1500 * (attempt + 1);
+      console.warn(`Rate limited ${opts.fileId}; retry in ${waitMs}ms`);
+      await sleep(waitMs);
+      continue;
+    }
+    let detail = "";
+    try {
+      const json = (await res.json()) as { error?: string };
+      detail = json.error ?? "";
+    } catch {
+      // ignore
+    }
+    console.error("Upload failed", opts.fileId, res.status, detail);
+    return "error";
+  }
+  console.error("Upload failed after retries", opts.fileId);
+  return "error";
+}
+
+async function uploadProductPhoto(
+  fileId: string,
+  photoId: string,
+): Promise<"created" | "exists" | "error"> {
+  return uploadSeedPhoto({
+    fileId,
+    photoId,
+    bucket: "product-images",
+    width: 800,
+  });
+}
+
+function formatPrice(amount: number): string {
+  return amount.toFixed(2);
+}
+
 async function main() {
   const db = getDb();
   const userIds: Record<string, string> = {};
@@ -110,7 +268,40 @@ async function main() {
     userIds[u.key] = await ensureUser(u);
   }
 
-  // Insert any missing catalog categories; leave existing rows (and admin edits) alone.
+  let bannersCreated = 0;
+  let bannersExisting = 0;
+  let bannersErrors = 0;
+  for (const u of USERS) {
+    if (!u.shop) continue;
+    const userId = userIds[u.key];
+    if (!userId) continue;
+
+    const fileId = seedShopBannerFileId(u.shop.slug);
+    const upload = await uploadSeedPhoto({
+      fileId,
+      photoId: u.shop.bannerPhotoId,
+      bucket: "avatars",
+      // Wide banner; keep under avatars 2MB limit.
+      width: 1400,
+    });
+    if (upload === "created") bannersCreated += 1;
+    else if (upload === "exists") bannersExisting += 1;
+    else {
+      bannersErrors += 1;
+      continue;
+    }
+
+    await db
+      .update(sellerProfiles)
+      .set({ bannerFileId: fileId })
+      .where(eq(sellerProfiles.userId, userId));
+    await sleep(250);
+  }
+  console.log(
+    `Shop banners created=${bannersCreated} exists=${bannersExisting} errors=${bannersErrors}`,
+  );
+
+  // Insert any missing catalog categories; leave existing rows alone.
   const catalogSlugs = CATEGORY_CATALOG.map((c) => c.slug);
   const existingCats = await db
     .select({ id: categories.id, slug: categories.slug })
@@ -118,7 +309,7 @@ async function main() {
     .where(inArray(categories.slug, catalogSlugs));
   const existingBySlug = new Map(existingCats.map((c) => [c.slug, c.id]));
 
-  let inserted = 0;
+  let catInserted = 0;
   for (const entry of CATEGORY_CATALOG) {
     if (existingBySlug.has(entry.slug)) continue;
     const id = `seed_cat_${entry.slug}`.slice(0, 36);
@@ -126,74 +317,112 @@ async function main() {
       id,
       name: entry.name,
       slug: entry.slug,
-      sortOrder: entry.sortOrder,
     });
     existingBySlug.set(entry.slug, id);
-    inserted += 1;
+    catInserted += 1;
   }
-  if (inserted > 0) {
-    console.log(`Inserted ${inserted} catalog categor${inserted === 1 ? "y" : "ies"}.`);
-  }
-
-  const categoryId =
-    existingBySlug.get("digital") ??
-    existingBySlug.values().next().value ??
-    null;
-  if (!categoryId) {
-    throw new Error("No categories available after catalog seed.");
+  if (catInserted > 0) {
+    console.log(
+      `Inserted ${catInserted} catalog categor${catInserted === 1 ? "y" : "ies"}.`,
+    );
   }
 
-  const sellerId = userIds.seller;
-  const existingProduct = await db
-    .select()
-    .from(products)
-    .where(eq(products.id, "seed_demo_product"))
-    .limit(1);
-  if (sellerId) {
-    if (!existingProduct[0]) {
+  // Remove old sticker demo SKUs and their images.
+  const staleIds = ["seed_demo_product", "seed_demo_free_product"];
+  await db
+    .delete(productImages)
+    .where(inArray(productImages.productId, staleIds));
+  await db.delete(products).where(inArray(products.id, staleIds));
+
+  let productsInserted = 0;
+  let imagesCreated = 0;
+  let imagesExisting = 0;
+  let imageErrors = 0;
+
+  for (const entry of SEED_PRODUCTS) {
+    const productId = seedProductId(entry.key);
+    const sellerId = userIds[entry.sellerKey];
+    const categoryId = existingBySlug.get(entry.categorySlug);
+    if (!sellerId || !categoryId) {
+      console.error(
+        `Skip ${entry.key}: missing seller=${Boolean(sellerId)} category=${entry.categorySlug}`,
+      );
+      continue;
+    }
+
+    const existing = await db
+      .select({ id: products.id })
+      .from(products)
+      .where(eq(products.id, productId))
+      .limit(1);
+
+    if (!existing[0]) {
       await db.insert(products).values({
-        id: "seed_demo_product",
+        id: productId,
         sellerId,
         categoryId,
-        title: "Demo Sticker Pack",
-        description: "Seeded contact-request SKU.",
-        price: "500.00",
-        isFree: false,
+        title: entry.title,
+        description: entry.description,
+        price: formatPrice(entry.price),
+        isFree: entry.price === 0,
         status: "active",
-        stock: 25,
+        stock: 10,
         available: true,
         currency: "LKR",
         featured: false,
       });
-      await db.insert(products).values({
-        id: "seed_demo_free_product",
-        sellerId,
-        categoryId,
-        title: "Demo Free Sticker",
-        description: "Seeded free SKU.",
-        price: "0.00",
-        isFree: true,
-        status: "active",
-        stock: 25,
-        available: true,
-        currency: "LKR",
-        featured: false,
-      });
+      productsInserted += 1;
     } else {
       await db
         .update(products)
-        .set({ description: "Seeded contact-request SKU." })
-        .where(eq(products.id, "seed_demo_product"));
+        .set({
+          sellerId,
+          categoryId,
+          title: entry.title,
+          description: entry.description,
+          price: formatPrice(entry.price),
+          isFree: entry.price === 0,
+          status: "active",
+          stock: 10,
+          available: true,
+          currency: "LKR",
+        })
+        .where(eq(products.id, productId));
+    }
+
+    // Ensure every catalog photo is uploaded and has a product_images row.
+    const existingImages = await db
+      .select()
+      .from(productImages)
+      .where(eq(productImages.productId, productId));
+    const existingFileIds = new Set(existingImages.map((row) => row.fileId));
+
+    for (let i = 0; i < entry.photoIds.length; i += 1) {
+      const fileId = seedImageFileId(entry.key, i);
+      const upload = await uploadProductPhoto(fileId, entry.photoIds[i]!);
+      if (upload === "created") imagesCreated += 1;
+      else if (upload === "exists") imagesExisting += 1;
+      else {
+        imageErrors += 1;
+        continue;
+      }
+      if (!existingFileIds.has(fileId)) {
+        await db.insert(productImages).values({
+          id: newId(),
+          productId,
+          fileId,
+          sortOrder: i,
+          alt: entry.title,
+        });
+        existingFileIds.add(fileId);
+      }
+      await sleep(250);
     }
   }
 
-  // Ensure demo users have phones for contact-request flow.
-  for (const userId of Object.values(userIds)) {
-    await db
-      .update(profiles)
-      .set({ phone: "0770000000" })
-      .where(eq(profiles.userId, userId));
-  }
+  console.log(
+    `Products inserted=${productsInserted}; images created=${imagesCreated} exists=${imagesExisting} errors=${imageErrors}`,
+  );
 
   const settings = [
     { key: "features.free_listings", value: "true" },
@@ -215,6 +444,9 @@ async function main() {
   }
 
   console.log("Seed complete. Demo password:", DEMO_PASSWORD);
+  console.log(
+    "Sellers: seller@knurdz.demo (Nimal Studio), amaya@knurdz.demo (Amaya Atelier)",
+  );
 }
 
 main()

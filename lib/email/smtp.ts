@@ -41,6 +41,7 @@ export async function sendSmtpMail(params: {
   to: string;
   subject: string;
   text: string;
+  html?: string;
 }): Promise<void> {
   const config = readSmtpConfig();
   const transporter = nodemailer.createTransport({
@@ -58,5 +59,6 @@ export async function sendSmtpMail(params: {
     to: params.to,
     subject: params.subject,
     text: params.text,
+    ...(params.html ? { html: params.html } : {}),
   });
 }

@@ -5,6 +5,7 @@ export {
 } from "./seller-metrics";
 export type { SellerMetrics } from "./seller-metrics";
 export {
+  buildSellerDashboardSnapshot,
   getSellerDashboardSnapshot,
   parseSellerAnalyticsRange,
 } from "./seller-dashboard";
@@ -13,7 +14,9 @@ export type {
   SellerDashboardSnapshot,
 } from "./seller-dashboard";
 export {
+  aggregateSellerViewInsights,
   getSellerViewInsights,
+  getSellerViewInsightsForSellerId,
   recordMarketplaceView,
 } from "./view-stats";
 export type {
@@ -60,9 +63,13 @@ export {
   listProductImages,
   listPublicProductsByIds,
   listTrendingProducts,
+  escapeLikeWildcards,
   normalizeProductSearchQuery,
   parseProductCatalogParams,
+  productSearchRelevanceSql,
   searchActiveProducts,
+  tokenizeProductSearchQuery,
+  type SearchActiveProductsResult,
 } from "./products";
 export {
   asWishlistItem,
@@ -228,6 +235,7 @@ export { getSessionUser } from "./session";
 export {
   deleteFile,
   uploadAvatar,
+  uploadCategoryImage,
   uploadFile,
   uploadProductImage,
   validateUpload,
@@ -266,3 +274,12 @@ export type {
   SellerPerformanceInput,
   SellerPerformanceRow,
 } from "./admin-seller-performance";
+export { getAdminShopDetail } from "./admin-shop-detail";
+export type {
+  AdminShopAccount,
+  AdminShopConversion,
+  AdminShopDetail,
+  AdminShopListingExtras,
+  AdminShopReportCounts,
+  AdminShopReviewModeration,
+} from "./admin-shop-detail";
