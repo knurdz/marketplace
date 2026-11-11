@@ -17,6 +17,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { StorageImage } from "@/components/ui/storage-image";
 import { Label } from "@/components/ui/label";
 import { toast } from "@/lib/ui/toast";
 
@@ -86,15 +87,14 @@ export function ProfileForm({
 
             <div className="flex items-center gap-4">
               {avatarPreviewUrl ? (
-                // eslint-disable-next-line @next/next/no-img-element -- storage URL
-                <img
-                  src={avatarPreviewUrl}
-                  alt=""
-                  width={72}
-                  height={72}
-                  referrerPolicy="no-referrer"
-                  className="size-[72px] rounded-xl border border-border object-cover"
-                />
+                <div className="size-[72px] overflow-hidden rounded-xl border border-border">
+                  <StorageImage
+                    src={avatarPreviewUrl}
+                    alt=""
+                    className="size-full"
+                    imgClassName="object-cover"
+                  />
+                </div>
               ) : (
                 <div
                   aria-hidden

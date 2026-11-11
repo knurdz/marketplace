@@ -2,6 +2,7 @@
 
 import { Package } from "lucide-react";
 import { useState } from "react";
+import { StorageImage } from "@/components/ui/storage-image";
 import { BUCKET_PRODUCT_IMAGES } from "@/lib/appwrite/config";
 import { getFilePreviewUrl } from "@/lib/appwrite/storage-urls";
 import type { ProductImage } from "@/lib/types";
@@ -38,14 +39,15 @@ export function ProductImageGallery({
   return (
     <div className="space-y-3">
       <div className="relative aspect-square w-full overflow-hidden rounded-xl border border-border bg-muted/20">
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
+        <StorageImage
           src={getFilePreviewUrl(BUCKET_PRODUCT_IMAGES, current.fileId, {
             width: 960,
             height: 960,
           })}
           alt={current.alt ?? productTitle}
-          className="h-full w-full object-cover"
+          className="h-full w-full"
+          imgClassName="object-cover"
+          priority
         />
       </div>
       {images.length > 1 ? (
@@ -64,14 +66,14 @@ export function ProductImageGallery({
                     : "border-border hover:border-foreground/30",
                 )}
               >
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
+                <StorageImage
                   src={getFilePreviewUrl(BUCKET_PRODUCT_IMAGES, image.fileId, {
                     width: 160,
                     height: 160,
                   })}
                   alt=""
-                  className="h-full w-full object-cover"
+                  className="h-full w-full"
+                  imgClassName="object-cover"
                 />
               </button>
             </li>

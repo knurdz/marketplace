@@ -1,5 +1,5 @@
 import { notFound } from "next/navigation";
-import { ProductGrid } from "@/components/store/product-grid";
+import { InfiniteProductGrid } from "@/components/store/infinite-product-grid";
 import { SellerPolicyBlocks } from "@/components/store/seller-policy-blocks";
 import { ShopHeader } from "@/components/store/shop-header";
 import { EmptyState } from "@/components/layout/empty-state";
@@ -7,11 +7,12 @@ import { getShopBannerPreviewUrl } from "@/lib/appwrite/storage-urls";
 import {
   computeSellerReviewMetrics,
   getPublicSellerBySlug,
-  listActiveProducts,
+  listActiveProductsPage,
   listApprovedSellerReviews,
   listCoverImagesByProductIds,
   recordMarketplaceView,
 } from "@/lib/services";
+import { CATALOG_PAGE_SIZE } from "@/lib/services/products";
 
 type ShopPageProps = {
   params: Promise<{ slug: string }>;
@@ -28,13 +29,14 @@ export default async function ShopPage({ params }: ShopPageProps) {
     targetId: seller.userId,
   });
 
-  const [products, reviews] = await Promise.all([
-    listActiveProducts({
+  const [catalogPage, reviews] = await Promise.all([
+    listActiveProductsPage({
       sellerId: seller.userId,
-      limit: 48,
+      limit: CATALOG_PAGE_SIZE,
     }),
     listApprovedSellerReviews(seller.userId),
   ]);
+  const products = catalogPage.products;
   const covers = await listCoverImagesByProductIds(products.map((p) => p.$id));
   const bannerUrl = getShopBannerPreviewUrl(seller.bannerFileId);
   const metrics = computeSellerReviewMetrics(reviews);
@@ -47,7 +49,7 @@ export default async function ShopPage({ params }: ShopPageProps) {
       <ShopHeader
         seller={seller}
         bannerUrl={bannerUrl}
-        listingCount={products.length}
+        listingCount={catalogPage.total}
         metrics={metrics}
         reviews={reviews}
       />
@@ -68,10 +70,15 @@ export default async function ShopPage({ params }: ShopPageProps) {
           </h2>
           {products.length > 0 ? (
             <div className="mt-6">
-              <ProductGrid
-                products={products}
-                covers={covers}
-                className={hasAbout ? "lg:grid-cols-3" : undefined}
+              <InfiniteProductGrid
+                initialProducts={products}
+                initialCovers={covers}
+                totalCount={catalogPage.total}
+                source="catalog"
+                sellerId={seller.userId}
+                sort="newest"
+                initialCursor={catalogPage.nextCursor}
+                gridClassName={hasAbout ? "lg:grid-cols-3" : undefined}
               />
             </div>
           ) : (

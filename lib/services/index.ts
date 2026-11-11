@@ -58,6 +58,9 @@ export {
   getProduct,
   isProductPurchasable,
   listActiveProducts,
+  listActiveProductsPage,
+  countActiveProducts,
+  CATALOG_PAGE_SIZE,
   listCoverImagesByProductIds,
   listFeaturedProducts,
   listProductImages,
@@ -70,6 +73,7 @@ export {
   productSearchRelevanceSql,
   searchActiveProducts,
   tokenizeProductSearchQuery,
+  type ListActiveProductsPageResult,
   type SearchActiveProductsResult,
   type SearchSuggestionIndex,
 } from "./products";

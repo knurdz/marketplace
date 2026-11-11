@@ -7,7 +7,8 @@ import {
   portalHomeForSessionUser,
   type SessionUserView,
 } from "@/lib/appwrite/session-user";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { AvatarStorageImage } from "@/components/ui/avatar-storage-image";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -53,7 +54,7 @@ export function AccountMenu({ user, displayName, avatarUrl }: AccountMenuProps) 
           aria-label="Account menu"
         >
           <Avatar className="size-9">
-            {avatarUrl ? <AvatarImage src={avatarUrl} alt="" /> : null}
+            {avatarUrl ? <AvatarStorageImage src={avatarUrl} alt="" /> : null}
             <AvatarFallback>{initials}</AvatarFallback>
           </Avatar>
         </Button>

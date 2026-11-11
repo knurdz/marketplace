@@ -4,7 +4,8 @@ import { ProfileForm } from "@/components/auth/profile-form";
 import { ResendVerificationForm } from "@/components/auth/resend-verification-form";
 import { BuyerAccountShell } from "@/components/store/buyer-account-shell";
 import { StatusPill } from "@/components/layout/status-pill";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { AvatarStorageImage } from "@/components/ui/avatar-storage-image";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -82,7 +83,7 @@ export default async function AccountPage() {
             <div className="flex min-w-0 items-center gap-4">
               <Avatar className="size-16 rounded-2xl">
                 {avatarPreviewUrl ? (
-                  <AvatarImage
+                  <AvatarStorageImage
                     src={avatarPreviewUrl}
                     alt=""
                     className="rounded-2xl"

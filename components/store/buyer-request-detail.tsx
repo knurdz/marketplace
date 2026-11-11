@@ -7,6 +7,7 @@ import { formatProductPrice } from "@/components/store/product-display";
 import { BuyerAccountShell } from "@/components/store/buyer-account-shell";
 import { StatusPill } from "@/components/layout/status-pill";
 import { Button } from "@/components/ui/button";
+import { StorageImage } from "@/components/ui/storage-image";
 import { BUCKET_PRODUCT_IMAGES } from "@/lib/appwrite/config";
 import { getFilePreviewUrl } from "@/lib/appwrite/storage-urls";
 import { formatPurchaseRequestStatus } from "@/lib/request-display";
@@ -103,14 +104,20 @@ export function BuyerRequestDetail({
           <aside className="border-b border-border bg-muted/15 p-5 lg:border-b-0 lg:border-r">
             <div className="relative mx-auto aspect-square w-full max-w-[240px] overflow-hidden rounded-xl border border-border bg-muted/25 lg:max-w-none">
               {coverFileId ? (
-                // eslint-disable-next-line @next/next/no-img-element -- storage preview URL
-                <img
+                <StorageImage
                   src={getFilePreviewUrl(BUCKET_PRODUCT_IMAGES, coverFileId, {
                     width: 480,
                     height: 480,
                   })}
                   alt=""
-                  className="size-full object-cover"
+                  className="size-full"
+                  imgClassName="object-cover"
+                  fallback={
+                    <div className="flex size-full flex-col items-center justify-center gap-2 text-muted-foreground">
+                      <Package className="size-10 opacity-60" aria-hidden />
+                      <span className="text-xs">No photo</span>
+                    </div>
+                  }
                 />
               ) : (
                 <div className="flex size-full flex-col items-center justify-center gap-2 text-muted-foreground">

@@ -20,6 +20,7 @@ import { SubmitListingButton } from "@/components/seller/submit-listing-button";
 import { BUCKET_PRODUCT_IMAGES } from "@/lib/appwrite/config";
 import { getFilePreviewUrl } from "@/lib/appwrite/storage-urls";
 import { listCategories } from "@/lib/services/categories";
+import { StorageImage } from "@/components/ui/storage-image";
 import { listCoverImagesByProductIds, listProductImages } from "@/lib/services/products";
 import { areFreeListingsEnabled } from "@/lib/services/platform-settings";
 import {
@@ -122,11 +123,17 @@ export default async function SellerListingsPage({
                       <div className="flex min-w-0 items-center gap-2.5">
                         <div className="flex size-8 shrink-0 items-center justify-center overflow-hidden rounded-md border border-border bg-muted/40">
                           {coverUrl ? (
-                            // eslint-disable-next-line @next/next/no-img-element
-                            <img
+                            <StorageImage
                               src={coverUrl}
                               alt=""
-                              className="size-full object-cover"
+                              className="size-full"
+                              imgClassName="object-cover"
+                              fallback={
+                                <Package
+                                  className="size-3.5 text-muted-foreground"
+                                  aria-hidden
+                                />
+                              }
                             />
                           ) : (
                             <Package

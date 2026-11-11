@@ -13,6 +13,7 @@ import { BuyerAccountShell } from "@/components/store/buyer-account-shell";
 import { BuyerRequestCard } from "@/components/store/buyer-request-card";
 import { RecentlyViewedSection } from "@/components/store/recently-viewed-section";
 import { Button } from "@/components/ui/button";
+import { StorageImage } from "@/components/ui/storage-image";
 import { BUCKET_PRODUCT_IMAGES } from "@/lib/appwrite/config";
 import { getOwnProfile } from "@/lib/appwrite/profiles";
 import { getLoggedInUser } from "@/lib/appwrite/session";
@@ -202,11 +203,16 @@ export default async function DashboardPage() {
                 <>
                   <div className="relative aspect-square overflow-hidden rounded-xl bg-muted">
                     {coverUrl ? (
-                      // eslint-disable-next-line @next/next/no-img-element -- storage preview URL
-                      <img
+                      <StorageImage
                         src={coverUrl}
                         alt=""
-                        className="size-full object-cover transition duration-300 group-hover:scale-105"
+                        className="size-full"
+                        imgClassName="object-cover transition duration-300 group-hover:scale-105"
+                        fallback={
+                          <div className="flex size-full items-center justify-center text-muted-foreground">
+                            <Package className="size-7 opacity-60" aria-hidden />
+                          </div>
+                        }
                       />
                     ) : (
                       <div className="flex size-full items-center justify-center text-muted-foreground">

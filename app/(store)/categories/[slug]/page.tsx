@@ -2,11 +2,12 @@ import { notFound } from "next/navigation";
 import { CatalogView } from "@/components/store/catalog-view";
 import {
   getCategoryBySlug,
-  listActiveProducts,
+  listActiveProductsPage,
   listCategories,
   listCoverImagesByProductIds,
   parseProductCatalogParams,
 } from "@/lib/services";
+import { CATALOG_PAGE_SIZE } from "@/lib/services/products";
 
 type CategoryPageProps = {
   params: Promise<{ slug: string }>;
@@ -27,10 +28,10 @@ export default async function CategoryPage({
   if (!category) notFound();
 
   const catalogParams = parseProductCatalogParams(query);
-  const [products, categories] = await Promise.all([
-    listActiveProducts({
+  const [catalogPage, categories] = await Promise.all([
+    listActiveProductsPage({
       categoryId: category.$id,
-      limit: 48,
+      limit: CATALOG_PAGE_SIZE,
       minPrice: catalogParams.minPrice,
       maxPrice: catalogParams.maxPrice,
       sort: catalogParams.sort,
@@ -38,6 +39,7 @@ export default async function CategoryPage({
     }),
     listCategories(),
   ]);
+  const products = catalogPage.products;
   const covers = await listCoverImagesByProductIds(products.map((p) => p.$id));
 
   const hasActiveFilters =
@@ -53,9 +55,12 @@ export default async function CategoryPage({
       activeSlug={category.slug}
       products={products}
       covers={covers}
+      totalCount={catalogPage.total}
+      catalogNextCursor={catalogPage.nextCursor}
+      categoryId={category.$id}
       filterAction={`/categories/${category.slug}`}
       catalogParams={catalogParams}
-      resultLabel={`${products.length} listing${products.length === 1 ? "" : "s"}`}
+      resultLabel={`${catalogPage.total} listing${catalogPage.total === 1 ? "" : "s"}`}
       emptyTitle={
         hasActiveFilters
           ? `Nothing in ${category.name} for this range`
