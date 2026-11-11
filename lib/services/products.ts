@@ -1,4 +1,5 @@
 import { hasDatabaseConfig } from "@/lib/config/app";
+import { logError } from "@/lib/observability/log-error";
 import {
   and,
   asc,
@@ -356,7 +357,8 @@ export async function listActiveProductsPage(opts?: {
       hasMore && lastRow ? nextCatalogCursor(sort, lastRow) : null;
 
     return { products, total, nextCursor };
-  } catch {
+  } catch (error) {
+    logError("products.listActiveProductsPage", error);
     return { products: [], total: 0, nextCursor: null };
   }
 }
@@ -534,7 +536,8 @@ export async function listActiveProducts(opts?: {
     });
 
     return mapPublicProductRows(result.rows);
-  } catch {
+  } catch (error) {
+    logError("products.listActiveProducts", error);
     return [];
   }
 }

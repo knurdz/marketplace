@@ -26,6 +26,9 @@ const nunitoSans = Nunito_Sans({
   display: "swap",
 });
 
+/** Hostinger MariaDB is in Mumbai. Keep serverless functions next to it. */
+export const preferredRegion = "bom1";
+
 export const metadata: Metadata = {
   metadataBase: getMetadataBase(),
   title: {

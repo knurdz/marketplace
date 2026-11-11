@@ -20,23 +20,53 @@ function addOrigins(target: Set<string>, raw?: string | null) {
   }
 }
 
+function isLoopbackOrigin(url: string): boolean {
+  try {
+    const host = new URL(url).hostname;
+    return host === "localhost" || host === "127.0.0.1" || host === "::1";
+  } catch {
+    return false;
+  }
+}
+
+function httpsOrigin(host: string): string {
+  return `https://${host.trim().replace(/\/$/, "")}`;
+}
+
 /** Public app origin for redirects and Better Auth. */
 export function getAppUrl(): string {
   if (typeof window !== "undefined" && window.location?.origin) {
     return window.location.origin;
   }
+
   const appUrl = process.env.NEXT_PUBLIC_APP_URL?.trim().replace(/\/$/, "");
-  if (appUrl) {
+  const onVercel = Boolean(process.env.VERCEL);
+  // Next inlines NEXT_PUBLIC_* at build. A localhost value on Vercel makes
+  // canonical URLs and auth links point at the dev machine.
+  if (appUrl && !(onVercel && isLoopbackOrigin(appUrl))) {
     return appUrl;
   }
-  if (process.env.VERCEL_PROJECT_PRODUCTION_URL) {
-    return `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL.trim().replace(/\/$/, "")}`;
+
+  if (onVercel && process.env.VERCEL_ENV === "production") {
+    const production = process.env.AUTH_PRODUCTION_APP_URL?.trim().replace(
+      /\/$/,
+      "",
+    );
+    if (production && !isLoopbackOrigin(production)) return production;
+    if (process.env.VERCEL_PROJECT_PRODUCTION_URL) {
+      return httpsOrigin(process.env.VERCEL_PROJECT_PRODUCTION_URL);
+    }
+    return DEFAULT_PRODUCTION_APP_URL;
   }
+
   if (process.env.VERCEL_URL) {
-    return `https://${process.env.VERCEL_URL.trim().replace(/\/$/, "")}`;
+    return httpsOrigin(process.env.VERCEL_URL);
+  }
+  if (process.env.VERCEL_PROJECT_PRODUCTION_URL) {
+    return httpsOrigin(process.env.VERCEL_PROJECT_PRODUCTION_URL);
   }
   if (process.env.NEXT_PUBLIC_VERCEL_URL) {
-    return `https://${process.env.NEXT_PUBLIC_VERCEL_URL.trim().replace(/\/$/, "")}`;
+    return httpsOrigin(process.env.NEXT_PUBLIC_VERCEL_URL);
   }
   if (process.env.NODE_ENV === "production") {
     throw new Error(
