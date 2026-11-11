@@ -14,12 +14,15 @@ Minimal Laravel 11 service for storing and serving marketplace files (`avatars` 
 
 1. Point the subdomain `marketplace-storage.knurdz.org` to this folder and set the **document root** to `public/`.
 2. Use **PHP 8.2+**.
-3. Install dependencies and configure environment:
+3. Install dependencies and configure environment (use Hostinger PHP 8.4):
    ```bash
-   composer install --no-dev --optimize-autoloader
+   /opt/alt/php84/usr/bin/php /usr/local/bin/composer install --no-dev --optimize-autoloader
+   # If there is no composer.lock yet:
+   # /opt/alt/php84/usr/bin/php /usr/local/bin/composer update --no-dev --optimize-autoloader
    cp .env.example .env
-   php artisan key:generate
+   /opt/alt/php84/usr/bin/php artisan key:generate
    ```
+   Requires `laravel/framework` **^12.68.0** (security-patched). Older `^11.0` installs are blocked by Packagist advisories.
 4. Set `APP_URL=https://marketplace-storage.knurdz.org` and a strong `STORAGE_API_TOKEN` in `.env` (never commit `.env`).
 5. Ensure `storage/` and `bootstrap/cache/` are writable by the web server:
    ```bash
