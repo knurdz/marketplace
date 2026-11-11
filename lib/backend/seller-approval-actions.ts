@@ -78,9 +78,13 @@ export async function rejectSellerApplication(
     return { error: "Missing seller application." };
   }
 
-  const reason = formData.get("reason");
-  if (typeof reason !== "string" || !reason.trim()) {
-    return { error: "Rejection reason is required." };
+  const reasonRaw = formData.get("reason");
+  const reason =
+    typeof reasonRaw === "string" && reasonRaw.trim().length > 0
+      ? reasonRaw.trim()
+      : null;
+  if (reason && reason.length > 500) {
+    return { error: "Rejection message must be at most 500 characters." };
   }
 
   const result = await rejectSellerApplicationCore(

@@ -51,10 +51,12 @@ type SellerApprovalRowProps = {
 
 type SellerApproveButtonProps = {
   sellerProfileId: string;
+  compact?: boolean;
 };
 
 export function SellerApproveButton({
   sellerProfileId,
+  compact = false,
 }: SellerApproveButtonProps) {
   const [state, formAction, pending] = useActionState(
     approveSellerApplication,
@@ -63,13 +65,13 @@ export function SellerApproveButton({
   useApprovalToast(state);
 
   return (
-    <form action={formAction}>
+    <form action={formAction} className="inline-flex shrink-0">
       <input type="hidden" name="sellerProfileId" value={sellerProfileId} />
       <Button
         type="submit"
         variant="success"
         disabled={pending}
-        size="sm"
+        size={compact ? "xs" : "sm"}
         data-testid="admin-approve-seller"
       >
         {!pending ? <Check data-icon="inline-start" /> : null}
@@ -82,7 +84,8 @@ export function SellerApproveButton({
 export function SellerRejectForm({
   sellerProfileId,
   shopName,
-}: SellerApprovalRowProps) {
+  compact = false,
+}: SellerApprovalRowProps & { compact?: boolean }) {
   const [open, setOpen] = useState(false);
   const [state, formAction, pending] = useActionState(
     rejectSellerApplication,
@@ -96,7 +99,7 @@ export function SellerRejectForm({
       <Button
         type="button"
         variant="destructive"
-        size="sm"
+        size={compact ? "xs" : "sm"}
         onClick={() => setOpen(true)}
       >
         <X data-icon="inline-start" />
@@ -106,7 +109,7 @@ export function SellerRejectForm({
         open={open}
         onOpenChange={setOpen}
         title="Reject seller application?"
-        description={`Reject “${shopName}”? The reason is visible to the applicant.`}
+        description={`Reject “${shopName}”? An optional message can be emailed to the applicant and shown on their application status.`}
         confirmLabel="Confirm reject"
         pendingLabel="Rejecting…"
         confirmVariant="destructive"
@@ -115,8 +118,9 @@ export function SellerRejectForm({
         hiddenFields={{ sellerProfileId }}
         note={{
           name: "reason",
-          label: `Reason for rejecting ${shopName}`,
-          placeholder: "Required. Visible to the applicant",
+          label: "Message to applicant (optional)",
+          placeholder: "Included in the rejection email if provided",
+          required: false,
         }}
       />
     </>
