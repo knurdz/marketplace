@@ -64,13 +64,19 @@ export {
   listPublicProductsByIds,
   listTrendingProducts,
   escapeLikeWildcards,
+  getSearchSuggestionIndex,
   normalizeProductSearchQuery,
   parseProductCatalogParams,
   productSearchRelevanceSql,
   searchActiveProducts,
   tokenizeProductSearchQuery,
   type SearchActiveProductsResult,
+  type SearchSuggestionIndex,
 } from "./products";
+export {
+  getOwnBuyerCommerceCounts,
+  type BuyerCommerceCounts,
+} from "./buyer-commerce-counts";
 export {
   asWishlistItem,
   getOwnWishlistView,

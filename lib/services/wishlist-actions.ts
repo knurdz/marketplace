@@ -14,6 +14,8 @@ import type { WishlistActionState } from "./wishlist-errors";
 
 function revalidateWishlistPaths(productId?: string) {
   revalidatePath("/wishlist");
+  revalidatePath("/dashboard");
+  revalidatePath("/account", "layout");
   revalidatePath("/", "layout");
   if (productId) {
     revalidatePath(`/products/${productId}`);
