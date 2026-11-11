@@ -1,11 +1,13 @@
+import { headers } from "next/headers";
+import { getAuth } from "@/lib/auth";
+import { logError } from "@/lib/observability/log-error";
 import { getAppUrl } from "./config";
+import type { OAuthErrorCode } from "./oauth-errors";
+import { type OAuthProviderId } from "./oauth-providers";
 import { createProfileForUser, getOwnProfile } from "./profiles";
 import { registrationCompletePath } from "./registration-complete";
 import { postLoginPath, safeNextPath } from "./roles";
 import { getLoggedInUser } from "./session";
-import { logError } from "@/lib/observability/log-error";
-import type { OAuthErrorCode } from "./oauth-errors";
-import { type OAuthProviderId } from "./oauth-providers";
 
 export type { OAuthProviderId } from "./oauth-providers";
 export { parseOAuthProvider } from "./oauth-providers";
@@ -54,20 +56,50 @@ export function buildOAuthSuccessUrl(params: {
   return success.toString();
 }
 
-/** Redirect to Better Auth social sign-in (same origin as the current request). */
+const PROVIDER_AUTHORIZE_HOSTS: Record<OAuthProviderId, string> = {
+  google: "accounts.google.com",
+  github: "github.com",
+};
+
+function isProviderAuthorizationUrl(
+  provider: OAuthProviderId,
+  raw: string,
+): boolean {
+  try {
+    const url = new URL(raw);
+    return (
+      url.protocol === "https:" &&
+      url.hostname === PROVIDER_AUTHORIZE_HOSTS[provider]
+    );
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * Better Auth social sign-in is POST-only. A browser navigation to
+ * `/api/auth/sign-in/social` is a 404 (Firefox shows its error page).
+ * Call the API here, then send the browser to the provider.
+ */
 export async function createOAuthRedirectUrl(params: {
   provider: OAuthProviderId;
   success: string;
   failure: string;
-  origin?: string;
 }): Promise<string> {
-  const base = (params.origin || getAppUrl()).replace(/\/$/, "");
-  const callback = new URL(params.success);
-  const url = new URL(`${base}/api/auth/sign-in/social`);
-  url.searchParams.set("provider", params.provider);
-  url.searchParams.set("callbackURL", callback.toString());
-  url.searchParams.set("errorCallbackURL", params.failure);
-  return url.toString();
+  const result = await getAuth().api.signInSocial({
+    body: {
+      provider: params.provider,
+      callbackURL: params.success,
+      errorCallbackURL: params.failure,
+      disableRedirect: true,
+    },
+    headers: await headers(),
+  });
+  const url = typeof result?.url === "string" ? result.url : "";
+  if (!isProviderAuthorizationUrl(params.provider, url)) {
+    throw new Error("OAuth provider did not return an authorization URL.");
+  }
+  return url;
 }
 
 /** After Better Auth OAuth, ensure profile exists and resolve destination. */

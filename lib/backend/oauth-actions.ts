@@ -79,7 +79,6 @@ export async function startOAuth(formData: FormData): Promise<void> {
       provider,
       success: buildOAuthSuccessUrl({ next, intent, origin }),
       failure: failUrl,
-      origin,
     });
     redirect(redirectUrl);
   } catch (error) {
