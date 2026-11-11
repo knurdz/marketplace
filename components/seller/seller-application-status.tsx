@@ -1,5 +1,7 @@
+import { Clock } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import type { SellerProfile } from "@/lib/types";
+import { cn } from "@/lib/utils";
 
 type SellerApplicationStatusProps = {
   profile: SellerProfile;
@@ -13,7 +15,16 @@ export function SellerApplicationStatus({
       <div className="mt-8 rounded-md border border-border bg-card p-5">
         <div className="flex flex-wrap items-center gap-2">
           <p className="font-medium">Application under review</p>
-          <Badge variant="secondary">Pending</Badge>
+          <Badge
+            variant="outline"
+            className={cn(
+              "border-orange-200/90 bg-orange-50/95 text-orange-800",
+              "dark:border-orange-800/55 dark:bg-orange-950/45 dark:text-orange-300",
+            )}
+          >
+            <Clock data-icon="inline-start" aria-hidden />
+            Pending
+          </Badge>
         </div>
         <p className="mt-2 text-sm text-muted-foreground">
           Your shop <strong>{profile.shopName}</strong> (

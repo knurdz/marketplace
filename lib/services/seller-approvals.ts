@@ -309,13 +309,10 @@ export async function approveSellerApplicationCore(
 export async function rejectSellerApplicationCore(
   adminUserId: string,
   sellerProfileId: string,
-  reason: string,
+  reason: string | null,
 ): Promise<SellerApprovalResult> {
-  const trimmedReason = reason.trim();
-  if (!trimmedReason) {
-    return { ok: false, error: "Rejection reason is required." };
-  }
-  if (trimmedReason.length > MAX_REJECTION_REASON) {
+  const trimmedReason = reason?.trim() || null;
+  if (trimmedReason && trimmedReason.length > MAX_REJECTION_REASON) {
     return {
       ok: false,
       error: `Rejection reason must be at most ${MAX_REJECTION_REASON} characters.`,
@@ -361,7 +358,7 @@ export async function rejectSellerApplicationCore(
         userId: profile.userId,
         shopName: profile.shopName,
         slug: profile.slug,
-        reason: trimmedReason,
+        ...(trimmedReason ? { reason: trimmedReason } : {}),
       },
     });
   } catch {
@@ -377,7 +374,9 @@ export async function rejectSellerApplicationCore(
     title: "Seller application not approved",
     body: `Your application for "${profile.shopName}" was not approved.`,
     link: "/become-seller",
-    detailLines: [`Reason: ${trimmedReason}`],
+    ...(trimmedReason
+      ? { detailLines: [`Message: ${trimmedReason}`] }
+      : {}),
   });
 
   return { ok: true, message: `${profile.shopName} rejected.` };
