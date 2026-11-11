@@ -18,6 +18,7 @@ import {
   Upload,
   X,
 } from "lucide-react";
+import { StorageImage } from "@/components/ui/storage-image";
 import {
   updateOwnShopBanner,
   updateOwnShopProfile,
@@ -216,11 +217,12 @@ function BannerDropzone({
       >
         {previewSrc ? (
           <>
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
+            <StorageImage
               src={previewSrc}
               alt=""
-              className="absolute inset-0 h-full w-full object-cover"
+              className="absolute inset-0 h-full w-full"
+              imgClassName="object-cover"
+              priority
             />
             <div className="absolute inset-0 bg-gradient-to-t from-black/55 via-black/20 to-black/10" />
             <div className="relative z-10 mt-auto flex w-full flex-col gap-3 p-5 text-white sm:flex-row sm:items-end sm:justify-between">

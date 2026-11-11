@@ -5,6 +5,7 @@ import { StatusPill } from "@/components/layout/status-pill";
 import { formatPurchaseRequestStatus } from "@/lib/request-display";
 import type { PurchaseRequest } from "@/lib/types";
 import { purchaseRequestStatusTone } from "@/lib/ui/status-tone";
+import { StorageImage } from "@/components/ui/storage-image";
 import { cn } from "@/lib/utils";
 
 function formatRequestDate(iso?: string): string | null {
@@ -52,11 +53,16 @@ export function BuyerRequestCard({
       >
         <div className="relative size-16 shrink-0 overflow-hidden rounded-xl border border-border bg-muted sm:size-20">
           {coverUrl ? (
-            // eslint-disable-next-line @next/next/no-img-element -- storage preview URL
-            <img
+            <StorageImage
               src={coverUrl}
               alt=""
-              className="size-full object-cover transition duration-300 group-hover:scale-105"
+              className="size-full"
+              imgClassName="object-cover transition duration-300 group-hover:scale-105"
+              fallback={
+                <div className="flex size-full items-center justify-center text-muted-foreground">
+                  <Package className="size-6 opacity-60" aria-hidden />
+                </div>
+              }
             />
           ) : (
             <div className="flex size-full items-center justify-center text-muted-foreground">

@@ -5,6 +5,7 @@ import { useCallback, useEffect, useState, useSyncExternalStore } from "react";
 import useEmblaCarousel from "embla-carousel-react";
 import { ChevronLeft, ChevronRight, Package } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { StorageImage } from "@/components/ui/storage-image";
 import { cn } from "@/lib/utils";
 
 export type PromoSlide = {
@@ -142,12 +143,12 @@ export function PromoCarousel({ slides }: { slides: PromoSlide[] }) {
                 <div className="relative aspect-[16/10] w-full overflow-hidden bg-background-alt">
                   {slide.imageUrl ? (
                     <>
-                      {/* eslint-disable-next-line @next/next/no-img-element -- Appwrite Storage preview URL */}
-                      <img
+                      <StorageImage
                         src={slide.imageUrl}
                         alt={slide.title}
-                        className="hover-zoom h-full w-full object-cover"
-                        loading={index < 3 ? "eager" : "lazy"}
+                        className="h-full w-full"
+                        imgClassName="hover-zoom object-cover"
+                        priority={index < 3}
                       />
                       <div
                         aria-hidden

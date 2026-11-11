@@ -1,9 +1,13 @@
 import { ProductCatalogFilters } from "@/components/store/product-catalog-filters";
 import { CategoryRail } from "@/components/store/category-rail";
-import { ProductGrid } from "@/components/store/product-grid";
+import { InfiniteProductGrid } from "@/components/store/infinite-product-grid";
 import { EmptyState } from "@/components/layout/empty-state";
 import { Button } from "@/components/ui/button";
-import type { ProductCatalogParams, ProductCoverMap } from "@/lib/services/products";
+import type {
+  ProductCatalogParams,
+  ProductCatalogSort,
+  ProductCoverMap,
+} from "@/lib/services/products";
 import type { Category, Product } from "@/lib/types";
 import Link from "next/link";
 
@@ -14,6 +18,13 @@ type CatalogViewProps = {
   activeSlug?: string;
   products: Product[];
   covers: ProductCoverMap;
+  totalCount: number;
+  catalogNextCursor: string | null;
+  categoryId?: string;
+  /** Search results use offset paging instead of catalog cursors. */
+  catalogMode?: "catalog" | "search";
+  searchQuery?: string;
+  searchNextOffset?: number | null;
   filterAction: string;
   catalogParams: ProductCatalogParams;
   preserve?: Record<string, string>;
@@ -30,6 +41,12 @@ export function CatalogView({
   activeSlug,
   products,
   covers,
+  totalCount,
+  catalogNextCursor,
+  categoryId,
+  catalogMode = "catalog",
+  searchQuery,
+  searchNextOffset = null,
   filterAction,
   catalogParams,
   preserve,
@@ -88,7 +105,29 @@ export function CatalogView({
         />
       ) : (
         <div className="pb-6">
-          <ProductGrid products={products} covers={covers} />
+          <InfiniteProductGrid
+            key={
+              catalogMode === "search"
+                ? `search-${searchQuery ?? ""}-${catalogParams.sort}-${catalogParams.minPrice ?? ""}-${catalogParams.maxPrice ?? ""}`
+                : `${categoryId ?? "all"}-${catalogParams.sort}-${catalogParams.minPrice ?? ""}-${catalogParams.maxPrice ?? ""}`
+            }
+            initialProducts={products}
+            initialCovers={covers}
+            totalCount={totalCount}
+            source={catalogMode}
+            categoryId={categoryId}
+            query={searchQuery}
+            minPrice={catalogParams.minPrice ?? null}
+            maxPrice={catalogParams.maxPrice ?? null}
+            sort={catalogParams.sort as ProductCatalogSort}
+            invalidPriceRange={invalidPriceRange}
+            initialCursor={
+              catalogMode === "catalog" ? catalogNextCursor : null
+            }
+            initialNextOffset={
+              catalogMode === "search" ? searchNextOffset : null
+            }
+          />
         </div>
       )}
     </main>

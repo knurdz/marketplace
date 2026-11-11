@@ -7,6 +7,7 @@ import {
   parseProductCatalogParams,
   searchActiveProducts,
 } from "@/lib/services";
+import { CATALOG_PAGE_SIZE } from "@/lib/services/products";
 
 type SearchPageProps = {
   searchParams: Promise<{
@@ -28,7 +29,7 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
   const catalogParams = parseProductCatalogParams(params);
   const [searchResult, categories] = await Promise.all([
     searchActiveProducts(normalized, {
-      limit: 48,
+      limit: CATALOG_PAGE_SIZE,
       minPrice: catalogParams.minPrice,
       maxPrice: catalogParams.maxPrice,
       sort: catalogParams.sort,
@@ -47,7 +48,8 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
 
   let emptyTitle = "No matches";
   let emptyDescription = `Nothing active matched “${normalized}”.`;
-  let resultLabel = `${products.length} result${products.length === 1 ? "" : "s"}`;
+  const searchTotal = searchResult.ok ? searchResult.total : 0;
+  let resultLabel = `${searchTotal} result${searchTotal === 1 ? "" : "s"}`;
 
   if (!searchResult.ok) {
     if (searchResult.reason === "too_short") {
@@ -79,6 +81,13 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
       categories={categories}
       products={products}
       covers={covers}
+      totalCount={searchTotal}
+      catalogNextCursor={null}
+      catalogMode="search"
+      searchQuery={normalized}
+      searchNextOffset={
+        searchResult.ok ? searchResult.nextOffset : null
+      }
       filterAction="/search"
       catalogParams={catalogParams}
       preserve={{ q: normalized }}

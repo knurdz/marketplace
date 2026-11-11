@@ -10,6 +10,7 @@ import {
 import type { PublicSellerInfo } from "@/lib/services/sellers";
 import type { SellerReviewMetrics } from "@/lib/services/reviews";
 import type { Review } from "@/lib/types";
+import { StorageImage } from "@/components/ui/storage-image";
 
 const VERIFIED_LABEL = "Verified seller on Knurdz Marketplace";
 
@@ -84,11 +85,12 @@ export function ShopHeader({
   return (
     <header className="overflow-hidden rounded-xl border border-border bg-card shadow-xs">
       {bannerUrl ? (
-        // eslint-disable-next-line @next/next/no-img-element -- Storage preview URL
-        <img
+        <StorageImage
           src={bannerUrl}
           alt=""
-          className="h-40 w-full object-cover sm:h-52"
+          className="h-40 w-full sm:h-52"
+          imgClassName="object-cover"
+          priority
         />
       ) : (
         <div

@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { MarketCategoryCircles } from "@/components/store/market/market-category-circles";
 import { MarketFilters } from "@/components/store/market/market-filters";
-import { ProductGrid } from "@/components/store/product-grid";
+import { InfiniteProductGrid } from "@/components/store/infinite-product-grid";
 import { EmptyState } from "@/components/layout/empty-state";
 import { SectionHeading } from "@/components/store/section-heading";
 import { Button } from "@/components/ui/button";
@@ -55,9 +55,15 @@ export function HomeBrowseListings({
   invalidPriceRange,
   products,
   covers,
+  totalCount,
+  catalogNextCursor,
+  categoryId,
 }: HomeBrowseSharedProps & {
   products: Product[];
   covers?: ProductCoverMap;
+  totalCount: number;
+  catalogNextCursor: string | null;
+  categoryId?: string;
 }) {
   const hasFilters =
     category != null ||
@@ -72,7 +78,7 @@ export function HomeBrowseListings({
         description={
           invalidPriceRange
             ? undefined
-            : `${products.length} listing${products.length === 1 ? "" : "s"}`
+            : `${totalCount} listing${totalCount === 1 ? "" : "s"}`
         }
       />
 
@@ -96,7 +102,19 @@ export function HomeBrowseListings({
           }
         />
       ) : (
-        <ProductGrid products={products} covers={covers} />
+        <InfiniteProductGrid
+          key={`${category ?? "all"}-${sort}-${minPrice ?? ""}-${maxPrice ?? ""}`}
+          initialProducts={products}
+          initialCovers={covers ?? {}}
+          totalCount={totalCount}
+          source="catalog"
+          categoryId={categoryId}
+          minPrice={minPrice}
+          maxPrice={maxPrice}
+          sort={sort}
+          invalidPriceRange={invalidPriceRange}
+          initialCursor={catalogNextCursor}
+        />
       )}
     </section>
   );

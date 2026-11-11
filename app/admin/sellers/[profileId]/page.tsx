@@ -12,6 +12,7 @@ import {
 import { DataTableShell } from "@/components/layout/data-table-shell";
 import { PortalPageHeader } from "@/components/layout/portal-page-header";
 import { PortalPanel } from "@/components/layout/portal-panel";
+import { StorageImage } from "@/components/ui/storage-image";
 import { StatusPill, type StatusTone } from "@/components/layout/status-pill";
 import { SellerDashboardCharts } from "@/components/seller/seller-dashboard-charts";
 import { Button } from "@/components/ui/button";
@@ -116,12 +117,14 @@ export default async function AdminShopDetailPage({ params }: PageProps) {
         <PortalPanel>
           <h3 className="text-base font-semibold tracking-tight">Shop</h3>
           {bannerUrl ? (
-            // eslint-disable-next-line @next/next/no-img-element -- storage preview URL
-            <img
-              src={bannerUrl}
-              alt=""
-              className="mt-4 h-32 w-full rounded-lg border border-border object-cover"
-            />
+            <div className="mt-4 h-32 w-full overflow-hidden rounded-lg border border-border">
+              <StorageImage
+                src={bannerUrl}
+                alt=""
+                className="h-full w-full"
+                imgClassName="object-cover"
+              />
+            </div>
           ) : null}
           <dl className="mt-4 space-y-3 text-sm">
             <div>

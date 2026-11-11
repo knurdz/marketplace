@@ -1,4 +1,7 @@
+"use client";
+
 import type { ReactNode } from "react";
+import { StorageImage } from "@/components/ui/storage-image";
 import { BUCKET_CATEGORIES } from "@/lib/appwrite/config";
 import { getFileViewUrl } from "@/lib/appwrite/storage-urls";
 import { categoryImagePath } from "@/lib/store/category-catalog";
@@ -35,12 +38,22 @@ export function CategoryImage({
 
   if (src) {
     return (
-      // eslint-disable-next-line @next/next/no-img-element -- remote storage or static public asset
-      <img
+      <StorageImage
         src={src}
         alt=""
-        loading="lazy"
-        className={cn("size-full object-cover", imgClassName, className)}
+        className={cn("size-full", className)}
+        imgClassName={cn("object-cover", imgClassName)}
+        fallback={
+          <span
+            className={cn(
+              "flex size-full items-center justify-center text-base font-semibold",
+              fallbackClassName,
+            )}
+            aria-hidden
+          >
+            {categoryInitial(name)}
+          </span>
+        }
       />
     );
   }

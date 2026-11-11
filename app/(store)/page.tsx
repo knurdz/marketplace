@@ -7,6 +7,7 @@ import { HomeListings } from "@/components/store/home/home-listings";
 import { ScrollToBrowse } from "@/components/store/home/scroll-to-browse";
 import {
   listActiveProducts,
+  listActiveProductsPage,
   listCategoriesWithActiveProducts,
   listCoverImagesByProductIds,
   parseProductCatalogParams,
@@ -14,8 +15,8 @@ import {
 
 /** One horizontal row of recent listings. */
 const JUST_LISTED_LIMIT = 8;
-/** Browse grid page size. */
-const BROWSE_LIMIT = 48;
+/** Browse grid first page (infinite scroll loads the rest). */
+const BROWSE_LIMIT = 12;
 
 type HomePageProps = {
   searchParams: Promise<{
@@ -44,14 +45,14 @@ export default async function Home({ searchParams }: HomePageProps) {
     catalog.sort !== "newest" ||
     catalog.invalidPriceRange;
 
-  const [justListed, browseProducts] = await Promise.all([
+  const [justListed, browsePage] = await Promise.all([
     hasBrowseParams
       ? Promise.resolve([])
       : listActiveProducts({
           limit: JUST_LISTED_LIMIT,
           sort: "newest",
         }),
-    listActiveProducts({
+    listActiveProductsPage({
       limit: BROWSE_LIMIT,
       categoryId: matchedCategory?.$id,
       minPrice: catalog.minPrice,
@@ -60,6 +61,7 @@ export default async function Home({ searchParams }: HomePageProps) {
       invalidPriceRange: catalog.invalidPriceRange,
     }),
   ]);
+  const browseProducts = browsePage.products;
 
   const covers = await listCoverImagesByProductIds([
     ...justListed.map((p) => p.$id),
@@ -75,6 +77,9 @@ export default async function Home({ searchParams }: HomePageProps) {
     invalidPriceRange: catalog.invalidPriceRange,
     products: browseProducts,
     covers,
+    totalCount: browsePage.total,
+    catalogNextCursor: browsePage.nextCursor,
+    categoryId: matchedCategory?.$id,
   };
 
   return (

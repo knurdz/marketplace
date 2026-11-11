@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { Package } from "lucide-react";
+import { StorageImage } from "@/components/ui/storage-image";
 import type { ProductCover } from "@/lib/services/products";
 import type { Product } from "@/lib/types";
 import { cn } from "@/lib/utils";
@@ -26,12 +27,16 @@ export function ProductCard({ product, cover, className }: ProductCardProps) {
       >
         <div className="relative aspect-square overflow-hidden rounded-xl bg-muted">
           {cover ? (
-            // eslint-disable-next-line @next/next/no-img-element -- Appwrite Storage preview URL
-            <img
+            <StorageImage
               src={coverPreviewUrl(cover)}
               alt={cover.alt ?? product.title}
-              className="h-full w-full object-cover transition duration-300 group-hover:scale-105"
-              loading="lazy"
+              className="h-full w-full"
+              imgClassName="object-cover transition duration-300 group-hover:scale-105"
+              fallback={
+                <div className="flex h-full w-full flex-col items-center justify-center gap-2 text-muted-foreground">
+                  <Package className="size-8 stroke-[1.5]" aria-hidden />
+                </div>
+              }
             />
           ) : (
             <div

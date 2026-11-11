@@ -1,4 +1,17 @@
-import { and, asc, desc, eq, gte, lte, or, sql, type SQL } from "drizzle-orm";
+import {
+  and,
+  asc,
+  count,
+  desc,
+  eq,
+  gt,
+  gte,
+  lt,
+  lte,
+  or,
+  sql,
+  type SQL,
+} from "drizzle-orm";
 import { AppwriteException, Query } from "@/lib/db/appwrite-shim";
 import {
   DATABASE_ID,
@@ -98,6 +111,294 @@ export function clampedStockDecrement(stock: number, quantity: number): number {
 }
 
 export type ProductCatalogSort = "newest" | "price_asc" | "price_desc";
+
+/** Default storefront catalog page size (infinite scroll). */
+export const CATALOG_PAGE_SIZE = 12;
+
+type CatalogCursorPayload = {
+  v: 1;
+  sort: ProductCatalogSort;
+  id: string;
+  createdAt?: string;
+  price?: string;
+};
+
+function encodeCatalogCursor(payload: CatalogCursorPayload): string {
+  return Buffer.from(JSON.stringify(payload)).toString("base64url");
+}
+
+function decodeCatalogCursor(
+  raw: string,
+  expectedSort: ProductCatalogSort,
+): CatalogCursorPayload | null {
+  try {
+    const payload = JSON.parse(
+      Buffer.from(raw, "base64url").toString("utf8"),
+    ) as CatalogCursorPayload;
+    if (payload.v !== 1 || payload.sort !== expectedSort || !payload.id) {
+      return null;
+    }
+    return payload;
+  } catch {
+    return null;
+  }
+}
+
+function catalogKeysetCondition(
+  sort: ProductCatalogSort,
+  cursor: CatalogCursorPayload,
+): SQL | undefined {
+  if (sort === "price_asc") {
+    if (cursor.price == null) return undefined;
+    return or(
+      gt(productsTable.price, cursor.price),
+      and(eq(productsTable.price, cursor.price), gt(productsTable.id, cursor.id)),
+    );
+  }
+  if (sort === "price_desc") {
+    if (cursor.price == null) return undefined;
+    return or(
+      lt(productsTable.price, cursor.price),
+      and(eq(productsTable.price, cursor.price), lt(productsTable.id, cursor.id)),
+    );
+  }
+  if (cursor.createdAt == null) return undefined;
+  return or(
+    lt(productsTable.createdAt, new Date(cursor.createdAt)),
+    and(
+      eq(productsTable.createdAt, new Date(cursor.createdAt)),
+      lt(productsTable.id, cursor.id),
+    ),
+  );
+}
+
+function buildPublicCatalogSqlFilters(opts: {
+  categoryId?: string | null;
+  sellerId?: string | null;
+  minPrice?: number;
+  maxPrice?: number;
+}): SQL[] {
+  const categoryId = opts.categoryId?.trim() || null;
+  const sellerId = opts.sellerId?.trim() || null;
+  const filters: SQL[] = [
+    eq(productsTable.status, ACTIVE_PRODUCT_STATUS),
+    eq(productsTable.available, true),
+  ];
+  if (sellerId) filters.push(eq(productsTable.sellerId, sellerId));
+  if (categoryId) filters.push(eq(productsTable.categoryId, categoryId));
+  if (opts.minPrice != null) {
+    filters.push(gte(productsTable.price, String(opts.minPrice)));
+  }
+  if (opts.maxPrice != null) {
+    filters.push(lte(productsTable.price, String(opts.maxPrice)));
+  }
+  return filters;
+}
+
+function catalogOrderBy(sort: ProductCatalogSort) {
+  if (sort === "price_asc") {
+    return [asc(productsTable.price), asc(productsTable.id)];
+  }
+  if (sort === "price_desc") {
+    return [desc(productsTable.price), desc(productsTable.id)];
+  }
+  return [desc(productsTable.createdAt), desc(productsTable.id)];
+}
+
+type DrizzleProductRow = {
+  id: string;
+  sellerId: string;
+  categoryId: string;
+  title: string;
+  description: string;
+  price: string;
+  isFree: boolean;
+  status: string;
+  stock: number;
+  available: boolean;
+  currency: string;
+  featured: boolean;
+  createdAt: Date;
+};
+
+function productFromDrizzleRow(row: DrizzleProductRow): Product | null {
+  return asProduct({
+    $id: row.id,
+    sellerId: row.sellerId,
+    categoryId: row.categoryId,
+    title: row.title,
+    description: row.description,
+    price: row.price,
+    isFree: row.isFree,
+    status: row.status,
+    stock: row.stock,
+    available: row.available,
+    currency: row.currency,
+    featured: row.featured,
+  });
+}
+
+function nextCatalogCursor(
+  sort: ProductCatalogSort,
+  row: DrizzleProductRow,
+): string {
+  return encodeCatalogCursor({
+    v: 1,
+    sort,
+    id: row.id,
+    createdAt: row.createdAt.toISOString(),
+    price: row.price,
+  });
+}
+
+export type ListActiveProductsPageResult = {
+  products: Product[];
+  total: number;
+  nextCursor: string | null;
+};
+
+/**
+ * Keyset-paginated active catalog (MariaDB). Falls back to a single TablesDB page
+ * when Drizzle is unavailable.
+ */
+export async function listActiveProductsPage(opts?: {
+  limit?: number;
+  categoryId?: string;
+  sellerId?: string;
+  minPrice?: number;
+  maxPrice?: number;
+  sort?: ProductCatalogSort;
+  invalidPriceRange?: boolean;
+  cursor?: string | null;
+}): Promise<ListActiveProductsPageResult> {
+  if (opts?.invalidPriceRange) {
+    return { products: [], total: 0, nextCursor: null };
+  }
+
+  const sort = opts?.sort ?? "newest";
+  const limit = Math.min(Math.max(opts?.limit ?? CATALOG_PAGE_SIZE, 1), 24);
+  const categoryId = opts?.categoryId?.trim() || null;
+  const sellerId = opts?.sellerId?.trim() || null;
+
+  if (!hasDatabaseConfig()) {
+    const products = await listActiveProducts({
+      limit,
+      categoryId: categoryId ?? undefined,
+      sellerId: sellerId ?? undefined,
+      minPrice: opts?.minPrice,
+      maxPrice: opts?.maxPrice,
+      sort,
+      invalidPriceRange: opts?.invalidPriceRange,
+    });
+    return {
+      products,
+      total: products.length,
+      nextCursor: null,
+    };
+  }
+
+  try {
+    const db = getDb();
+    const filters = buildPublicCatalogSqlFilters({
+      categoryId,
+      sellerId,
+      minPrice: opts?.minPrice,
+      maxPrice: opts?.maxPrice,
+    });
+
+    const decoded = opts?.cursor?.trim()
+      ? decodeCatalogCursor(opts.cursor.trim(), sort)
+      : null;
+    const keyset = decoded ? catalogKeysetCondition(sort, decoded) : undefined;
+    const where =
+      keyset != null ? and(...filters, keyset) : and(...filters);
+
+    const [totalRow] = await db
+      .select({ value: count() })
+      .from(productsTable)
+      .where(and(...filters));
+
+    const total = Number(totalRow?.value ?? 0);
+
+    const rows = await db
+      .select({
+        id: productsTable.id,
+        sellerId: productsTable.sellerId,
+        categoryId: productsTable.categoryId,
+        title: productsTable.title,
+        description: productsTable.description,
+        price: productsTable.price,
+        isFree: productsTable.isFree,
+        status: productsTable.status,
+        stock: productsTable.stock,
+        available: productsTable.available,
+        currency: productsTable.currency,
+        featured: productsTable.featured,
+        createdAt: productsTable.createdAt,
+      })
+      .from(productsTable)
+      .where(where)
+      .orderBy(...catalogOrderBy(sort))
+      .limit(limit + 1);
+
+    const hasMore = rows.length > limit;
+    const pageRows = hasMore ? rows.slice(0, limit) : rows;
+    const products: Product[] = [];
+    for (const row of pageRows) {
+      const product = productFromDrizzleRow(row as DrizzleProductRow);
+      if (product && isPubliclyListed(product)) {
+        products.push(product);
+      }
+    }
+
+    const lastRow = pageRows[pageRows.length - 1] as DrizzleProductRow | undefined;
+    const nextCursor =
+      hasMore && lastRow ? nextCatalogCursor(sort, lastRow) : null;
+
+    return { products, total, nextCursor };
+  } catch {
+    return { products: [], total: 0, nextCursor: null };
+  }
+}
+
+export async function countActiveProducts(opts?: {
+  categoryId?: string;
+  sellerId?: string;
+  minPrice?: number;
+  maxPrice?: number;
+  invalidPriceRange?: boolean;
+}): Promise<number> {
+  if (opts?.invalidPriceRange) return 0;
+
+  if (!hasDatabaseConfig()) {
+    const products = await listActiveProducts({
+      limit: 100,
+      categoryId: opts?.categoryId,
+      sellerId: opts?.sellerId,
+      minPrice: opts?.minPrice,
+      maxPrice: opts?.maxPrice,
+      invalidPriceRange: opts?.invalidPriceRange,
+    });
+    return products.length;
+  }
+
+  try {
+    const db = getDb();
+    const filters = buildPublicCatalogSqlFilters({
+      categoryId: opts?.categoryId,
+      sellerId: opts?.sellerId,
+      minPrice: opts?.minPrice,
+      maxPrice: opts?.maxPrice,
+    });
+    const [row] = await db
+      .select({ value: count() })
+      .from(productsTable)
+      .where(and(...filters));
+    return Number(row?.value ?? 0);
+  } catch {
+    return 0;
+  }
+}
 
 export type ProductCatalogParams = {
   minPrice?: number;
@@ -326,7 +627,7 @@ export function productSearchRelevanceSql(tokens: string[]): SQL {
 }
 
 export type SearchActiveProductsResult =
-  | { ok: true; products: Product[] }
+  | { ok: true; products: Product[]; total: number; nextOffset: number | null }
   | {
       ok: false;
       reason: "empty" | "too_short" | "invalid_range" | "unavailable" | "failed";
@@ -340,6 +641,7 @@ export async function searchActiveProducts(
   query: string,
   opts?: {
     limit?: number;
+    offset?: number;
     minPrice?: number;
     maxPrice?: number;
     sort?: ProductCatalogSort;
@@ -362,7 +664,8 @@ export async function searchActiveProducts(
     return { ok: false, reason: "too_short" };
   }
 
-  const limit = Math.min(Math.max(opts?.limit ?? 24, 1), 48);
+  const limit = Math.min(Math.max(opts?.limit ?? CATALOG_PAGE_SIZE, 1), 24);
+  const offset = Math.max(opts?.offset ?? 0, 0);
   const sort = opts?.sort ?? "newest";
 
   try {
@@ -387,6 +690,27 @@ export async function searchActiveProducts(
         : sort === "price_desc"
           ? [desc(productsTable.price), desc(productsTable.createdAt)]
           : [desc(relevance), desc(productsTable.createdAt)];
+
+  const whereClause = and(...filters);
+
+    const countQuery = db
+      .select({ value: count() })
+      .from(productsTable)
+      .leftJoin(
+        categoriesTable,
+        eq(productsTable.categoryId, categoriesTable.id),
+      )
+      .leftJoin(
+        sellerProfilesTable,
+        and(
+          eq(productsTable.sellerId, sellerProfilesTable.userId),
+          eq(sellerProfilesTable.status, "approved"),
+        ),
+      )
+      .where(whereClause);
+
+    const [totalRow] = await countQuery;
+    const total = Number(totalRow?.value ?? 0);
 
     const rows = await db
       .select({
@@ -415,12 +739,16 @@ export async function searchActiveProducts(
           eq(sellerProfilesTable.status, "approved"),
         ),
       )
-      .where(and(...filters))
+      .where(whereClause)
       .orderBy(...orderBy)
-      .limit(limit);
+      .limit(limit + 1)
+      .offset(offset);
+
+    const hasMore = rows.length > limit;
+    const pageRows = hasMore ? rows.slice(0, limit) : rows;
 
     const products: Product[] = [];
-    for (const row of rows) {
+    for (const row of pageRows) {
       const product = asProduct({
         $id: row.id,
         sellerId: row.sellerId,
@@ -439,7 +767,8 @@ export async function searchActiveProducts(
         products.push(product);
       }
     }
-    return { ok: true, products };
+    const nextOffset = hasMore ? offset + products.length : null;
+    return { ok: true, products, total, nextOffset };
   } catch {
     return { ok: false, reason: "failed" };
   }

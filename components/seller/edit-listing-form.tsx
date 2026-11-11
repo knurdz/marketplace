@@ -11,6 +11,7 @@ import {
 } from "@/lib/appwrite/seller-listing-actions";
 import { BUCKET_PRODUCT_IMAGES } from "@/lib/appwrite/config";
 import { getFilePreviewUrl } from "@/lib/appwrite/storage-urls";
+import { StorageImage } from "@/components/ui/storage-image";
 import type { Category, Product, ProductImage, ProductStatus } from "@/lib/types";
 import { toast } from "@/lib/ui/toast";
 import {
@@ -142,15 +143,15 @@ export function EditListingForm({
                       className="overflow-hidden rounded-lg border border-border"
                     >
                       <div className="relative aspect-square bg-muted/20">
-                        {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img
+                        <StorageImage
                           src={getFilePreviewUrl(
                             BUCKET_PRODUCT_IMAGES,
                             image.fileId,
                             { width: 240, height: 240 },
                           )}
                           alt={image.alt ?? product.title}
-                          className="size-full object-cover"
+                          className="size-full"
+                          imgClassName="object-cover"
                         />
                       </div>
                       {!isArchived ? (

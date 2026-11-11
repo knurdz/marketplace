@@ -14,6 +14,7 @@ import { CategoryImage } from "@/components/store/category-image";
 import { PortalPageHeader } from "@/components/layout/portal-page-header";
 import { PortalPanel } from "@/components/layout/portal-panel";
 import { Button } from "@/components/ui/button";
+import { StorageImage } from "@/components/ui/storage-image";
 import { ConfirmActionDialog } from "@/components/ui/confirm-action-dialog";
 import {
   Drawer,
@@ -124,11 +125,11 @@ function CategoryImageField({
         )}
       >
         {previewUrl ? (
-          // eslint-disable-next-line @next/next/no-img-element -- local object URL preview
-          <img
+          <StorageImage
             src={previewUrl}
             alt=""
-            className="absolute inset-0 size-full object-cover"
+            className="absolute inset-0 size-full"
+            imgClassName="object-cover"
           />
         ) : existing ? (
           <span className="absolute inset-0">
