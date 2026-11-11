@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Str;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
@@ -28,7 +29,7 @@ class FileStorageController
         }
 
         $uploaded = $request->file('file');
-        if (! $uploaded || ! $uploaded->isValid()) {
+        if (! $uploaded instanceof UploadedFile || ! $uploaded->isValid()) {
             return response()->json(['error' => 'Invalid file upload'], 422);
         }
 
@@ -38,9 +39,8 @@ class FileStorageController
             return response()->json(['error' => 'File exceeds bucket size limit'], 422);
         }
 
-        $mime = strtolower((string) $uploaded->getMimeType());
-        $allowedMimes = (array) config('storage_api.allowed_mimes', []);
-        if (! in_array($mime, $allowedMimes, true)) {
+        $mime = $this->detectAllowedMime($uploaded);
+        if ($mime === null) {
             return response()->json(['error' => 'Unsupported file MIME type'], 422);
         }
 
@@ -59,6 +59,12 @@ class FileStorageController
             return response()->json(['error' => 'Storage directory unavailable'], 500);
         }
 
+        $dataPath = $dir.DIRECTORY_SEPARATOR.$fileId;
+        $metaPath = $dataPath.'.json';
+        if (is_file($dataPath) || is_file($metaPath)) {
+            return response()->json(['error' => 'File already exists'], 409);
+        }
+
         $uploaded->move($dir, $fileId);
 
         $meta = [
@@ -67,7 +73,7 @@ class FileStorageController
             'originalName' => (string) $uploaded->getClientOriginalName(),
         ];
         file_put_contents(
-            $dir . DIRECTORY_SEPARATOR . $fileId . '.json',
+            $metaPath,
             json_encode($meta, JSON_UNESCAPED_SLASHES)
         );
 
@@ -95,8 +101,8 @@ class FileStorageController
         }
 
         $dir = $this->bucketDir($bucket);
-        $dataPath = $dir . DIRECTORY_SEPARATOR . $fileId;
-        $metaPath = $dataPath . '.json';
+        $dataPath = $dir.DIRECTORY_SEPARATOR.$fileId;
+        $metaPath = $dataPath.'.json';
 
         if (is_file($dataPath)) {
             @unlink($dataPath);
@@ -120,27 +126,31 @@ class FileStorageController
         }
 
         $dir = $this->bucketDir($bucket);
-        $dataPath = $dir . DIRECTORY_SEPARATOR . $fileId;
+        $dataPath = $dir.DIRECTORY_SEPARATOR.$fileId;
         if (! is_file($dataPath) || ! is_readable($dataPath)) {
             return response()->json(['error' => 'Not found'], 404);
         }
 
-        $mime = 'application/octet-stream';
-        $metaPath = $dataPath . '.json';
+        $allowedMimes = (array) config('storage_api.allowed_mimes', []);
+        $mime = null;
+        $metaPath = $dataPath.'.json';
         if (is_file($metaPath) && is_readable($metaPath)) {
             $decoded = json_decode((string) file_get_contents($metaPath), true);
             if (is_array($decoded) && ! empty($decoded['mimeType']) && is_string($decoded['mimeType'])) {
-                $mime = $decoded['mimeType'];
+                $candidate = strtolower($decoded['mimeType']);
+                if (in_array($candidate, $allowedMimes, true)) {
+                    $mime = $candidate;
+                }
             }
-        } else {
-            $detected = @mime_content_type($dataPath);
-            if (is_string($detected) && $detected !== '') {
-                $mime = $detected;
-            }
+        }
+
+        if ($mime === null) {
+            return response()->json(['error' => 'Not found'], 404);
         }
 
         return response()->file($dataPath, [
             'Content-Type' => $mime,
+            'Content-Disposition' => 'inline',
             'Cache-Control' => 'public, max-age=86400',
             'X-Content-Type-Options' => 'nosniff',
         ]);
@@ -156,12 +166,57 @@ class FileStorageController
         if ($provided === '') {
             return false;
         }
+
         return hash_equals($configured, $provided);
     }
 
     private function bucketDir(string $bucket): string
     {
         $root = rtrim((string) config('storage_api.root', storage_path('app/marketplace')), DIRECTORY_SEPARATOR);
-        return $root . DIRECTORY_SEPARATOR . $bucket;
+
+        return $root.DIRECTORY_SEPARATOR.$bucket;
+    }
+
+    /**
+     * Detect an allowed image MIME from file contents (magic bytes), not the client header.
+     */
+    private function detectAllowedMime(UploadedFile $uploaded): ?string
+    {
+        $path = $uploaded->getRealPath();
+        if ($path === false || ! is_readable($path)) {
+            return null;
+        }
+
+        $handle = fopen($path, 'rb');
+        if ($handle === false) {
+            return null;
+        }
+        $header = fread($handle, 16);
+        fclose($handle);
+        if ($header === false || strlen($header) < 4) {
+            return null;
+        }
+
+        $allowedMimes = (array) config('storage_api.allowed_mimes', []);
+
+        if (str_starts_with($header, "\xFF\xD8\xFF") && in_array('image/jpeg', $allowedMimes, true)) {
+            return 'image/jpeg';
+        }
+
+        if (str_starts_with($header, "\x89PNG\r\n\x1A\n") && in_array('image/png', $allowedMimes, true)) {
+            return 'image/png';
+        }
+
+        // WebP: RIFF....WEBP
+        if (
+            strlen($header) >= 12
+            && str_starts_with($header, 'RIFF')
+            && substr($header, 8, 4) === 'WEBP'
+            && in_array('image/webp', $allowedMimes, true)
+        ) {
+            return 'image/webp';
+        }
+
+        return null;
     }
 }

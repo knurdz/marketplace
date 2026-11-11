@@ -1,8 +1,8 @@
 import { AppwriteException } from "@/lib/db/appwrite-shim";
 import { newId } from "@/lib/db/client";
-import { deleteStoredFile, putStoredFile } from "@/lib/storage";
+import { deleteStoredFile, getStoredFileMeta, putStoredFile } from "@/lib/storage";
+import { assertDurableRateLimit } from "@/lib/security/durable-rate-limit";
 import {
-  assertRateLimit,
   RATE_LIMIT_MESSAGE,
   RATE_LIMITS,
 } from "@/lib/security/rate-limit";
@@ -79,7 +79,7 @@ export async function uploadFile(params: {
     throw new Error("You must be signed in to upload.");
   }
 
-  const uploadLimit = assertRateLimit({
+  const uploadLimit = await assertDurableRateLimit({
     bucket: "upload.any",
     key: `user:${user.$id}`,
     ...RATE_LIMITS.upload,
@@ -105,6 +105,15 @@ export async function deleteFile(
   if (!user) {
     throw new Error("You must be signed in.");
   }
+
+  const meta = await getStoredFileMeta(fileId);
+  if (!meta || meta.bucketId !== bucketId) {
+    throw new Error("File not found.");
+  }
+  if (meta.ownerId !== user.$id) {
+    throw new Error("You do not own this file.");
+  }
+
   await deleteStoredFile(bucketId, fileId);
 }
 

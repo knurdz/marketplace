@@ -2,15 +2,55 @@ import { eq } from "drizzle-orm";
 import { getDb, newId } from "@/lib/db/client";
 import { storedFiles } from "@/lib/db/schema";
 
+const REMOTE_TIMEOUT_MS = 20_000;
+
 function getRemoteStorageConfig(): { baseUrl: string; token: string } | null {
   const baseUrl = process.env.STORAGE_API_URL?.trim().replace(/\/$/, "") ?? "";
   const token = process.env.STORAGE_API_TOKEN?.trim() ?? "";
   if (!baseUrl || !token) return null;
+
+  const isLocalDev =
+    process.env.NODE_ENV !== "production" &&
+    (baseUrl.startsWith("http://localhost") ||
+      baseUrl.startsWith("http://127.0.0.1"));
+
+  if (!isLocalDev && !baseUrl.startsWith("https://")) {
+    throw new Error(
+      "STORAGE_API_URL must use https:// outside local development.",
+    );
+  }
+
   return { baseUrl, token };
 }
 
 export function isRemoteStorageConfigured(): boolean {
-  return getRemoteStorageConfig() !== null;
+  try {
+    return getRemoteStorageConfig() !== null;
+  } catch {
+    return false;
+  }
+}
+
+async function fetchWithTimeout(
+  url: string,
+  init: RequestInit,
+): Promise<Response> {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), REMOTE_TIMEOUT_MS);
+  try {
+    return await fetch(url, { ...init, signal: controller.signal });
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+function sanitizeRemoteError(status: number, bodyError?: string): string {
+  const safe =
+    bodyError &&
+    !/token|bearer|authorization|\/home\/|storage\/app/i.test(bodyError)
+      ? bodyError
+      : `HTTP ${status}`;
+  return `Storage request failed: ${safe}`;
 }
 
 export async function putRemoteFile(params: {
@@ -30,24 +70,29 @@ export async function putRemoteFile(params: {
   form.set("fileId", fileId);
   form.set("file", params.file, params.file.name || fileId);
 
-  const response = await fetch(`${cfg.baseUrl}/api/v1/files`, {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${cfg.token}`,
-      Accept: "application/json",
-    },
-    body: form,
-  });
+  let response: Response;
+  try {
+    response = await fetchWithTimeout(`${cfg.baseUrl}/api/v1/files`, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${cfg.token}`,
+        Accept: "application/json",
+      },
+      body: form,
+    });
+  } catch {
+    throw new Error("Storage upload failed: request timed out or unreachable.");
+  }
 
   if (!response.ok) {
-    let detail = `HTTP ${response.status}`;
+    let detail: string | undefined;
     try {
       const json = (await response.json()) as { error?: string };
-      if (json?.error) detail = json.error;
+      detail = json?.error;
     } catch {
       // ignore non-json error body
     }
-    throw new Error(`Storage upload failed: ${detail}`);
+    throw new Error(sanitizeRemoteError(response.status, detail));
   }
 
   const payload = (await response.json()) as { fileId?: string };
@@ -77,7 +122,7 @@ export async function deleteRemoteFile(
 
   const url = `${cfg.baseUrl}/api/v1/files/${encodeURIComponent(bucketId)}/${encodeURIComponent(fileId)}`;
   try {
-    await fetch(url, {
+    await fetchWithTimeout(url, {
       method: "DELETE",
       headers: {
         Authorization: `Bearer ${cfg.token}`,
