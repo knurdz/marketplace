@@ -1,8 +1,7 @@
 /**
  * Canonical marketplace categories for seed + storefront images.
  * Local copies: /public/categories/{slug}.jpg
- * Hosted: storage API fileId `category-{slug}` (categories bucket when available,
- * otherwise product-images until Hostinger storage-api is redeployed).
+ * Hosted: storage API `categories` bucket, fileId `category-{slug}`.
  */
 
 import {
@@ -26,8 +25,8 @@ export function categoryImageFileId(slug: string): string {
 
 /**
  * Bucket used for category photos on the configured storage API.
- * Prefer `categories` when NEXT_PUBLIC prefers it; uploads fall back to
- * product-images if the remote API has not been redeployed yet.
+ * Defaults to `categories`; override with NEXT_PUBLIC_CATEGORY_IMAGE_BUCKET
+ * or CATEGORY_IMAGE_BUCKET if needed (e.g. product-images).
  */
 export function categoryImageBucket(): string {
   const prefer =
@@ -36,8 +35,7 @@ export function categoryImageBucket(): string {
   if (prefer === BUCKET_CATEGORIES || prefer === BUCKET_PRODUCT_IMAGES) {
     return prefer;
   }
-  // Live Hostinger currently allowlists product-images; categories after redeploy.
-  return BUCKET_PRODUCT_IMAGES;
+  return BUCKET_CATEGORIES;
 }
 
 /** Flat major category types sellers can choose when listing. */
