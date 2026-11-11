@@ -636,7 +636,7 @@ async function resolvePurchaseRequest(
       title: nextStatus === "sold" ? "Request marked sold" : "Request cancelled",
       body:
         nextStatus === "sold"
-          ? `The seller marked your request for ${request.title} as sold.`
+          ? `The seller marked your request for ${request.title} as sold. You can rate this seller on the request page.`
           : `The seller cancelled your request for ${request.title}.`,
       link: `/requests/${request.$id}`,
     });

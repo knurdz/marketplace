@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { LayoutDashboard, LogOut, Package, UserRound } from "lucide-react";
+import { Heart, LayoutDashboard, LogOut, Package, UserRound } from "lucide-react";
 import { signOut } from "@/lib/appwrite/auth";
 import {
   portalHomeForSessionUser,
@@ -87,7 +87,10 @@ export function AccountMenu({ user, displayName, avatarUrl }: AccountMenuProps) 
                 </Link>
               </DropdownMenuItem>
               <DropdownMenuItem asChild>
-                <Link href="/wishlist">Wishlist</Link>
+                <Link href="/wishlist">
+                  <Heart />
+                  Wishlist
+                </Link>
               </DropdownMenuItem>
             </>
           )}

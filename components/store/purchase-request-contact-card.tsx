@@ -5,6 +5,8 @@ type PurchaseRequestContactCardProps = {
   title: string;
   contact: PurchaseRequestContact;
   variant?: "default" | "portal";
+  /** Overrides the portal helper line under the title. */
+  description?: string;
   className?: string;
 };
 
@@ -42,9 +44,15 @@ export function PurchaseRequestContactCard({
   title,
   contact,
   variant = "default",
+  description,
   className,
 }: PurchaseRequestContactCardProps) {
   const isPortal = variant === "portal";
+  const helperText =
+    description ??
+    (isPortal
+      ? "Reach out to the buyer to arrange payment and delivery."
+      : null);
 
   return (
     <section
@@ -58,10 +66,8 @@ export function PurchaseRequestContactCard({
         <h2 className="text-sm font-semibold tracking-tight text-foreground">
           {title}
         </h2>
-        {isPortal ? (
-          <p className="mt-1 text-sm text-muted-foreground">
-            Reach out to the buyer to arrange payment and delivery.
-          </p>
+        {helperText ? (
+          <p className="mt-1 text-sm text-muted-foreground">{helperText}</p>
         ) : null}
       </div>
 

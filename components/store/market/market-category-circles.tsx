@@ -1,12 +1,9 @@
 import type { ReactNode } from "react";
 import Link from "next/link";
 import { LayoutGrid } from "lucide-react";
+import { CategoryImage } from "@/components/store/category-image";
 import { SectionHeading } from "@/components/store/section-heading";
-import {
-  MARKET_CATEGORIES,
-  unsplashUrl,
-  type MarketCategory,
-} from "@/lib/store/home-demo";
+import type { Category } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
 function CategoryItem({
@@ -72,31 +69,34 @@ function CategoryCircle({
   category,
   active,
 }: {
-  category: MarketCategory;
+  category: Category;
   active: boolean;
 }) {
   return (
     <CategoryItem
-      href={`/?category=${encodeURIComponent(category.slug)}#browse`}
+      href={`/categories/${category.slug}`}
       active={active}
-      label={category.label}
+      label={category.name}
     >
-      {/* eslint-disable-next-line @next/next/no-img-element -- static remote showcase image */}
-      <img
-        src={unsplashUrl(category.photoId, 240)}
-        alt=""
-        loading="lazy"
-        className="size-full object-cover transition duration-300 group-hover:scale-105"
+      <CategoryImage
+        name={category.name}
+        slug={category.slug}
+        imgClassName="transition duration-300 group-hover:scale-105"
+        fallbackClassName="bg-muted text-foreground"
       />
     </CategoryItem>
   );
 }
 
 export function MarketCategoryCircles({
+  categories,
   activeSlug,
 }: {
+  categories: Category[];
   activeSlug?: string | null;
 }) {
+  if (categories.length === 0) return null;
+
   const allSelected = !activeSlug;
 
   return (
@@ -109,9 +109,9 @@ export function MarketCategoryCircles({
         />
         <ul className="scrollbar-none flex snap-x snap-mandatory gap-5 overflow-x-auto overscroll-x-contain py-1 pr-8 sm:gap-6">
           <AllCategoryCircle active={allSelected} />
-          {MARKET_CATEGORIES.map((category) => (
+          {categories.map((category) => (
             <CategoryCircle
-              key={category.slug}
+              key={category.$id}
               category={category}
               active={activeSlug === category.slug}
             />

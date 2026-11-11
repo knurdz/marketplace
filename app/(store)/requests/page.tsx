@@ -1,36 +1,32 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { ExternalLink } from "lucide-react";
-import { formatPurchaseRequestStatus } from "@/lib/request-display";
-import { getLoggedInUser } from "@/lib/appwrite/session";
-import { listOwnPurchaseRequests } from "@/lib/services";
-import {
-  DataTableEmpty,
-  DataTableShell,
-  FilterTabs,
-} from "@/components/layout/data-table-shell";
-import { StatusPill } from "@/components/layout/status-pill";
+import { Package } from "lucide-react";
+import { BuyerAccountShell } from "@/components/store/buyer-account-shell";
+import { BuyerRequestCard } from "@/components/store/buyer-request-card";
+import { EmptyState } from "@/components/layout/empty-state";
+import { FilterTabs } from "@/components/layout/data-table-shell";
 import { Button } from "@/components/ui/button";
+import { BUCKET_PRODUCT_IMAGES } from "@/lib/appwrite/config";
+import { getLoggedInUser } from "@/lib/appwrite/session";
+import { getFilePreviewUrl } from "@/lib/appwrite/storage-urls";
 import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-
-function requestTone(
-  status: "requested" | "sold" | "cancelled",
-): "neutral" | "positive" | "warning" | "danger" {
-  if (status === "sold") return "positive";
-  if (status === "cancelled") return "danger";
-  return "warning";
-}
+  listCoverImagesByProductIds,
+  listOwnPurchaseRequests,
+} from "@/lib/services";
+import type { PurchaseRequestStatus } from "@/lib/types";
 
 type BuyerRequestsPageProps = {
   searchParams: Promise<{ filter?: string }>;
 };
+
+function resolveFilter(
+  filter: string | undefined,
+): PurchaseRequestStatus | undefined {
+  if (filter === "open") return "requested";
+  if (filter === "sold") return "sold";
+  if (filter === "cancelled") return "cancelled";
+  return undefined;
+}
 
 export default async function BuyerRequestsPage({
   searchParams,
@@ -41,93 +37,97 @@ export default async function BuyerRequestsPage({
   }
 
   const { filter } = await searchParams;
-  const openOnly = filter === "open";
-  const requests = openOnly
-    ? await listOwnPurchaseRequests({ status: "requested" })
+  const status = resolveFilter(filter);
+  const active = filter === "open" || filter === "sold" || filter === "cancelled"
+    ? filter
+    : "all";
+
+  const requests = status
+    ? await listOwnPurchaseRequests({ status })
     : await listOwnPurchaseRequests();
 
-  const filterBar = (
-    <FilterTabs
-      tabs={[
-        { href: "/requests", label: "All", active: !openOnly },
-        {
-          href: "/requests?filter=open",
-          label: "Open",
-          active: openOnly,
-        },
-      ]}
-    />
+  const covers = await listCoverImagesByProductIds(
+    requests.map((request) => request.productId),
+  );
+  const coverUrlByProductId = Object.fromEntries(
+    Object.entries(covers).map(([id, cover]) => [
+      id,
+      getFilePreviewUrl(BUCKET_PRODUCT_IMAGES, cover.fileId, {
+        width: 160,
+        height: 160,
+      }),
+    ]),
   );
 
+  const emptyMessage =
+    active === "open"
+      ? "No open requests."
+      : active === "sold"
+        ? "No sold requests yet."
+        : active === "cancelled"
+          ? "No cancelled requests."
+          : "No requests yet.";
+
   return (
-    <main className="mx-auto w-full max-w-6xl px-4 py-8 sm:px-6 lg:px-8">
-      <h1 className="text-2xl font-bold tracking-tight">Your requests</h1>
-      <p className="mt-1 text-sm text-muted-foreground">
-        Buy requests you sent to sellers. Contact details stay on each request.
-      </p>
+    <BuyerAccountShell
+      title="Your requests"
+      description="Buy requests you sent to sellers. Contact details stay on each request."
+      actions={
+        <Button variant="secondary" size="sm" asChild>
+          <Link href="/market">Browse market</Link>
+        </Button>
+      }
+    >
+      <FilterTabs
+        tabs={[
+          { href: "/requests", label: "All", active: active === "all" },
+          {
+            href: "/requests?filter=open",
+            label: "Open",
+            active: active === "open",
+          },
+          {
+            href: "/requests?filter=sold",
+            label: "Sold",
+            active: active === "sold",
+          },
+          {
+            href: "/requests?filter=cancelled",
+            label: "Cancelled",
+            active: active === "cancelled",
+          },
+        ]}
+      />
 
       {requests.length === 0 ? (
-        <div className="mt-6 space-y-4">
-          {filterBar}
-          <DataTableEmpty
-            message={openOnly ? "No open requests." : "No requests yet."}
-          />
-        </div>
+        <EmptyState
+          className="mt-6"
+          icon={Package}
+          title={emptyMessage}
+          description={
+            active === "all"
+              ? "Browse listings and tap Buy to send a request to a seller."
+              : undefined
+          }
+          action={
+            active === "all" ? (
+              <Button asChild>
+                <Link href="/market">Browse market</Link>
+              </Button>
+            ) : undefined
+          }
+        />
       ) : (
-        <div className="mt-6 space-y-4">
-          {filterBar}
-        <DataTableShell>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>
-                  Product
-                </TableHead>
-                <TableHead>
-                  Qty
-                </TableHead>
-                <TableHead>
-                  Status
-                </TableHead>
-                <TableHead>
-                  Actions
-                </TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {requests.map((request) => (
-                <TableRow key={request.$id}>
-                  <TableCell className="font-medium">{request.title}</TableCell>
-                  <TableCell className="tabular-nums">
-                    {request.quantity}
-                  </TableCell>
-                  <TableCell>
-                    <StatusPill
-                      tone={requestTone(request.status)}
-                      label={formatPurchaseRequestStatus(request.status)}
-                    />
-                  </TableCell>
-                  <TableCell>
-                    <Button variant="outline" size="xs" asChild>
-                      <Link
-                        href={`/requests/${request.$id}`}
-                        data-testid="buyer-request-link"
-                      >
-                        <ExternalLink
-                          data-icon="inline-start"
-                          className="size-3"
-                        />
-                        View
-                      </Link>
-                    </Button>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </DataTableShell>
-        </div>
+        <ul className="mt-6 space-y-3">
+          {requests.map((request) => (
+            <BuyerRequestCard
+              key={request.$id}
+              request={request}
+              coverUrl={coverUrlByProductId[request.productId]}
+            />
+          ))}
+        </ul>
       )}
-    </main>
+    </BuyerAccountShell>
   );
 }

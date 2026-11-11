@@ -10,10 +10,13 @@ import type { Product } from "@/lib/types";
 type RecentlyViewedSectionProps = {
   /** Exclude the current product page id from the strip when set. */
   excludeProductId?: string;
+  /** Drop outer max-width padding when nested in buyer account shell. */
+  embedded?: boolean;
 };
 
 export function RecentlyViewedSection({
   excludeProductId,
+  embedded = false,
 }: RecentlyViewedSectionProps) {
   const [products, setProducts] = useState<Product[]>([]);
   const [covers, setCovers] = useState<ProductCoverMap>({});
@@ -52,11 +55,25 @@ export function RecentlyViewedSection({
   if (!loaded || products.length === 0) return null;
 
   return (
-    <section className="mx-auto w-full max-w-6xl px-4 py-12 sm:px-6 lg:px-8">
+    <section
+      className={
+        embedded
+          ? "w-full"
+          : "mx-auto w-full max-w-6xl px-4 py-12 sm:px-6 lg:px-8"
+      }
+    >
       <p className="text-xs font-medium tracking-[0.18em] text-muted-foreground uppercase">
         Recently viewed
       </p>
-      <h2 className="mt-2 text-2xl font-bold tracking-tight">On this device</h2>
+      <h2
+        className={
+          embedded
+            ? "mt-2 text-lg font-semibold tracking-tight"
+            : "mt-2 text-2xl font-bold tracking-tight"
+        }
+      >
+        On this device
+      </h2>
       <p className="mt-2 text-sm text-muted-foreground">
         Saved locally, not shared across accounts.
       </p>

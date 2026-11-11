@@ -2,13 +2,44 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { ProfileForm } from "@/components/auth/profile-form";
 import { ResendVerificationForm } from "@/components/auth/resend-verification-form";
-import { PageHeader } from "@/components/layout/page-header";
+import { BuyerAccountShell } from "@/components/store/buyer-account-shell";
+import { StatusPill } from "@/components/layout/status-pill";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { signOut } from "@/lib/appwrite/auth";
 import { getOwnProfile } from "@/lib/appwrite/profiles";
-import { getAvatarPreviewUrl } from "@/lib/appwrite/storage-urls";
+import {
+  ROLE_LABELS,
+  userHasLabel,
+} from "@/lib/appwrite/roles";
 import { getLoggedInUser } from "@/lib/appwrite/session";
+import { getAvatarPreviewUrl } from "@/lib/appwrite/storage-urls";
+
+function roleLabel(user: {
+  labels?: string[];
+}): { label: string; showBuyerNav: boolean } {
+  if (userHasLabel(user, ROLE_LABELS.admin)) {
+    return { label: "Admin", showBuyerNav: false };
+  }
+  if (userHasLabel(user, ROLE_LABELS.seller)) {
+    return { label: "Seller", showBuyerNav: false };
+  }
+  return { label: "Buyer", showBuyerNav: true };
+}
+
+function initialsFrom(name: string, email: string): string {
+  const source = name.trim() || email.trim();
+  const parts = source.split(/[\s@._-]+/).filter(Boolean);
+  const letters = (parts[0]?.[0] ?? "K") + (parts[1]?.[0] ?? "");
+  return letters.toUpperCase().slice(0, 2);
+}
 
 export default async function AccountPage() {
   const user = await getLoggedInUser();
@@ -20,59 +51,113 @@ export default async function AccountPage() {
   const avatarPreviewUrl = profile
     ? getAvatarPreviewUrl(profile.avatarFileId)
     : null;
-  const labels =
-    Array.isArray(user.labels) && user.labels.length > 0
-      ? user.labels.join(", ")
-      : "buyer";
+  const { label: accountRole, showBuyerNav } = roleLabel(user);
+  const displayName =
+    profile?.displayName?.trim() || user.name?.trim() || user.email;
+  const initials = initialsFrom(displayName, user.email);
 
   return (
-    <div>
-      <PageHeader
-        eyebrow="Account"
-        title="Your profile"
-        description="Session details and profile fields for this account."
-      />
+    <BuyerAccountShell
+      title="Account"
+      description="Profile details and session for this account."
+      showBuyerNav={showBuyerNav}
+      actions={
+        showBuyerNav ? (
+          <Button variant="secondary" size="sm" asChild>
+            <Link href="/market">Browse market</Link>
+          </Button>
+        ) : (
+          <Button variant="secondary" size="sm" asChild>
+            <Link href={accountRole === "Admin" ? "/admin" : "/seller"}>
+              Back to portal
+            </Link>
+          </Button>
+        )
+      }
+    >
+      <div className="space-y-6">
+        <Card className="rounded-2xl border-border/80 shadow-none">
+          <CardContent className="flex flex-col gap-4 pt-1 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex min-w-0 items-center gap-4">
+              <Avatar className="size-16 rounded-2xl">
+                {avatarPreviewUrl ? (
+                  <AvatarImage
+                    src={avatarPreviewUrl}
+                    alt=""
+                    className="rounded-2xl"
+                  />
+                ) : null}
+                <AvatarFallback className="rounded-2xl text-base">
+                  {initials}
+                </AvatarFallback>
+              </Avatar>
+              <div className="min-w-0">
+                <p className="truncate text-lg font-semibold tracking-tight">
+                  {displayName}
+                </p>
+                <p className="mt-0.5 truncate text-sm text-muted-foreground">
+                  {user.email}
+                </p>
+                <div className="mt-2 flex flex-wrap items-center gap-2">
+                  <StatusPill tone="neutral" label={accountRole} />
+                  <StatusPill
+                    tone={user.emailVerification ? "positive" : "warning"}
+                    label={
+                      user.emailVerification ? "Email verified" : "Unverified"
+                    }
+                  />
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
 
-      <Card className="mt-8">
-        <CardContent className="space-y-2 pt-1 text-sm">
-          <p>
-            <span className="text-muted-foreground">Email</span>
-            <span className="mt-0.5 block">{user.email}</span>
-          </p>
-          <p>
-            <span className="text-muted-foreground">Roles</span>
-            <span className="mt-0.5 block font-mono text-xs">{labels}</span>
-          </p>
-          <p>
-            <span className="text-muted-foreground">Verified</span>
-            <span className="mt-0.5 block">
-              {user.emailVerification ? "Yes" : "Not yet"}
-            </span>
-          </p>
-        </CardContent>
-      </Card>
+        {!user.emailVerification ? (
+          <Card className="rounded-2xl border-amber-200/80 bg-amber-50/50 shadow-none dark:border-amber-800/60 dark:bg-amber-950/30">
+            <CardHeader>
+              <CardTitle className="text-base">Verify your email</CardTitle>
+              <CardDescription>
+                Confirm your address so sellers can trust purchase requests from
+                you.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <ResendVerificationForm />
+            </CardContent>
+          </Card>
+        ) : null}
 
-      {!user.emailVerification ? (
-        <div className="mt-6 space-y-2">
-          <p className="text-sm text-muted-foreground">
-            Your email is not verified yet. Resend a verification link:
-          </p>
-          <ResendVerificationForm />
-        </div>
-      ) : null}
+        {profile ? (
+          <ProfileForm
+            profile={profile}
+            avatarPreviewUrl={avatarPreviewUrl}
+          />
+        ) : (
+          <Card className="rounded-2xl border-border/80 shadow-none">
+            <CardContent className="pt-1">
+              <p className="text-sm text-muted-foreground">
+                Profile is still loading. Refresh if this persists.
+              </p>
+            </CardContent>
+          </Card>
+        )}
 
-      {profile ? (
-        <ProfileForm profile={profile} avatarPreviewUrl={avatarPreviewUrl} />
-      ) : null}
-
-      <div className="mt-8 flex flex-wrap gap-3">
-        <Button variant="secondary" asChild>
-          <Link href="/#browse">Browse</Link>
-        </Button>
-        <form action={signOut}>
-          <Button type="submit">Sign out</Button>
-        </form>
+        <Card className="rounded-2xl border-border/80 shadow-none">
+          <CardHeader>
+            <CardTitle>Session</CardTitle>
+            <CardDescription>
+              Sign out on this device. You can sign back in anytime.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <form action={signOut}>
+              <Button type="submit" variant="outline">
+                Sign out
+              </Button>
+            </form>
+          </CardContent>
+        </Card>
       </div>
-    </div>
+    </BuyerAccountShell>
   );
 }

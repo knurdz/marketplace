@@ -7,6 +7,17 @@ import {
   type Profile,
   type ProfileActionState,
 } from "@/lib/appwrite/profiles";
+import { AUTH_FIELD_CLASS } from "@/components/auth/auth-form-styles";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { toast } from "@/lib/ui/toast";
 
 const initialState: ProfileActionState = {};
@@ -52,136 +63,136 @@ export function ProfileForm({
   const avatarErrorId = "avatar-form-error";
 
   return (
-    <div className="mt-8 space-y-10">
-      <form action={avatarAction} className="space-y-5">
-        <h2 className="text-xl font-bold tracking-tight">Avatar</h2>
+    <div className="space-y-6">
+      <Card className="rounded-2xl border-border/80 shadow-none">
+        <CardHeader>
+          <CardTitle>Avatar</CardTitle>
+          <CardDescription>
+            JPG, PNG, or WebP · max 2MB. Shown on your account menu.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <form action={avatarAction} className="space-y-5">
+            {avatarState.error ? (
+              <p
+                id={avatarErrorId}
+                role="alert"
+                aria-live="polite"
+                className="rounded-lg border border-destructive/30 bg-destructive/5 px-3 py-2 text-sm text-destructive"
+              >
+                {avatarState.error}
+              </p>
+            ) : null}
 
-        {avatarState.error ? (
-          <p
-            id={avatarErrorId}
-            role="alert"
-            aria-live="polite"
-            className="rounded-md border border-border bg-card px-3 py-2 font-mono text-sm text-accent-bright"
-          >
-            {avatarState.error}
-          </p>
-        ) : null}
-
-        <div className="flex items-center gap-4">
-          {avatarPreviewUrl ? (
-            // eslint-disable-next-line @next/next/no-img-element -- Appwrite Storage URL
-            <img
-              src={avatarPreviewUrl}
-              alt=""
-              width={64}
-              height={64}
-              className="h-16 w-16 rounded-md border border-border object-cover"
-            />
-          ) : (
-            <div
-              aria-hidden
-              className="flex h-16 w-16 items-center justify-center rounded-md border border-border bg-card font-mono text-xs text-muted-foreground"
-            >
-              none
+            <div className="flex items-center gap-4">
+              {avatarPreviewUrl ? (
+                // eslint-disable-next-line @next/next/no-img-element -- storage URL
+                <img
+                  src={avatarPreviewUrl}
+                  alt=""
+                  width={72}
+                  height={72}
+                  className="size-[72px] rounded-xl border border-border object-cover"
+                />
+              ) : (
+                <div
+                  aria-hidden
+                  className="flex size-[72px] items-center justify-center rounded-xl border border-dashed border-border bg-muted/40 text-xs text-muted-foreground"
+                >
+                  No photo
+                </div>
+              )}
+              <div className="min-w-0 flex-1 space-y-2">
+                <Label htmlFor="avatar">Choose image</Label>
+                <Input
+                  id="avatar"
+                  name="avatar"
+                  type="file"
+                  accept="image/jpeg,image/png,image/webp,.jpg,.jpeg,.png,.webp"
+                  required
+                  aria-invalid={avatarError || undefined}
+                  aria-describedby={avatarError ? avatarErrorId : undefined}
+                  className={`${AUTH_FIELD_CLASS} cursor-pointer file:mr-3 file:rounded-md file:border-0 file:bg-muted file:px-3 file:py-1.5 file:text-sm file:font-medium`}
+                />
+              </div>
             </div>
-          )}
-          <div className="min-w-0 flex-1 space-y-2">
-            <label htmlFor="avatar" className="block text-sm text-muted-foreground">
-              Image (jpg, png, webp · max 2MB)
-            </label>
-            <input
-              id="avatar"
-              name="avatar"
-              type="file"
-              accept="image/jpeg,image/png,image/webp,.jpg,.jpeg,.png,.webp"
-              required
-              aria-invalid={avatarError || undefined}
-              aria-describedby={avatarError ? avatarErrorId : undefined}
-              className="block w-full text-sm text-muted-foreground file:mr-3 file:rounded-md file:border file:border-border file:bg-card file:px-3 file:py-1.5 file:text-foreground"
-            />
-          </div>
-        </div>
 
-        <button
-          type="submit"
-          disabled={avatarPending}
-          className="inline-flex items-center justify-center rounded-md border border-border bg-transparent px-5 py-2.5 font-mono text-sm text-foreground transition hover:bg-card disabled:opacity-60"
-        >
-          {avatarPending ? "Uploading…" : "Upload avatar"}
-        </button>
-      </form>
+            <Button type="submit" variant="secondary" disabled={avatarPending}>
+              {avatarPending ? "Uploading…" : "Upload avatar"}
+            </Button>
+          </form>
+        </CardContent>
+      </Card>
 
-      <form action={formAction} className="space-y-5">
-        <h2 className="text-xl font-bold tracking-tight">Profile</h2>
+      <Card className="rounded-2xl border-border/80 shadow-none">
+        <CardHeader>
+          <CardTitle>Profile</CardTitle>
+          <CardDescription>
+            Name and phone are shared with sellers on your purchase requests.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <form action={formAction} className="space-y-5">
+            {state.error ? (
+              <p
+                id={profileErrorId}
+                role="alert"
+                aria-live="polite"
+                className="rounded-lg border border-destructive/30 bg-destructive/5 px-3 py-2 text-sm text-destructive"
+              >
+                {state.error}
+              </p>
+            ) : null}
 
-        {state.error ? (
-          <p
-            id={profileErrorId}
-            role="alert"
-            aria-live="polite"
-            className="rounded-md border border-border bg-card px-3 py-2 font-mono text-sm text-accent-bright"
-          >
-            {state.error}
-          </p>
-        ) : null}
+            <div className="space-y-2">
+              <Label htmlFor="displayName">Display name</Label>
+              <Input
+                id="displayName"
+                name="displayName"
+                type="text"
+                required
+                maxLength={128}
+                defaultValue={profile.displayName}
+                aria-invalid={profileError || undefined}
+                aria-describedby={profileError ? profileErrorId : undefined}
+                className={AUTH_FIELD_CLASS}
+              />
+            </div>
 
-        <div className="space-y-2">
-          <label htmlFor="displayName" className="block text-sm text-muted-foreground">
-            Display name
-          </label>
-          <input
-            id="displayName"
-            name="displayName"
-            type="text"
-            required
-            maxLength={128}
-            defaultValue={profile.displayName}
-            aria-invalid={profileError || undefined}
-            aria-describedby={profileError ? profileErrorId : undefined}
-            className="w-full rounded-md border border-border bg-card px-3 py-2.5 text-foreground outline-none ring-accent focus:ring-2"
-          />
-        </div>
+            <div className="space-y-2">
+              <Label htmlFor="phone">Phone (optional)</Label>
+              <Input
+                id="phone"
+                name="phone"
+                type="tel"
+                maxLength={32}
+                defaultValue={profile.phone ?? ""}
+                aria-invalid={profileError || undefined}
+                aria-describedby={profileError ? profileErrorId : undefined}
+                className={AUTH_FIELD_CLASS}
+              />
+            </div>
 
-        <div className="space-y-2">
-          <label htmlFor="phone" className="block text-sm text-muted-foreground">
-            Phone (optional)
-          </label>
-          <input
-            id="phone"
-            name="phone"
-            type="tel"
-            maxLength={32}
-            defaultValue={profile.phone ?? ""}
-            aria-invalid={profileError || undefined}
-            aria-describedby={profileError ? profileErrorId : undefined}
-            className="w-full rounded-md border border-border bg-card px-3 py-2.5 text-foreground outline-none ring-accent focus:ring-2"
-          />
-        </div>
+            <div className="space-y-2">
+              <Label htmlFor="bio">Bio (optional)</Label>
+              <textarea
+                id="bio"
+                name="bio"
+                rows={3}
+                maxLength={1000}
+                defaultValue={profile.bio ?? ""}
+                aria-invalid={profileError || undefined}
+                aria-describedby={profileError ? profileErrorId : undefined}
+                className="flex min-h-[88px] w-full rounded-lg border border-border bg-background px-3 py-2.5 text-sm shadow-none outline-none ring-offset-background placeholder:text-muted-foreground focus-visible:ring-2 focus-visible:ring-ring"
+              />
+            </div>
 
-        <div className="space-y-2">
-          <label htmlFor="bio" className="block text-sm text-muted-foreground">
-            Bio (optional)
-          </label>
-          <textarea
-            id="bio"
-            name="bio"
-            rows={3}
-            maxLength={1000}
-            defaultValue={profile.bio ?? ""}
-            aria-invalid={profileError || undefined}
-            aria-describedby={profileError ? profileErrorId : undefined}
-            className="w-full rounded-md border border-border bg-card px-3 py-2.5 text-foreground outline-none ring-accent focus:ring-2"
-          />
-        </div>
-
-        <button
-          type="submit"
-          disabled={pending}
-          className="inline-flex items-center justify-center rounded-md bg-foreground px-5 py-2.5 text-sm font-medium text-background transition hover:opacity-90 disabled:opacity-60"
-        >
-          {pending ? "Saving…" : "Save profile"}
-        </button>
-      </form>
+            <Button type="submit" disabled={pending}>
+              {pending ? "Saving…" : "Save profile"}
+            </Button>
+          </form>
+        </CardContent>
+      </Card>
     </div>
   );
 }

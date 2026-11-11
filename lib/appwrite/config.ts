@@ -49,10 +49,13 @@ export const ALL_TABLE_IDS = [
 /** Storage bucket IDs: must match docs/agent/SCHEMA.md. */
 export const BUCKET_AVATARS = "avatars";
 export const BUCKET_PRODUCT_IMAGES = "product-images";
+/** Catalog circle photos; Hostinger may still use product-images until this bucket is deployed. */
+export const BUCKET_CATEGORIES = "categories";
 
 export const ALL_BUCKET_IDS = [
   BUCKET_AVATARS,
   BUCKET_PRODUCT_IMAGES,
+  BUCKET_CATEGORIES,
 ] as const;
 
 /** Max upload sizes (bytes): mirror bucket settings. */

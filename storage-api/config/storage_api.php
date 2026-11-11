@@ -10,6 +10,9 @@ return [
         'product-images' => [
             'max_bytes' => 5 * 1024 * 1024, // 5MB
         ],
+        'categories' => [
+            'max_bytes' => 2 * 1024 * 1024, // 2MB
+        ],
     ],
     'allowed_mimes' => [
         'image/jpeg',

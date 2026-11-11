@@ -3,7 +3,7 @@
  * Usage: npx tsx --env-file=.env.local scripts/seed-demo.ts
  */
 import { hashPassword } from "better-auth/crypto";
-import { eq } from "drizzle-orm";
+import { eq, inArray } from "drizzle-orm";
 import { getDb, getPool, newId } from "../lib/db/client";
 import {
   authAccount,
@@ -14,6 +14,7 @@ import {
   profiles,
   sellerProfiles,
 } from "../lib/db/schema";
+import { CATEGORY_CATALOG } from "../lib/store/category-catalog";
 
 const DEMO_PASSWORD = "DemoPass123!";
 
@@ -109,16 +110,37 @@ async function main() {
     userIds[u.key] = await ensureUser(u);
   }
 
-  const catRows = await db.select().from(categories).limit(1);
-  let categoryId = catRows[0]?.id;
-  if (!categoryId) {
-    categoryId = "seed_cat_digital";
+  // Insert any missing catalog categories; leave existing rows (and admin edits) alone.
+  const catalogSlugs = CATEGORY_CATALOG.map((c) => c.slug);
+  const existingCats = await db
+    .select({ id: categories.id, slug: categories.slug })
+    .from(categories)
+    .where(inArray(categories.slug, catalogSlugs));
+  const existingBySlug = new Map(existingCats.map((c) => [c.slug, c.id]));
+
+  let inserted = 0;
+  for (const entry of CATEGORY_CATALOG) {
+    if (existingBySlug.has(entry.slug)) continue;
+    const id = `seed_cat_${entry.slug}`.slice(0, 36);
     await db.insert(categories).values({
-      id: categoryId,
-      name: "Digital",
-      slug: "digital",
-      sortOrder: 0,
+      id,
+      name: entry.name,
+      slug: entry.slug,
+      sortOrder: entry.sortOrder,
     });
+    existingBySlug.set(entry.slug, id);
+    inserted += 1;
+  }
+  if (inserted > 0) {
+    console.log(`Inserted ${inserted} catalog categor${inserted === 1 ? "y" : "ies"}.`);
+  }
+
+  const categoryId =
+    existingBySlug.get("digital") ??
+    existingBySlug.values().next().value ??
+    null;
+  if (!categoryId) {
+    throw new Error("No categories available after catalog seed.");
   }
 
   const sellerId = userIds.seller;

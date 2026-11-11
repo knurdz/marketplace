@@ -1,8 +1,9 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { EmptyState } from "@/components/layout/empty-state";
-import { PageHeader } from "@/components/layout/page-header";
+import { Heart } from "lucide-react";
+import { BuyerAccountShell } from "@/components/store/buyer-account-shell";
 import { WishlistList } from "@/components/store/wishlist-list";
+import { EmptyState } from "@/components/layout/empty-state";
 import { Button } from "@/components/ui/button";
 import { BUCKET_PRODUCT_IMAGES } from "@/lib/appwrite/config";
 import { getFilePreviewUrl } from "@/lib/appwrite/storage-urls";
@@ -23,41 +24,36 @@ export default async function WishlistPage() {
     Object.entries(covers).map(([id, cover]) => [
       id,
       getFilePreviewUrl(BUCKET_PRODUCT_IMAGES, cover.fileId, {
-        width: 128,
-        height: 128,
+        width: 480,
+        height: 480,
       }),
     ]),
   );
 
   return (
-    <main className="mx-auto w-full max-w-3xl px-4 py-10 sm:px-6">
-      <PageHeader
-        eyebrow="Account"
-        title="Wishlist"
-        description="Saved products for your account."
-        actions={
-          <Button variant="secondary" asChild>
-            <Link href="/requests">Requests</Link>
-          </Button>
-        }
-      />
-
+    <BuyerAccountShell
+      title="Wishlist"
+      description="Saved products for your account."
+      actions={
+        <Button variant="secondary" size="sm" asChild>
+          <Link href="/market">Browse market</Link>
+        </Button>
+      }
+    >
       {view.lines.length === 0 ? (
         <EmptyState
-          className="mt-10"
+          icon={Heart}
           title="Nothing saved yet"
           description="Open a listing and tap Save."
           action={
             <Button asChild>
-              <Link href="/">Browse listings</Link>
+              <Link href="/market">Browse listings</Link>
             </Button>
           }
         />
       ) : (
-        <div className="mt-10">
-          <WishlistList lines={view.lines} imageByProductId={imageByProductId} />
-        </div>
+        <WishlistList lines={view.lines} imageByProductId={imageByProductId} />
       )}
-    </main>
+    </BuyerAccountShell>
   );
 }
