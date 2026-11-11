@@ -1,7 +1,6 @@
 import { NextResponse } from "next/server";
 import {
   BUCKET_AVATARS,
-  BUCKET_BANK_SLIPS,
   BUCKET_PRODUCT_IMAGES,
 } from "@/lib/appwrite/config";
 import { readStoredFile } from "@/lib/storage/disk";
@@ -14,9 +13,6 @@ export async function GET(
 ) {
   const { bucket, fileId } = await context.params;
   if (!PUBLIC_BUCKETS.has(bucket)) {
-    return NextResponse.json({ error: "Not found" }, { status: 404 });
-  }
-  if (bucket === BUCKET_BANK_SLIPS) {
     return NextResponse.json({ error: "Not found" }, { status: 404 });
   }
 

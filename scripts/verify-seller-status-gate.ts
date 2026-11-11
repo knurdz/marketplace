@@ -22,10 +22,6 @@ function profile(status: SellerProfile["status"]): SellerProfile {
     bio: null,
     bannerFileId: null,
     status,
-    bankAccountName: null,
-    bankAccountNumber: null,
-    bankName: null,
-    bankTransferNotes: null,
     rejectionReason: status === "rejected" ? "Incomplete details" : null,
     returnPolicy: null,
     shippingPolicy: null,
@@ -90,12 +86,24 @@ assert(
   "pending applicant home",
 );
 assert(
-  postLoginPath({ labels: ["seller"] }, "/") === "/seller",
-  "seller cannot next into market",
+  postLoginPath({ labels: ["seller"] }, "/") === "/",
+  "seller may next into market catalog",
 );
 assert(
-  postLoginPath({ labels: ["admin"] }, "/products/x") === "/admin",
-  "admin cannot next into market product",
+  postLoginPath({ labels: ["admin"] }, "/products/x") === "/products/x",
+  "admin may next into market product",
+);
+assert(
+  postLoginPath({ labels: ["admin"] }, "/requests") === "/admin",
+  "admin cannot next into buyer requests",
+);
+assert(
+  postLoginPath({ labels: ["seller"] }, "/wishlist") === "/seller",
+  "seller cannot next into buyer wishlist",
+);
+assert(
+  postLoginPath({ labels: [] }, "/", "pending") === "/seller/pending",
+  "pending cannot next into market",
 );
 assert(
   postLoginPath({ labels: [] }, "/seller/pending", "pending") ===
@@ -103,12 +111,12 @@ assert(
   "pending may open holding page",
 );
 assert(
-  postLoginPath({ labels: ["buyer"] }, "/cart") === "/cart",
-  "buyer may next into cart",
+  postLoginPath({ labels: ["buyer"] }, "/requests") === "/requests",
+  "buyer may next into requests",
 );
 assert(
-  postLoginPath({ labels: ["user"] }, "/cart") === "/cart",
-  "legacy user label may next into cart",
+  postLoginPath({ labels: ["user"] }, "/requests") === "/requests",
+  "legacy user label may next into requests",
 );
 assert(
   postLoginPath({ labels: [] }, "/") === "/",

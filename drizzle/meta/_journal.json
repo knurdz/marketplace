@@ -15,6 +15,27 @@
       "when": 1793437688695,
       "tag": "0001_grey_ezekiel",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "5",
+      "when": 1794300000000,
+      "tag": "0002_registration_complete",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "5",
+      "when": 1794400000000,
+      "tag": "0003_contact_requests",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "5",
+      "when": 1794500000000,
+      "tag": "0004_seller_reviews",
+      "breakpoints": true
     }
   ]
 }

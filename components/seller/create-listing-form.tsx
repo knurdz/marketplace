@@ -1,15 +1,27 @@
 "use client";
 
 import { useActionState, useState } from "react";
-import Link from "next/link";
 import {
   createDraftListing,
   type CreateListingActionState,
 } from "@/lib/appwrite/seller-listing-actions";
 import type { Category } from "@/lib/types";
+import {
+  ListingFormBody,
+  ListingFormCheckbox,
+  ListingFormColumns,
+  ListingFormField,
+  ListingFormFileField,
+  ListingFormFooter,
+  ListingFormMediaSection,
+  ListingFormSection,
+  listingNumberInputClassName,
+  listingSelectClassName,
+  listingTextareaClassName,
+} from "@/components/seller/listing-form-drawer";
 import { Button } from "@/components/ui/button";
+import { DrawerClose } from "@/components/ui/drawer";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 
 const initialState: CreateListingActionState = {};
 
@@ -29,145 +41,175 @@ export function CreateListingForm({
   );
 
   return (
-    <form action={formAction} className="mt-8 max-w-lg space-y-5">
-      {state.error ? (
-        <p
-          role="alert"
-          className="rounded-md border border-border bg-card px-3 py-2 font-mono text-sm text-accent-bright"
-        >
-          {state.error}
-        </p>
-      ) : null}
-
-      <div className="space-y-2">
-        <Label htmlFor="title">Title</Label>
-        <Input
-          id="title"
-          name="title"
-          type="text"
-          required
-          maxLength={200}
-          placeholder="e.g. Vinyl sticker pack"
-          disabled={pending}
-        />
-      </div>
-
-      <div className="space-y-2">
-        <Label htmlFor="description">Description</Label>
-        <textarea
-          id="description"
-          name="description"
-          rows={5}
-          required
-          maxLength={10000}
-          disabled={pending}
-          placeholder="Describe your item for buyers."
-          className="w-full rounded-lg border border-input bg-transparent px-2.5 py-2 text-sm outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 disabled:opacity-50"
-        />
-      </div>
-
-      <div className="space-y-2">
-        <Label htmlFor="categoryId">Category</Label>
-        <select
-          id="categoryId"
-          name="categoryId"
-          required
-          disabled={pending || categories.length === 0}
-          className="h-8 w-full rounded-lg border border-input bg-background px-2.5 text-sm text-foreground outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 disabled:opacity-50"
-        >
-          <option value="">Select a category</option>
-          {categories.map((c) => (
-            <option key={c.$id} value={c.$id}>
-              {c.name}
-            </option>
-          ))}
-        </select>
-        {categories.length === 0 ? (
-          <p className="text-xs text-muted-foreground">
-            No categories yet. Ask an admin to add categories first.
+    <form action={formAction} className="flex min-h-0 flex-1 flex-col">
+      <ListingFormBody>
+        {state.error ? (
+          <p
+            role="alert"
+            className="rounded-lg border border-destructive/30 bg-destructive/5 px-3 py-2.5 text-sm text-destructive"
+          >
+            {state.error}
           </p>
         ) : null}
-      </div>
 
-      {freeListingsEnabled ? (
-        <div className="flex items-center gap-2">
-          <input
-            id="isFree"
-            name="isFree"
-            type="checkbox"
-            checked={isFree}
-            onChange={(e) => setIsFree(e.target.checked)}
-            disabled={pending}
-            className="size-4 rounded border border-input"
-          />
-          <Label htmlFor="isFree" className="font-normal">
-            Free listing (buyers checkout at no cost)
-          </Label>
-        </div>
-      ) : null}
+        <ListingFormColumns
+          media={
+            <ListingFormMediaSection
+              title="Photos"
+              description="Optional. Add up to 8 images before or after saving."
+            >
+              <ListingFormFileField
+                id="images"
+                name="images"
+                label="Upload"
+                hint="First image is used as the cover on your listings table."
+                disabled={pending}
+                multiple
+              />
+            </ListingFormMediaSection>
+          }
+          fields={
+            <>
+              <ListingFormSection
+                title="Details"
+                description="What buyers see on the storefront."
+              >
+                <ListingFormField label="Title" htmlFor="title">
+                  <Input
+                    id="title"
+                    name="title"
+                    type="text"
+                    required
+                    maxLength={200}
+                    placeholder="e.g. Vinyl sticker pack"
+                    disabled={pending}
+                    className="bg-card shadow-xs"
+                  />
+                </ListingFormField>
 
-      <div className="grid gap-4 sm:grid-cols-2">
-        <div className="space-y-2">
-          <Label htmlFor="price">Price (LKR)</Label>
-          {isFree ? <input type="hidden" name="price" value="0" /> : null}
-          <Input
-            id="price"
-            name={isFree ? undefined : "price"}
-            type="number"
-            min={0.01}
-            step="0.01"
-            required={!isFree}
-            disabled={pending || isFree}
-            placeholder={isFree ? "Free" : "e.g. 500"}
-          />
-        </div>
-        <div className="space-y-2">
-          <Label htmlFor="stock">Stock</Label>
-          <Input
-            id="stock"
-            name="stock"
-            type="number"
-            min={0}
-            step={1}
-            required
-            defaultValue={1}
-            disabled={pending}
-          />
-        </div>
-      </div>
+                <ListingFormField label="Description" htmlFor="description">
+                  <textarea
+                    id="description"
+                    name="description"
+                    rows={5}
+                    required
+                    maxLength={10000}
+                    disabled={pending}
+                    placeholder="Describe your item for buyers."
+                    className={listingTextareaClassName}
+                  />
+                </ListingFormField>
 
-      <div className="flex items-center gap-2">
-        <input
-          id="available"
-          name="available"
-          type="checkbox"
-          defaultChecked
-          disabled={pending}
-          className="size-4 rounded border border-input"
+                <ListingFormField
+                  label="Category"
+                  htmlFor="categoryId"
+                  hint={
+                    categories.length === 0
+                      ? "No categories yet. Ask an admin to add categories first."
+                      : undefined
+                  }
+                >
+                  <select
+                    id="categoryId"
+                    name="categoryId"
+                    required
+                    disabled={pending || categories.length === 0}
+                    className={listingSelectClassName}
+                    defaultValue=""
+                  >
+                    <option value="">Select a category</option>
+                    {categories.map((c) => (
+                      <option key={c.$id} value={c.$id}>
+                        {c.name}
+                      </option>
+                    ))}
+                  </select>
+                </ListingFormField>
+              </ListingFormSection>
+
+              <ListingFormSection
+                title="Price and stock"
+                description="Set what buyers pay and how many you can sell."
+                className="last:border-0 last:pb-0"
+              >
+                {freeListingsEnabled ? (
+                  <ListingFormCheckbox
+                    id="isFree"
+                    name="isFree"
+                    label="Free listing"
+                    description="Buyers see zero price at checkout."
+                    checked={isFree}
+                    onChange={(e) => setIsFree(e.target.checked)}
+                    disabled={pending}
+                  />
+                ) : null}
+
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <ListingFormField label="Price (LKR)" htmlFor="price">
+                    {isFree ? (
+                      <input type="hidden" name="price" value="0" />
+                    ) : null}
+                    <Input
+                      id="price"
+                      name={isFree ? undefined : "price"}
+                      type="number"
+                      min={0.01}
+                      step="0.01"
+                      required={!isFree}
+                      disabled={pending || isFree}
+                      placeholder={isFree ? "Free" : "500"}
+                      className={cnInput(isFree)}
+                    />
+                  </ListingFormField>
+                  <ListingFormField label="Stock" htmlFor="stock">
+                    <Input
+                      id="stock"
+                      name="stock"
+                      type="number"
+                      min={0}
+                      step={1}
+                      required
+                      defaultValue={1}
+                      disabled={pending}
+                      className={cnInput()}
+                    />
+                  </ListingFormField>
+                </div>
+
+                <ListingFormCheckbox
+                  id="available"
+                  name="available"
+                  label="Available for purchase"
+                  description="Turn off to hide from checkout while keeping the listing."
+                  defaultChecked
+                  disabled={pending}
+                />
+              </ListingFormSection>
+            </>
+          }
         />
-        <Label htmlFor="available" className="font-normal">
-          Available for purchase
-        </Label>
-      </div>
+      </ListingFormBody>
 
-      <div className="space-y-2">
-        <Label htmlFor="images">Images (optional, up to 8)</Label>
-        <Input
-          id="images"
-          name="images"
-          type="file"
-          accept="image/jpeg,image/png,image/webp,.jpg,.jpeg,.png,.webp"
-          multiple
-          disabled={pending}
-        />
-        <p className="text-xs text-muted-foreground">
-          JPG, PNG, or WebP. Max 5MB each.
-        </p>
-      </div>
-
-      <div className="flex flex-wrap gap-3 pt-2">
+      <ListingFormFooter>
+        <DrawerClose asChild>
+          <Button type="button" variant="ghost" size="sm" disabled={pending}>
+            Cancel
+          </Button>
+        </DrawerClose>
         <Button
           type="submit"
+          size="sm"
+          variant="secondary"
+          name="intent"
+          value="draft"
+          disabled={pending || categories.length === 0}
+          data-testid="listing-save-draft"
+        >
+          {pending ? "Saving…" : "Save draft"}
+        </Button>
+        <Button
+          type="submit"
+          size="sm"
           name="intent"
           value="list"
           disabled={pending || categories.length === 0}
@@ -175,20 +217,17 @@ export function CreateListingForm({
         >
           {pending ? "Listing…" : "List item"}
         </Button>
-        <Button
-          type="submit"
-          variant="outline"
-          name="intent"
-          value="draft"
-          disabled={pending || categories.length === 0}
-          data-testid="listing-save-draft"
-        >
-          {pending ? "Saving draft…" : "Save draft"}
-        </Button>
-        <Button variant="outline" type="button" disabled={pending} asChild>
-          <Link href="/seller/listings">Cancel</Link>
-        </Button>
-      </div>
+      </ListingFormFooter>
     </form>
   );
+}
+
+function cnInput(dimmed?: boolean) {
+  return [
+    "bg-card shadow-xs",
+    listingNumberInputClassName,
+    dimmed ? "text-muted-foreground" : "",
+  ]
+    .filter(Boolean)
+    .join(" ");
 }

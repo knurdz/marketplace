@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useActionState, useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
+import { ConfirmActionDialog } from "@/components/ui/confirm-action-dialog";
 import {
   approveListingFormAction,
   rejectListingFormAction,
@@ -71,56 +72,42 @@ export function ListingRejectForm({
   productId,
   title,
 }: Pick<ListingRowActionsProps, "productId" | "title">) {
-  const [showReason, setShowReason] = useState(false);
+  const [open, setOpen] = useState(false);
   const [state, formAction, pending] = useActionState(
     rejectListingFormAction,
     initial,
   );
 
-  useModerationToast(state, () => setShowReason(false));
+  useModerationToast(state, () => setOpen(false));
 
-  if (!showReason) {
-    return (
+  return (
+    <>
       <Button
         type="button"
         variant="outline"
         size="sm"
-        onClick={() => setShowReason(true)}
+        onClick={() => setOpen(true)}
       >
         Reject
       </Button>
-    );
-  }
-
-  return (
-    <form action={formAction} className="mt-3 space-y-2">
-      <input type="hidden" name="productId" value={productId} />
-      <label className="block font-mono text-xs text-muted-foreground">
-        Reason for rejecting {title}
-        <textarea
-          name="reason"
-          required
-          maxLength={500}
-          rows={3}
-          placeholder="Required. Stored in audit log"
-          className="mt-1 w-full rounded-md border border-border bg-background px-3 py-2 text-sm"
-        />
-      </label>
-      <div className="flex gap-2">
-        <Button type="submit" variant="outline" size="sm" disabled={pending}>
-          {pending ? "Rejecting…" : "Confirm reject"}
-        </Button>
-        <Button
-          type="button"
-          variant="ghost"
-          size="sm"
-          disabled={pending}
-          onClick={() => setShowReason(false)}
-        >
-          Cancel
-        </Button>
-      </div>
-    </form>
+      <ConfirmActionDialog
+        open={open}
+        onOpenChange={setOpen}
+        title="Reject listing?"
+        description={`Reject “${title}”? A reason is required for the audit log.`}
+        confirmLabel="Confirm reject"
+        pendingLabel="Rejecting…"
+        confirmVariant="outline"
+        pending={pending}
+        formAction={formAction}
+        hiddenFields={{ productId }}
+        note={{
+          name: "reason",
+          label: `Reason for rejecting ${title}`,
+          placeholder: "Required. Stored in audit log",
+        }}
+      />
+    </>
   );
 }
 
@@ -128,56 +115,42 @@ export function ListingRemoveForm({
   productId,
   title,
 }: Pick<ListingRowActionsProps, "productId" | "title">) {
-  const [showReason, setShowReason] = useState(false);
+  const [open, setOpen] = useState(false);
   const [state, formAction, pending] = useActionState(
     removeListingFormAction,
     initial,
   );
 
-  useModerationToast(state, () => setShowReason(false));
+  useModerationToast(state, () => setOpen(false));
 
-  if (!showReason) {
-    return (
+  return (
+    <>
       <Button
         type="button"
         variant="outline"
         size="sm"
-        onClick={() => setShowReason(true)}
+        onClick={() => setOpen(true)}
       >
         Remove
       </Button>
-    );
-  }
-
-  return (
-    <form action={formAction} className="mt-3 space-y-2">
-      <input type="hidden" name="productId" value={productId} />
-      <label className="block font-mono text-xs text-muted-foreground">
-        Reason for removing {title}
-        <textarea
-          name="reason"
-          required
-          maxLength={500}
-          rows={3}
-          placeholder="Required. Stored in audit log"
-          className="mt-1 w-full rounded-md border border-border bg-background px-3 py-2 text-sm"
-        />
-      </label>
-      <div className="flex gap-2">
-        <Button type="submit" variant="outline" size="sm" disabled={pending}>
-          {pending ? "Removing…" : "Confirm remove"}
-        </Button>
-        <Button
-          type="button"
-          variant="ghost"
-          size="sm"
-          disabled={pending}
-          onClick={() => setShowReason(false)}
-        >
-          Cancel
-        </Button>
-      </div>
-    </form>
+      <ConfirmActionDialog
+        open={open}
+        onOpenChange={setOpen}
+        title="Remove listing?"
+        description={`Remove “${title}”? A reason is required for the audit log.`}
+        confirmLabel="Confirm remove"
+        pendingLabel="Removing…"
+        confirmVariant="destructive"
+        pending={pending}
+        formAction={formAction}
+        hiddenFields={{ productId }}
+        note={{
+          name: "reason",
+          label: `Reason for removing ${title}`,
+          placeholder: "Required. Stored in audit log",
+        }}
+      />
+    </>
   );
 }
 

@@ -1,0 +1,117 @@
+"use client";
+
+import { useRouter } from "next/navigation";
+import { useActionState, useEffect, useRef, useState } from "react";
+import {
+  markPurchaseRequestCancelledAction,
+  markPurchaseRequestSoldAction,
+} from "@/lib/services/purchase-request-actions";
+import type { PurchaseRequestActionState } from "@/lib/services/purchase-request-errors";
+import { ConfirmActionDialog } from "@/components/ui/confirm-action-dialog";
+import { Button } from "@/components/ui/button";
+import { toast } from "@/lib/ui/toast";
+
+type SellerRequestResolveActionsProps = {
+  requestId: string;
+};
+
+const initialState: PurchaseRequestActionState = {};
+
+function useResolveToast(
+  state: PurchaseRequestActionState,
+  onSuccess?: () => void,
+) {
+  const lastToast = useRef<string | null>(null);
+  const router = useRouter();
+
+  useEffect(() => {
+    if (state.error) {
+      const key = `e:${state.error}`;
+      if (key !== lastToast.current) {
+        lastToast.current = key;
+        toast.error(state.error);
+      }
+      return;
+    }
+    if (state.success) {
+      const key = `s:${state.success}`;
+      if (key !== lastToast.current) {
+        lastToast.current = key;
+        toast.success(state.success);
+        onSuccess?.();
+        router.refresh();
+      }
+    }
+  }, [state, onSuccess, router]);
+}
+
+export function SellerRequestResolveActions({
+  requestId,
+}: SellerRequestResolveActionsProps) {
+  const [soldOpen, setSoldOpen] = useState(false);
+  const [cancelOpen, setCancelOpen] = useState(false);
+  const [soldState, soldAction, soldPending] = useActionState(
+    markPurchaseRequestSoldAction,
+    initialState,
+  );
+  const [cancelState, cancelAction, cancelPending] = useActionState(
+    markPurchaseRequestCancelledAction,
+    initialState,
+  );
+
+  useResolveToast(soldState, () => setSoldOpen(false));
+  useResolveToast(cancelState, () => setCancelOpen(false));
+
+  return (
+    <div
+      className="flex shrink-0 flex-wrap justify-end gap-2"
+      data-testid="seller-request-actions"
+    >
+      <Button
+        type="button"
+        size="sm"
+        disabled={soldPending || cancelPending}
+        data-testid="seller-mark-sold"
+        onClick={() => setSoldOpen(true)}
+      >
+        Mark sold
+      </Button>
+      <ConfirmActionDialog
+        open={soldOpen}
+        onOpenChange={setSoldOpen}
+        title="Mark as sold?"
+        description="Stock will decrease by the requested quantity. This cannot be undone."
+        confirmLabel="Mark sold"
+        pendingLabel="Saving…"
+        pending={soldPending}
+        confirmTestId="seller-mark-sold-confirm"
+        formAction={soldAction}
+        hiddenFields={{ requestId }}
+      />
+
+      <Button
+        type="button"
+        variant="outline"
+        size="sm"
+        disabled={soldPending || cancelPending}
+        data-testid="seller-mark-cancelled"
+        onClick={() => setCancelOpen(true)}
+      >
+        Cancel request
+      </Button>
+      <ConfirmActionDialog
+        open={cancelOpen}
+        onOpenChange={setCancelOpen}
+        title="Cancel this request?"
+        description="Stock will stay the same. The buyer will be notified."
+        confirmLabel="Cancel request"
+        pendingLabel="Saving…"
+        confirmVariant="outline"
+        pending={cancelPending}
+        confirmTestId="seller-mark-cancelled-confirm"
+        formAction={cancelAction}
+        hiddenFields={{ requestId }}
+      />
+    </div>
+  );
+}

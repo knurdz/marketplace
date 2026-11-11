@@ -1,10 +1,17 @@
 import { AppwriteException, ID, Permission, Query, Role } from "@/lib/db/appwrite-shim";
+import { createNotificationForUser } from "@/lib/appwrite/notifications";
 import {
   DATABASE_ID,
+  TABLE_AUDIT_LOGS,
   TABLE_REVIEWS,
   hasAppwritePublicConfig,
 } from "@/lib/appwrite/config";
-import { createPublicClient, createSessionClient } from "@/lib/appwrite/server";
+import { ROLE_LABELS, requireLabel, userHasLabel } from "@/lib/appwrite/roles";
+import {
+  createAdminClient,
+  createPublicClient,
+  createSessionClient,
+} from "@/lib/appwrite/server";
 import { getLoggedInUser } from "@/lib/appwrite/session";
 import {
   assertRateLimit,
@@ -13,9 +20,9 @@ import {
   RATE_LIMITS,
 } from "@/lib/security/rate-limit";
 import { logError } from "@/lib/observability/log-error";
-import type { Review } from "@/lib/types";
-import { getOwnOrderItems, listOwnOrders } from "./orders";
-import { getProduct } from "./products";
+import type { Review, ReviewStatus } from "@/lib/types";
+import { isReviewStatus } from "@/lib/types";
+import { getOwnPurchaseRequestDetail } from "./purchase-requests";
 import {
   REVIEW_ERROR_CODES,
   type ReviewActionState,
@@ -30,14 +37,29 @@ export {
 
 export type ReviewEligibility = {
   eligible: boolean;
-  orderId?: string;
+  requestId?: string;
+  existingStatus?: ReviewStatus;
 };
 
-export type CreateProductReviewInput = {
-  productId: string;
-  productRating: number;
-  sellerRating?: number | null;
+export type CreateSellerReviewInput = {
+  requestId: string;
+  rating: number;
   comment?: string | null;
+};
+
+export type ReviewModerationResult =
+  | { ok: true; message: string }
+  | { ok: false; error: string };
+
+export type AdminReviewView = {
+  $id: string;
+  requestId: string;
+  buyerId: string;
+  sellerId: string;
+  rating: number;
+  comment: string | null;
+  status: ReviewStatus;
+  $createdAt: string | null;
 };
 
 function asNullableString(value: unknown): string | null {
@@ -65,20 +87,21 @@ function asRating(value: unknown): number | null {
 /** Map a TablesDB row to Review; returns null if required fields invalid. */
 export function asReview(row: Record<string, unknown>): Review | null {
   const $id = asNullableString(row.$id);
-  const orderId = asNullableString(row.orderId);
-  const productId = asNullableString(row.productId);
+  const requestId = asNullableString(row.requestId);
   const buyerId = asNullableString(row.buyerId);
   const sellerId = asNullableString(row.sellerId);
-  const productRating = asRating(row.productRating);
-  if (!$id || !orderId || !productId || !buyerId || !sellerId || !productRating) {
+  const rating = asRating(row.rating);
+  const statusRaw = row.status;
+  if (
+    !$id ||
+    !requestId ||
+    !buyerId ||
+    !sellerId ||
+    !rating ||
+    !isReviewStatus(statusRaw)
+  ) {
     return null;
   }
-
-  const sellerRatingRaw = row.sellerRating;
-  const sellerRating =
-    sellerRatingRaw == null || sellerRatingRaw === ""
-      ? null
-      : asRating(sellerRatingRaw);
 
   const commentRaw = row.comment;
   const comment =
@@ -92,13 +115,12 @@ export function asReview(row: Record<string, unknown>): Review | null {
 
   return {
     $id,
-    orderId,
-    productId,
+    requestId,
     buyerId,
     sellerId,
-    productRating,
-    sellerRating,
+    rating,
     comment,
+    status: statusRaw,
     ...(createdAt ? { $createdAt: createdAt } : {}),
   };
 }
@@ -157,26 +179,20 @@ function notConfiguredState(): ReviewActionState {
 function mapReviewError(err: unknown): ReviewActionState {
   const code = (err as Error & { code?: ReviewErrorCode }).code;
   if (code === REVIEW_ERROR_CODES.NOT_AUTHENTICATED) {
-    return {
-      error: "Sign in to leave a review.",
-      errorCode: code,
-    };
+    return { error: "Sign in to leave a review.", errorCode: code };
   }
   if (code === REVIEW_ERROR_CODES.RATE_LIMITED) {
-    return {
-      error: RATE_LIMIT_MESSAGE,
-      errorCode: code,
-    };
+    return { error: RATE_LIMIT_MESSAGE, errorCode: code };
   }
   if (code === REVIEW_ERROR_CODES.NOT_ELIGIBLE) {
     return {
-      error: "You can review this product after completing an order.",
+      error: "You can review this seller after a sold request.",
       errorCode: code,
     };
   }
   if (code === REVIEW_ERROR_CODES.ALREADY_REVIEWED) {
     return {
-      error: "You already reviewed this product for this order.",
+      error: "You already submitted a review for this request.",
       errorCode: code,
     };
   }
@@ -186,152 +202,268 @@ function mapReviewError(err: unknown): ReviewActionState {
   };
 }
 
-function validateRating(value: number, label: string): string | null {
-  if (!Number.isInteger(value) || value < 1 || value > 5) {
-    return `${label} must be between 1 and 5.`;
-  }
-  return null;
-}
-
-async function hasReviewForOrderProduct(
-  orderId: string,
-  buyerId: string,
-  productId: string,
-): Promise<boolean> {
-  if (!hasAppwritePublicConfig()) return false;
-
+async function findReviewForRequest(requestId: string): Promise<Review | null> {
+  if (!hasAppwritePublicConfig()) return null;
   try {
-    const { tables } = await createPublicClient();
+    const { tables } = await createAdminClient();
     const result = await tables.listRows({
       databaseId: DATABASE_ID,
       tableId: TABLE_REVIEWS,
-      queries: [
-        Query.equal("orderId", orderId),
-        Query.equal("buyerId", buyerId),
-        Query.equal("productId", productId),
-        Query.limit(1),
-      ],
+      queries: [Query.equal("requestId", requestId), Query.limit(1)],
     });
-    return result.rows.length > 0;
+    const row = result.rows[0];
+    if (!row) return null;
+    return asReview(row as unknown as Record<string, unknown>);
   } catch (error) {
-    logError("reviews.hasExisting", error, { orderId, productId });
-    return false;
+    logError("reviews.findForRequest", error, { requestId });
+    return null;
   }
 }
 
-/** Find a completed own order containing the product that has not been reviewed yet. */
-async function findEligibleReviewOrder(
-  productId: string,
-  buyerId: string,
-): Promise<string | null> {
-  const orders = await listOwnOrders({ limit: 100 });
-  const completed = orders.filter((order) => order.status === "completed");
-
-  for (const order of completed) {
-    const items = await getOwnOrderItems(order.$id);
-    const containsProduct = items.some((item) => item.productId === productId);
-    if (!containsProduct) continue;
-
-    const alreadyReviewed = await hasReviewForOrderProduct(
-      order.$id,
-      buyerId,
-      productId,
-    );
-    if (!alreadyReviewed) {
-      return order.$id;
-    }
-  }
-
-  return null;
-}
-
-export async function listOwnReviewsForOrder(
-  orderId: string,
-): Promise<Review[]> {
-  const user = await getLoggedInUser();
-  if (!user || !hasAppwritePublicConfig()) return [];
-
+async function notifyUserSafe(params: {
+  userId: string;
+  type: string;
+  title: string;
+  body: string;
+  link?: string | null;
+}): Promise<void> {
   try {
-    const { tables } = await createSessionClient();
-    const result = await tables.listRows({
-      databaseId: DATABASE_ID,
-      tableId: TABLE_REVIEWS,
-      queries: [
-        Query.equal("orderId", orderId),
-        Query.equal("buyerId", user.$id),
-        Query.limit(100),
-      ],
-    });
-    const out: Review[] = [];
-    for (const row of result.rows) {
-      const review = asReview(row as unknown as Record<string, unknown>);
-      if (review && review.buyerId === user.$id) out.push(review);
-    }
-    return out;
+    await createNotificationForUser(params);
   } catch (error) {
-    logError("reviews.listOwnForOrder", error, { orderId });
-    return [];
+    logError("reviews.notify", error, { type: params.type, userId: params.userId });
   }
 }
 
-/** Public list of reviews for a product (newest first). */
-export async function listProductReviews(
-  productId: string,
-  opts?: { limit?: number },
+async function writeAuditLog(params: {
+  actorId: string;
+  event: string;
+  resourceId: string;
+  meta: Record<string, string>;
+}): Promise<void> {
+  const { tables } = await createAdminClient();
+  await tables.createRow({
+    databaseId: DATABASE_ID,
+    tableId: TABLE_AUDIT_LOGS,
+    rowId: ID.unique(),
+    data: {
+      actorId: params.actorId,
+      event: params.event.slice(0, 128),
+      resourceType: "review",
+      resourceId: params.resourceId,
+      meta: JSON.stringify(params.meta).slice(0, 4000),
+    },
+    permissions: [],
+  });
+}
+
+const APPROVED_REVIEW_PAGE = 100;
+const APPROVED_REVIEW_MAX = 500;
+
+/** Public list of approved seller reviews (newest first). */
+export async function listApprovedSellerReviews(
+  sellerId: string,
+  opts?: { limit?: number; cursor?: string },
 ): Promise<Review[]> {
   if (!hasAppwritePublicConfig()) return [];
 
-  const trimmed = productId?.trim();
+  const trimmed = sellerId?.trim();
   if (!trimmed) return [];
 
-  const limit = Math.min(Math.max(opts?.limit ?? 50, 1), 50);
+  const limit = Math.min(Math.max(opts?.limit ?? 50, 1), 100);
 
   try {
     const { tables } = await createPublicClient();
+    const queries = [
+      Query.equal("sellerId", trimmed),
+      Query.equal("status", "approved"),
+      Query.orderDesc("$createdAt"),
+      Query.limit(limit),
+    ];
+    if (opts?.cursor?.trim()) {
+      queries.push(Query.cursorAfter(opts.cursor.trim()));
+    }
     const result = await tables.listRows({
       databaseId: DATABASE_ID,
       tableId: TABLE_REVIEWS,
-      queries: [
-        Query.equal("productId", trimmed),
-        Query.orderDesc("$createdAt"),
-        Query.limit(limit),
-      ],
+      queries,
     });
 
     const out: Review[] = [];
     for (const row of result.rows) {
       const review = asReview(row as unknown as Record<string, unknown>);
-      if (review && review.productId === trimmed) {
+      if (review && review.sellerId === trimmed && review.status === "approved") {
         out.push(review);
       }
     }
     return out;
-  } catch {
+  } catch (error) {
+    logError("reviews.listApprovedSeller", error, { sellerId: trimmed });
     return [];
   }
 }
 
-/** UI gating only: create re-validates eligibility server-side. */
-export async function canReviewProduct(
-  productId: string,
+/** All approved reviews for a seller (paginated cap for metrics). */
+export async function listAllApprovedSellerReviews(
+  sellerId: string,
+): Promise<Review[]> {
+  const trimmed = sellerId?.trim();
+  if (!trimmed || !hasAppwritePublicConfig()) return [];
+
+  const out: Review[] = [];
+  let cursor: string | undefined;
+
+  while (out.length < APPROVED_REVIEW_MAX) {
+    const batch = await listApprovedSellerReviews(trimmed, {
+      limit: APPROVED_REVIEW_PAGE,
+      cursor,
+    });
+    if (batch.length === 0) break;
+    out.push(...batch);
+    if (batch.length < APPROVED_REVIEW_PAGE) break;
+    cursor = batch[batch.length - 1]?.$id;
+    if (!cursor) break;
+  }
+
+  return out;
+}
+
+export type SellerReviewDistributionRow = {
+  stars: 1 | 2 | 3 | 4 | 5;
+  count: number;
+  percent: number;
+};
+
+export type SellerReviewMetrics = {
+  average: number | null;
+  count: number;
+  distribution: SellerReviewDistributionRow[];
+};
+
+export function computeSellerReviewMetrics(reviews: Review[]): SellerReviewMetrics {
+  const approved = reviews.filter((r) => r.status === "approved");
+  const count = approved.length;
+  if (count === 0) {
+    return {
+      average: null,
+      count: 0,
+      distribution: [1, 2, 3, 4, 5].map((stars) => ({
+        stars: stars as 1 | 2 | 3 | 4 | 5,
+        count: 0,
+        percent: 0,
+      })),
+    };
+  }
+
+  const buckets = new Map<number, number>();
+  for (const stars of [1, 2, 3, 4, 5]) buckets.set(stars, 0);
+  let sum = 0;
+  for (const review of approved) {
+    sum += review.rating;
+    buckets.set(review.rating, (buckets.get(review.rating) ?? 0) + 1);
+  }
+
+  const distribution: SellerReviewDistributionRow[] = [1, 2, 3, 4, 5].map(
+    (stars) => {
+      const starCount = buckets.get(stars) ?? 0;
+      return {
+        stars: stars as 1 | 2 | 3 | 4 | 5,
+        count: starCount,
+        percent: Math.round((starCount / count) * 1000) / 10,
+      };
+    },
+  );
+
+  return {
+    average: Math.round((sum / count) * 10) / 10,
+    count,
+    distribution,
+  };
+}
+
+export async function getSellerReviewMetrics(
+  sellerId: string,
+): Promise<SellerReviewMetrics> {
+  const reviews = await listAllApprovedSellerReviews(sellerId);
+  return computeSellerReviewMetrics(reviews);
+}
+
+export async function getSellerRatingSummary(sellerId: string): Promise<{
+  average: number | null;
+  count: number;
+}> {
+  const metrics = await getSellerReviewMetrics(sellerId);
+  return { average: metrics.average, count: metrics.count };
+}
+
+export type OwnSellerReviewInsights = {
+  metrics: SellerReviewMetrics;
+  reviews: Review[];
+};
+
+/** Approved reviews + metrics for the signed-in seller (session). */
+export async function getOwnSellerReviewInsights(): Promise<OwnSellerReviewInsights> {
+  const empty: OwnSellerReviewInsights = {
+    metrics: computeSellerReviewMetrics([]),
+    reviews: [],
+  };
+
+  if (!hasAppwritePublicConfig()) return empty;
+
+  const user = await getLoggedInUser();
+  if (!user || !userHasLabel(user, ROLE_LABELS.seller)) return empty;
+
+  const reviews = await listAllApprovedSellerReviews(user.$id);
+  return {
+    metrics: computeSellerReviewMetrics(reviews),
+    reviews,
+  };
+}
+
+export async function getOwnReviewForRequest(
+  requestId: string,
+): Promise<Review | null> {
+  const user = await getLoggedInUser();
+  if (!user) return null;
+  const review = await findReviewForRequest(requestId.trim());
+  if (!review || review.buyerId !== user.$id) return null;
+  return review;
+}
+
+/** UI gating: create re-validates eligibility server-side. */
+export async function canReviewSellerRequest(
+  requestId: string,
 ): Promise<ReviewEligibility> {
   if (!hasAppwritePublicConfig()) return { eligible: false };
 
   const user = await getLoggedInUser();
   if (!user) return { eligible: false };
 
-  const trimmed = productId?.trim();
+  const trimmed = requestId?.trim();
   if (!trimmed) return { eligible: false };
 
-  const orderId = await findEligibleReviewOrder(trimmed, user.$id);
-  if (!orderId) return { eligible: false };
+  const detail = await getOwnPurchaseRequestDetail(trimmed);
+  if (!detail || detail.request.buyerId !== user.$id) {
+    return { eligible: false };
+  }
+  if (detail.request.status !== "sold") {
+    return { eligible: false };
+  }
 
-  return { eligible: true, orderId };
+  const existing = await findReviewForRequest(trimmed);
+  if (existing) {
+    return {
+      eligible: false,
+      requestId: trimmed,
+      existingStatus: existing.status,
+    };
+  }
+
+  return { eligible: true, requestId: trimmed };
 }
 
-/** Create a review after verifying a completed own order contains the product. */
-export async function createProductReview(
-  input: CreateProductReviewInput,
+/** Create a pending seller review after a sold own request. */
+export async function createSellerReview(
+  input: CreateSellerReviewInput,
 ): Promise<ReviewActionState> {
   if (!hasAppwritePublicConfig()) return notConfiguredState();
 
@@ -339,38 +471,20 @@ export async function createProductReview(
     const user = await requireUser();
     await assertReviewMutationRateLimit(user.$id);
 
-    const trimmedProductId = input.productId?.trim();
-    if (!trimmedProductId) {
+    const requestId = input.requestId?.trim() ?? "";
+    if (!requestId) {
       return {
-        error: "Product id is required.",
+        error: "Request id is required.",
         errorCode: REVIEW_ERROR_CODES.INVALID_INPUT,
       };
     }
 
-    const productRatingError = validateRating(
-      input.productRating,
-      "Product rating",
-    );
-    if (productRatingError) {
+    const rating = asRating(input.rating);
+    if (!rating) {
       return {
-        error: productRatingError,
+        error: "Rating must be between 1 and 5.",
         errorCode: REVIEW_ERROR_CODES.INVALID_INPUT,
       };
-    }
-
-    let sellerRating: number | null = null;
-    if (input.sellerRating != null && input.sellerRating !== undefined) {
-      const sellerRatingError = validateRating(
-        input.sellerRating,
-        "Seller rating",
-      );
-      if (sellerRatingError) {
-        return {
-          error: sellerRatingError,
-          errorCode: REVIEW_ERROR_CODES.INVALID_INPUT,
-        };
-      }
-      sellerRating = input.sellerRating;
     }
 
     const comment =
@@ -378,20 +492,26 @@ export async function createProductReview(
         ? null
         : String(input.comment).trim().slice(0, 2000) || null;
 
-    const product = await getProduct(trimmedProductId);
-    if (!product) {
-      return {
-        error: "This product is not available.",
-        errorCode: REVIEW_ERROR_CODES.PRODUCT_UNAVAILABLE,
-      };
-    }
-
-    const orderId = await findEligibleReviewOrder(trimmedProductId, user.$id);
-    if (!orderId) {
+    const detail = await getOwnPurchaseRequestDetail(requestId);
+    if (!detail || detail.request.buyerId !== user.$id) {
       const err = new Error("Not eligible to review.");
       (err as Error & { code: ReviewErrorCode }).code =
         REVIEW_ERROR_CODES.NOT_ELIGIBLE;
       throw err;
+    }
+    if (detail.request.status !== "sold") {
+      const err = new Error("Not eligible to review.");
+      (err as Error & { code: ReviewErrorCode }).code =
+        REVIEW_ERROR_CODES.NOT_ELIGIBLE;
+      throw err;
+    }
+
+    const existing = await findReviewForRequest(requestId);
+    if (existing) {
+      return {
+        error: "You already submitted a review for this request.",
+        errorCode: REVIEW_ERROR_CODES.ALREADY_REVIEWED,
+      };
     }
 
     const { tables } = await createSessionClient();
@@ -400,13 +520,12 @@ export async function createProductReview(
       tableId: TABLE_REVIEWS,
       rowId: ID.unique(),
       data: {
-        orderId,
-        productId: trimmedProductId,
+        requestId,
         buyerId: user.$id,
-        sellerId: product.sellerId,
-        productRating: input.productRating,
-        sellerRating,
+        sellerId: detail.request.sellerId,
+        rating,
         comment,
+        status: "pending",
       },
       permissions: reviewRowPermissions(user.$id),
     });
@@ -419,14 +538,176 @@ export async function createProductReview(
       };
     }
 
-    return { success: "Thank you. Your review was submitted." };
+    return {
+      success: "Thanks. Your review was submitted and is waiting for admin approval.",
+    };
   } catch (err) {
     if (isUniqueConstraintError(err)) {
       return {
-        error: "You already reviewed this product for this order.",
+        error: "You already submitted a review for this request.",
         errorCode: REVIEW_ERROR_CODES.ALREADY_REVIEWED,
       };
     }
     return mapReviewError(err);
   }
+}
+
+export async function listReviewsForAdmin(opts?: {
+  status?: ReviewStatus;
+  cursor?: string;
+  limit?: number;
+}): Promise<AdminReviewView[]> {
+  await requireLabel("admin");
+  if (!hasAppwritePublicConfig()) return [];
+
+  const limit = Math.min(Math.max(opts?.limit ?? 50, 1), 100);
+  const queries = [Query.orderDesc("$createdAt"), Query.limit(limit)];
+  if (opts?.status) {
+    queries.unshift(Query.equal("status", opts.status));
+  } else {
+    queries.unshift(Query.equal("status", "pending"));
+  }
+  if (opts?.cursor?.trim()) {
+    queries.push(Query.cursorAfter(opts.cursor.trim()));
+  }
+
+  try {
+    const { tables } = await createAdminClient();
+    const result = await tables.listRows({
+      databaseId: DATABASE_ID,
+      tableId: TABLE_REVIEWS,
+      queries,
+    });
+    const out: AdminReviewView[] = [];
+    for (const row of result.rows) {
+      const review = asReview(row as unknown as Record<string, unknown>);
+      if (!review) continue;
+      out.push({
+        $id: review.$id,
+        requestId: review.requestId,
+        buyerId: review.buyerId,
+        sellerId: review.sellerId,
+        rating: review.rating,
+        comment: review.comment,
+        status: review.status,
+        $createdAt: review.$createdAt ?? null,
+      });
+    }
+    return out;
+  } catch (error) {
+    logError("reviews.listAdmin", error);
+    return [];
+  }
+}
+
+async function moderateReview(
+  reviewId: string,
+  nextStatus: "approved" | "rejected",
+): Promise<ReviewModerationResult> {
+  if (!hasAppwritePublicConfig()) {
+    return { ok: false, error: "Reviews are not available right now." };
+  }
+
+  const admin = await requireLabel("admin");
+  const trimmed = reviewId?.trim() ?? "";
+  if (!trimmed) {
+    return { ok: false, error: "Review not found." };
+  }
+
+  try {
+    const { tables } = await createAdminClient();
+    const row = await tables.getRow({
+      databaseId: DATABASE_ID,
+      tableId: TABLE_REVIEWS,
+      rowId: trimmed,
+    });
+    const review = asReview(row as unknown as Record<string, unknown>);
+    if (!review) {
+      return { ok: false, error: "Review not found." };
+    }
+    if (review.status !== "pending") {
+      return { ok: false, error: "This review was already resolved." };
+    }
+
+    const updated = await tables.updateRowIfColumnIn({
+      databaseId: DATABASE_ID,
+      tableId: TABLE_REVIEWS,
+      rowId: review.$id,
+      column: "status",
+      values: ["pending"],
+      data: { status: nextStatus },
+    });
+
+    if (!updated) {
+      return { ok: false, error: "This review was already resolved." };
+    }
+
+    await writeAuditLog({
+      actorId: admin.$id,
+      event: nextStatus === "approved" ? "review.approved" : "review.rejected",
+      resourceId: review.$id,
+      meta: {
+        requestId: review.requestId,
+        sellerId: review.sellerId,
+        buyerId: review.buyerId,
+      },
+    });
+
+    await notifyUserSafe({
+      userId: review.buyerId,
+      type: nextStatus === "approved" ? "review.approved" : "review.rejected",
+      title:
+        nextStatus === "approved" ? "Review approved" : "Review not approved",
+      body:
+        nextStatus === "approved"
+          ? "Your seller review is now visible on their shop."
+          : "An admin did not approve your seller review.",
+      link: `/requests/${review.requestId}`,
+    });
+
+    return {
+      ok: true,
+      message:
+        nextStatus === "approved"
+          ? "Review approved."
+          : "Review rejected.",
+    };
+  } catch (error) {
+    logError("reviews.moderate", error, { reviewId: trimmed, nextStatus });
+    return { ok: false, error: "Could not update the review." };
+  }
+}
+
+export async function approveReview(
+  reviewId: string,
+): Promise<ReviewModerationResult> {
+  return moderateReview(reviewId, "approved");
+}
+
+export async function rejectReview(
+  reviewId: string,
+): Promise<ReviewModerationResult> {
+  return moderateReview(reviewId, "rejected");
+}
+
+/** @deprecated Use canReviewSellerRequest */
+export async function canReviewProduct(
+  _productId: string,
+): Promise<ReviewEligibility> {
+  return { eligible: false };
+}
+
+/** @deprecated Use listApprovedSellerReviews */
+export async function listProductReviews(
+  _productId: string,
+): Promise<Review[]> {
+  return [];
+}
+
+/** @deprecated Use createSellerReview */
+export async function createProductReview(): Promise<ReviewActionState> {
+  return {
+    error: "Product reviews are no longer supported. Review the seller from a sold request.",
+    errorCode: REVIEW_ERROR_CODES.NOT_ALLOWED,
+  };
 }

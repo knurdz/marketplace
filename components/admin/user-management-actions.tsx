@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useActionState, useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
+import { ConfirmActionDialog } from "@/components/ui/confirm-action-dialog";
 import {
   suspendUser,
   unsuspendUser,
@@ -48,57 +49,44 @@ type UserSuspendFormProps = {
 };
 
 export function UserSuspendForm({ userId, displayLabel }: UserSuspendFormProps) {
-  const [showReason, setShowReason] = useState(false);
+  const [open, setOpen] = useState(false);
   const [state, formAction, pending] = useActionState(
     suspendUser,
     suspendInitial,
   );
 
-  useManagementToast(state, () => setShowReason(false));
+  useManagementToast(state, () => setOpen(false));
 
-  if (!showReason) {
-    return (
+  return (
+    <>
       <Button
         type="button"
         variant="outline"
         size="sm"
-        onClick={() => setShowReason(true)}
+        onClick={() => setOpen(true)}
         data-testid="admin-suspend-user"
       >
         Suspend
       </Button>
-    );
-  }
-
-  return (
-    <form action={formAction} className="space-y-2">
-      <input type="hidden" name="userId" value={userId} />
-      <label className="block font-mono text-xs text-muted-foreground">
-        Reason for suspending {displayLabel}
-        <textarea
-          name="reason"
-          required
-          maxLength={500}
-          rows={3}
-          placeholder="Required. Stored in audit log"
-          className="mt-1 w-full rounded-md border border-border bg-background px-3 py-2 text-sm"
-        />
-      </label>
-      <div className="flex gap-2">
-        <Button type="submit" variant="outline" size="sm" disabled={pending} data-testid="admin-suspend-confirm">
-          {pending ? "Suspending…" : "Confirm suspend"}
-        </Button>
-        <Button
-          type="button"
-          variant="ghost"
-          size="sm"
-          disabled={pending}
-          onClick={() => setShowReason(false)}
-        >
-          Cancel
-        </Button>
-      </div>
-    </form>
+      <ConfirmActionDialog
+        open={open}
+        onOpenChange={setOpen}
+        title="Suspend user?"
+        description={`Suspend ${displayLabel}? A reason is required for the audit log.`}
+        confirmLabel="Confirm suspend"
+        pendingLabel="Suspending…"
+        confirmVariant="destructive"
+        pending={pending}
+        formAction={formAction}
+        hiddenFields={{ userId }}
+        confirmTestId="admin-suspend-confirm"
+        note={{
+          name: "reason",
+          label: `Reason for suspending ${displayLabel}`,
+          placeholder: "Required. Stored in audit log",
+        }}
+      />
+    </>
   );
 }
 

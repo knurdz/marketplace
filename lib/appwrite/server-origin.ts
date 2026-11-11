@@ -1,26 +1,28 @@
 import { headers } from "next/headers";
-import { getAppUrl } from "./config";
+import { getAuthAllowedHosts, getAppUrl } from "@/lib/config/app";
 
 /**
  * Checks if a host is in the allowed domain list.
- * Accepts the production domain and Vercel preview domains.
+ * Accepts local + production auth origins and Vercel preview domains.
  */
 function isAllowedHost(host: string): boolean {
-  const lower = host.toLowerCase().split(":")[0] ?? "";
-  // Production domain
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL?.trim().replace(/\/$/, "");
-  if (appUrl) {
-    try {
-      const configuredHost = new URL(appUrl).hostname;
-      if (lower === configuredHost) return true;
-    } catch {
-      // Invalid URL in env: skip
-    }
+  const raw = host.toLowerCase();
+  const hostname = raw.split(":")[0] ?? "";
+  const allowed = getAuthAllowedHosts().map((h) => h.toLowerCase());
+  if (allowed.includes(raw) || allowed.includes(hostname)) return true;
+  // Host-only patterns without port (e.g. marketplace.knurdz.org)
+  if (
+    allowed.some((entry) => {
+      const entryHost = entry.split(":")[0] ?? "";
+      return entryHost === hostname;
+    })
+  ) {
+    return true;
   }
   // Vercel preview deployments
-  if (lower.endsWith(".vercel.app")) return true;
+  if (hostname.endsWith(".vercel.app")) return true;
   // Local development
-  if (lower === "localhost" || lower === "127.0.0.1") return true;
+  if (hostname === "localhost" || hostname === "127.0.0.1") return true;
   return false;
 }
 

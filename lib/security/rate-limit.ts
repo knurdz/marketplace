@@ -22,17 +22,11 @@ export const RATE_LIMITS = {
   recoveryComplete: { limit: 10, windowMs: 15 * MS_MINUTE },
   verifyComplete: { limit: 10, windowMs: 15 * MS_MINUTE },
   upload: { limit: 20, windowMs: MS_HOUR },
-  cart: { limit: 60, windowMs: MS_MINUTE },
   wishlist: { limit: 60, windowMs: MS_MINUTE },
   reviews: { limit: 20, windowMs: MS_MINUTE },
   reports: { limit: 10, windowMs: MS_MINUTE },
-  checkout: { limit: 10, windowMs: MS_MINUTE },
-  bankSlip: { limit: 10, windowMs: MS_MINUTE },
-  cancelOrder: { limit: 10, windowMs: MS_MINUTE },
-  reorder: { limit: 10, windowMs: MS_MINUTE },
+  purchaseRequests: { limit: 20, windowMs: MS_MINUTE },
   listings: { limit: 20, windowMs: MS_HOUR },
-  fulfillment: { limit: 30, windowMs: MS_MINUTE },
-  messages: { limit: 30, windowMs: MS_MINUTE },
   views: { limit: 1, windowMs: 24 * MS_HOUR },
 } as const;
 

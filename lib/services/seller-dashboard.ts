@@ -1,23 +1,19 @@
-import type { Order, Product, SellerProfile } from "@/lib/types";
-import {
-  getSellerEarnings,
-  type SellerEarnings,
-  type SellerEarningsLine,
-} from "./seller-earnings";
+import type { Product, PurchaseRequest, SellerProfile } from "@/lib/types";
 import { listOwnProducts } from "./seller-listings";
-import {
-  listSellerOrderItemsForOrderIds,
-  listSellerOrders,
-} from "./seller-orders";
+import { listSellerPurchaseRequests } from "./purchase-requests";
 import { getSellerMetrics, type SellerMetrics } from "./seller-metrics";
 import { getOwnSellerProfile } from "./seller-application";
+import {
+  getOwnSellerReviewInsights,
+  type OwnSellerReviewInsights,
+} from "./reviews";
 import { getSellerViewInsights, type SellerViewInsights } from "./view-stats";
 
-const DEFAULT_CURRENCY = "LKR";
 const LOW_STOCK_THRESHOLD = 5;
 
 export type SellerAnalyticsRange = "30d" | "12m";
 
+/** Time-bucket sold request counts (revenue retained at 0 for legacy chart shape). */
 export type SellerSalesBucket = {
   bucket: string;
   orderCount: number;
@@ -25,11 +21,10 @@ export type SellerSalesBucket = {
   currency: string;
 };
 
-export type SellerProductEarnings = {
-  productId: string;
-  title: string;
-  quantity: number;
-  revenue: number;
+export type SellerRequestDayBucket = {
+  bucket: string;
+  newRequests: number;
+  sold: number;
 };
 
 export type SellerDashboardSnapshot = {
@@ -40,26 +35,18 @@ export type SellerDashboardSnapshot = {
     draft: number;
     pendingReview: number;
   };
-  recentOrders: Order[];
+  recentRequests: PurchaseRequest[];
   lowStock: Product[];
   shop: {
     shopName: string | null;
     slug: string | null;
-    hasBank: boolean;
     hasPolicies: boolean;
   };
   earningsSeries: SellerSalesBucket[];
-  earnings: SellerEarnings;
+  requestSeries: SellerRequestDayBucket[];
   views: SellerViewInsights;
   viewProducts: Array<{ productId: string; title: string; count: number }>;
-};
-
-export type SellerEarningsAnalytics = {
-  range: SellerAnalyticsRange;
-  currency: string;
-  series: SellerSalesBucket[];
-  byProduct: SellerProductEarnings[];
-  earnings: SellerEarnings;
+  reviewInsights: OwnSellerReviewInsights;
 };
 
 function toDayBucket(iso: string): string | null {
@@ -71,18 +58,9 @@ function toDayBucket(iso: string): string | null {
   return `${y}-${m}-${day}`;
 }
 
-function toMonthBucket(iso: string): string | null {
-  const d = new Date(iso);
-  if (Number.isNaN(d.getTime())) return null;
-  const y = d.getUTCFullYear();
-  const m = String(d.getUTCMonth() + 1).padStart(2, "0");
-  return `${y}-${m}`;
-}
-
 function resolveRange(range?: SellerAnalyticsRange): {
   start: Date;
   end: Date;
-  bucket: "day" | "month";
 } {
   const now = new Date();
   const selected = range === "12m" ? "12m" : "30d";
@@ -92,75 +70,87 @@ function resolveRange(range?: SellerAnalyticsRange): {
     );
     const start = new Date(end);
     start.setUTCDate(start.getUTCDate() - 30);
-    return { start, end, bucket: "day" };
+    return { start, end };
   }
   const end = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() + 1, 1));
   const start = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() - 11, 1));
-  return { start, end, bucket: "month" };
+  return { start, end };
 }
 
-function generateBucketKeys(
-  start: Date,
-  end: Date,
-  bucket: "day" | "month",
-): string[] {
+function generateDayKeys(start: Date, end: Date): string[] {
   const keys: string[] = [];
-  if (bucket === "day") {
-    const cur = new Date(start);
-    while (cur < end) {
-      const key = toDayBucket(cur.toISOString());
-      if (key) keys.push(key);
-      cur.setUTCDate(cur.getUTCDate() + 1);
-    }
-    return keys;
-  }
-  const cur = new Date(Date.UTC(start.getUTCFullYear(), start.getUTCMonth(), 1));
+  const cur = new Date(start);
   while (cur < end) {
-    const key = toMonthBucket(cur.toISOString());
+    const key = toDayBucket(cur.toISOString());
     if (key) keys.push(key);
-    cur.setUTCMonth(cur.getUTCMonth() + 1);
+    cur.setUTCDate(cur.getUTCDate() + 1);
   }
   return keys;
 }
 
-export function bucketSellerEarnings(
-  lines: SellerEarningsLine[],
+function bucketSoldRequests(
+  requests: PurchaseRequest[],
   range: SellerAnalyticsRange,
-  currency: string,
 ): SellerSalesBucket[] {
-  const { start, end, bucket } = resolveRange(range);
-  const keys = generateBucketKeys(start, end, bucket);
+  const { start, end } = resolveRange(range);
+  const keys = generateDayKeys(start, end);
   const map = new Map<string, SellerSalesBucket>();
   for (const key of keys) {
-    map.set(key, {
-      bucket: key,
-      orderCount: 0,
-      revenue: 0,
-      currency,
-    });
+    map.set(key, { bucket: key, orderCount: 0, revenue: 0, currency: "LKR" });
   }
 
-  const seenOrders = new Set<string>();
-  for (const line of lines) {
-    if (!line.paidAt) continue;
-    const paid = new Date(line.paidAt);
-    if (Number.isNaN(paid.getTime()) || paid < start || paid >= end) continue;
-    const key =
-      bucket === "day" ? toDayBucket(line.paidAt) : toMonthBucket(line.paidAt);
+  for (const request of requests) {
+    if (request.status !== "sold" || !request.$createdAt) continue;
+    const created = new Date(request.$createdAt);
+    if (Number.isNaN(created.getTime()) || created < start || created >= end) {
+      continue;
+    }
+    const key = toDayBucket(request.$createdAt);
     if (!key) continue;
     const row = map.get(key);
-    if (!row) continue;
-    row.revenue += line.payment.amount;
-    if (!seenOrders.has(`${key}:${line.order.$id}`)) {
-      seenOrders.add(`${key}:${line.order.$id}`);
-      row.orderCount += 1;
-    }
+    if (row) row.orderCount += 1;
   }
 
-  return [...map.values()].map((row) => ({
-    ...row,
-    revenue: Number.isFinite(row.revenue) ? row.revenue : 0,
-  }));
+  return [...map.values()];
+}
+
+function bucketNewAndSoldRequests(
+  allRequests: PurchaseRequest[],
+  soldRequests: PurchaseRequest[],
+  range: SellerAnalyticsRange,
+): SellerRequestDayBucket[] {
+  const { start, end } = resolveRange(range);
+  const keys = generateDayKeys(start, end);
+  const map = new Map<string, SellerRequestDayBucket>();
+  for (const key of keys) {
+    map.set(key, { bucket: key, newRequests: 0, sold: 0 });
+  }
+
+  for (const request of allRequests) {
+    if (!request.$createdAt) continue;
+    const created = new Date(request.$createdAt);
+    if (Number.isNaN(created.getTime()) || created < start || created >= end) {
+      continue;
+    }
+    const key = toDayBucket(request.$createdAt);
+    if (!key) continue;
+    const row = map.get(key);
+    if (row) row.newRequests += 1;
+  }
+
+  for (const request of soldRequests) {
+    if (request.status !== "sold" || !request.$createdAt) continue;
+    const created = new Date(request.$createdAt);
+    if (Number.isNaN(created.getTime()) || created < start || created >= end) {
+      continue;
+    }
+    const key = toDayBucket(request.$createdAt);
+    if (!key) continue;
+    const row = map.get(key);
+    if (row) row.sold += 1;
+  }
+
+  return [...map.values()];
 }
 
 function shopCompleteness(profile: SellerProfile | null): SellerDashboardSnapshot["shop"] {
@@ -168,30 +158,36 @@ function shopCompleteness(profile: SellerProfile | null): SellerDashboardSnapsho
     return {
       shopName: null,
       slug: null,
-      hasBank: false,
       hasPolicies: false,
     };
   }
   return {
     shopName: profile.shopName,
     slug: profile.slug,
-    hasBank: Boolean(
-      profile.bankName && profile.bankAccountName && profile.bankAccountNumber,
-    ),
     hasPolicies: Boolean(profile.returnPolicy || profile.shippingPolicy),
   };
 }
 
 export async function getSellerDashboardSnapshot(): Promise<SellerDashboardSnapshot> {
-  const [metrics, products, recentOrders, earnings, profile, views] =
-    await Promise.all([
-      getSellerMetrics(),
-      listOwnProducts({ limit: 100 }),
-      listSellerOrders({ limit: 5 }),
-      getSellerEarnings(),
-      getOwnSellerProfile(),
-      getSellerViewInsights(),
-    ]);
+  const [
+    metrics,
+    products,
+    recentRequests,
+    profile,
+    views,
+    soldRequests,
+    allRequests,
+    reviewInsights,
+  ] = await Promise.all([
+    getSellerMetrics(),
+    listOwnProducts({ limit: 100 }),
+    listSellerPurchaseRequests({ limit: 5 }),
+    getOwnSellerProfile(),
+    getSellerViewInsights(),
+    listSellerPurchaseRequests({ status: "sold", limit: 100 }),
+    listSellerPurchaseRequests({ limit: 100 }),
+    getOwnSellerReviewInsights(),
+  ]);
 
   const listingCounts = {
     total: products.length,
@@ -213,15 +209,11 @@ export async function getSellerDashboardSnapshot(): Promise<SellerDashboardSnaps
   return {
     metrics,
     listingCounts,
-    recentOrders,
+    recentRequests,
     lowStock,
     shop: shopCompleteness(profile),
-    earningsSeries: bucketSellerEarnings(
-      earnings.allLines,
-      "30d",
-      earnings.currency || DEFAULT_CURRENCY,
-    ),
-    earnings,
+    earningsSeries: bucketSoldRequests(soldRequests, "30d"),
+    requestSeries: bucketNewAndSoldRequests(allRequests, soldRequests, "30d"),
     views,
     viewProducts: views.topProducts.map((row) => ({
       productId: row.productId,
@@ -230,43 +222,7 @@ export async function getSellerDashboardSnapshot(): Promise<SellerDashboardSnaps
         products.find((product) => product.$id === row.productId)?.title ??
         "Listing",
     })),
-  };
-}
-
-export async function getSellerEarningsAnalytics(
-  range: SellerAnalyticsRange = "30d",
-): Promise<SellerEarningsAnalytics> {
-  const earnings = await getSellerEarnings();
-  const currency = earnings.currency || DEFAULT_CURRENCY;
-  const series = bucketSellerEarnings(earnings.allLines, range, currency);
-
-  const paidOrderIds = [
-    ...new Set(earnings.allLines.map((line) => line.order.$id)),
-  ];
-  const items = await listSellerOrderItemsForOrderIds(paidOrderIds);
-  const byProductMap = new Map<string, SellerProductEarnings>();
-  for (const item of items) {
-    const current = byProductMap.get(item.productId) ?? {
-      productId: item.productId,
-      title: item.title,
-      quantity: 0,
-      revenue: 0,
-    };
-    current.quantity += item.quantity;
-    current.revenue += item.lineTotal;
-    byProductMap.set(item.productId, current);
-  }
-
-  const byProduct = [...byProductMap.values()].sort(
-    (a, b) => b.revenue - a.revenue,
-  );
-
-  return {
-    range,
-    currency,
-    series,
-    byProduct,
-    earnings,
+    reviewInsights,
   };
 }
 

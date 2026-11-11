@@ -1,21 +1,23 @@
 # Knurdz Marketplace
 
-Multi-role marketplace web app built with **Next.js**, **MariaDB** (Drizzle), **Better Auth**, local disk storage, and in-app PayHere routes.
+Multi-role marketplace web app built with **Next.js**, **MariaDB** (Drizzle), **Better Auth**, and local disk storage. The platform connects buyers and sellers; it does **not** process payments.
 
 ## Portals
 
-| Portal     | Who              | Purpose                                   |
-| ---------- | ---------------- | ----------------------------------------- |
-| Storefront | Buyers           | Browse, cart, checkout, orders            |
-| Seller     | Approved sellers | Listings, inventory, fulfillment          |
-| Admin      | Admins           | Approvals, moderation, payments oversight |
+| Portal     | Who              | Purpose                                              |
+| ---------- | ---------------- | ---------------------------------------------------- |
+| Storefront | Buyers           | Browse, wishlist, send buy requests                  |
+| Seller     | Approved sellers | Listings, inventory, resolve buy requests            |
+| Admin      | Admins           | Approvals, moderation, read-only request oversight   |
 
-## Payments (MVP)
+## Buy flow (MVP)
 
-- **PayHere** — sandbox card checkout (server-side hash + notify verification). **Disabled in the app by default** (`checkout.payhere_enabled=false`) until merchant authorization; admin can enable later. Test cards and click-path demo: [`docs/agent/PAYHERE.md`](./docs/agent/PAYHERE.md#sandbox-demo-step-127).
-- **Bank transfer** — instructions + slip upload, then verification
-- **Cash on delivery (COD)** — buyer confirms on `/checkout/cod`; order marked paid for fulfillment (cash collected on delivery)
-- **Free** — zero-price listings / checkout without a gateway
+1. Buyer opens a product, chooses a quantity, and taps **Buy**.
+2. A request is created; both sides see phone and email on that request.
+3. They settle the sale personally.
+4. Seller marks the request **sold** (stock decreases) or **cancelled** (stock unchanged).
+
+See [`docs/agent/PAYHERE.md`](./docs/agent/PAYHERE.md) (payments note) and [`docs/agent/SCHEMA.md`](./docs/agent/SCHEMA.md).
 
 ## Team & agent docs
 
@@ -51,8 +53,7 @@ Open [http://localhost:3000](http://localhost:3000). The UI theme matches [knurd
 | `npm run format`       | Prettier write                 |
 | `npm run format:check` | Prettier check                 |
 | `npm run build`        | Production build               |
-| `npm run test:e2e`     | Playwright Guide §10 MVP suite (live Appwrite) |
-| `npm run test:e2e:payhere` | Same + PayHere sandbox path (`PAYHERE_E2E=1`; requires **6.17** console setup) |
+| `npm run test:e2e`     | Playwright contact-request smoke suite |
 
 Set `DATABASE_URL` and `NEXT_PUBLIC_APP_URL` in `.env.local` (see `.env.example`). Do not commit secrets.
 

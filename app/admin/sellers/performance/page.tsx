@@ -62,7 +62,7 @@ export default async function AdminSellerPerformancePage({
     : null;
 
   return (
-    <div>
+    <div className="w-full">
       <PortalPageHeader
         title="Seller performance"
         description="Basic KPIs for approved sellers. Revenue matches paid payments on the seller earnings view. Pending is paid through ready-for-pickup, not unpaid checkout."
@@ -83,17 +83,27 @@ export default async function AdminSellerPerformancePage({
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead className="px-4">Shop</TableHead>
-                <TableHead className="px-4">Slug</TableHead>
-                <TableHead className="px-4 text-right">Orders</TableHead>
-                <TableHead className="px-4 text-right">Pending</TableHead>
-                <TableHead className="px-4 text-right">Revenue</TableHead>
+                <TableHead>
+                  Shop
+                </TableHead>
+                <TableHead>
+                  Slug
+                </TableHead>
+                <TableHead>
+                  Orders
+                </TableHead>
+                <TableHead>
+                  Pending
+                </TableHead>
+                <TableHead>
+                  Revenue
+                </TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {rows.map((row) => (
                 <TableRow key={row.sellerId}>
-                  <TableCell className="px-4 font-medium">
+                  <TableCell className="font-medium">
                     <Link
                       href={`/shop/${row.slug}`}
                       className="hover:text-accent hover:underline hover:underline-offset-2"
@@ -101,16 +111,16 @@ export default async function AdminSellerPerformancePage({
                       {row.shopName}
                     </Link>
                   </TableCell>
-                  <TableCell className="px-4 font-mono text-xs text-muted-foreground">
+                  <TableCell className="text-xs text-muted-foreground">
                     /shop/{row.slug}
                   </TableCell>
-                  <TableCell className="px-4 text-right font-mono text-sm tabular-nums">
+                  <TableCell className="text-sm tabular-nums">
                     {formatCount(row.orderCount)}
                   </TableCell>
-                  <TableCell className="px-4 text-right font-mono text-sm tabular-nums">
+                  <TableCell className="text-sm tabular-nums">
                     {formatCount(row.pendingCount)}
                   </TableCell>
-                  <TableCell className="px-4 text-right font-mono text-sm tabular-nums">
+                  <TableCell className="text-sm font-medium tabular-nums">
                     {formatRevenue(row.revenue, row.currency)}
                   </TableCell>
                 </TableRow>

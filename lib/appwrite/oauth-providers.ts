@@ -1,4 +1,4 @@
-export const OAUTH_PROVIDERS = ["google", "apple", "facebook"] as const;
+export const OAUTH_PROVIDERS = ["google", "github"] as const;
 export type OAuthProviderId = (typeof OAUTH_PROVIDERS)[number];
 
 export function parseOAuthProvider(raw: string): OAuthProviderId | null {

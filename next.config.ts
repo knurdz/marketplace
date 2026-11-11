@@ -1,4 +1,8 @@
+import path from "node:path";
+import { fileURLToPath } from "node:url";
 import type { NextConfig } from "next";
+
+const appRoot = path.dirname(fileURLToPath(import.meta.url));
 
 // React dev tooling needs eval(); production never does, so keep it out of the prod CSP.
 const isDev = process.env.NODE_ENV !== "production";
@@ -6,8 +10,6 @@ const scriptSrc = [
   "'self'",
   "'unsafe-inline'",
   ...(isDev ? ["'unsafe-eval'"] : []),
-  "https://sandbox.payhere.lk",
-  "https://www.payhere.lk",
 ].join(" ");
 
 const securityHeaders = [
@@ -32,8 +34,6 @@ const securityHeaders = [
     value: "camera=(), microphone=(), geolocation=()",
   },
   {
-    // Baseline CSP: allow self, Appwrite, PayHere sandbox, inline styles (needed by many UI libs).
-    // Tighten further once all external origins are audited.
     key: "Content-Security-Policy",
     value: [
       "default-src 'self'",
@@ -41,26 +41,26 @@ const securityHeaders = [
       "style-src 'self' 'unsafe-inline'",
       "img-src 'self' data: blob: https://sgp.cloud.appwrite.io https://*.cloud.appwrite.io https://images.unsplash.com",
       "font-src 'self'",
-      "connect-src 'self' https://sgp.cloud.appwrite.io https://*.cloud.appwrite.io https://sandbox.payhere.lk https://www.payhere.lk",
-      "frame-src https://sandbox.payhere.lk https://www.payhere.lk",
+      "connect-src 'self' https://sgp.cloud.appwrite.io https://*.cloud.appwrite.io",
       "frame-ancestors 'none'",
       "base-uri 'self'",
-      "form-action 'self' https://sandbox.payhere.lk https://www.payhere.lk",
+      "form-action 'self'",
     ].join("; "),
   },
 ];
 
 const nextConfig: NextConfig = {
+  turbopack: {
+    root: appRoot,
+  },
   async headers() {
     return [
       {
-        // Apply security headers to all routes
         source: "/(.*)",
         headers: securityHeaders,
       },
     ];
   },
-
   images: {
     remotePatterns: [
       {

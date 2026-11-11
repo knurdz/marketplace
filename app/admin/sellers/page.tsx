@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { ExternalLink } from "lucide-react";
 import {
   SellerApproveButton,
   SellerRejectForm,
@@ -6,8 +7,10 @@ import {
 import {
   DataTableEmpty,
   DataTableShell,
+  FilterTabs,
 } from "@/components/layout/data-table-shell";
 import { PortalPageHeader } from "@/components/layout/portal-page-header";
+import { StatusPill, type StatusTone } from "@/components/layout/status-pill";
 import { Button } from "@/components/ui/button";
 import {
   Table,
@@ -17,7 +20,21 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { listPendingSellerApplications } from "@/lib/services";
+import {
+  listPendingSellerApplications,
+  listSellerProfilesAdmin,
+} from "@/lib/services/seller-approvals";
+import type { SellerStatus } from "@/lib/types";
+
+type SellersFilter = "all" | "pending";
+
+type PageProps = {
+  searchParams: Promise<{ filter?: string }>;
+};
+
+function parseFilter(raw: string | undefined): SellersFilter {
+  return raw === "all" ? "all" : "pending";
+}
 
 function formatAppliedAt(iso: string | undefined): string {
   if (!iso) return "-";
@@ -31,14 +48,43 @@ function formatAppliedAt(iso: string | undefined): string {
   }
 }
 
-export default async function AdminSellersPage() {
-  const pending = await listPendingSellerApplications();
+function statusTone(status: SellerStatus): StatusTone {
+  if (status === "approved") return "positive";
+  if (status === "pending") return "warning";
+  return "danger";
+}
+
+export default async function AdminSellersPage({ searchParams }: PageProps) {
+  const { filter: filterRaw } = await searchParams;
+  const filter = parseFilter(filterRaw);
+
+  const sellers =
+    filter === "pending"
+      ? await listPendingSellerApplications()
+      : await listSellerProfilesAdmin();
+
+  const filterBar = (
+    <FilterTabs
+      tabs={[
+        {
+          href: "/admin/sellers",
+          label: "Pending",
+          active: filter === "pending",
+        },
+        {
+          href: "/admin/sellers?filter=all",
+          label: "All sellers",
+          active: filter === "all",
+        },
+      ]}
+    />
+  );
 
   return (
-    <div>
+    <div className="w-full">
       <PortalPageHeader
-        title="Seller approvals"
-        description="Review pending applications. Approving grants the seller label and unlocks the seller portal."
+        title="Sellers"
+        description="Browse all seller profiles or review pending applications. Approving grants the seller label and unlocks the seller portal."
         actions={
           <Button variant="secondary" size="sm" asChild>
             <Link href="/admin/sellers/performance">Performance</Link>
@@ -46,48 +92,53 @@ export default async function AdminSellersPage() {
         }
       />
 
-      {pending.length === 0 ? (
-        <DataTableEmpty
-          className="mt-6"
-          message="No pending applications. New seller registrations appear here until you approve or reject them."
-        />
-      ) : (
-        <DataTableShell className="mt-6">
+      {sellers.length === 0 ? (
+        <div className="mt-6 space-y-4">
+          {filterBar}
+          <DataTableEmpty
+            message={
+              filter === "pending"
+                ? "No pending applications. New seller registrations appear here until you approve or reject them."
+                : "No sellers yet."
+            }
+          />
+        </div>
+      ) : filter === "pending" ? (
+        <div className="mt-6 space-y-4">
+          {filterBar}
+        <DataTableShell>
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead className="px-4">Shop</TableHead>
-                <TableHead className="px-4">Bank</TableHead>
-                <TableHead className="px-4">Applied</TableHead>
-                <TableHead className="px-4">Actions</TableHead>
+                <TableHead>
+                  Shop
+                </TableHead>
+                <TableHead>
+                  Applied
+                </TableHead>
+                <TableHead>
+                  Actions
+                </TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {pending.map((app) => (
+              {sellers.map((app) => (
                 <TableRow key={app.$id} className="align-top">
-                  <TableCell className="max-w-[420px] px-4 py-3 whitespace-normal">
+                  <TableCell className="max-w-[420px] whitespace-normal">
                     <p className="font-medium tracking-tight">{app.shopName}</p>
-                    <p className="mt-0.5 font-mono text-xs text-muted-foreground">
+                    <p className="mt-0.5 text-xs text-muted-foreground">
                       /shop/{app.slug}
                     </p>
                     {app.bio ? (
-                      <p className="mt-2 text-sm text-muted-foreground">
+                      <p className="mt-1.5 text-xs text-muted-foreground">
                         {app.bio}
                       </p>
                     ) : null}
                   </TableCell>
-                  <TableCell className="px-4 py-3 font-mono text-xs text-muted-foreground">
-                    {app.bankName ?? "-"}
-                    {app.maskedBankAccountNumber ? (
-                      <span className="block">
-                        {app.maskedBankAccountNumber}
-                      </span>
-                    ) : null}
-                  </TableCell>
-                  <TableCell className="px-4 py-3 font-mono text-xs text-muted-foreground">
+                  <TableCell className="text-xs text-muted-foreground">
                     {formatAppliedAt(app.$createdAt)}
                   </TableCell>
-                  <TableCell className="w-[260px] max-w-[260px] px-4 py-3 whitespace-normal">
+                  <TableCell className="w-[260px] max-w-[260px] whitespace-normal">
                     <div className="flex flex-wrap items-start gap-2">
                       <SellerApproveButton sellerProfileId={app.$id} />
                       <SellerRejectForm
@@ -101,6 +152,85 @@ export default async function AdminSellersPage() {
             </TableBody>
           </Table>
         </DataTableShell>
+        </div>
+      ) : (
+        <div className="mt-6 space-y-4">
+          {filterBar}
+        <DataTableShell>
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>
+                  Shop
+                </TableHead>
+                <TableHead>
+                  Status
+                </TableHead>
+                <TableHead>
+                  Applied
+                </TableHead>
+                <TableHead>
+                  Actions
+                </TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {sellers.map((row) => (
+                <TableRow key={row.$id} className="align-top">
+                  <TableCell className="max-w-[420px] whitespace-normal">
+                    <p className="font-medium tracking-tight">{row.shopName}</p>
+                    <p className="mt-0.5 text-xs text-muted-foreground">
+                      /shop/{row.slug}
+                    </p>
+                    {row.bio ? (
+                      <p className="mt-1.5 text-xs text-muted-foreground">
+                        {row.bio}
+                      </p>
+                    ) : null}
+                    {row.status === "rejected" && row.rejectionReason ? (
+                      <p className="mt-1.5 text-xs text-rose-700">
+                        {row.rejectionReason}
+                      </p>
+                    ) : null}
+                  </TableCell>
+                  <TableCell>
+                    <StatusPill
+                      label={row.status}
+                      tone={statusTone(row.status)}
+                    />
+                  </TableCell>
+                  <TableCell className="text-xs text-muted-foreground">
+                    {formatAppliedAt(row.$createdAt)}
+                  </TableCell>
+                  <TableCell className="w-[260px] max-w-[260px] whitespace-normal">
+                    {row.status === "pending" ? (
+                      <div className="flex flex-wrap items-start gap-2">
+                        <SellerApproveButton sellerProfileId={row.$id} />
+                        <SellerRejectForm
+                          sellerProfileId={row.$id}
+                          shopName={row.shopName}
+                        />
+                      </div>
+                    ) : row.status === "approved" ? (
+                      <Button variant="outline" size="xs" asChild>
+                        <Link href={`/shop/${row.slug}`}>
+                          <ExternalLink
+                            data-icon="inline-start"
+                            className="size-3"
+                          />
+                          View shop
+                        </Link>
+                      </Button>
+                    ) : (
+                      <p className="text-xs text-muted-foreground">Rejected</p>
+                    )}
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </DataTableShell>
+        </div>
       )}
     </div>
   );

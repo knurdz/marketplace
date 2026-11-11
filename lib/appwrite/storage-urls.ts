@@ -1,8 +1,15 @@
 import { BUCKET_AVATARS } from "./config";
 import { getAppUrl } from "@/lib/config/app";
 
-/** Public file URL served by Next.js disk storage. */
+/** Public file URL served by Hostinger storage API (when configured) or Next.js disk storage. */
 export function getFileViewUrl(bucketId: string, fileId: string): string {
+  const remoteBase = process.env.NEXT_PUBLIC_STORAGE_URL?.trim().replace(
+    /\/$/,
+    "",
+  );
+  if (remoteBase) {
+    return `${remoteBase}/files/${encodeURIComponent(bucketId)}/${encodeURIComponent(fileId)}`;
+  }
   const base = getAppUrl().replace(/\/$/, "");
   return `${base}/api/files/${encodeURIComponent(bucketId)}/${encodeURIComponent(fileId)}`;
 }

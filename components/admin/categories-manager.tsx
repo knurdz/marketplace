@@ -2,7 +2,21 @@
 
 import { useRouter } from "next/navigation";
 import { useActionState, useEffect, useRef, useState } from "react";
+import { Plus } from "lucide-react";
+import { PortalPageHeader } from "@/components/layout/portal-page-header";
+import { PortalPanel } from "@/components/layout/portal-panel";
 import { Button } from "@/components/ui/button";
+import { ConfirmActionDialog } from "@/components/ui/confirm-action-dialog";
+import {
+  Drawer,
+  DrawerClose,
+  DrawerContent,
+  DrawerDescription,
+  DrawerFooter,
+  DrawerHeader,
+  DrawerTitle,
+  DrawerTrigger,
+} from "@/components/ui/drawer";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -79,68 +93,96 @@ function parentOptions(
     }));
 }
 
-function CreateCategoryForm({ flatCategories }: { flatCategories: Category[] }) {
+function CreateCategoryDrawer({
+  flatCategories,
+}: {
+  flatCategories: Category[];
+}) {
+  const [open, setOpen] = useState(false);
   const [state, formAction, pending] = useActionState(
     createCategoryFormAction,
     initial,
   );
-  useCategoryToast(state);
+  useCategoryToast(state, () => setOpen(false));
 
   const parents = parentOptions(flatCategories);
 
   return (
-    <form
-      action={formAction}
-      className="mt-10 rounded-md border border-border bg-card px-4 py-5"
-    >
-      <p className="font-mono text-xs text-accent">create</p>
-      <h3 className="mt-1 text-lg font-bold tracking-tight">New category</h3>
-
-      <div className="mt-4 grid gap-4 sm:grid-cols-2">
-        <div className="space-y-2">
-          <Label htmlFor="create-name">Name</Label>
-          <Input id="create-name" name="name" required maxLength={128} />
-        </div>
-        <div className="space-y-2">
-          <Label htmlFor="create-slug">Slug (optional)</Label>
-          <Input
-            id="create-slug"
-            name="slug"
-            placeholder="auto-generated from name"
-            maxLength={128}
-          />
-        </div>
-        <div className="space-y-2">
-          <Label htmlFor="create-parent">Parent</Label>
-          <select
-            id="create-parent"
-            name="parentId"
-            className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-xs"
-            defaultValue=""
+    <Drawer contained direction="bottom" open={open} onOpenChange={setOpen}>
+      <DrawerTrigger asChild>
+        <Button size="sm">
+          <Plus data-icon="inline-start" />
+          New category
+        </Button>
+      </DrawerTrigger>
+      <DrawerContent>
+        <DrawerHeader>
+          <DrawerTitle>New category</DrawerTitle>
+          <DrawerDescription>
+            Nested categories appear under their parent on the storefront.
+          </DrawerDescription>
+        </DrawerHeader>
+        <form
+          id="create-category-form"
+          action={formAction}
+          className="flex flex-1 flex-col gap-4 overflow-y-auto px-6 pb-2"
+        >
+          <div className="flex flex-col gap-2">
+            <Label htmlFor="create-name">Name</Label>
+            <Input id="create-name" name="name" required maxLength={128} />
+          </div>
+          <div className="flex flex-col gap-2">
+            <Label htmlFor="create-slug">Slug (optional)</Label>
+            <Input
+              id="create-slug"
+              name="slug"
+              placeholder="auto-generated from name"
+              maxLength={128}
+            />
+          </div>
+          <div className="flex flex-col gap-2">
+            <Label htmlFor="create-parent">Parent</Label>
+            <select
+              id="create-parent"
+              name="parentId"
+              className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-none"
+              defaultValue=""
+            >
+              <option value="">None (top level)</option>
+              {parents.map((p) => (
+                <option key={p.value} value={p.value}>
+                  {p.label}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div className="flex flex-col gap-2">
+            <Label htmlFor="create-sort">Sort order</Label>
+            <Input
+              id="create-sort"
+              name="sortOrder"
+              type="number"
+              defaultValue={0}
+            />
+          </div>
+        </form>
+        <DrawerFooter>
+          <DrawerClose asChild>
+            <Button type="button" size="sm" variant="outline">
+              Cancel
+            </Button>
+          </DrawerClose>
+          <Button
+            type="submit"
+            size="sm"
+            form="create-category-form"
+            disabled={pending}
           >
-            <option value="">None (top level)</option>
-            {parents.map((p) => (
-              <option key={p.value} value={p.value}>
-                {p.label}
-              </option>
-            ))}
-          </select>
-        </div>
-        <div className="space-y-2">
-          <Label htmlFor="create-sort">Sort order</Label>
-          <Input
-            id="create-sort"
-            name="sortOrder"
-            type="number"
-            defaultValue={0}
-          />
-        </div>
-      </div>
-
-      <Button type="submit" className="mt-4" disabled={pending} size="sm">
-        {pending ? "Creating…" : "Create category"}
-      </Button>
-    </form>
+            {pending ? "Creating…" : "Create category"}
+          </Button>
+        </DrawerFooter>
+      </DrawerContent>
+    </Drawer>
   );
 }
 
@@ -202,7 +244,7 @@ function CategoryRow({
   return (
     <>
       <li
-        className="rounded-md border border-border bg-card px-4 py-4"
+        className="rounded-xl border border-border/80 bg-card px-4 py-4 shadow-none"
         style={{ marginLeft: depth * 16 }}
       >
         {editing ? (
@@ -309,38 +351,26 @@ function CategoryRow({
                 >
                   Edit
                 </Button>
-                {!confirmDelete ? (
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setConfirmDelete(true)}
-                  >
-                    Delete
-                  </Button>
-                ) : (
-                  <form action={deleteAction} className="inline">
-                    <input type="hidden" name="categoryId" value={node.$id} />
-                    <div className="flex gap-2">
-                      <Button
-                        type="submit"
-                        variant="outline"
-                        size="sm"
-                        disabled={deletePending}
-                      >
-                        {deletePending ? "Deleting…" : "Confirm delete"}
-                      </Button>
-                      <Button
-                        type="button"
-                        variant="outline"
-                        size="sm"
-                        onClick={() => setConfirmDelete(false)}
-                      >
-                        Cancel
-                      </Button>
-                    </div>
-                  </form>
-                )}
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setConfirmDelete(true)}
+                >
+                  Delete
+                </Button>
+                <ConfirmActionDialog
+                  open={confirmDelete}
+                  onOpenChange={setConfirmDelete}
+                  title="Delete category?"
+                  description={`Delete “${node.name}”? This cannot be undone if the category has no products or children.`}
+                  confirmLabel="Delete"
+                  pendingLabel="Deleting…"
+                  confirmVariant="destructive"
+                  pending={deletePending}
+                  formAction={deleteAction}
+                  hiddenFields={{ categoryId: node.$id }}
+                />
               </div>
             </div>
           </>
@@ -388,27 +418,27 @@ export function CategoriesManager({
   flatCategories,
 }: CategoriesManagerProps) {
   return (
-    <>
-      <CreateCategoryForm flatCategories={flatCategories} />
+    <div className="w-full">
+      <PortalPageHeader
+        title="Categories"
+        description="Organize product categories. Deletion is blocked when products or child categories still reference a category."
+        actions={<CreateCategoryDrawer flatCategories={flatCategories} />}
+      />
 
-      {tree.length === 0 ? (
-        <p className="mt-10 rounded-md border border-border bg-card px-4 py-5 font-mono text-sm text-muted-foreground">
-          No categories yet. Create one above. Storefront filters will read
-          from this list once seeded.
-        </p>
-      ) : (
-        <div className="mt-10">
-          <p className="font-mono text-xs text-accent">tree</p>
-          <h3 className="mt-1 text-lg font-bold tracking-tight">
-            All categories
-          </h3>
+      <PortalPanel className="mt-6">
+        <h3 className="text-base font-semibold tracking-tight">All categories</h3>
+        {tree.length === 0 ? (
+          <p className="mt-4 text-sm text-muted-foreground">
+            No categories yet. Use New category to add the first one.
+          </p>
+        ) : (
           <CategoryTreeList
             nodes={tree}
             depth={0}
             flatCategories={flatCategories}
           />
-        </div>
-      )}
-    </>
+        )}
+      </PortalPanel>
+    </div>
   );
 }

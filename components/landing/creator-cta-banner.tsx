@@ -31,7 +31,7 @@ export function CreatorCtaBanner({ className }: { className?: string }) {
           </h2>
 
           <p className="mt-2 text-base text-muted-foreground">
-            List your digital tools, hardware, design assets, or goods. Keep 100% of your earnings with instant PayHere or direct bank settlement.
+            List your digital tools, hardware, design assets, or goods. Buyers contact you directly — you keep the full sale.
           </p>
 
           <div className="mt-6 flex flex-wrap items-center gap-4">
@@ -74,7 +74,7 @@ export function CreatorCtaBanner({ className }: { className?: string }) {
               </div>
               <div className="flex items-center justify-between text-xs">
                 <span className="text-muted-foreground">Settlement</span>
-                <span className="font-mono font-bold text-foreground">Direct PayHere</span>
+                <span className="font-mono font-bold text-foreground">Direct contact</span>
               </div>
             </div>
 

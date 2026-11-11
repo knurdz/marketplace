@@ -4,6 +4,7 @@ import {
   TABLE_WISHLIST_ITEMS,
   hasAppwritePublicConfig,
 } from "@/lib/appwrite/config";
+import { mayBrowsePublicCatalog } from "@/lib/appwrite/roles";
 import { createSessionClient } from "@/lib/appwrite/server";
 import { getLoggedInUser } from "@/lib/appwrite/session";
 import {
@@ -228,6 +229,12 @@ export async function addToOwnWishlist(
 
   try {
     const user = await requireUser();
+    if (mayBrowsePublicCatalog(user)) {
+      return {
+        error: "Admin and seller accounts cannot use the wishlist.",
+        errorCode: WISHLIST_ERROR_CODES.NOT_ALLOWED,
+      };
+    }
     await assertWishlistMutationRateLimit(user.$id);
 
     const trimmed = productId?.trim();
@@ -284,6 +291,12 @@ export async function removeFromOwnWishlist(
 
   try {
     const user = await requireUser();
+    if (mayBrowsePublicCatalog(user)) {
+      return {
+        error: "Admin and seller accounts cannot use the wishlist.",
+        errorCode: WISHLIST_ERROR_CODES.NOT_ALLOWED,
+      };
+    }
     await assertWishlistMutationRateLimit(user.$id);
 
     const trimmed = productId?.trim();

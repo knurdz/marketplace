@@ -1,11 +1,19 @@
 "use client";
 
-import Link from "next/link";
 import { useActionState } from "react";
 import {
   requestPasswordRecovery,
   type RecoveryActionState,
 } from "@/lib/appwrite/recovery";
+import { AuthBackLink } from "@/components/auth/auth-back-link";
+import { AuthLegalLinks } from "@/components/auth/auth-legal-links";
+import {
+  AUTH_FIELD_CLASS,
+  AUTH_PRIMARY_BUTTON_CLASS,
+} from "@/components/auth/auth-form-styles";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 
 const initialState: RecoveryActionState = {};
 
@@ -16,51 +24,51 @@ export function ForgotPasswordForm() {
   );
 
   return (
-    <form action={formAction} className="space-y-5">
-      {state?.error ? (
-        <p
-          role="alert"
-          className="rounded-md border border-border bg-card px-3 py-2 font-mono text-sm text-accent-bright"
+    <div className="space-y-6">
+      <form action={formAction} className="space-y-4">
+        {state?.error ? (
+          <p
+            role="alert"
+            className="rounded-lg border border-destructive/30 bg-destructive/5 px-3 py-2 text-sm text-destructive"
+          >
+            {state.error}
+          </p>
+        ) : null}
+        {state?.success ? (
+          <p
+            role="status"
+            className="rounded-lg border border-green-600/30 bg-green-600/5 px-3 py-2 text-sm text-green-800 dark:text-green-300"
+          >
+            {state.success}
+          </p>
+        ) : null}
+
+        <div className="space-y-1.5">
+          <Label htmlFor="email">Email</Label>
+          <Input
+            id="email"
+            name="email"
+            type="email"
+            autoComplete="email"
+            required
+            placeholder="Enter your email"
+            className={AUTH_FIELD_CLASS}
+          />
+        </div>
+
+        <Button
+          type="submit"
+          variant="default"
+          className={AUTH_PRIMARY_BUTTON_CLASS}
+          disabled={pending}
         >
-          {state.error}
-        </p>
-      ) : null}
-      {state?.success ? (
-        <p
-          role="status"
-          className="rounded-md border border-border bg-card px-3 py-2 font-mono text-sm text-accent"
-        >
-          {state.success}
-        </p>
-      ) : null}
+          {pending ? "Sending…" : "Send reset link"}
+        </Button>
+      </form>
 
-      <div className="space-y-2">
-        <label htmlFor="email" className="block text-sm text-muted-foreground">
-          Email
-        </label>
-        <input
-          id="email"
-          name="email"
-          type="email"
-          autoComplete="email"
-          required
-          className="w-full rounded-md border border-border bg-card px-3 py-2.5 text-foreground outline-none ring-accent focus:ring-2"
-        />
-      </div>
+      <AuthBackLink href="/login">Back to sign in</AuthBackLink>
 
-      <button
-        type="submit"
-        disabled={pending}
-        className="inline-flex w-full items-center justify-center rounded-md bg-foreground px-5 py-2.5 text-sm font-medium text-background transition hover:opacity-90 disabled:opacity-60"
-      >
-        {pending ? "Sending…" : "Send reset link"}
-      </button>
-
-      <p className="font-mono text-sm text-muted-foreground">
-        <Link href="/login" className="text-accent hover:underline">
-          Back to sign in
-        </Link>
-      </p>
-    </form>
+      <AuthLegalLinks />
+    </div>
   );
 }

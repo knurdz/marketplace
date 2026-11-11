@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useActionState, useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
+import { ConfirmActionDialog } from "@/components/ui/confirm-action-dialog";
 import {
   dismissReportFormAction,
   resolveReportFormAction,
@@ -77,51 +78,37 @@ function ReportNoteForm({
   state: ReportTriageActionState;
   pending: boolean;
 }) {
-  const [showNote, setShowNote] = useState(false);
-  useTriageToast(state, () => setShowNote(false));
+  const [open, setOpen] = useState(false);
+  useTriageToast(state, () => setOpen(false));
 
-  if (!showNote) {
-    return (
+  return (
+    <>
       <Button
         type="button"
         variant="outline"
         size="sm"
-        onClick={() => setShowNote(true)}
+        onClick={() => setOpen(true)}
       >
         {label}
       </Button>
-    );
-  }
-
-  return (
-    <form action={formAction} className="mt-3 space-y-2">
-      <input type="hidden" name="reportId" value={reportId} />
-      <label className="block font-mono text-xs text-muted-foreground">
-        {label} note
-        <textarea
-          name="note"
-          required
-          maxLength={500}
-          rows={3}
-          placeholder="Required. Stored in audit log"
-          className="mt-1 w-full rounded-md border border-border bg-background px-3 py-2 text-sm"
-        />
-      </label>
-      <div className="flex gap-2">
-        <Button type="submit" variant="outline" size="sm" disabled={pending}>
-          {pending ? pendingLabel : confirmLabel}
-        </Button>
-        <Button
-          type="button"
-          variant="ghost"
-          size="sm"
-          disabled={pending}
-          onClick={() => setShowNote(false)}
-        >
-          Cancel
-        </Button>
-      </div>
-    </form>
+      <ConfirmActionDialog
+        open={open}
+        onOpenChange={setOpen}
+        title={`${label} report?`}
+        description="A note is required and stored in the audit log."
+        confirmLabel={confirmLabel}
+        pendingLabel={pendingLabel}
+        confirmVariant="outline"
+        pending={pending}
+        formAction={formAction}
+        hiddenFields={{ reportId }}
+        note={{
+          name: "note",
+          label: `${label} note`,
+          placeholder: "Required. Stored in audit log",
+        }}
+      />
+    </>
   );
 }
 

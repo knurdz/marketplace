@@ -1,4 +1,4 @@
-import { desc, eq, gt } from "drizzle-orm";
+import { and, desc, eq, gt } from "drizzle-orm";
 import { ROLE_LABELS, type RoleLabel } from "@/lib/appwrite/roles";
 import { getDb } from "./client";
 import { authSession, authUser } from "./schema";
@@ -64,21 +64,42 @@ export class UsersApi {
     const db = getDb();
     let limit = 25;
     let cursor: string | null = null;
+    let role: RoleLabel | null = null;
     for (const q of params.queries ?? []) {
       try {
-        const d = JSON.parse(q) as { type: string; value?: number | string };
+        const d = JSON.parse(q) as {
+          type: string;
+          value?: number | string;
+          attribute?: string;
+        };
         if (d.type === "limit" && typeof d.value === "number") limit = d.value;
         if (d.type === "cursorAfter" && typeof d.value === "string") {
           cursor = d.value;
+        }
+        if (d.type === "equal" && d.attribute === "role") {
+          const raw = Array.isArray(d.value) ? d.value[0] : d.value;
+          if (
+            raw === ROLE_LABELS.buyer ||
+            raw === ROLE_LABELS.seller ||
+            raw === ROLE_LABELS.admin
+          ) {
+            role = raw;
+          }
         }
       } catch {
         // ignore
       }
     }
 
+    const conditions = [];
+    if (role) conditions.push(eq(authUser.role, role));
+    if (cursor) conditions.push(gt(authUser.id, cursor));
+
     let query = db.select().from(authUser).orderBy(desc(authUser.createdAt)).$dynamic();
-    if (cursor) {
-      query = query.where(gt(authUser.id, cursor));
+    if (conditions.length === 1) {
+      query = query.where(conditions[0]!);
+    } else if (conditions.length > 1) {
+      query = query.where(and(...conditions));
     }
     const rows = await query.limit(limit);
     const users = rows.map((row) => rowToMarketplaceUser(row));

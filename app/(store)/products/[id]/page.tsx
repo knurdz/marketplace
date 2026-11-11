@@ -1,9 +1,8 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
-import { AddToCartButton } from "@/components/store/add-to-cart-button";
+import { BuyRequestButton } from "@/components/store/buy-request-button";
 import { ProductImageGallery } from "@/components/store/product-image-gallery";
-import { ProductReviewsPlaceholder } from "@/components/store/product-reviews-placeholder";
 import { RecordRecentlyViewed } from "@/components/store/record-recently-viewed";
 import { RecentlyViewedSection } from "@/components/store/recently-viewed-section";
 import { ReportListingButton } from "@/components/store/report-listing-button";
@@ -20,16 +19,17 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
+import { getOwnProfile } from "@/lib/appwrite/profiles";
+import { mayBrowsePublicCatalog } from "@/lib/appwrite/roles";
 import { getLoggedInUser } from "@/lib/appwrite/session";
 import {
-  canReviewProduct,
   getProduct,
   getPublicSellerByUserId,
+  getSellerPhoneForBuy,
   isProductInOwnWishlist,
   isProductPurchasable,
   listCategories,
   listProductImages,
-  listProductReviews,
   recordMarketplaceView,
 } from "@/lib/services";
 
@@ -52,18 +52,21 @@ export default async function ProductPage({ params }: ProductPageProps) {
     targetId: product.$id,
   });
 
-  const [images, seller, saved, reviews, reviewEligibility] = await Promise.all([
+  const [images, seller, saved, profile, sellerPhone] = await Promise.all([
     listProductImages(product.$id),
     getPublicSellerByUserId(product.sellerId),
     user ? isProductInOwnWishlist(product.$id) : Promise.resolve(false),
-    listProductReviews(product.$id),
-    user ? canReviewProduct(product.$id) : Promise.resolve({ eligible: false }),
+    user ? getOwnProfile() : Promise.resolve(null),
+    getSellerPhoneForBuy(product.sellerId),
   ]);
 
   const category = categories.find((entry) => entry.$id === product.categoryId);
   const priceLabel = formatProductPrice(product);
-  const canBuy = isProductPurchasable(product);
+  const isPortalBrowser = Boolean(user && mayBrowsePublicCatalog(user));
+  const canBuy = isProductPurchasable(product) && !isPortalBrowser;
   const loginHref = `/login?next=${encodeURIComponent(`/products/${product.$id}`)}`;
+  const buyerHasPhone = Boolean(profile?.phone);
+  const sellerHasPhone = Boolean(sellerPhone);
 
   return (
     <main className="mx-auto w-full max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
@@ -104,6 +107,22 @@ export default async function ProductPage({ params }: ProductPageProps) {
           <h1 className="mt-2 text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
             {product.title}
           </h1>
+          <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
+            {seller ? (
+              <>
+                Listed by{" "}
+                <Link
+                  href={`/shop/${seller.slug}`}
+                  className="font-medium text-foreground hover:text-accent"
+                >
+                  {seller.shopName}
+                </Link>
+                . A person in the community, not a brand.
+              </>
+            ) : (
+              "Listed by someone in the community, not a brand."
+            )}
+          </p>
 
           {/* Price & Stock status aligned together */}
           <div className="mt-4 flex flex-wrap items-center gap-3">
@@ -128,29 +147,38 @@ export default async function ProductPage({ params }: ProductPageProps) {
             </span>
           </div>
 
-          {/* Primary purchase and wishlist actions aligned together */}
-          <div className="mt-6 flex flex-wrap items-center gap-3">
-            {canBuy ? (
-              <AddToCartButton
+          <div className="mt-6 flex flex-wrap items-end gap-3">
+            {isPortalBrowser ? (
+              <p className="text-sm text-muted-foreground">
+                Signed in as{" "}
+                {user && user.labels.includes("admin") ? "admin" : "seller"}.
+                Browse only — buy requests stay with buyer accounts.
+              </p>
+            ) : canBuy ? (
+              <BuyRequestButton
                 productId={product.$id}
                 maxStock={product.stock}
                 isLoggedIn={Boolean(user)}
                 loginHref={loginHref}
+                buyerHasPhone={buyerHasPhone}
+                sellerHasPhone={sellerHasPhone}
               />
             ) : (
               <p className="text-sm text-muted-foreground">
                 {!product.available
-                  ? "This item is currently unavailable."
-                  : "Out of stock. Check back later."}
+                  ? "This person is not offering this right now."
+                  : "They do not have any left. Check back later."}
               </p>
             )}
 
-            <WishlistToggleButton
-              productId={product.$id}
-              initialSaved={saved}
-              isLoggedIn={Boolean(user)}
-              loginHref={loginHref}
-            />
+            {!isPortalBrowser ? (
+              <WishlistToggleButton
+                productId={product.$id}
+                initialSaved={saved}
+                isLoggedIn={Boolean(user)}
+                loginHref={loginHref}
+              />
+            ) : null}
           </div>
 
           {/* Product Description */}
@@ -165,8 +193,8 @@ export default async function ProductPage({ params }: ProductPageProps) {
 
           {/* Metadata Bar & Report Listing Action */}
           <div className="mt-8 flex items-center justify-between border-t border-border/60 pt-4 text-xs text-muted-foreground">
-            <span className="font-mono text-[11px]">
-              Listing SKU: <span className="text-foreground/70">{product.$id.slice(-8).toUpperCase()}</span>
+            <span>
+              Bought from a person. No store markup.
             </span>
             <ReportListingButton
               productId={product.$id}
@@ -177,15 +205,8 @@ export default async function ProductPage({ params }: ProductPageProps) {
         </div>
       </div>
 
-      <div className="mt-14 grid gap-8 lg:grid-cols-2">
+      <div className="mt-14 max-w-lg">
         <SellerInfoCard seller={seller} />
-        <ProductReviewsPlaceholder
-          productId={product.$id}
-          reviews={reviews}
-          canReview={reviewEligibility.eligible}
-          isLoggedIn={Boolean(user)}
-          loginHref={loginHref}
-        />
       </div>
 
       <div className="mt-10">

@@ -33,7 +33,7 @@ async function assertAdmin(): Promise<
 
 function revalidateSellerPaths(): void {
   revalidatePath("/admin/sellers");
-  revalidatePath("/admin");
+  revalidatePath("/admin", "layout");
 }
 
 export async function approveSellerApplication(

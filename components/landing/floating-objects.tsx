@@ -47,11 +47,10 @@ export function FloatingMarketBadges({ className }: { className?: string }) {
         </span>
       </div>
 
-      {/* Badge 3: PayHere & Instant Checkout */}
       <div className="group inline-flex shrink-0 items-center gap-2 rounded-full border border-border bg-card/90 px-3.5 py-1.5 shadow-xs backdrop-blur-md transition-colors hover:border-accent/50 hover:bg-card-hover">
         <Zap className="size-3.5 text-accent" />
         <span className="font-mono text-xs font-medium text-foreground">
-          PayHere & Bank Verified
+          Direct buy requests
         </span>
       </div>
     </div>

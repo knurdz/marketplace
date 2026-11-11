@@ -5,6 +5,8 @@ import {
   requestEmailVerification,
   type RecoveryActionState,
 } from "@/lib/appwrite/recovery";
+import { AUTH_PRIMARY_BUTTON_CLASS } from "@/components/auth/auth-form-styles";
+import { Button } from "@/components/ui/button";
 
 const initialState: RecoveryActionState = {};
 
@@ -19,7 +21,7 @@ export function ResendVerificationForm() {
       {state?.error ? (
         <p
           role="alert"
-          className="rounded-md border border-border bg-card px-3 py-2 font-mono text-sm text-accent-bright"
+          className="rounded-lg border border-destructive/30 bg-destructive/5 px-3 py-2 text-sm text-destructive"
         >
           {state.error}
         </p>
@@ -27,18 +29,19 @@ export function ResendVerificationForm() {
       {state?.success ? (
         <p
           role="status"
-          className="rounded-md border border-border bg-card px-3 py-2 font-mono text-sm text-accent"
+          className="rounded-lg border border-green-600/30 bg-green-600/5 px-3 py-2 text-sm text-green-800 dark:text-green-300"
         >
           {state.success}
         </p>
       ) : null}
-      <button
+      <Button
         type="submit"
+        variant="default"
+        className={AUTH_PRIMARY_BUTTON_CLASS}
         disabled={pending}
-        className="inline-flex items-center justify-center rounded-md border border-border px-4 py-2 font-mono text-sm transition hover:bg-card disabled:opacity-60"
       >
         {pending ? "Sending…" : "Resend verification email"}
-      </button>
+      </Button>
     </form>
   );
 }

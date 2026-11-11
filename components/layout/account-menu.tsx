@@ -1,9 +1,12 @@
 "use client";
 
 import Link from "next/link";
-import { LayoutDashboard, LogOut, MessageSquare, Package, UserRound } from "lucide-react";
+import { LayoutDashboard, LogOut, Package, UserRound } from "lucide-react";
 import { signOut } from "@/lib/appwrite/auth";
-import type { SessionUserView } from "@/lib/appwrite/session-user";
+import {
+  portalHomeForSessionUser,
+  type SessionUserView,
+} from "@/lib/appwrite/session-user";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import {
@@ -32,6 +35,13 @@ function initialsFrom(name: string, email: string): string {
 export function AccountMenu({ user, displayName, avatarUrl }: AccountMenuProps) {
   const label = displayName?.trim() || user.name.trim() || user.email;
   const initials = initialsFrom(label, user.email);
+  const portalHome = portalHomeForSessionUser(user);
+  const portalLabel =
+    portalHome === "/admin"
+      ? "Admin portal"
+      : portalHome === "/seller"
+        ? "Seller portal"
+        : null;
 
   return (
     <DropdownMenu>
@@ -55,27 +65,32 @@ export function AccountMenu({ user, displayName, avatarUrl }: AccountMenuProps) 
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
         <DropdownMenuGroup>
-          <DropdownMenuItem asChild>
-            <Link href="/dashboard">
-              <LayoutDashboard />
-              Dashboard
-            </Link>
-          </DropdownMenuItem>
-          <DropdownMenuItem asChild>
-            <Link href="/orders">
-              <Package />
-              Orders
-            </Link>
-          </DropdownMenuItem>
-          <DropdownMenuItem asChild>
-            <Link href="/messages">
-              <MessageSquare />
-              Messages
-            </Link>
-          </DropdownMenuItem>
-          <DropdownMenuItem asChild>
-            <Link href="/wishlist">Wishlist</Link>
-          </DropdownMenuItem>
+          {portalHome ? (
+            <DropdownMenuItem asChild>
+              <Link href={portalHome}>
+                <LayoutDashboard />
+                {portalLabel}
+              </Link>
+            </DropdownMenuItem>
+          ) : (
+            <>
+              <DropdownMenuItem asChild>
+                <Link href="/dashboard">
+                  <LayoutDashboard />
+                  Dashboard
+                </Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild>
+                <Link href="/requests">
+                  <Package />
+                  Requests
+                </Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild>
+                <Link href="/wishlist">Wishlist</Link>
+              </DropdownMenuItem>
+            </>
+          )}
           <DropdownMenuItem asChild>
             <Link href="/account">
               <UserRound />

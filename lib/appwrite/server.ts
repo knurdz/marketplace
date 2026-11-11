@@ -20,7 +20,7 @@ export async function createAdminClient() {
       throw new Error("Use Better Auth APIs instead of account (admin).");
     },
     get functions() {
-      throw new Error("PayHere runs in Next.js routes, not Appwrite Functions.");
+      throw new Error("Use Next.js server routes; Appwrite Functions are not used.");
     },
   };
 }
@@ -36,7 +36,7 @@ export async function createSessionClient() {
       throw new Error("Use getLoggedInUser() / Better Auth session.");
     },
     get functions() {
-      throw new Error("PayHere runs in Next.js routes, not Appwrite Functions.");
+      throw new Error("Use Next.js server routes; Appwrite Functions are not used.");
     },
   };
 }

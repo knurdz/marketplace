@@ -1,16 +1,10 @@
 /**
- * Canonical platform_settings keys (Members 2–4).
+ * Canonical platform_settings keys.
  * Values are strings in TablesDB; parse JSON flags via parsePlatformSettingJson.
  */
 export const PLATFORM_SETTING_KEYS = {
   siteName: "site.name",
   siteSupportEmail: "site.support_email",
-  checkoutCurrencyDefault: "checkout.currency_default",
-  checkoutBankInstructions: "checkout.bank_instructions",
-  checkoutSandboxModeDisplay: "checkout.sandbox_mode_display",
-  checkoutFeePercent: "checkout.fee_percent",
-  /** When `"true"`, PayHere appears at checkout and createOrder accepts `payhere`. */
-  checkoutPayhereEnabled: "checkout.payhere_enabled",
   featuresFreeListings: "features.free_listings",
 } as const;
 

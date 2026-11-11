@@ -108,7 +108,7 @@ export async function createDraftListing(
     if (submit.ok) {
       redirect("/seller/listings");
     }
-    redirect(`/seller/listings/${result.productId}`);
+    redirect(`/seller/listings?edit=${encodeURIComponent(result.productId)}`);
   }
 
   redirect("/seller/listings");

@@ -76,48 +76,64 @@ export default async function AdminReportsPage({ searchParams }: PageProps) {
       }).toString()}`
     : null;
 
+  const filterBar = (
+    <FilterTabs
+      tabs={REPORT_STATUSES.map((value) => ({
+        href: `/admin/reports?status=${value}`,
+        label: STATUS_LABELS[value],
+        active: status === value,
+      }))}
+    />
+  );
+
   return (
-    <div>
+    <div className="w-full">
       <PortalPageHeader
         title="Reports"
         description="Triage listing reports. Resolving or dismissing records the outcome in the audit log; take down a listing from Listings if needed."
       />
 
-      <FilterTabs
-        className="mt-6"
-        tabs={REPORT_STATUSES.map((value) => ({
-          href: `/admin/reports?status=${value}`,
-          label: STATUS_LABELS[value],
-          active: status === value,
-        }))}
-      />
-
       {reports.length === 0 ? (
-        <DataTableEmpty className="mt-6" message={EMPTY_COPY[status]} />
+        <div className="mt-6 space-y-4">
+          {filterBar}
+          <DataTableEmpty message={EMPTY_COPY[status]} />
+        </div>
       ) : (
-        <DataTableShell className="mt-6">
+        <div className="mt-6 space-y-4">
+          {filterBar}
+        <DataTableShell>
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead className="px-4">Report</TableHead>
-                <TableHead className="px-4">Listing</TableHead>
-                <TableHead className="px-4">Status</TableHead>
-                <TableHead className="px-4">Actions</TableHead>
+                <TableHead>
+                  Report
+                </TableHead>
+                <TableHead>
+                  Listing
+                </TableHead>
+                <TableHead>
+                  Status
+                </TableHead>
+                <TableHead>
+                  Actions
+                </TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {reports.map((report) => (
                 <TableRow key={report.$id} className="align-top">
-                  <TableCell className="max-w-[360px] px-4 py-3 whitespace-normal">
+                  <TableCell className="max-w-[360px] whitespace-normal">
                     <p className="font-medium tracking-tight">{report.reason}</p>
-                    <p className="mt-1 font-mono text-xs text-muted-foreground">
+                    <p className="mt-1 text-xs text-muted-foreground">
                       {report.reporterId} · {formatCreatedAt(report.$createdAt)}
                     </p>
                     <ReportDetails details={report.details} />
                   </TableCell>
-                  <TableCell className="max-w-[280px] px-4 py-3 whitespace-normal">
-                    <p className="text-sm">{report.productTitle ?? "Unavailable"}</p>
-                    <p className="mt-1 font-mono text-xs text-muted-foreground">
+                  <TableCell className="max-w-[280px] whitespace-normal">
+                    <p className="text-sm">
+                      {report.productTitle ?? "Unavailable"}
+                    </p>
+                    <p className="mt-1 text-xs text-muted-foreground">
                       {report.productId}
                       {report.productStatus ? ` · ${report.productStatus}` : ""}
                     </p>
@@ -130,13 +146,13 @@ export default async function AdminReportsPage({ searchParams }: PageProps) {
                       </Link>
                     </p>
                   </TableCell>
-                  <TableCell className="px-4 py-3">
+                  <TableCell>
                     <StatusPill
                       label={STATUS_LABELS[report.status]}
                       tone={reportStatusTone(report.status)}
                     />
                   </TableCell>
-                  <TableCell className="w-[240px] max-w-[240px] px-4 py-3 whitespace-normal">
+                  <TableCell className="w-[240px] max-w-[240px] whitespace-normal">
                     <ReportRowActions
                       reportId={report.$id}
                       status={report.status}
@@ -147,9 +163,9 @@ export default async function AdminReportsPage({ searchParams }: PageProps) {
             </TableBody>
           </Table>
         </DataTableShell>
+          {nextHref ? <LoadMoreLink href={nextHref} /> : null}
+        </div>
       )}
-
-      {nextHref ? <LoadMoreLink href={nextHref} /> : null}
     </div>
   );
 }

@@ -8,13 +8,15 @@ import { loadSellerStatus } from "@/lib/appwrite/home-path";
 import { getOwnProfile } from "@/lib/appwrite/profiles";
 import {
   homePathForUser,
+  mayBrowsePublicCatalog,
+  pathIsPublicCatalog,
   pathIsPublicStoreException,
   shouldLeaveBuyerStorefront,
 } from "@/lib/appwrite/roles";
+import { redirectIfRegistrationIncomplete } from "@/lib/appwrite/registration-complete";
 import { getLoggedInUser } from "@/lib/appwrite/session";
 import { toSessionUserView } from "@/lib/appwrite/session-user";
 import { getAvatarPreviewUrl } from "@/lib/appwrite/storage-urls";
-import { getCartItemCount } from "@/lib/services";
 
 export default async function StoreLayout({
   children,
@@ -24,7 +26,13 @@ export default async function StoreLayout({
   const authUser = await getLoggedInUser();
   const pathname = (await headers()).get("x-knurdz-pathname") ?? "";
 
-  if (authUser && !pathIsPublicStoreException(pathname)) {
+  await redirectIfRegistrationIncomplete(pathname);
+
+  if (
+    authUser &&
+    !pathIsPublicStoreException(pathname) &&
+    !(pathIsPublicCatalog(pathname) && mayBrowsePublicCatalog(authUser))
+  ) {
     const sellerStatus = await loadSellerStatus(authUser);
     const leave = shouldLeaveBuyerStorefront(authUser, sellerStatus);
     const home = homePathForUser(authUser, sellerStatus);
@@ -33,9 +41,7 @@ export default async function StoreLayout({
     }
   }
 
-  const [cartItemCount, profile] = authUser
-    ? await Promise.all([getCartItemCount(), getOwnProfile()])
-    : [0, null];
+  const profile = authUser ? await getOwnProfile() : null;
   const avatarUrl = profile ? getAvatarPreviewUrl(profile.avatarFileId) : null;
   const user = authUser ? toSessionUserView(authUser) : null;
 
@@ -44,7 +50,6 @@ export default async function StoreLayout({
       <SkipToContent />
       <StoreNavbar
         user={user}
-        cartItemCount={cartItemCount}
         displayName={profile?.displayName}
         avatarUrl={avatarUrl}
       />

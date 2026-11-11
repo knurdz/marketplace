@@ -17,12 +17,6 @@ const PENDING_STATUS = "pending" as const;
 const MAX_SHOP_NAME_LENGTH = 128;
 const MAX_SLUG_LENGTH = 128;
 const MAX_BIO_LENGTH = 2000;
-const MAX_BANK_NAME_LENGTH = 128;
-const MAX_BANK_ACCOUNT_NAME_LENGTH = 128;
-const MAX_BANK_ACCOUNT_NUMBER_LENGTH = 64;
-const MAX_BANK_TRANSFER_NOTES_LENGTH = 2000;
-/** Digits, spaces, hyphens: Sri Lankan copy-paste friendly. */
-const BANK_ACCOUNT_NUMBER_PATTERN = /^[\d\s-]+$/;
 
 export type BlockedSellerPortalDestination = "/seller/pending" | "/" | null;
 
@@ -53,13 +47,6 @@ export type ShopBannerUpdateResult =
   | { ok: true; message: string; slug: string }
   | { ok: false; error: string };
 
-export type UpdateSellerBankDetailsInput = {
-  bankAccountName?: string;
-  bankAccountNumber?: string;
-  bankName?: string;
-  bankTransferNotes?: string;
-};
-
 export type UpdateShopPoliciesInput = {
   returnPolicy?: string;
   shippingPolicy?: string;
@@ -67,16 +54,6 @@ export type UpdateShopPoliciesInput = {
 
 export type ParsedShopPoliciesInput =
   | { ok: true; returnPolicy: string | null; shippingPolicy: string | null }
-  | { ok: false; error: string };
-
-export type ParsedSellerBankDetailsInput =
-  | {
-      ok: true;
-      bankAccountName: string | null;
-      bankAccountNumber: string | null;
-      bankName: string | null;
-      bankTransferNotes: string | null;
-    }
   | { ok: false; error: string };
 
 /**
@@ -143,87 +120,6 @@ export function parseSellerApplicationInput(
 /** Lowercase hyphenated slug for seller shop URLs. */
 export function normalizeShopSlug(value: string): string {
   return generateSlug(value);
-}
-
-/** Validate seller bank fields (no I/O). All empty clears; partial input rejected. */
-export function parseSellerBankDetailsInput(
-  input: UpdateSellerBankDetailsInput,
-): ParsedSellerBankDetailsInput {
-  const bankName = input.bankName?.trim() ?? "";
-  const bankAccountName = input.bankAccountName?.trim() ?? "";
-  const bankAccountNumber = input.bankAccountNumber?.trim() ?? "";
-  const bankTransferNotes = input.bankTransferNotes?.trim() ?? "";
-
-  if (!bankName && !bankAccountName && !bankAccountNumber) {
-    if (bankTransferNotes) {
-      return {
-        ok: false,
-        error: "Bank details are required when saving transfer notes.",
-      };
-    }
-    return {
-      ok: true,
-      bankAccountName: null,
-      bankAccountNumber: null,
-      bankName: null,
-      bankTransferNotes: null,
-    };
-  }
-
-  if (!bankName) {
-    return { ok: false, error: "Bank name is required when saving bank details." };
-  }
-  if (!bankAccountName) {
-    return {
-      ok: false,
-      error: "Account name is required when saving bank details.",
-    };
-  }
-  if (!bankAccountNumber) {
-    return {
-      ok: false,
-      error: "Account number is required when saving bank details.",
-    };
-  }
-
-  if (bankName.length > MAX_BANK_NAME_LENGTH) {
-    return {
-      ok: false,
-      error: `Bank name must be at most ${MAX_BANK_NAME_LENGTH} characters.`,
-    };
-  }
-  if (bankAccountName.length > MAX_BANK_ACCOUNT_NAME_LENGTH) {
-    return {
-      ok: false,
-      error: `Account name must be at most ${MAX_BANK_ACCOUNT_NAME_LENGTH} characters.`,
-    };
-  }
-  if (bankAccountNumber.length > MAX_BANK_ACCOUNT_NUMBER_LENGTH) {
-    return {
-      ok: false,
-      error: `Account number must be at most ${MAX_BANK_ACCOUNT_NUMBER_LENGTH} characters.`,
-    };
-  }
-  if (!BANK_ACCOUNT_NUMBER_PATTERN.test(bankAccountNumber)) {
-    return {
-      ok: false,
-      error: "Account number may only contain digits, spaces, and hyphens.",
-    };
-  }
-  if (bankTransferNotes.length > MAX_BANK_TRANSFER_NOTES_LENGTH) {
-    return {
-      ok: false,
-      error: `Transfer notes must be at most ${MAX_BANK_TRANSFER_NOTES_LENGTH} characters.`,
-    };
-  }
-
-  return {
-    ok: true,
-    bankAccountName,
-    bankAccountNumber,
-    bankName,
-    bankTransferNotes: bankTransferNotes || null,
-  };
 }
 
 /** Validate shop policy text fields (no I/O). Empty clears; max length enforced. */
@@ -380,9 +276,6 @@ export async function submitSellerApplicationCore(
         bio: parsed.bio,
         status: PENDING_STATUS,
         bannerFileId: null,
-        bankAccountName: null,
-        bankAccountNumber: null,
-        bankName: null,
         rejectionReason: null,
       },
       permissions: sellerProfilePermissions(user.$id),
@@ -463,9 +356,6 @@ export async function createPendingSellerProfileForUser(
         bio: parsed.bio,
         status: PENDING_STATUS,
         bannerFileId: null,
-        bankAccountName: null,
-        bankAccountNumber: null,
-        bankName: null,
         rejectionReason: null,
       },
       permissions: sellerProfilePermissions(trimmedUserId),
@@ -494,7 +384,7 @@ export async function createPendingSellerProfileForUser(
 
 /**
  * Update shop name + bio for the signed-in approved seller only.
- * Never mutates slug, status, bank fields, or userId.
+ * Never mutates slug, status, or userId.
  */
 export async function updateOwnShopProfileCore(
   input: UpdateShopProfileInput,
@@ -553,73 +443,8 @@ export async function updateOwnShopProfileCore(
 }
 
 /**
- * Update bank payout fields for the signed-in approved seller only.
- * Never mutates slug, status, shop name, or bio.
- */
-export async function updateOwnBankDetailsCore(
-  input: UpdateSellerBankDetailsInput,
-): Promise<ShopProfileUpdateResult> {
-  if (!hasAppwritePublicConfig()) {
-    return { ok: false, error: "Marketplace is not configured." };
-  }
-
-  const user = await getLoggedInUser();
-  if (!user) {
-    return { ok: false, error: "You must be signed in to update bank details." };
-  }
-
-  const parsed = parseSellerBankDetailsInput(input);
-  if (!parsed.ok) {
-    return { ok: false, error: parsed.error };
-  }
-
-  const existing = await getOwnSellerProfile();
-  if (!existing || existing.userId !== user.$id) {
-    return { ok: false, error: "Seller profile not found." };
-  }
-  if (existing.status !== "approved") {
-    return {
-      ok: false,
-      error: "Only approved sellers can edit bank details.",
-    };
-  }
-
-  try {
-    const { tables } = await createSessionClient();
-    await tables.updateRow({
-      databaseId: DATABASE_ID,
-      tableId: TABLE_SELLER_PROFILES,
-      rowId: existing.$id,
-      data: {
-        bankAccountName: parsed.bankAccountName,
-        bankAccountNumber: parsed.bankAccountNumber,
-        bankName: parsed.bankName,
-        bankTransferNotes: parsed.bankTransferNotes,
-        userId: user.$id,
-      },
-    });
-
-    const cleared =
-      !parsed.bankAccountName && !parsed.bankAccountNumber && !parsed.bankName;
-
-    return {
-      ok: true,
-      message: cleared ? "Bank details cleared." : "Bank details saved.",
-      slug: existing.slug,
-    };
-  } catch (error) {
-    if (error instanceof AppwriteException) {
-      if (error.code === 401 || error.code === 404) {
-        return { ok: false, error: "Not allowed to update bank details." };
-      }
-    }
-    return { ok: false, error: "Could not update bank details. Please try again." };
-  }
-}
-
-/**
  * Update return/shipping policy text for the signed-in approved seller only.
- * Never mutates slug, status, bank fields, or shop name.
+ * Never mutates slug, status, or shop name.
  */
 export async function updateOwnShopPoliciesCore(
   input: UpdateShopPoliciesInput,

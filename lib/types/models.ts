@@ -1,15 +1,12 @@
 /**
  * Thin row shapes for marketplace contracts (SCHEMA fields + `$id`).
- * Members 2–4 import these instead of inventing parallel types.
  */
 
 import type {
-  BankSlipStatus,
-  OrderStatus,
-  PaymentMethod,
-  PaymentStatus,
   ProductStatus,
+  PurchaseRequestStatus,
   ReportStatus,
+  ReviewStatus,
   SellerStatus,
 } from "./status";
 
@@ -44,47 +41,6 @@ export type ProductImage = {
   alt: string | null;
 };
 
-export type Cart = {
-  $id: string;
-  userId: string;
-  sellerId: string | null;
-};
-
-export type CartItem = {
-  $id: string;
-  cartId: string;
-  productId: string;
-  quantity: number;
-  unitPrice: number;
-};
-
-/** Live product join + validation flags for cart UI. */
-export type CartLineIssue =
-  | "ok"
-  | "out_of_stock"
-  | "unavailable"
-  | "inactive"
-  | "missing";
-
-export type CartLine = {
-  item: CartItem;
-  productTitle: string | null;
-  productStock: number;
-  productAvailable: boolean;
-  productCurrency: string;
-  lineTotal: number;
-  issue: CartLineIssue;
-  purchasable: boolean;
-};
-
-export type CartView = {
-  cart: Cart | null;
-  lines: CartLine[];
-  itemCount: number;
-  subtotal: number;
-  hasIssues: boolean;
-};
-
 export type WishlistItem = {
   $id: string;
   userId: string;
@@ -113,70 +69,46 @@ export type SellerProfile = {
   bio: string | null;
   bannerFileId: string | null;
   status: SellerStatus;
-  bankAccountName: string | null;
-  bankAccountNumber: string | null;
-  bankName: string | null;
-  bankTransferNotes: string | null;
   rejectionReason: string | null;
   returnPolicy: string | null;
   shippingPolicy: string | null;
 };
 
-export type Order = {
+export type PurchaseRequest = {
   $id: string;
   buyerId: string;
   sellerId: string;
-  status: OrderStatus;
-  totalAmount: number;
-  currency: string;
-  shippingAddress: string;
-  paymentMethod: PaymentMethod;
-  couponCode: string | null;
-  discountAmount: number;
-  $createdAt?: string;
-};
-
-export type OrderItem = {
-  $id: string;
-  orderId: string;
   productId: string;
   title: string;
   quantity: number;
   unitPrice: number;
-  lineTotal: number;
-};
-
-export type Payment = {
-  $id: string;
-  orderId: string;
-  method: PaymentMethod;
-  status: PaymentStatus;
-  amount: number;
   currency: string;
-  payherePaymentId: string | null;
-  idempotencyKey: string | null;
+  status: PurchaseRequestStatus;
+  $createdAt?: string;
+  $updatedAt?: string;
 };
 
-export type BankSlip = {
-  $id: string;
-  paymentId: string;
-  orderId: string;
-  fileId: string;
-  uploadedBy: string;
-  status: BankSlipStatus;
-  reviewedBy: string | null;
-  reviewNote: string | null;
+/** Contact details revealed only to the other party on a request (and admin). */
+export type PurchaseRequestContact = {
+  phone: string | null;
+  email: string | null;
+  displayName: string | null;
+};
+
+export type PurchaseRequestDetail = {
+  request: PurchaseRequest;
+  /** Counterparty contact for the signed-in participant. */
+  contact: PurchaseRequestContact;
 };
 
 export type Review = {
   $id: string;
-  orderId: string;
-  productId: string;
+  requestId: string;
   buyerId: string;
   sellerId: string;
-  productRating: number;
-  sellerRating: number | null;
+  rating: number;
   comment: string | null;
+  status: ReviewStatus;
   $createdAt?: string;
 };
 
@@ -216,5 +148,5 @@ export type AuditLogEntry = {
   resourceId: string | null;
   meta: string | null;
   ip: string | null;
-  $createdAt: string;
+  $createdAt?: string;
 };

@@ -104,10 +104,12 @@ function assertCanModifyTarget(
 
 /**
  * Paginated platform users for admin review (server-only; admin SDK).
+ * Pass `role: "buyer"` to list signed-up buyers only.
  */
 export async function listUsers(params?: {
   search?: string;
   cursor?: string;
+  role?: "buyer" | "seller" | "admin";
 }): Promise<UserListResult> {
   if (!hasAppwritePublicConfig()) {
     return { users: [], total: 0, nextCursor: null };
@@ -119,6 +121,9 @@ export async function listUsers(params?: {
   const queries = [Query.limit(PAGE_SIZE), Query.orderDesc("$createdAt")];
   if (cursor) {
     queries.push(Query.cursorAfter(cursor));
+  }
+  if (params?.role) {
+    queries.push(Query.equal("role", params.role));
   }
 
   const { users } = await createAdminClient();
@@ -138,6 +143,14 @@ export async function listUsers(params?: {
     total: result.total ?? page.length,
     nextCursor,
   };
+}
+
+/** Signed-up buyers for the admin Buyers tab. */
+export async function listBuyers(params?: {
+  search?: string;
+  cursor?: string;
+}): Promise<UserListResult> {
+  return listUsers({ ...params, role: ROLE_LABELS.buyer });
 }
 
 /**

@@ -1,56 +1,34 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { OrderListRow } from "@/components/store/order-list-row";
 import { RecentlyViewedSection } from "@/components/store/recently-viewed-section";
 import { EmptyState } from "@/components/layout/empty-state";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { getLoggedInUser } from "@/lib/appwrite/session";
-import { getOwnWishlistView, listOwnOrders } from "@/lib/services";
-import type { Order, OrderStatus, WishlistLine } from "@/lib/types";
+import { getOwnWishlistView, listOwnPurchaseRequests } from "@/lib/services";
+import { formatPurchaseRequestStatus } from "@/lib/request-display";
+import type { PurchaseRequest, WishlistLine } from "@/lib/types";
 
-const RECENT_ORDERS_LIMIT = 5;
+const RECENT_REQUESTS_LIMIT = 5;
 const WISHLIST_PREVIEW_LIMIT = 4;
 
-const PENDING_STATUSES: readonly OrderStatus[] = [
-  "pending_payment",
-  "payment_review",
-];
-const IN_PROGRESS_STATUSES: readonly OrderStatus[] = [
-  "paid",
-  "processing",
-  "shipped",
-  "ready_pickup",
-];
-const COMPLETED_STATUSES: readonly OrderStatus[] = ["completed"];
-
-type OrderSummaryCounts = {
-  pending: number;
-  inProgress: number;
-  completed: number;
+type RequestSummaryCounts = {
+  open: number;
+  sold: number;
+  cancelled: number;
 };
 
-function countOrdersBySummaryBucket(orders: Order[]): OrderSummaryCounts {
-  const counts: OrderSummaryCounts = {
-    pending: 0,
-    inProgress: 0,
-    completed: 0,
+function countRequests(requests: PurchaseRequest[]): RequestSummaryCounts {
+  const counts: RequestSummaryCounts = {
+    open: 0,
+    sold: 0,
+    cancelled: 0,
   };
-
-  for (const order of orders) {
-    if ((PENDING_STATUSES as readonly string[]).includes(order.status)) {
-      counts.pending += 1;
-    } else if (
-      (IN_PROGRESS_STATUSES as readonly string[]).includes(order.status)
-    ) {
-      counts.inProgress += 1;
-    } else if (
-      (COMPLETED_STATUSES as readonly string[]).includes(order.status)
-    ) {
-      counts.completed += 1;
-    }
+  for (const request of requests) {
+    if (request.status === "requested") counts.open += 1;
+    else if (request.status === "sold") counts.sold += 1;
+    else if (request.status === "cancelled") counts.cancelled += 1;
   }
-
   return counts;
 }
 
@@ -73,14 +51,13 @@ export default async function DashboardPage() {
     redirect("/login?next=/dashboard");
   }
 
-  const [orders, wishlistView] = await Promise.all([
-    listOwnOrders({ limit: 50 }),
+  const [requests, wishlistView] = await Promise.all([
+    listOwnPurchaseRequests({ limit: 50 }),
     getOwnWishlistView({ limit: WISHLIST_PREVIEW_LIMIT }),
   ]);
 
-  const summary = countOrdersBySummaryBucket(orders);
-
-  const recentOrders = orders.slice(0, RECENT_ORDERS_LIMIT);
+  const summary = countRequests(requests);
+  const recentRequests = requests.slice(0, RECENT_REQUESTS_LIMIT);
 
   return (
     <main className="mx-auto w-full max-w-4xl px-4 py-10 sm:px-6">
@@ -89,159 +66,136 @@ export default async function DashboardPage() {
           Your dashboard
         </h1>
         <p className="mt-2 max-w-2xl text-sm text-muted-foreground">
-          Orders, saved products, and what you viewed on this device.
+          Buy requests, saved products, and what you viewed on this device.
         </p>
       </header>
 
-      <section className="mt-12" aria-labelledby="order-summary-heading">
+      <section className="mt-12" aria-labelledby="request-summary-heading">
         <h2
-          id="order-summary-heading"
+          id="request-summary-heading"
           className="text-lg font-semibold tracking-tight"
         >
-          Order summary
+          Request summary
         </h2>
-        <p className="mt-1 text-sm text-muted-foreground">
-          Counts from your most recent orders.
-        </p>
         <dl className="mt-6 grid grid-cols-3 gap-3">
           <Card>
             <CardContent>
-              <dt className="text-sm text-muted-foreground">Pending</dt>
+              <dt className="text-sm text-muted-foreground">Open</dt>
               <dd className="mt-1 font-mono text-2xl tabular-nums">
-                {summary.pending}
+                {summary.open}
               </dd>
             </CardContent>
           </Card>
           <Card>
             <CardContent>
-              <dt className="text-sm text-muted-foreground">In progress</dt>
+              <dt className="text-sm text-muted-foreground">Sold</dt>
               <dd className="mt-1 font-mono text-2xl tabular-nums">
-                {summary.inProgress}
+                {summary.sold}
               </dd>
             </CardContent>
           </Card>
           <Card>
             <CardContent>
-              <dt className="text-sm text-muted-foreground">Completed</dt>
+              <dt className="text-sm text-muted-foreground">Cancelled</dt>
               <dd className="mt-1 font-mono text-2xl tabular-nums">
-                {summary.completed}
+                {summary.cancelled}
               </dd>
             </CardContent>
           </Card>
         </dl>
       </section>
 
-      <section className="mt-12" aria-labelledby="recent-orders-heading">
-        <h2
-          id="recent-orders-heading"
-          className="text-lg font-semibold tracking-tight"
-        >
-          Recent orders
-        </h2>
-        {recentOrders.length === 0 ? (
-          <>
-            <EmptyState
-              className="mt-4"
-              title="No orders yet"
-              action={
-                <Button asChild>
-                  <Link href="/">Browse listings</Link>
-                </Button>
-              }
-            />
-          </>
-        ) : (
-          <>
-            <ul className="mt-6" aria-label="Recent orders">
-              {recentOrders.map((order) => (
-                <OrderListRow key={order.$id} order={order} />
-              ))}
-            </ul>
-            <p className="mt-6">
-              <Button variant="secondary" size="sm" asChild>
-                <Link href="/orders">View all orders</Link>
+      <section className="mt-12" aria-labelledby="recent-requests-heading">
+        <div className="flex flex-wrap items-end justify-between gap-3">
+          <h2
+            id="recent-requests-heading"
+            className="text-lg font-semibold tracking-tight"
+          >
+            Recent requests
+          </h2>
+          <Button variant="secondary" size="sm" asChild>
+            <Link href="/requests">View all</Link>
+          </Button>
+        </div>
+        {recentRequests.length === 0 ? (
+          <EmptyState
+            className="mt-6"
+            title="No requests yet"
+            description="Browse listings and tap Buy to send a request to a seller."
+            action={
+              <Button asChild>
+                <Link href="/">Browse market</Link>
               </Button>
-            </p>
-          </>
+            }
+          />
+        ) : (
+          <ul className="mt-6 divide-y divide-border rounded-xl border border-border">
+            {recentRequests.map((request) => (
+              <li
+                key={request.$id}
+                className="flex items-center justify-between gap-3 px-4 py-3"
+              >
+                <div>
+                  <p className="font-medium">{request.title}</p>
+                  <p className="text-sm text-muted-foreground">
+                    Qty {request.quantity} ·{" "}
+                    {formatPurchaseRequestStatus(request.status)}
+                  </p>
+                </div>
+                <Button variant="ghost" size="sm" asChild>
+                  <Link href={`/requests/${request.$id}`}>Open</Link>
+                </Button>
+              </li>
+            ))}
+          </ul>
         )}
       </section>
 
-      <section className="mt-12" aria-labelledby="wishlist-preview-heading">
-        <h2
-          id="wishlist-preview-heading"
-          className="text-lg font-semibold tracking-tight"
-        >
-          Wishlist
-          {wishlistView.itemCount > 0 ? (
-            <span className="ml-2 font-mono text-sm font-normal tabular-nums text-muted-foreground">
-              ({wishlistView.itemCount})
-            </span>
-          ) : null}
-        </h2>
+      <section className="mt-12" aria-labelledby="wishlist-heading">
+        <div className="flex flex-wrap items-end justify-between gap-3">
+          <h2
+            id="wishlist-heading"
+            className="text-lg font-semibold tracking-tight"
+          >
+            Wishlist
+          </h2>
+          <Button variant="secondary" size="sm" asChild>
+            <Link href="/wishlist">View wishlist</Link>
+          </Button>
+        </div>
         {wishlistView.lines.length === 0 ? (
-          <>
-            <EmptyState
-              className="mt-4"
-              title="Nothing saved yet"
-              description="Browse listings and tap Save on a product page."
-              action={
-                <Button asChild>
-                  <Link href="/">Browse listings</Link>
-                </Button>
-              }
-            />
-          </>
+          <p className="mt-4 text-sm text-muted-foreground">
+            Nothing saved yet.
+          </p>
         ) : (
-          <>
-            <ul className="mt-6" aria-label="Saved products preview">
-              {wishlistView.lines.map((line) => {
-                const product = line.product;
-                const title = product?.title ?? "Unknown product";
-                const priceLabel = product
-                  ? product.isFree
-                    ? "free"
-                    : `${product.currency} ${product.price.toFixed(2)}`
-                  : null;
-                const note = wishlistIssueLabel(line.issue);
-                const href = product ? `/products/${product.$id}` : undefined;
-
-                return (
-                  <li
-                    key={line.item.$id}
-                    className="border-b border-border py-4 last:border-b-0"
-                  >
-                    {href ? (
-                      <Link
-                        href={href}
-                        className="block font-medium tracking-tight hover:text-accent"
-                      >
-                        {title}
-                      </Link>
-                    ) : (
-                      <span className="font-medium tracking-tight">{title}</span>
-                    )}
-                    {priceLabel ? (
-                      <p className="mt-1 font-mono text-sm text-muted-foreground">
-                        {priceLabel}
-                      </p>
-                    ) : null}
-                    {note ? (
-                      <p className="mt-1 text-xs text-muted-foreground">{note}</p>
-                    ) : null}
-                  </li>
-                );
-              })}
-            </ul>
-            <p className="mt-6">
-              <Button variant="secondary" size="sm" asChild>
-                <Link href="/wishlist">View wishlist</Link>
-              </Button>
-            </p>
-          </>
+          <ul className="mt-4 space-y-2">
+            {wishlistView.lines.map((line) => {
+              const issue = wishlistIssueLabel(line.issue);
+              return (
+                <li key={line.item.$id} className="text-sm">
+                  {line.product ? (
+                    <Link
+                      href={`/products/${line.product.$id}`}
+                      className="font-medium hover:underline"
+                    >
+                      {line.product.title}
+                    </Link>
+                  ) : (
+                    <span className="text-muted-foreground">Unavailable</span>
+                  )}
+                  {issue ? (
+                    <span className="ml-2 text-muted-foreground">({issue})</span>
+                  ) : null}
+                </li>
+              );
+            })}
+          </ul>
         )}
       </section>
 
-      <RecentlyViewedSection />
+      <div className="mt-12">
+        <RecentlyViewedSection />
+      </div>
     </main>
   );
 }

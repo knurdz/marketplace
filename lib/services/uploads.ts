@@ -5,7 +5,6 @@
 export {
   deleteFile,
   uploadAvatar,
-  uploadBankSlip,
   uploadFile,
   uploadProductImage,
   validateUpload,

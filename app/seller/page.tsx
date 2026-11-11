@@ -1,10 +1,11 @@
 import Link from "next/link";
+import { ExternalLink } from "lucide-react";
 import { getSellerDashboardSnapshot } from "@/lib/services";
+import { DataTableShell } from "@/components/layout/data-table-shell";
 import { PortalPageHeader } from "@/components/layout/portal-page-header";
-import { StatCardGrid } from "@/components/layout/stat-card";
+import { PortalPanel } from "@/components/layout/portal-panel";
 import { StatusPill } from "@/components/layout/status-pill";
-import { SellerEarningsChart } from "@/components/seller/seller-earnings-chart";
-import { SellerShopViewsChart } from "@/components/seller/seller-views-chart";
+import { SellerDashboardCharts } from "@/components/seller/seller-dashboard-charts";
 import { Button } from "@/components/ui/button";
 import {
   Table,
@@ -14,257 +15,128 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { formatOrderStatus } from "@/lib/order-display";
-import { orderStatusTone } from "@/lib/ui/status-tone";
-
-function formatCount(value: number): string {
-  return new Intl.NumberFormat(undefined, {
-    maximumFractionDigits: 0,
-  }).format(value);
-}
-
-function formatRevenue(amount: number, currency: string): string {
-  try {
-    return new Intl.NumberFormat(undefined, {
-      style: "currency",
-      currency,
-      maximumFractionDigits: 2,
-    }).format(amount);
-  } catch {
-    return new Intl.NumberFormat(undefined, {
-      style: "currency",
-      currency: "LKR",
-      maximumFractionDigits: 2,
-    }).format(amount);
-  }
-}
+import { formatPurchaseRequestStatus } from "@/lib/request-display";
+import { purchaseRequestStatusTone } from "@/lib/ui/status-tone";
 
 export default async function SellerPage() {
   const snapshot = await getSellerDashboardSnapshot();
   const {
     metrics,
     listingCounts,
-    recentOrders,
+    recentRequests,
     lowStock,
     shop,
-    earningsSeries,
     views,
     viewProducts,
+    earningsSeries,
+    requestSeries,
+    reviewInsights,
   } = snapshot;
 
-  const cards = [
-    {
-      label: "Orders",
-      value: formatCount(metrics.orderCount),
-      href: "/seller/orders",
-    },
-    {
-      label: "Revenue",
-      value: formatRevenue(metrics.revenue, metrics.currency),
-      href: "/seller/earnings",
-    },
-    {
-      label: "Pending",
-      value: formatCount(metrics.pendingCount),
-      href: "/seller/orders?filter=pending",
-    },
-    {
-      label: "Active listings",
-      value: formatCount(listingCounts.active),
-      href: "/seller/listings",
-    },
-  ];
-
   return (
-    <div>
+    <div className="w-full">
       <PortalPageHeader
         title="Dashboard"
-        description="Sales, listings, and work waiting on you. Charts open the matching page."
+        description="Traffic, requests, and listings at a glance."
         actions={
           <Button size="sm" asChild>
-            <Link href="/seller/listings/new">New listing</Link>
+            <Link href="/seller/listings?compose=new">New listing</Link>
           </Button>
         }
       />
 
-      <StatCardGrid cards={cards} className="mt-6" />
+      <SellerDashboardCharts
+        metrics={metrics}
+        listingCounts={listingCounts}
+        views={views}
+        earningsSeries={earningsSeries}
+        requestSeries={requestSeries}
+        viewProducts={viewProducts}
+        shopName={shop.shopName}
+        reviewInsights={reviewInsights}
+      />
 
-      <section className="mt-8 rounded-xl border border-border bg-card p-5">
+      <PortalPanel className="mt-6">
         <div className="flex flex-wrap items-end justify-between gap-3">
           <div>
-            <h3 className="text-base font-semibold tracking-tight">Earnings (30 days)</h3>
+            <h3 className="text-base font-semibold tracking-tight">
+              Recent requests
+            </h3>
             <p className="mt-1 text-sm text-muted-foreground">
-              Paid revenue by day. Open earnings for monthly and per-product totals.
+              Contact buyers from each request, then mark sold or cancelled.
             </p>
           </div>
           <Button variant="secondary" size="sm" asChild>
-            <Link href="/seller/earnings">View earnings</Link>
+            <Link href="/seller/requests">All requests</Link>
           </Button>
         </div>
-        <div className="mt-6">
-          <SellerEarningsChart
-            series={earningsSeries}
-            currency={metrics.currency}
-            range="30d"
-          />
-        </div>
-      </section>
-
-      <section className="mt-6 rounded-xl border border-border bg-card p-5">
-        <div className="flex flex-wrap items-end justify-between gap-3">
-          <div>
-            <h3 className="text-base font-semibold tracking-tight">Store views (30 days)</h3>
-            <p className="mt-1 text-sm text-muted-foreground">
-              {formatCount(views.shopTotal)} shop views · {formatCount(views.productTotal)} product views
-            </p>
-          </div>
-        </div>
-        <div className="mt-6">
-          <SellerShopViewsChart series={views.shopSeries} />
-        </div>
-        {viewProducts.length > 0 ? (
-          <Table className="mt-4" aria-label="Top products by views">
-            <TableHeader>
-              <TableRow>
-                <TableHead>Product</TableHead>
-                <TableHead className="text-right">Views</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {viewProducts.map((row) => (
-                <TableRow key={row.productId}>
-                  <TableCell>
-                    <Link
-                      href={`/seller/listings/${row.productId}`}
-                      className="hover:text-accent"
-                    >
-                      {row.title}
-                    </Link>
-                  </TableCell>
-                  <TableCell className="text-right font-mono text-sm tabular-nums text-muted-foreground">
-                    {formatCount(row.count)}
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+        {recentRequests.length === 0 ? (
+          <p className="mt-6 text-sm text-muted-foreground">No requests yet.</p>
         ) : (
-          <p className="mt-4 text-sm text-muted-foreground">
-            Product view totals appear after buyers open your listings.
-          </p>
-        )}
-      </section>
-
-      <div className="mt-6 grid gap-4 lg:grid-cols-2">
-        <section className="rounded-xl border border-border bg-card p-5">
-          <div className="flex items-center justify-between gap-3">
-            <h3 className="text-base font-semibold tracking-tight">Recent orders</h3>
-            <Button variant="ghost" size="sm" asChild>
-              <Link href="/seller/orders">All orders</Link>
-            </Button>
-          </div>
-          {recentOrders.length === 0 ? (
-            <p className="mt-4 text-sm text-muted-foreground">No orders yet.</p>
-          ) : (
-            <Table className="mt-2">
+          <DataTableShell className="mt-6">
+            <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Order</TableHead>
+                  <TableHead>Product</TableHead>
+                  <TableHead>Qty</TableHead>
                   <TableHead>Status</TableHead>
-                  <TableHead className="text-right">Total</TableHead>
+                  <TableHead>Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {recentOrders.map((order) => (
-                  <TableRow key={order.$id}>
-                    <TableCell>
-                      <Link
-                        href={`/seller/orders/${order.$id}`}
-                        className="font-mono text-sm hover:text-accent"
-                      >
-                        {order.$id.slice(0, 8)}…
-                      </Link>
+                {recentRequests.map((request) => (
+                  <TableRow key={request.$id}>
+                    <TableCell className="font-medium">
+                      {request.title}
+                    </TableCell>
+                    <TableCell className="tabular-nums">
+                      {request.quantity}
                     </TableCell>
                     <TableCell>
                       <StatusPill
-                        label={formatOrderStatus(order.status)}
-                        tone={orderStatusTone(order.status)}
+                        tone={purchaseRequestStatusTone(request.status)}
+                        label={formatPurchaseRequestStatus(request.status)}
                       />
                     </TableCell>
-                    <TableCell className="text-right font-mono text-sm tabular-nums">
-                      {formatRevenue(order.totalAmount, order.currency)}
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          )}
-        </section>
-
-        <section className="rounded-xl border border-border bg-card p-5">
-          <div className="flex items-center justify-between gap-3">
-            <h3 className="text-base font-semibold tracking-tight">Low stock</h3>
-            <Button variant="ghost" size="sm" asChild>
-              <Link href="/seller/listings">Listings</Link>
-            </Button>
-          </div>
-          {lowStock.length === 0 ? (
-            <p className="mt-4 text-sm text-muted-foreground">
-              No listings at or below 5 units.
-            </p>
-          ) : (
-            <Table className="mt-2">
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Listing</TableHead>
-                  <TableHead className="text-right">Stock</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {lowStock.map((product) => (
-                  <TableRow key={product.$id}>
                     <TableCell>
-                      <Link
-                        href={`/seller/listings/${product.$id}`}
-                        className="hover:text-accent"
-                      >
-                        {product.title}
-                      </Link>
-                    </TableCell>
-                    <TableCell className="text-right font-mono text-sm tabular-nums text-muted-foreground">
-                      {product.stock}
+                      <Button variant="outline" size="xs" asChild>
+                        <Link href={`/seller/requests/${request.$id}`}>
+                          <ExternalLink
+                            data-icon="inline-start"
+                            className="size-3"
+                          />
+                          Open
+                        </Link>
+                      </Button>
                     </TableCell>
                   </TableRow>
                 ))}
               </TableBody>
             </Table>
-          )}
-        </section>
-      </div>
+          </DataTableShell>
+        )}
+      </PortalPanel>
 
-      <section className="mt-4 rounded-xl border border-border bg-card p-5">
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <div>
-            <h3 className="text-base font-semibold tracking-tight">Shop setup</h3>
-            <p className="mt-1 text-sm text-muted-foreground">
-              {shop.shopName ?? "Your shop"} ·{" "}
-              {listingCounts.draft} drafts · {listingCounts.pendingReview} in review
-            </p>
-          </div>
-          <div className="flex flex-wrap gap-2">
-            <Button variant="secondary" size="sm" asChild>
-              <Link href="/seller/shop">
-                {shop.hasBank ? "Bank details" : "Add bank details"}
-              </Link>
-            </Button>
-            <Button variant="secondary" size="sm" asChild>
-              <Link href="/seller/settings">
-                {shop.hasPolicies ? "Policies" : "Add policies"}
-              </Link>
-            </Button>
-          </div>
-        </div>
-      </section>
+      {lowStock.length > 0 ? (
+        <PortalPanel className="mt-6">
+          <h3 className="text-base font-semibold tracking-tight">Low stock</h3>
+          <ul className="mt-4 space-y-2 text-sm">
+            {lowStock.map((product) => (
+              <li key={product.$id} className="flex justify-between gap-3">
+                <Link
+                  href={`/seller/listings?edit=${encodeURIComponent(product.$id)}`}
+                  className="font-medium hover:underline"
+                >
+                  {product.title}
+                </Link>
+                <span className="tabular-nums text-muted-foreground">
+                  {product.stock}
+                </span>
+              </li>
+            ))}
+          </ul>
+        </PortalPanel>
+      ) : null}
     </div>
   );
 }

@@ -21,7 +21,7 @@ import {
 } from "./config";
 import { getRequestOrigin } from "./server-origin";
 import { createProfileForUser } from "./profiles";
-import { resolveHomePath, resolvePostLoginPath } from "./home-path";
+import { resolvePostLoginPath } from "./home-path";
 import { ROLE_LABELS } from "./roles";
 import { createAdminClient } from "./server";
 import { getActiveUserById } from "./session";
@@ -91,17 +91,35 @@ function mapAuthError(error: unknown): string {
     }
   }
   if (error instanceof Error) {
-    if (error.message.toLowerCase().includes("already exists")) {
+    const message = error.message.toLowerCase();
+    if (
+      message.includes("email not verified") ||
+      message.includes("email_not_verified") ||
+      message.includes("verify your email")
+    ) {
+      return "Verify your email before signing in. We sent another link to your inbox.";
+    }
+    if (message.includes("already exists")) {
       return "An account with this email already exists.";
     }
-    if (error.message.toLowerCase().includes("invalid")) {
+    if (message.includes("invalid")) {
       return "Invalid email or password.";
     }
     if (error.message.includes("DATABASE_URL")) {
       return "Server is not configured. Ask an admin to set DATABASE_URL.";
     }
+    if (error.message.includes("SMTP")) {
+      return "Email is not configured. Ask an admin to set SMTP settings.";
+    }
   }
   return "Something went wrong. Please try again.";
+}
+
+/** Digits, spaces, +, -, parentheses; at least 8 digits. No SMS verification. */
+function isValidPhone(phone: string): boolean {
+  if (!/^[+\d][\d\s()-]*$/.test(phone)) return false;
+  const digits = phone.replace(/\D/g, "");
+  return digits.length >= 8 && digits.length <= 15;
 }
 
 export async function signUpWithEmail(
@@ -110,6 +128,7 @@ export async function signUpWithEmail(
 ): Promise<AuthActionState> {
   const email = readString(formData, "email");
   const password = readString(formData, "password");
+  const confirm = readString(formData, "confirm");
   const name = readString(formData, "name");
   const phone = readString(formData, "phone");
   const accountType = readString(formData, "accountType");
@@ -123,8 +142,20 @@ export async function signUpWithEmail(
   if (password.length < 8) {
     return { error: "Password must be at least 8 characters." };
   }
+  if (!confirm || password !== confirm) {
+    return { error: "Passwords do not match." };
+  }
+  if (!phone) {
+    return { error: "Phone number is required." };
+  }
   if (phone.length > 32) {
     return { error: "Phone number is too long." };
+  }
+  if (!isValidPhone(phone)) {
+    return {
+      error:
+        "Enter a valid phone number (at least 8 digits; + and spaces allowed).",
+    };
   }
 
   const sellerInput =
@@ -153,8 +184,14 @@ export async function signUpWithEmail(
 
   try {
     const hdrs = await headers();
+    const origin = await getRequestOrigin();
     const result = await auth.api.signUpEmail({
-      body: { email, password, name: name || email.split("@")[0] || "User" },
+      body: {
+        email,
+        password,
+        name: name || email.split("@")[0] || "User",
+        callbackURL: `${origin}/verify-email?verified=1`,
+      },
       headers: hdrs,
     });
     const userId = result.user.id;
@@ -172,6 +209,7 @@ export async function signUpWithEmail(
         email,
         name: name || undefined,
         phone: phone || undefined,
+        registrationComplete: true,
       });
     } catch (profileError) {
       await rollbackSignup(userId);
@@ -192,16 +230,8 @@ export async function signUpWithEmail(
       }
     }
 
-    try {
-      const origin = await getRequestOrigin();
-      await auth.api.sendVerificationEmail({
-        body: { email, callbackURL: `${origin}/verify-email` },
-        headers: hdrs,
-      });
-    } catch (verifyError) {
-      unstable_rethrow(verifyError);
-      logError("auth.signup.verify", verifyError, { userId: createdUserId });
-    }
+    // Better Auth sends the verification email when requireEmailVerification /
+    // emailVerification.sendOnSignUp is enabled (see lib/auth/index.ts).
   } catch (error) {
     unstable_rethrow(error);
     if (createdUserId) {
@@ -210,10 +240,7 @@ export async function signUpWithEmail(
     return { error: mapAuthError(error) };
   }
 
-  const sessionUser = createdUserId
-    ? await getActiveUserById(createdUserId)
-    : null;
-  redirect(sessionUser ? await resolveHomePath(sessionUser) : "/login");
+  redirect("/login?registered=1");
 }
 
 export async function signInWithEmail(

@@ -14,3 +14,12 @@ export function toSessionUserView(user: SessionUser): SessionUserView {
     labels: Array.isArray(user.labels) ? [...user.labels] : [],
   };
 }
+
+/** Portal home for signed-in admin/seller views (client-safe). */
+export function portalHomeForSessionUser(
+  user: Pick<SessionUserView, "labels">,
+): "/admin" | "/seller" | null {
+  if (user.labels.includes("admin")) return "/admin";
+  if (user.labels.includes("seller")) return "/seller";
+  return null;
+}

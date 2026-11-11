@@ -6,6 +6,7 @@ import {
   PortalShell,
   type PortalNavGroup,
 } from "@/components/layout/portal-shell";
+import { redirectIfRegistrationIncomplete } from "@/lib/appwrite/registration-complete";
 import { ROLE_LABELS, requireUser, userHasLabel } from "@/lib/appwrite/roles";
 import {
   blockedSellerPortalDestination,
@@ -14,15 +15,25 @@ import {
 
 const SELLER_NAV: PortalNavGroup[] = [
   {
+    items: [{ href: "/seller", label: "Dashboard", icon: "dashboard" }],
+  },
+  {
+    title: "Shop",
     items: [
-      { href: "/seller", label: "Dashboard", icon: "dashboard" },
       { href: "/seller/shop", label: "Shop", icon: "shop" },
       { href: "/seller/listings", label: "Listings", icon: "listings" },
-      { href: "/seller/orders", label: "Orders", icon: "orders" },
-      { href: "/seller/messages", label: "Messages", icon: "messages" },
-      { href: "/seller/earnings", label: "Earnings", icon: "earnings" },
-      { href: "/seller/settings", label: "Settings", icon: "settings" },
     ],
+  },
+  {
+    title: "Sales",
+    items: [
+      { href: "/seller/requests", label: "Requests", icon: "orders" },
+      { href: "/seller/reviews", label: "Reviews", icon: "reviews" },
+    ],
+  },
+  {
+    title: "Account",
+    items: [{ href: "/seller/settings", label: "Settings", icon: "settings" }],
   },
 ];
 
@@ -32,8 +43,9 @@ export default async function SellerLayout({
   children: ReactNode;
 }) {
   const user = await requireUser();
-  const hasSellerLabel = userHasLabel(user, ROLE_LABELS.seller);
   const pathname = (await headers()).get("x-knurdz-pathname") ?? "";
+  await redirectIfRegistrationIncomplete(pathname);
+  const hasSellerLabel = userHasLabel(user, ROLE_LABELS.seller);
   const isPendingPage = pathname === "/seller/pending";
 
   if (hasSellerLabel) {

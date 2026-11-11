@@ -3,7 +3,12 @@
 import Link from "next/link";
 import { useActionState, useState } from "react";
 import { signUpWithEmail, type AuthActionState } from "@/lib/appwrite/auth";
+import { AuthLegalLinks } from "@/components/auth/auth-legal-links";
 import { OAuthButtons } from "@/components/auth/oauth-buttons";
+import {
+  AUTH_FIELD_CLASS,
+  AUTH_PRIMARY_BUTTON_CLASS,
+} from "@/components/auth/auth-form-styles";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -18,7 +23,7 @@ export function RegisterForm({ oauthError }: { oauthError?: string }) {
   const [accountType, setAccountType] = useState<"buyer" | "seller">("buyer");
 
   return (
-    <div className="space-y-5">
+    <div className="space-y-4">
       <fieldset className="space-y-3">
         <legend className="text-sm font-medium">Account type</legend>
         <div className="grid gap-2 sm:grid-cols-2">
@@ -37,7 +42,7 @@ export function RegisterForm({ oauthError }: { oauthError?: string }) {
             <span>
               <span className="block text-sm font-medium">Buyer</span>
               <span className="mt-0.5 block text-xs text-muted-foreground">
-                Browse the market, cart, and checkout.
+                Browse the market and send buy requests to sellers.
               </span>
             </span>
           </label>
@@ -63,19 +68,7 @@ export function RegisterForm({ oauthError }: { oauthError?: string }) {
         </div>
       </fieldset>
 
-      {accountType === "seller" ? (
-        <p className="text-sm text-muted-foreground">
-          Continue with Google, Apple, or Facebook, then tell us about your shop.
-        </p>
-      ) : null}
-
-      <OAuthButtons
-        from="register"
-        intent={accountType === "seller" ? "seller" : undefined}
-        error={oauthError}
-      />
-
-      <form action={formAction} className="space-y-5">
+      <form action={formAction} className="space-y-4">
         <input type="hidden" name="accountType" value={accountType} />
 
         {state?.error ? (
@@ -86,7 +79,14 @@ export function RegisterForm({ oauthError }: { oauthError?: string }) {
 
         <div className="space-y-2">
           <Label htmlFor="name">Name</Label>
-          <Input id="name" name="name" type="text" autoComplete="name" />
+          <Input
+            id="name"
+            name="name"
+            type="text"
+            autoComplete="name"
+            placeholder="Your name"
+            className={AUTH_FIELD_CLASS}
+          />
         </div>
 
         <div className="space-y-2">
@@ -97,24 +97,27 @@ export function RegisterForm({ oauthError }: { oauthError?: string }) {
             type="email"
             autoComplete="email"
             required
+            placeholder="Enter your email"
+            className={AUTH_FIELD_CLASS}
           />
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="phone">
-            Phone <span className="font-normal text-muted-foreground">(optional)</span>
-          </Label>
+          <Label htmlFor="phone">Phone</Label>
           <Input
             id="phone"
             name="phone"
             type="tel"
             autoComplete="tel"
+            required
             maxLength={32}
+            placeholder="e.g. 077 123 4567"
+            className={AUTH_FIELD_CLASS}
           />
         </div>
 
         {accountType === "seller" ? (
-          <div className="space-y-5 rounded-lg border border-border bg-card px-3 py-4">
+          <div className="space-y-4 rounded-lg border border-border bg-card px-3 py-4">
             <div className="space-y-2">
               <Label htmlFor="shopName">Shop name</Label>
               <Input
@@ -125,6 +128,7 @@ export function RegisterForm({ oauthError }: { oauthError?: string }) {
                 maxLength={128}
                 autoComplete="organization"
                 placeholder="e.g. Campus Crafts"
+                className={AUTH_FIELD_CLASS}
               />
             </div>
             <div className="space-y-2">
@@ -136,6 +140,7 @@ export function RegisterForm({ oauthError }: { oauthError?: string }) {
                 maxLength={128}
                 autoComplete="off"
                 placeholder="campus-crafts"
+                className={AUTH_FIELD_CLASS}
               />
             </div>
             <div className="space-y-2">
@@ -161,12 +166,29 @@ export function RegisterForm({ oauthError }: { oauthError?: string }) {
             autoComplete="new-password"
             required
             minLength={8}
+            placeholder="At least 8 characters"
+            className={AUTH_FIELD_CLASS}
+          />
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="confirm">Confirm password</Label>
+          <Input
+            id="confirm"
+            name="confirm"
+            type="password"
+            autoComplete="new-password"
+            required
+            minLength={8}
+            placeholder="Repeat your password"
+            className={AUTH_FIELD_CLASS}
           />
         </div>
 
         <Button
           type="submit"
-          className="w-full"
+          variant="default"
+          className={AUTH_PRIMARY_BUTTON_CLASS}
           disabled={pending}
           data-testid="register-submit"
         >
@@ -177,17 +199,28 @@ export function RegisterForm({ oauthError }: { oauthError?: string }) {
               : "Create account"}
         </Button>
 
-        <p className="text-sm text-muted-foreground">
+        <p className="text-center text-xs text-muted-foreground">
           We will email you a link to verify your address after sign-up.
         </p>
-
-        <p className="text-sm text-muted-foreground">
-          Already registered?{" "}
-          <Link href="/login" className="text-foreground hover:underline">
-            Sign in
-          </Link>
-        </p>
       </form>
+
+      <OAuthButtons
+        from="register"
+        intent={accountType === "seller" ? "seller" : undefined}
+        error={oauthError}
+      />
+
+      <p className="text-center text-sm text-muted-foreground">
+        Already have an account?{" "}
+        <Link
+          href="/login"
+          className="font-semibold text-primary underline-offset-4 hover:underline"
+        >
+          Sign in
+        </Link>
+      </p>
+
+      <AuthLegalLinks />
     </div>
   );
 }

@@ -1,5 +1,6 @@
 import { getAppUrl } from "./config";
-import { createProfileForUser } from "./profiles";
+import { createProfileForUser, getOwnProfile } from "./profiles";
+import { registrationCompletePath } from "./registration-complete";
 import { postLoginPath, safeNextPath } from "./roles";
 import { getLoggedInUser } from "./session";
 import { logError } from "@/lib/observability/log-error";
@@ -53,13 +54,14 @@ export function buildOAuthSuccessUrl(params: {
   return success.toString();
 }
 
-/** Redirect to Better Auth social sign-in. */
+/** Redirect to Better Auth social sign-in (same origin as the current request). */
 export async function createOAuthRedirectUrl(params: {
   provider: OAuthProviderId;
   success: string;
   failure: string;
+  origin?: string;
 }): Promise<string> {
-  const base = getAppUrl().replace(/\/$/, "");
+  const base = (params.origin || getAppUrl()).replace(/\/$/, "");
   const callback = new URL(params.success);
   const url = new URL(`${base}/api/auth/sign-in/social`);
   url.searchParams.set("provider", params.provider);
@@ -87,12 +89,20 @@ export async function completeOAuthLogin(params: {
       userId: user.$id,
       email: user.email,
       name: user.name || undefined,
+      registrationComplete: false,
     });
   } catch (error) {
+    // Existing profile (returning user) is expected; other failures are logged.
     logError("oauth.profile", error, { userId: user.$id });
   }
 
-  const destination = postLoginPath(user, params.next ?? undefined);
+  const profile = await getOwnProfile();
+  const next = params.next ?? undefined;
+  const destination =
+    profile?.registrationComplete === true
+      ? postLoginPath(user, next)
+      : registrationCompletePath(next);
+
   return {
     ok: true,
     sessionSecret: "",

@@ -1,6 +1,9 @@
 "use server";
 
+import { eq, or } from "drizzle-orm";
 import { AppwriteException, Permission, Role } from "@/lib/db/appwrite-shim";
+import { getDb } from "@/lib/db/client";
+import { profiles as profilesTable } from "@/lib/db/schema";
 import { revalidatePath } from "next/cache";
 import { BUCKET_AVATARS, DATABASE_ID, TABLE_PROFILES } from "./config";
 import { createAdminClient, createSessionClient } from "./server";
@@ -14,6 +17,7 @@ export type Profile = {
   avatarFileId: string | null;
   phone: string | null;
   bio: string | null;
+  registrationComplete: boolean;
 };
 
 export type ProfileActionState = {
@@ -33,12 +37,31 @@ function asProfile(row: Record<string, unknown>): Profile {
     phone:
       typeof row.phone === "string" && row.phone.length > 0 ? row.phone : null,
     bio: typeof row.bio === "string" && row.bio.length > 0 ? row.bio : null,
+    registrationComplete:
+      row.registrationComplete === true || row.registrationComplete === 1,
   };
 }
 
 function readString(formData: FormData, key: string): string {
   const value = formData.get(key);
   return typeof value === "string" ? value.trim() : "";
+}
+
+/** Resolve `profiles.id` for an auth user (row id is usually userId, not always). */
+export async function getProfileRowIdForUser(
+  userId: string,
+): Promise<string | null> {
+  const rows = await getDb()
+    .select({ id: profilesTable.id })
+    .from(profilesTable)
+    .where(
+      or(
+        eq(profilesTable.id, userId),
+        eq(profilesTable.userId, userId),
+      ),
+    )
+    .limit(1);
+  return rows[0]?.id ?? null;
 }
 
 function defaultDisplayName(name: string | undefined, email: string): string {
@@ -57,6 +80,8 @@ export async function createProfileForUser(params: {
   email: string;
   name?: string;
   phone?: string;
+  /** Email signup sets true; OAuth first-time leaves false until /register/complete. */
+  registrationComplete?: boolean;
 }): Promise<Profile> {
   const { tables } = await createAdminClient();
   const phone =
@@ -70,6 +95,7 @@ export async function createProfileForUser(params: {
     data: {
       userId: params.userId,
       displayName: defaultDisplayName(params.name, params.email),
+      registrationComplete: params.registrationComplete === true,
       ...(phone ? { phone } : {}),
     },
     permissions: [
@@ -85,12 +111,15 @@ export async function getOwnProfile(): Promise<Profile | null> {
   const user = await getLoggedInUser();
   if (!user) return null;
 
+  const rowId = await getProfileRowIdForUser(user.$id);
+  if (!rowId) return null;
+
   try {
     const { tables } = await createSessionClient();
     const row = await tables.getRow({
       databaseId: DATABASE_ID,
       tableId: TABLE_PROFILES,
-      rowId: user.$id,
+      rowId,
     });
     const profile = asProfile(row as unknown as Record<string, unknown>);
     // Defense in depth: never return another user's row even if IDs diverge.
@@ -136,12 +165,17 @@ export async function updateOwnProfile(
     return { error: "Bio must be at most 1000 characters." };
   }
 
+  const profileRowId = await getProfileRowIdForUser(user.$id);
+  if (!profileRowId) {
+    return { error: "Profile not found." };
+  }
+
   try {
     const { tables } = await createSessionClient();
     const existing = await tables.getRow({
       databaseId: DATABASE_ID,
       tableId: TABLE_PROFILES,
-      rowId: user.$id,
+      rowId: profileRowId,
     });
     const existingProfile = asProfile(
       existing as unknown as Record<string, unknown>,
@@ -153,7 +187,7 @@ export async function updateOwnProfile(
     await tables.updateRow({
       databaseId: DATABASE_ID,
       tableId: TABLE_PROFILES,
-      rowId: user.$id,
+      rowId: profileRowId,
       data: {
         displayName,
         phone: phone || null,
@@ -197,12 +231,17 @@ export async function updateOwnAvatar(
   let uploadedFileId: string | null = null;
   let previousFileId: string | null = null;
 
+  const profileRowId = await getProfileRowIdForUser(user.$id);
+  if (!profileRowId) {
+    return { error: "Profile not found." };
+  }
+
   try {
     const { tables } = await createSessionClient();
     const existing = await tables.getRow({
       databaseId: DATABASE_ID,
       tableId: TABLE_PROFILES,
-      rowId: user.$id,
+      rowId: profileRowId,
     });
     const existingProfile = asProfile(
       existing as unknown as Record<string, unknown>,
@@ -218,7 +257,7 @@ export async function updateOwnAvatar(
     await tables.updateRow({
       databaseId: DATABASE_ID,
       tableId: TABLE_PROFILES,
-      rowId: user.$id,
+      rowId: profileRowId,
       data: {
         avatarFileId: fileId,
         userId: user.$id,
