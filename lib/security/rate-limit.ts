@@ -14,6 +14,8 @@ const MS_HOUR = 60 * MS_MINUTE;
 /** Named presets: single source of truth for auth/upload abuse guards. */
 export const RATE_LIMITS = {
   login: { limit: 5, windowMs: 15 * MS_MINUTE },
+  // Own bucket: OAuth must not spend the password-login IP allowance.
+  oauth: { limit: 10, windowMs: 15 * MS_MINUTE },
   register: { limit: 5, windowMs: MS_HOUR },
   recovery: { limit: 3, windowMs: MS_HOUR },
   verifyResend: { limit: 5, windowMs: MS_HOUR },

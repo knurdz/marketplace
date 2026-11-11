@@ -1,131 +1,201 @@
-# Knurdz Marketplace
+<p align="center">
+  <img src="./public/brand/logo.png" alt="Knurdz Marketplace" width="320" />
+</p>
 
-Multi-role marketplace web app built with **Next.js**, **MariaDB** (Drizzle), **Better Auth**, and file storage (local disk in dev; Hostinger Laravel API in production). The platform connects buyers and sellers; it does **not** process payments.
+**Knurdz Marketplace** is a production multi-role commerce web app: buyers discover listings and send **purchase requests**; sellers and buyers exchange contact details on those requests and complete payment off-platform. The platform does **not** process payments or hold funds. Inventory decreases only when a seller marks a request **sold**.
 
-**Production file hosting:** [`storage-api/README.md`](./storage-api/README.md) — deploy/update steps for `marketplace-storage.knurdz.org` on Hostinger.
+| Surface | URL |
+| -------- | --- |
+| Storefront | [https://marketplace.knurdz.org](https://marketplace.knurdz.org) |
+| File host | [https://marketplace-storage.knurdz.org](https://marketplace-storage.knurdz.org) |
+| Transactional email | `marketplace@knurdz.org` (Hostinger SMTP) |
+| Support | [support@knurdz.org](mailto:support@knurdz.org) |
 
-## Portals
+---
 
-| Portal     | Who              | Purpose                                              |
-| ---------- | ---------------- | ---------------------------------------------------- |
-| Storefront | Buyers           | Browse, wishlist, send buy requests                  |
-| Seller     | Approved sellers | Listings, inventory, resolve buy requests            |
-| Admin      | Admins           | Approvals, moderation, read-only request oversight   |
+## What it is
 
-## Buy flow (MVP)
+Signed-in buyers open a product, choose quantity, and send a **purchase request**. On that request, each party sees the other’s phone and email (not on public listing pages). They negotiate and settle outside the app. The seller marks the request **sold** (stock decrements in a transaction) or **cancelled** (stock unchanged). Admins moderate sellers, listings, reviews, and reports.
 
-1. Buyer opens a product, chooses a quantity, and taps **Buy**.
-2. A request is created; both sides see phone and email on that request.
-3. They settle the sale personally.
-4. Seller marks the request **sold** (stock decreases) or **cancelled** (stock unchanged).
+---
 
-See [`docs/agent/SCHEMA.md`](./docs/agent/SCHEMA.md).
+## Features
 
-## Team & agent docs
+### Storefront (`/`)
 
-| Doc                                       | Location                                                                                   |
-| ----------------------------------------- | ------------------------------------------------------------------------------------------ |
-| Work distribution, checklists, step plans | [`WORK_DISTRIBUTION.md`](./WORK_DISTRIBUTION.md) _(root)_                                  |
-| Agent reference index                     | [`docs/agent/INDEX.md`](./docs/agent/INDEX.md)                                             |
-| Member implementation guide               | [`docs/agent/MEMBER_IMPLEMENTATION_GUIDE.md`](./docs/agent/MEMBER_IMPLEMENTATION_GUIDE.md) |
-| Cursor rules                              | [`.cursor/rules/`](./.cursor/rules/)                                                       |
+Browse, search, categories, shop pages, product detail, wishlist, buyer dashboard, and purchase-request tracking. Reviews are allowed after a **sold** request; public shop ratings show admin-approved reviews only.
 
-Member **1** finishes foundation (auth, schema, UI kit, guards) before others implement against live APIs.
+### Seller portal (`/seller`)
 
-## Agent / quality rules
+Shop profile, listings (draft → review → active), inventory, and request inbox (sold / cancel). New sellers land on `/seller/pending` until an admin approves the shop.
 
-Priority: **security and build quality first**. Agents must use **graphify** before/after implementations, use only approved MCPs, tick checklist items in `WORK_DISTRIBUTION.md`, and **never** commit/PR/merge unless a human explicitly asks.
+### Admin portal (`/admin`)
 
-## Getting started
+Seller approval, listings and review moderation, purchase-request oversight (read-only contact context), reports, users, categories, platform settings, audit logs, analytics, and trust controls.
 
-Requires Node.js 20+ and npm.
+### Auth and trust
+
+Email/password with verification and password reset ([Better Auth](https://www.better-auth.com/)). Optional Google and GitHub OAuth. Cloudflare Turnstile on sensitive forms. Role labels (`buyer`, `seller`, `admin`) are enforced server-side in services and route guards, not only in the UI.
+
+### Uploads
+
+JPEG, PNG, and WebP only (magic-byte validation). Buckets: `avatars`, `product-images`, `categories`. Per-owner quotas and throttling apply in production.
+
+---
+
+## Architecture
+
+```mermaid
+flowchart LR
+  subgraph client [Browser]
+    NextApp[Next.js App Router]
+  end
+  subgraph vercel [Vercel]
+  NextApp --> API[Route handlers and server actions]
+  end
+  API --> MariaDB[(MariaDB)]
+  API --> Auth[Better Auth]
+  API --> SMTP[Nodemailer SMTP]
+  API --> StorageAPI[Storage API Laravel]
+  StorageAPI --> Disk[Hostinger disk]
+  API --> LocalUploads[Local ./uploads dev only]
+```
+
+| Layer | Technology | Location |
+| ----- | ---------- | -------- |
+| UI | Next.js 16, React 19, Tailwind, shadcn | `app/`, `components/` |
+| Data | Drizzle ORM, MariaDB 11 | `lib/db/`, `drizzle/` |
+| Auth | Better Auth | `lib/auth/`, `app/api/auth/` |
+| Email | Nodemailer (SMTP) | `lib/email/` |
+| Business logic | Typed services | `lib/services/` |
+| Files | Remote API or local disk (dev) | `lib/storage/`, `storage-api/` |
+
+**Portals**
+
+- Storefront: `app/(store)/`
+- Auth flows: `app/(auth)/` — `/login`, `/register`, `/account`, password and email verification
+- Seller: `app/seller/`
+- Admin: `app/admin/`
+
+**Storage behavior** ([`lib/storage/index.ts`](./lib/storage/index.ts))
+
+- **Development:** If `STORAGE_API_URL` is unset, files are written under `./uploads` and served at `/api/files/{bucket}/{fileId}`.
+- **Production:** Remote storage is **required**. Disk fallback throws if `STORAGE_API_URL` / `STORAGE_API_TOKEN` are missing (Vercel has no persistent local filesystem).
+
+**References**
+
+- Data contract: [`docs/agent/SCHEMA.md`](./docs/agent/SCHEMA.md)
+- Production security and ops: [`docs/SECURITY_OPERATIONS.md`](./docs/SECURITY_OPERATIONS.md)
+- Storage API deploy: [`storage-api/README.md`](./storage-api/README.md)
+
+---
+
+## Run locally
+
+**Requirements:** Node.js 20+, npm.
 
 ```bash
 cp .env.example .env.local
 npm install
-npm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000). The UI theme matches [knurdz.org](https://knurdz.org) (dark canvas, Space Grotesk, accent green).
+Configure [`.env.local`](./.env.example) before starting the app. Never commit secrets.
 
-| Script                 | Purpose                        |
-| ---------------------- | ------------------------------ |
-| `npm run dev`          | Start local Next.js dev server |
-| `npm run lint`         | ESLint                         |
-| `npm run format`       | Prettier write                 |
-| `npm run format:check` | Prettier check                 |
-| `npm run build`        | Production build               |
-| `npm run test:e2e`     | Playwright contact-request smoke suite |
+### MariaDB
 
-Set `DATABASE_URL` and `NEXT_PUBLIC_APP_URL` in `.env.local` (see `.env.example`). Do not commit secrets.
-
-## MariaDB setup
+**Option A — Docker (recommended for dev)**
 
 ```bash
 docker compose up -d
+```
+
+MariaDB 11 listens on `127.0.0.1:3306`. Defaults match [`docker-compose.yml`](./docker-compose.yml):
+
+`DATABASE_URL=mysql://knurdz:knurdz_dev@127.0.0.1:3306/marketplace`
+
+**Option B — Your own MariaDB**
+
+Create database `marketplace`, grant a user, then set:
+
+`DATABASE_URL=mysql://USER:PASSWORD@HOST:3306/marketplace`
+
+### Schema and dev server
+
+```bash
 npm run schema    # drizzle migrate
-npm run seed      # demo users + sample product
+npm run dev
 ```
 
-Default DB URL: `mysql://knurdz:knurdz_dev@127.0.0.1:3306/marketplace`
+Open [http://localhost:3000](http://localhost:3000).
 
-Server helpers live in [`lib/backend/`](./lib/backend/) (session, roles, storage wrappers). Table contract: [`docs/agent/SCHEMA.md`](./docs/agent/SCHEMA.md). Shared contracts for other members:
+**Optional:** `npm run seed` loads local demo fixtures only. Do **not** run seed against production.
 
-- Statuses / row types: [`lib/types/`](./lib/types/)
-- Session / products / uploads: [`lib/services/`](./lib/services/)
+### File storage
 
-### Demo seed (dev / sandbox only)
+| Mode | Configuration | Behavior |
+| ---- | ------------- | -------- |
+| Local dev | Leave `STORAGE_API_URL` unset | Writes to `./uploads`, serves `/api/files/...` |
+| Remote (prod-like) | `STORAGE_API_URL`, `STORAGE_API_TOKEN`, `NEXT_PUBLIC_STORAGE_URL` | Next.js uploads via bearer token to the Laravel API |
 
-After migrations:
+To exercise production storage locally, point the three variables at your deployed API host (see [`storage-api/README.md`](./storage-api/README.md)).
 
-```bash
-npm run seed
-```
+### Environment variables (summary)
 
-Creates idempotent demo users, profiles, **two** approved seller shops, categories, and sample products for local testing.
+| Group | Variables | Notes |
+| ----- | --------- | ----- |
+| App URL | `NEXT_PUBLIC_APP_URL`, `AUTH_LOCAL_APP_URL`, `AUTH_PRODUCTION_APP_URL`, optional `AUTH_TRUSTED_ORIGINS` | OAuth redirects and email links |
+| Database | `DATABASE_URL` | MariaDB connection string |
+| Session / forms | `BETTER_AUTH_SECRET`, `FORM_GUARD_SECRET` | Generate with `node -e "console.log(require('crypto').randomBytes(32).toString('base64'))"` |
+| Turnstile | `NEXT_PUBLIC_TURNSTILE_SITE_KEY`, `TURNSTILE_SECRET_KEY` | Required for production forms |
+| SMTP | `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASSWORD`, `SMTP_FROM` | Verification and password reset; production uses `smtp.hostinger.com`, port `465`, `SMTP_FROM="Knurdz Marketplace <marketplace@knurdz.org>"`. If the password contains `$`, escape each literal dollar as `\$` in `.env.local` (Next.js expands `$VAR`). |
+| OAuth (optional) | `GOOGLE_*`, `GITHUB_*` | Leave empty to disable |
+| Storage (production) | `STORAGE_API_URL`, `STORAGE_API_TOKEN`, `NEXT_PUBLIC_STORAGE_URL` | Production: `https://marketplace-storage.knurdz.org` |
 
-| Role    | Email                  | Labels            | Shop slug      |
-| ------- | ---------------------- | ----------------- | -------------- |
-| Admin   | `admin@knurdz.demo`    | `buyer`, `admin`  | —              |
-| Seller  | `seller@knurdz.demo`   | `buyer`, `seller` | `demo-shop`    |
-| Seller  | `seller2@knurdz.demo`  | `buyer`, `seller` | `paper-trail`  |
-| Buyer   | `buyer@knurdz.demo`    | `buyer`           | —              |
+Full comments: [`.env.example`](./.env.example).
 
-Sample SKUs: `seed_demo_product` (500 LKR), `seed_demo_free_product` (free), `seed_demo_tote` (goods), `seed_seller2_digital`, `seed_seller2_goods`.
+---
 
-Password for all demo accounts: `DemoPass123!`  
-**Sandbox only** — never reuse in production.
+## Scripts
 
-### Auth routes
+| Command | Purpose |
+| ------- | ------- |
+| `npm run dev` | Development server |
+| `npm run build` / `npm run start` | Production build and serve |
+| `npm run schema` | Apply Drizzle migrations |
+| `npm run lint` | ESLint |
+| `npm run typecheck` | `tsc --noEmit` |
+| `npm run format` / `npm run format:check` | Prettier |
+| `npm run test:security` | Security unit tests |
+| `npm run test:e2e` | Playwright E2E (install Chromium: `npx playwright install chromium`) |
 
-Shared storefront `/` is the buyer landing page. There is a single `/login` (no `/admin/login` or `/seller/login`). After sign-in, users are sent to their portal: **admin → `/admin`**, **seller → `/seller`**, **pending seller → `/seller/pending`**, **buyer → `/market`**. Admins and sellers cannot browse the buyer market. A `?next=` return path is honored only when it is a same-origin relative URL the user’s labels may visit.
+---
 
-| Path               | Purpose                                         |
-| ------------------ | ----------------------------------------------- |
-| `/login`           | Email/password sign in (role redirect after)    |
-| `/register`        | Create account (buyer or seller application)    |
-| `/account`         | Session + profile edit, verify resend, sign out |
-| `/forgot-password` | Request password recovery email                 |
-| `/reset-password`  | Set new password from recovery link             |
-| `/verify-email`    | Complete email verification from email link     |
-| `/seller`          | Seller portal (requires `seller` label)         |
-| `/seller/pending`  | Holding page until admin approves a shop        |
-| `/admin`           | Admin portal (requires `admin` label)           |
+## Production
 
-## Status
+| Component | Deployment |
+| --------- | ------------ |
+| Next.js app | Vercel (`marketplace.knurdz.org`) |
+| Database | External MariaDB (`DATABASE_URL` on Vercel) |
+| Files | Laravel storage API on Hostinger — **mandatory** (no disk on Vercel) |
+| Email | Hostinger SMTP as `marketplace@knurdz.org` |
 
-**Phase 0 complete (steps 1.1–1.13).** Member 1 foundation is ready: auth, schema, storage, UI shells, shared types/services, and demo seed.
+Deploy and update the file service using [`storage-api/README.md`](./storage-api/README.md).
 
-Setup order for a fresh clone: `cp .env.example .env.local` → `docker compose up -d` → `npm run schema` → `npm run seed` → `npm run dev`.
+**Required production secrets** (names only; set in the host’s env UI):
 
-### E2E tests (Phase 6.18)
+- `BETTER_AUTH_SECRET`, `FORM_GUARD_SECRET`
+- `TURNSTILE_SECRET_KEY`, `NEXT_PUBLIC_TURNSTILE_SITE_KEY`
+- `STORAGE_API_URL`, `STORAGE_API_TOKEN`, `NEXT_PUBLIC_STORAGE_URL`
+- SMTP: `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASSWORD`, `SMTP_FROM`
+- `DATABASE_URL`
 
-Requires `.env.local`, seeded categories, and a running dev server (Playwright starts one locally unless `CI` is set).
+Edge rate limiting, CSP, and rotation policy: [`docs/SECURITY_OPERATIONS.md`](./docs/SECURITY_OPERATIONS.md).
 
-```bash
-npx playwright install chromium
-npm run test:e2e
-```
+---
 
-Uses unique `@knurdz.demo` emails per run. Default password matches demo seed:
-`DemoPass123!` (override with `E2E_PASSWORD`).
+## Purchase request lifecycle
+
+1. Buyer (with profile phone) requests quantity ≤ available stock → status `requested`; stock unchanged.
+2. Buyer and seller see each other’s phone and email on the request detail view.
+3. Seller marks **sold** → stock decrements if sufficient; **cancelled** → no stock change.
+4. Buyer may leave a review linked to the sold request; admin approves before it appears on the shop.

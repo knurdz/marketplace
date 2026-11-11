@@ -15,6 +15,7 @@ import { getRequestOrigin } from "./server-origin";
 import {
   buildOAuthSuccessUrl,
   createOAuthRedirectUrl,
+  isOAuthProviderConfigured,
   oauthFailureUrl,
   parseOAuthProvider,
 } from "./oauth";
@@ -39,29 +40,38 @@ export async function startOAuth(formData: FormData): Promise<void> {
   const failUrl = oauthFailureUrl(from, "oauth", origin);
   const guard = await verifyFormGuard(formData, "auth.oauth.start");
   if (!guard.ok) {
-    redirect(failUrl);
+    redirect(
+      oauthFailureUrl(from, guard.reason === "too_fast" ? "try_again" : "oauth", origin),
+    );
   }
   const provider = parseOAuthProvider(readString(formData, "provider"));
   if (!provider) {
     redirect(failUrl);
     return;
   }
+  if (!isOAuthProviderConfigured(provider)) {
+    logError("auth.oauth.start", new Error("OAuth provider is not configured."), {
+      provider,
+    });
+    redirect(oauthFailureUrl(from, "oauth_unavailable", origin));
+  }
 
   const ip = await getClientIp();
-  const limit = await assertRateLimits([
-    {
-      bucket: "auth.login",
-      key: `ip:${ip}`,
-      ...RATE_LIMITS.login,
-    },
-    {
-      bucket: "auth.login",
-      key: `oauth:${ip}`,
-      ...RATE_LIMITS.login,
-    },
-  ]);
-  if (!limit.ok) {
+  let limit: { ok: true } | { ok: false };
+  try {
+    limit = await assertRateLimits([
+      {
+        bucket: "auth.oauth",
+        key: `ip:${ip}`,
+        ...RATE_LIMITS.oauth,
+      },
+    ]);
+  } catch (error) {
+    logError("auth.oauth.start", error, { provider, stage: "rate-limit" });
     redirect(failUrl);
+  }
+  if (!limit.ok) {
+    redirect(oauthFailureUrl(from, "rate_limited", origin));
   }
 
   const intentRaw = readString(formData, "intent");
@@ -78,7 +88,8 @@ export async function startOAuth(formData: FormData): Promise<void> {
     const redirectUrl = await createOAuthRedirectUrl({
       provider,
       success: buildOAuthSuccessUrl({ next, intent, origin }),
-      failure: failUrl,
+      // No preset ?error= so Better Auth can append the real code.
+      failure: `${origin}${from === "register" ? "/register" : "/login"}`,
     });
     redirect(redirectUrl);
   } catch (error) {

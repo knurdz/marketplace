@@ -174,6 +174,16 @@ export function getAuth() {
         fallback: getAppUrl(),
       },
       trustedOrigins: getAuthAppOrigins(),
+      account: {
+        accountLinking: {
+          enabled: true,
+          trustedProviders: ["google", "github"],
+        },
+      },
+      // Production otherwise sends /api/auth/error, which bounces to /?error=.
+      onAPIError: {
+        errorURL: "/login",
+      },
       // Server actions call auth.api directly; without this, Set-Cookie is dropped. Must stay last.
       plugins: [nextCookies()],
     });

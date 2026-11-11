@@ -89,7 +89,9 @@ export const authAccount = mysqlTable(
 export const authVerification = mysqlTable("verification", {
   id: id36(),
   identifier: varchar("identifier", { length: 255 }).notNull(),
-  value: varchar("value", { length: 255 }).notNull(),
+  // OAuth state JSON includes the callback URLs and a 128-char verifier.
+  // varchar(255) truncates it and JSON.parse throws "Unterminated string".
+  value: text("value").notNull(),
   expiresAt: timestamp("expires_at", { mode: "date" }).notNull(),
   createdAt: ts(),
   updatedAt: tsUpdated(),

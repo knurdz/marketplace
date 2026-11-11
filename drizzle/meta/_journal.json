@@ -78,6 +78,13 @@
       "when": 1795100000000,
       "tag": "0010_storage_quotas",
       "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "5",
+      "when": 1795200000000,
+      "tag": "0011_verification_value_text",
+      "breakpoints": true
     }
   ]
 }

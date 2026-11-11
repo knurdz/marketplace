@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Nunito_Sans, Space_Grotesk } from "next/font/google";
-import type { ReactNode } from "react";
+import { Suspense, type ReactNode } from "react";
+import { QueryToast } from "@/components/auth/query-toast";
 import { ThemeProvider } from "@/components/theme/theme-provider";
 import { Toaster } from "@/components/ui/sonner";
 import {
@@ -99,8 +100,11 @@ export default function RootLayout({ children }: { children: ReactNode }) {
     >
       <body className="min-h-screen antialiased">
         <ThemeProvider>
-          {children}
           <Toaster position="top-right" richColors closeButton />
+          {children}
+          <Suspense fallback={null}>
+            <QueryToast />
+          </Suspense>
         </ThemeProvider>
       </body>
     </html>

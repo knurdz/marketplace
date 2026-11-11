@@ -38,31 +38,18 @@ export default async function VerifyEmailPage({
   const failed = Boolean(linkError) || Boolean(result && !result.ok);
   const missingParams = !success && !failed;
 
-  const defaultFailureMessage =
-    "This verification link is invalid or has expired.";
-  const failureMessage =
-    (result && !result.ok ? result.error : null) ??
-    (linkError
-      ? "We couldn't verify your email. Request a new link from your account."
-      : null) ??
-    (missingParams
-      ? "This verification link is missing required parameters."
-      : defaultFailureMessage);
-
-  const toastStatus: "success" | "error" | null = success
-    ? "success"
-    : failed || missingParams
-      ? "error"
-      : null;
-  const toastMessage = success
-    ? "Email verified. Sign in to continue."
-    : toastStatus === "error"
-      ? failureMessage
-      : "";
-
   return (
     <main className="mx-auto w-full max-w-[30rem] px-4 py-14 sm:px-6 sm:py-20">
-      <VerifyEmailToast status={toastStatus} message={toastMessage} />
+      <VerifyEmailToast
+        status={token && result ? (result.ok ? "success" : "error") : null}
+        message={
+          token && result
+            ? result.ok
+              ? "Email verified. Sign in to continue."
+              : result.error
+            : ""
+        }
+      />
       <h1 className="text-center text-2xl font-semibold tracking-tight text-foreground">
         {success ? "Email verified" : "Verify email"}
       </h1>

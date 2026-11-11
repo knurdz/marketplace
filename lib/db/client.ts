@@ -102,11 +102,14 @@ export function getPool(): mysql.Pool {
     pool = attachRetry(
       mysql.createPool({
         uri: getDatabaseUrl(),
-        // A few parallel catalog queries, without opening 10 sockets per isolate.
-        connectionLimit: onVercel ? 4 : 10,
+        // Hostinger counts every new login toward max_connections_per_hour (500).
+        // One socket per warm server; parallel queries wait on it instead of
+        // opening more. A dead socket after the 20s server timeout is replaced once.
+        connectionLimit: onVercel ? 1 : 10,
         maxIdle: 1,
-        // Close idle sockets before Hostinger's 20s wait_timeout.
-        idleTimeout: 8_000,
+        // Keep a live socket. Closing it early would spend another hourly login
+        // on the next request, while the server connection is still valid.
+        idleTimeout: 60_000,
         connectTimeout: 10_000,
         enableKeepAlive: true,
         keepAliveInitialDelay: 0,

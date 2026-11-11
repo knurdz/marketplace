@@ -61,6 +61,17 @@ const PROVIDER_AUTHORIZE_HOSTS: Record<OAuthProviderId, string> = {
   github: "github.com",
 };
 
+const PROVIDER_ENV: Record<OAuthProviderId, readonly [string, string]> = {
+  google: ["GOOGLE_CLIENT_ID", "GOOGLE_CLIENT_SECRET"],
+  github: ["GITHUB_CLIENT_ID", "GITHUB_CLIENT_SECRET"],
+};
+
+/** True only when both server env values are set. An empty id disables the provider. */
+export function isOAuthProviderConfigured(provider: OAuthProviderId): boolean {
+  const [idKey, secretKey] = PROVIDER_ENV[provider];
+  return Boolean(process.env[idKey]?.trim() && process.env[secretKey]?.trim());
+}
+
 function isProviderAuthorizationUrl(
   provider: OAuthProviderId,
   raw: string,
