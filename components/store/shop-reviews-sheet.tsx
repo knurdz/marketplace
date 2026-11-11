@@ -67,8 +67,8 @@ type ShopReviewsSheetProps = {
   shopName: string;
   metrics: SellerReviewMetrics;
   reviews: Review[];
-  /** Compact rating chip used on the public shop header. */
-  triggerMode?: "button" | "rating-pill";
+  /** Trigger style used on the public shop header. */
+  triggerMode?: "button" | "rating-pill" | "stat-card";
   triggerVariant?: ComponentProps<typeof Button>["variant"];
   triggerSize?: ComponentProps<typeof Button>["size"];
   triggerClassName?: string;
@@ -111,11 +111,41 @@ export function ShopReviewsSheet({
     </button>
   );
 
+  const statCard = (
+    <button
+      type="button"
+      className="group flex flex-col justify-between px-4 py-3 text-left transition-colors hover:bg-muted/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring/50"
+    >
+      <span className="font-mono text-[11px] uppercase tracking-wider text-muted-foreground">
+        Rating
+      </span>
+      {hasRating ? (
+        <span className="mt-1 flex items-center gap-1.5">
+          <span className="text-base font-semibold tabular-nums tracking-tight text-foreground">
+            {averageLabel}
+          </span>
+          <StarRating rating={Math.round(metrics.average!)} size="sm" />
+        </span>
+      ) : (
+        <span className="mt-1 text-base font-semibold tracking-tight text-foreground">
+          No rating
+        </span>
+      )}
+      <span className="mt-0.5 text-xs text-accent transition-colors group-hover:text-accent/80">
+        {hasRating
+          ? `${metrics.count} ${metrics.count === 1 ? "review" : "reviews"} →`
+          : "See reviews →"}
+      </span>
+    </button>
+  );
+
   return (
     <Sheet>
       <SheetTrigger asChild>
         {triggerMode === "rating-pill" ? (
           ratingPill
+        ) : triggerMode === "stat-card" ? (
+          statCard
         ) : (
           <Button
             variant={triggerVariant}

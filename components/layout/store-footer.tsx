@@ -6,14 +6,7 @@ const FOOTER_COLUMNS = [
     title: "Market",
     links: [
       { href: "/#browse", label: "Browse listings" },
-    ],
-  },
-  {
-    title: "Help",
-    links: [
-      { href: "/faq", label: "FAQ" },
-      { href: "/legal/terms", label: "Terms of Service" },
-      { href: "/legal/privacy", label: "Privacy Policy" },
+      { href: "/categories", label: "Categories" },
     ],
   },
   {
@@ -25,11 +18,14 @@ const FOOTER_COLUMNS = [
     ],
   },
   {
+    title: "Help",
+    links: [{ href: "/faq", label: "FAQ" }],
+  },
+  {
     title: "Legal",
     links: [
       { href: "/legal/terms", label: "Terms of Service" },
       { href: "/legal/privacy", label: "Privacy Policy" },
-      { href: "/faq", label: "FAQ" },
     ],
   },
 ] as const;
@@ -41,7 +37,7 @@ export function StoreFooter() {
         <div className="md:col-span-1">
           <BrandLogo className="h-14" />
           <p className="mt-3 max-w-xs text-sm leading-relaxed text-muted-foreground">
-            A market for the community that already ships.
+            Buy and sell directly with people in the community.
           </p>
         </div>
         {FOOTER_COLUMNS.map((column) => (

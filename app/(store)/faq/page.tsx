@@ -2,52 +2,95 @@ import { LegalPage, LegalSection } from "@/components/legal/legal-page";
 
 export default function FaqPage() {
   return (
-    <LegalPage title="FAQ" updated="10 November 2026">
+    <LegalPage eyebrow="Help" title="FAQ" updated="11 November 2026">
       <LegalSection title="How do I buy something?">
         <p>
-          Browse or search active listings, open a product, choose a quantity,
-          and tap Buy. That sends a request to the seller and shows their phone
-          and email so you can arrange the sale directly.
+          Browse or search active listings, open a product, and choose a
+          quantity. You need to be signed in and have a phone number on your
+          account. Tapping Buy sends a purchase request to the seller. The
+          request shows their phone and email, and shows yours to them, so you
+          can arrange the sale directly.
         </p>
       </LegalSection>
 
-      <LegalSection title="Does Knurdz process payments?">
+      <LegalSection title="Does Knurdz charge fees?">
         <p>
-          No. Buyers and sellers contact each other and settle personally. When
-          the deal is done, the seller marks the request sold or cancelled.
-          Stock drops only when a request is marked sold.
+          No. Knurdz does not charge buyers or sellers a listing fee, a
+          commission, or any other platform fee. The price on a listing is
+          between you and the other person.
+        </p>
+      </LegalSection>
+
+      <LegalSection title="How do I pay the seller?">
+        <p>
+          You pay the seller yourselves. Knurdz does not take card payments,
+          bank transfers, or cash, and it does not hold money for either side.
+          Agree how and when to pay when you contact each other.
+        </p>
+      </LegalSection>
+
+      <LegalSection title="When is a request sold or cancelled?">
+        <p>
+          The seller marks the request sold or cancelled. Sold reduces the
+          listing’s stock by the quantity on the request, if enough stock
+          remains. Cancelled leaves the stock unchanged. A request is not an
+          order that Knurdz fulfills.
         </p>
       </LegalSection>
 
       <LegalSection title="How do I sell on Knurdz?">
         <p>
-          Create an account and choose Seller at registration. An admin reviews
-          your shop before you can publish listings. Add a phone number so
-          buyers can reach you after they send a request.
+          Create an account and apply as a seller. An admin reviews your shop
+          before you can publish. Add a phone number so buyers can reach you.
+          New listings start as drafts. Submit a draft for review; it appears
+          on the store only after an admin approves it. A rejected listing
+          stays off the store until you fix it and submit it again.
         </p>
       </LegalSection>
 
-      <LegalSection title="Why can’t I open /seller or /admin?">
+      <LegalSection title="What does Knurdz review?">
         <p>
-          Those areas require the matching role label. Buyers are blocked from
-          admin; unapproved users are blocked from seller dashboards. Sign in
-          with a seeded demo account if you are testing locally.
+          Before something is public, an admin reviews new seller shops, new
+          listings, and buyer reviews. A later edit to a listing that is
+          already live does not automatically go back through review. The seller
+          stays responsible for keeping that listing accurate. A signed-in user
+          can report someone else’s listing, and the team reviews those
+          reports.
         </p>
       </LegalSection>
 
-      <LegalSection title="How do seller reviews work?">
+      <LegalSection title="How do reviews work?">
         <p>
-          After a seller marks your request sold, you can rate the seller from
-          that request. An admin must approve the review before it appears on
-          the seller’s shop. Reviews are about the seller, not a product.
+          After a seller marks your request sold, you can leave one rating of
+          that seller, from 1 to 5, with an optional comment. The review stays
+          hidden until an admin approves it. Approved reviews appear on the
+          seller’s shop. Reviews are about the seller, not a single product.
         </p>
       </LegalSection>
 
-      <LegalSection title="How does email verification work?">
+      <LegalSection title="How do I report a listing?">
         <p>
-          After sign-up you can request a verification email from your account
-          page. Password reset uses a secure recovery link. Sensitive auth
-          actions are rate-limited.
+          Sign in and report someone else’s listing with a reason. You cannot
+          report your own listing. An admin can dismiss the report, take the
+          listing down, or suspend the shop.
+        </p>
+      </LegalSection>
+
+      <LegalSection title="What is the wishlist?">
+        <p>
+          The wishlist saves listings for you. Only you can see what you have
+          saved.
+        </p>
+      </LegalSection>
+
+      <LegalSection title="How do accounts and contact details work?">
+        <p>
+          You can sign up with email or with Google or GitHub. Confirm your
+          email from the message we send, and use the recovery link if you
+          forget your password. Your phone and email are not shown on public
+          product or shop pages. They are shared with the other person only
+          after a purchase request, and with admins who moderate the
+          marketplace.
         </p>
       </LegalSection>
     </LegalPage>
