@@ -1,5 +1,9 @@
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { CatalogView } from "@/components/store/catalog-view";
+import { BUCKET_CATEGORIES } from "@/lib/backend/config";
+import { getFileViewUrl } from "@/lib/backend/storage-urls";
+import { buildNoIndexMetadata, buildPublicMetadata } from "@/lib/seo/metadata";
 import {
   getCategoryBySlug,
   listActiveProductsPage,
@@ -8,6 +12,7 @@ import {
   parseProductCatalogParams,
 } from "@/lib/services";
 import { CATALOG_PAGE_SIZE } from "@/lib/services/products";
+import { categoryImagePath } from "@/lib/store/category-catalog";
 
 type CategoryPageProps = {
   params: Promise<{ slug: string }>;
@@ -17,6 +22,43 @@ type CategoryPageProps = {
     sort?: string;
   }>;
 };
+
+export async function generateMetadata({
+  params,
+  searchParams,
+}: CategoryPageProps): Promise<Metadata> {
+  const [{ slug }, query] = await Promise.all([params, searchParams]);
+  const category = await getCategoryBySlug(slug);
+  if (!category) {
+    return buildNoIndexMetadata("Category not found");
+  }
+
+  const catalogParams = parseProductCatalogParams(query);
+  const hasFacetFilters =
+    catalogParams.minPrice != null ||
+    catalogParams.maxPrice != null ||
+    catalogParams.sort !== "newest" ||
+    catalogParams.invalidPriceRange;
+
+  const uploadedId = category.imageFileId?.trim() || null;
+  const imageUrl = uploadedId
+    ? getFileViewUrl(BUCKET_CATEGORIES, uploadedId)
+    : categoryImagePath(category.slug);
+
+  return buildPublicMetadata({
+    title: category.name,
+    description: `Browse active ${category.name} listings on Knurdz Marketplace. Connect directly with verified community sellers and pay zero platform fees.`,
+    canonicalPath: `/categories/${category.slug}`,
+    image: imageUrl
+      ? {
+          url: imageUrl,
+          alt: `${category.name} category on Knurdz Marketplace`,
+        }
+      : null,
+    noIndex: hasFacetFilters,
+    follow: true,
+  });
+}
 
 export default async function CategoryPage({
   params,

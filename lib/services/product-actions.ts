@@ -10,6 +10,11 @@ import {
   type ProductCoverMap,
 } from "./products";
 import type { Product } from "@/lib/types";
+import {
+  assertRateLimit,
+  getClientIp,
+  RATE_LIMITS,
+} from "@/lib/security/rate-limit";
 
 /** Hydrate active listings for client-side recently viewed ids. */
 export async function fetchPublicProductsByIds(
@@ -52,6 +57,14 @@ export async function loadMoreCatalogProducts(
     nextOffset: null,
     hasMore: false,
   };
+
+  const ip = await getClientIp();
+  const rate = await assertRateLimit({
+    bucket: "public.catalog",
+    key: `ip:${ip}`,
+    ...RATE_LIMITS.publicReads,
+  });
+  if (!rate.ok) return empty;
 
   if (input.invalidPriceRange) return empty;
 

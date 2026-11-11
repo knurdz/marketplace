@@ -1,3 +1,4 @@
+import { hasDatabaseConfig } from "@/lib/config/app";
 import {
   and,
   asc,
@@ -12,16 +13,15 @@ import {
   sql,
   type SQL,
 } from "drizzle-orm";
-import { AppwriteException, Query } from "@/lib/db/appwrite-shim";
+import { DbException, Query } from "@/lib/db/compat";
 import {
   DATABASE_ID,
   TABLE_PRODUCT_IMAGES,
   TABLE_PRODUCTS,
   TABLE_PURCHASE_REQUESTS,
-  hasAppwritePublicConfig,
-} from "@/lib/appwrite/config";
-import { createAdminClient, createPublicClient } from "@/lib/appwrite/server";
-import { getDb, hasDatabaseConfig } from "@/lib/db/client";
+} from "@/lib/backend/config";
+import { createAdminClient, createPublicClient } from "@/lib/backend/server";
+import { getDb } from "@/lib/db/client";
 import {
   categories as categoriesTable,
   products as productsTable,
@@ -509,7 +509,7 @@ export async function listActiveProducts(opts?: {
   sort?: ProductCatalogSort;
   invalidPriceRange?: boolean;
 }): Promise<Product[]> {
-  if (!hasAppwritePublicConfig() || opts?.invalidPriceRange) return [];
+  if (!hasDatabaseConfig() || opts?.invalidPriceRange) return [];
 
   const limit = Math.min(Math.max(opts?.limit ?? 24, 1), 100);
   const categoryId = opts?.categoryId?.trim() || null;
@@ -543,7 +543,7 @@ export async function listActiveProducts(opts?: {
 export async function listFeaturedProducts(opts?: {
   limit?: number;
 }): Promise<Product[]> {
-  if (!hasAppwritePublicConfig()) return [];
+  if (!hasDatabaseConfig()) return [];
 
   const limit = Math.min(Math.max(opts?.limit ?? 8, 1), 24);
 
@@ -655,7 +655,7 @@ export async function searchActiveProducts(
   if (opts?.invalidPriceRange) {
     return { ok: false, reason: "invalid_range" };
   }
-  if (!hasDatabaseConfig() && !hasAppwritePublicConfig()) {
+  if (!hasDatabaseConfig()) {
     return { ok: false, reason: "unavailable" };
   }
 
@@ -857,7 +857,7 @@ export async function getSearchSuggestionIndex(): Promise<SearchSuggestionIndex>
  */
 export async function getProduct(id: string): Promise<Product | null> {
   const trimmed = id?.trim();
-  if (!trimmed || !hasAppwritePublicConfig()) return null;
+  if (!trimmed || !hasDatabaseConfig()) return null;
 
   try {
     const { tables } = await createPublicClient();
@@ -870,7 +870,7 @@ export async function getProduct(id: string): Promise<Product | null> {
     if (!product || !isActiveProduct(product)) return null;
     return product;
   } catch (error) {
-    if (error instanceof AppwriteException && error.code === 404) {
+    if (error instanceof DbException && error.code === 404) {
       return null;
     }
     return null;
@@ -903,7 +903,7 @@ export async function listProductImages(
   productId: string,
 ): Promise<ProductImage[]> {
   const trimmed = productId?.trim();
-  if (!trimmed || !hasAppwritePublicConfig()) return [];
+  if (!trimmed || !hasDatabaseConfig()) return [];
 
   try {
     const { tables } = await createPublicClient();
@@ -948,7 +948,7 @@ export async function listCoverImagesByProductIds(
   const ids = Array.from(
     new Set(productIds.map((id) => id.trim()).filter(Boolean)),
   );
-  if (ids.length === 0 || !hasAppwritePublicConfig()) return {};
+  if (ids.length === 0 || !hasDatabaseConfig()) return {};
 
   const covers: ProductCoverMap = {};
 
@@ -990,7 +990,7 @@ export async function listCoverImagesByProductIds(
 export async function listTrendingProducts(opts?: {
   limit?: number;
 }): Promise<Product[]> {
-  if (!hasAppwritePublicConfig() || !process.env.DATABASE_URL?.trim()) {
+  if (!hasDatabaseConfig()) {
     return [];
   }
 
@@ -1049,7 +1049,7 @@ export async function listPublicProductsByIds(ids: string[]): Promise<Product[]>
     ...new Set(ids.map((id) => id.trim()).filter((id) => id.length > 0)),
   ].slice(0, 12);
 
-  if (unique.length === 0 || !hasAppwritePublicConfig()) return [];
+  if (unique.length === 0 || !hasDatabaseConfig()) return [];
 
   const byId = new Map<string, Product>();
   for (const id of unique) {

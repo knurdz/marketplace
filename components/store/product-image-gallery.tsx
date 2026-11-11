@@ -3,8 +3,8 @@
 import { Package } from "lucide-react";
 import { useState } from "react";
 import { StorageImage } from "@/components/ui/storage-image";
-import { BUCKET_PRODUCT_IMAGES } from "@/lib/appwrite/config";
-import { getFilePreviewUrl } from "@/lib/appwrite/storage-urls";
+import { BUCKET_PRODUCT_IMAGES } from "@/lib/backend/config";
+import { getFilePreviewUrl } from "@/lib/backend/storage-urls";
 import type { ProductImage } from "@/lib/types";
 import { cn } from "@/lib/utils";
 

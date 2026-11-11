@@ -33,7 +33,7 @@ import {
   deleteCategoryFormAction,
   updateCategoryFormAction,
   type CategoryActionState,
-} from "@/lib/appwrite/categories-actions";
+} from "@/lib/backend/categories-actions";
 import type { CategoryTreeNode } from "@/lib/services";
 import type { Category } from "@/lib/types";
 import { toast } from "@/lib/ui/toast";

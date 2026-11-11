@@ -95,6 +95,14 @@ export const authVerification = mysqlTable("verification", {
   updatedAt: tsUpdated(),
 });
 
+/** Better Auth's serverless-safe HTTP endpoint limiter. */
+export const authRateLimit = mysqlTable("auth_rate_limit", {
+  id: id36(),
+  key: varchar("rate_limit_key", { length: 255 }).notNull().unique(),
+  count: int("count").notNull(),
+  lastRequest: bigint("last_request", { mode: "number" }).notNull(),
+});
+
 export const profiles = mysqlTable(
   "profiles",
   {
@@ -218,6 +226,7 @@ export const purchaseRequests = mysqlTable(
     buyerId: varchar("buyer_id", { length: 36 }).notNull(),
     sellerId: varchar("seller_id", { length: 36 }).notNull(),
     productId: varchar("product_id", { length: 36 }).notNull(),
+    openKey: varchar("open_key", { length: 80 }),
     title: varchar("title", { length: 200 }).notNull(),
     quantity: int("quantity").notNull(),
     unitPrice: decimal("unit_price", { precision: 12, scale: 2 }).notNull(),
@@ -231,6 +240,7 @@ export const purchaseRequests = mysqlTable(
     index("purchase_requests_seller_id_idx").on(t.sellerId),
     index("purchase_requests_product_id_idx").on(t.productId),
     index("purchase_requests_status_idx").on(t.status),
+    uniqueIndex("purchase_requests_open_key_unique").on(t.openKey),
   ],
 );
 
@@ -380,6 +390,14 @@ export const storedFiles = mysqlTable(
     index("stored_files_owner_idx").on(t.ownerId),
   ],
 );
+
+export const storageQuotas = mysqlTable("storage_quotas", {
+  ownerId: varchar("owner_id", { length: 36 }).primaryKey(),
+  fileCount: int("file_count").notNull().default(0),
+  totalBytes: bigint("total_bytes", { mode: "number" }).notNull().default(0),
+  createdAt: ts(),
+  updatedAt: tsUpdated(),
+});
 
 export const TABLE_REGISTRY = {
   profiles,

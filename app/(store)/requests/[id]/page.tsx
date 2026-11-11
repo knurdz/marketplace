@@ -1,12 +1,18 @@
+import type { Metadata } from "next";
 import { notFound, redirect } from "next/navigation";
 import { BuyerRequestDetail } from "@/components/store/buyer-request-detail";
-import { getLoggedInUser } from "@/lib/appwrite/session";
+import { getLoggedInUser } from "@/lib/backend/session";
+import { buildNoIndexMetadata } from "@/lib/seo/metadata";
 import {
   canReviewSellerRequest,
   getOwnPurchaseRequestDetail,
   getOwnReviewForRequest,
 } from "@/lib/services";
 import { listCoverImagesByProductIds } from "@/lib/services/products";
+
+export const metadata: Metadata = buildNoIndexMetadata(
+  "Purchase Request Details",
+);
 
 type BuyerRequestDetailPageProps = {
   params: Promise<{ id: string }>;

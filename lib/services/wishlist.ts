@@ -1,12 +1,12 @@
-import { ID, Permission, Query, Role } from "@/lib/db/appwrite-shim";
+import { ID, Permission, Query, Role } from "@/lib/db/compat";
 import {
   DATABASE_ID,
   TABLE_WISHLIST_ITEMS,
-  hasAppwritePublicConfig,
-} from "@/lib/appwrite/config";
-import { mayBrowsePublicCatalog } from "@/lib/appwrite/roles";
-import { createSessionClient } from "@/lib/appwrite/server";
-import { getLoggedInUser } from "@/lib/appwrite/session";
+  hasDatabaseConfig,
+} from "@/lib/backend/config";
+import { mayBrowsePublicCatalog } from "@/lib/backend/roles";
+import { createSessionClient } from "@/lib/backend/server";
+import { getLoggedInUser } from "@/lib/backend/session";
 import {
   assertRateLimit,
   getClientIp,
@@ -78,7 +78,7 @@ function buildWishlistLine(item: WishlistItem, product: Product | null): Wishlis
 
 async function assertWishlistMutationRateLimit(userId: string): Promise<void> {
   const ip = await getClientIp();
-  const result = assertRateLimit({
+  const result = await assertRateLimit({
     bucket: "wishlist",
     key: `${userId}:${ip}`,
     ...RATE_LIMITS.wishlist,
@@ -133,7 +133,7 @@ function mapWishlistError(err: unknown): WishlistActionState {
 export async function listOwnWishlistItems(opts?: {
   limit?: number;
 }): Promise<WishlistItem[]> {
-  if (!hasAppwritePublicConfig()) return [];
+  if (!hasDatabaseConfig()) return [];
 
   const user = await getLoggedInUser();
   if (!user) return [];
@@ -167,7 +167,7 @@ export async function listOwnWishlistItems(opts?: {
 
 /** Whether the signed-in user has saved this product. */
 export async function isProductInOwnWishlist(productId: string): Promise<boolean> {
-  if (!hasAppwritePublicConfig()) return false;
+  if (!hasDatabaseConfig()) return false;
 
   const user = await getLoggedInUser();
   if (!user) return false;
@@ -225,7 +225,7 @@ export async function getOwnWishlistView(opts?: {
 export async function addToOwnWishlist(
   productId: string,
 ): Promise<WishlistActionState> {
-  if (!hasAppwritePublicConfig()) return notConfiguredState();
+  if (!hasDatabaseConfig()) return notConfiguredState();
 
   try {
     const user = await requireUser();
@@ -287,7 +287,7 @@ export async function addToOwnWishlist(
 export async function removeFromOwnWishlist(
   productId: string,
 ): Promise<WishlistActionState> {
-  if (!hasAppwritePublicConfig()) return notConfiguredState();
+  if (!hasDatabaseConfig()) return notConfiguredState();
 
   try {
     const user = await requireUser();

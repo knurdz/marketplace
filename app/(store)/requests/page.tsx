@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { Package } from "lucide-react";
@@ -6,14 +7,20 @@ import { BuyerRequestCard } from "@/components/store/buyer-request-card";
 import { EmptyState } from "@/components/layout/empty-state";
 import { FilterTabs } from "@/components/layout/data-table-shell";
 import { Button } from "@/components/ui/button";
-import { BUCKET_PRODUCT_IMAGES } from "@/lib/appwrite/config";
-import { getLoggedInUser } from "@/lib/appwrite/session";
-import { getFilePreviewUrl } from "@/lib/appwrite/storage-urls";
+import { BUCKET_PRODUCT_IMAGES } from "@/lib/backend/config";
+import { getLoggedInUser } from "@/lib/backend/session";
+import { getFilePreviewUrl } from "@/lib/backend/storage-urls";
+import { buildNoIndexMetadata } from "@/lib/seo/metadata";
 import {
   listCoverImagesByProductIds,
   listOwnPurchaseRequests,
 } from "@/lib/services";
 import type { PurchaseRequestStatus } from "@/lib/types";
+
+export const metadata: Metadata = buildNoIndexMetadata(
+  "Purchase Requests",
+  "Buy requests you sent to sellers on Knurdz Marketplace.",
+);
 
 type BuyerRequestsPageProps = {
   searchParams: Promise<{ filter?: string }>;

@@ -57,6 +57,27 @@
       "when": 1794800000000,
       "tag": "0007_user_image_length",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "5",
+      "when": 1794900000000,
+      "tag": "0008_auth_rate_limit",
+      "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "5",
+      "when": 1795000000000,
+      "tag": "0009_purchase_request_open_key",
+      "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "5",
+      "when": 1795100000000,
+      "tag": "0010_storage_quotas",
+      "breakpoints": true
     }
   ]
 }

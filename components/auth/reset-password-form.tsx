@@ -4,7 +4,7 @@ import { useActionState } from "react";
 import {
   completePasswordRecovery,
   type RecoveryActionState,
-} from "@/lib/appwrite/recovery";
+} from "@/lib/backend/recovery";
 import { AuthBackLink } from "@/components/auth/auth-back-link";
 import { AuthLegalLinks } from "@/components/auth/auth-legal-links";
 import {
@@ -14,6 +14,8 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { FormGuardFields } from "@/components/security/form-guard-fields";
+import { Turnstile } from "@/components/security/turnstile";
 
 const initialState: RecoveryActionState = {};
 
@@ -26,6 +28,7 @@ export function ResetPasswordForm({ token }: { token: string }) {
   return (
     <div className="space-y-6">
       <form action={formAction} className="space-y-4">
+        <FormGuardFields action="auth.password-recovery.complete" />
         <input type="hidden" name="token" value={token} />
 
         {state?.error ? (
@@ -54,6 +57,7 @@ export function ResetPasswordForm({ token }: { token: string }) {
             autoComplete="new-password"
             required
             minLength={8}
+            maxLength={128}
             placeholder="At least 8 characters"
             className={AUTH_FIELD_CLASS}
           />
@@ -68,10 +72,15 @@ export function ResetPasswordForm({ token }: { token: string }) {
             autoComplete="new-password"
             required
             minLength={8}
+            maxLength={128}
             placeholder="Repeat your password"
             className={AUTH_FIELD_CLASS}
           />
         </div>
+
+        {state?.requireCaptcha ? (
+          <Turnstile action="auth_recovery_complete" pending={pending} />
+        ) : null}
 
         <Button
           type="submit"
@@ -83,7 +92,9 @@ export function ResetPasswordForm({ token }: { token: string }) {
         </Button>
       </form>
 
-      <AuthBackLink href="/forgot-password">Request a new reset link</AuthBackLink>
+      <AuthBackLink href="/forgot-password">
+        Request a new reset link
+      </AuthBackLink>
       <AuthBackLink href="/login">Back to sign in</AuthBackLink>
 
       <AuthLegalLinks />

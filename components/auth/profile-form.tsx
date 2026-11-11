@@ -6,7 +6,7 @@ import {
   updateOwnProfile,
   type Profile,
   type ProfileActionState,
-} from "@/lib/appwrite/profiles";
+} from "@/lib/backend/profiles";
 import { AUTH_FIELD_CLASS } from "@/components/auth/auth-form-styles";
 import { Button } from "@/components/ui/button";
 import {
@@ -20,6 +20,7 @@ import { Input } from "@/components/ui/input";
 import { StorageImage } from "@/components/ui/storage-image";
 import { Label } from "@/components/ui/label";
 import { toast } from "@/lib/ui/toast";
+import { FormGuardFields } from "@/components/security/form-guard-fields";
 
 const initialState: ProfileActionState = {};
 const avatarInitial: ProfileActionState = {};
@@ -74,6 +75,7 @@ export function ProfileForm({
         </CardHeader>
         <CardContent>
           <form action={avatarAction} className="space-y-5">
+            <FormGuardFields action="account.avatar.update" />
             {avatarState.error ? (
               <p
                 id={avatarErrorId}
@@ -134,6 +136,7 @@ export function ProfileForm({
         </CardHeader>
         <CardContent>
           <form action={formAction} className="space-y-5">
+            <FormGuardFields action="account.profile.update" />
             {state.error ? (
               <p
                 id={profileErrorId}

@@ -1,11 +1,11 @@
-import { ID, Query } from "@/lib/db/appwrite-shim";
+import { ID, Query } from "@/lib/db/compat";
 import {
   DATABASE_ID,
   TABLE_AUDIT_LOGS,
-  hasAppwritePublicConfig,
-} from "@/lib/appwrite/config";
-import { requireLabel } from "@/lib/appwrite/roles";
-import { createAdminClient } from "@/lib/appwrite/server";
+  hasDatabaseConfig,
+} from "@/lib/backend/config";
+import { requireLabel } from "@/lib/backend/roles";
+import { createAdminClient } from "@/lib/backend/server";
 import { getClientIp } from "@/lib/security/rate-limit";
 import type { AuditLogEntry } from "@/lib/types";
 
@@ -65,7 +65,7 @@ function asNullableString(value: unknown): string | null {
 }
 
 function adminSdkAvailable(): boolean {
-  return hasAppwritePublicConfig() && Boolean(process.env.DATABASE_URL?.trim());
+  return hasDatabaseConfig();
 }
 
 function clampLimit(raw?: number): number {

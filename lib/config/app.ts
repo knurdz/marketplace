@@ -20,7 +20,7 @@ function addOrigins(target: Set<string>, raw?: string | null) {
   }
 }
 
-/** Public app origin (no Appwrite dependency). */
+/** Public app origin for redirects and Better Auth. */
 export function getAppUrl(): string {
   if (typeof window !== "undefined" && window.location?.origin) {
     return window.location.origin;
@@ -79,6 +79,14 @@ export function getAuthAllowedHosts(): string[] {
   hosts.add("localhost:3000");
   hosts.add("127.0.0.1:3000");
   hosts.add("marketplace.knurdz.org");
+  for (const vercelHost of [
+    process.env.VERCEL_PROJECT_PRODUCTION_URL,
+    process.env.VERCEL_URL,
+    process.env.VERCEL_BRANCH_URL,
+  ]) {
+    const origin = vercelHost ? normalizeOrigin(vercelHost) : null;
+    if (origin) hosts.add(new URL(origin).host);
+  }
   return [...hosts];
 }
 

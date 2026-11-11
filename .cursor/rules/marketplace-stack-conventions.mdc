@@ -1,0 +1,15 @@
+---
+description: Next.js + MariaDB stack conventions for Knurdz marketplace
+alwaysApply: true
+---
+
+# Stack Conventions
+
+- **Frontend**: Next.js App Router + TypeScript.
+- **Backend**: MariaDB (Drizzle), Better Auth, local disk or Hostinger storage API.
+- **Roles**: `buyer` (default), `seller` (approved), `admin` — enforce with labels **and** server-side checks in services/actions.
+- **Portals**: storefront `/`, seller `/seller`, admin `/admin`.
+- **Commerce**: Purchase requests only; buyers and sellers settle off-platform. Stock updates on **sold** only.
+- **Statuses**: Use shared types/enums from `lib/types`; do not invent parallel status strings.
+- **Secrets**: Server-only env (`DATABASE_URL`, `BETTER_AUTH_SECRET`, SMTP, storage tokens). Never in client or `NEXT_PUBLIC_*`.
+- **Uploads**: Validate type/size; private buckets with least-privilege access via `/api/files` or storage API.

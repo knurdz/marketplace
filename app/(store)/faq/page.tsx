@@ -1,4 +1,13 @@
+import type { Metadata } from "next";
 import { LegalPage, LegalSection } from "@/components/legal/legal-page";
+import { buildPublicMetadata } from "@/lib/seo/metadata";
+
+export const metadata: Metadata = buildPublicMetadata({
+  title: "FAQ",
+  description:
+    "Frequently asked questions about buying, selling, purchase requests, reviews, and zero platform fees on Knurdz Marketplace.",
+  canonicalPath: "/faq",
+});
 
 export default function FaqPage() {
   return (

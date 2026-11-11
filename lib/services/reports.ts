@@ -1,11 +1,11 @@
-import { AppwriteException, ID, Permission, Role } from "@/lib/db/appwrite-shim";
+import { DbException, ID, Permission, Role } from "@/lib/db/compat";
 import {
   DATABASE_ID,
   TABLE_REPORTS,
-  hasAppwritePublicConfig,
-} from "@/lib/appwrite/config";
-import { createSessionClient } from "@/lib/appwrite/server";
-import { getLoggedInUser } from "@/lib/appwrite/session";
+  hasDatabaseConfig,
+} from "@/lib/backend/config";
+import { createSessionClient } from "@/lib/backend/server";
+import { getLoggedInUser } from "@/lib/backend/session";
 import { notifyAdminsEvent, notifyUserEvent } from "@/lib/email/events";
 import {
   assertRateLimit,
@@ -85,7 +85,7 @@ function reportRowPermissions(reporterId: string): string[] {
 
 async function assertReportMutationRateLimit(userId: string): Promise<void> {
   const ip = await getClientIp();
-  const result = assertRateLimit({
+  const result = await assertRateLimit({
     bucket: "reports",
     key: `${userId}:${ip}`,
     ...RATE_LIMITS.reports,
@@ -140,7 +140,7 @@ function mapReportError(err: unknown): ReportActionState {
 export async function createProductReport(
   input: CreateProductReportInput,
 ): Promise<ReportActionState> {
-  if (!hasAppwritePublicConfig()) return notConfiguredState();
+  if (!hasDatabaseConfig()) return notConfiguredState();
 
   try {
     const user = await requireUser();
@@ -231,7 +231,7 @@ export async function createProductReport(
       success: "Report submitted. Our team will review it.",
     };
   } catch (err) {
-    if (err instanceof AppwriteException) {
+    if (err instanceof DbException) {
       if (err.code === 401) {
         return {
           error: "Sign in to report a listing.",

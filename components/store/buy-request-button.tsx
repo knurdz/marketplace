@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "@/lib/ui/toast";
+import { FormGuardFields } from "@/components/security/form-guard-fields";
 
 type BuyRequestButtonProps = {
   productId: string;
@@ -73,6 +74,7 @@ export function BuyRequestButton({
 
   return (
     <form action={formAction} className="flex flex-wrap items-end gap-3">
+      <FormGuardFields action="purchase-request.create" />
       <input type="hidden" name="productId" value={productId} />
       <div className="space-y-1.5">
         <Label htmlFor="buy-quantity">Quantity</Label>

@@ -1,11 +1,12 @@
-import { Query } from "@/lib/db/appwrite-shim";
+import { Query } from "@/lib/db/compat";
 import {
   DATABASE_ID,
   TABLE_PRODUCTS,
-  hasAppwritePublicConfig,
-} from "@/lib/appwrite/config";
-import { createAdminClient } from "@/lib/appwrite/server";
+  hasDatabaseConfig,
+} from "@/lib/backend/config";
+import { createAdminClient } from "@/lib/backend/server";
 import { notifyUserEvent } from "@/lib/email/events";
+import { assertAdminUser } from "@/lib/security/admin-auth";
 import type { Product } from "@/lib/types";
 import type { ProductStatus } from "@/lib/types";
 import {
@@ -22,16 +23,13 @@ const DEFAULT_PAGE_SIZE = 24;
 const MAX_PAGE_SIZE = 100;
 
 export type ListingModerationResult =
-  | { ok: true; message: string }
-  | { ok: false; error: string };
+  { ok: true; message: string } | { ok: false; error: string };
 
 function adminSdkAvailable(): boolean {
-  return hasAppwritePublicConfig() && Boolean(process.env.DATABASE_URL?.trim());
+  return hasDatabaseConfig();
 }
 
-async function loadProduct(
-  productId: string,
-): Promise<Product | null> {
+async function loadProduct(productId: string): Promise<Product | null> {
   const trimmed = productId?.trim();
   if (!trimmed) return null;
 
@@ -70,6 +68,7 @@ export async function listProductsByStatus(
   status: ProductStatus,
   opts?: { limit?: number; cursor?: string },
 ): Promise<Product[]> {
+  await assertAdminUser();
   if (!adminSdkAvailable()) return [];
 
   const limit = Math.min(
@@ -122,6 +121,7 @@ export async function approveListingCore(
   adminUserId: string,
   productId: string,
 ): Promise<ListingModerationResult> {
+  await assertAdminUser(adminUserId);
   const product = await loadProduct(productId);
   if (!product) {
     return { ok: false, error: "Listing not found." };
@@ -190,6 +190,7 @@ export async function rejectListingCore(
   productId: string,
   reason: string,
 ): Promise<ListingModerationResult> {
+  await assertAdminUser(adminUserId);
   const parsedReason = parseReason(reason);
   if (typeof parsedReason !== "string") return parsedReason;
 
@@ -264,6 +265,7 @@ export async function removeListingCore(
   productId: string,
   reason: string,
 ): Promise<ListingModerationResult> {
+  await assertAdminUser(adminUserId);
   const parsedReason = parseReason(reason);
   if (typeof parsedReason !== "string") return parsedReason;
 
@@ -311,8 +313,7 @@ export async function removeListingCore(
   } catch {
     return {
       ok: false,
-      error:
-        "Listing removed but audit log failed. Please notify an operator.",
+      error: "Listing removed but audit log failed. Please notify an operator.",
     };
   }
 
@@ -324,7 +325,10 @@ export async function removeListingCore(
     detailLines: [`Reason: ${parsedReason}`],
   });
 
-  return { ok: true, message: `"${product.title}" removed from the storefront.` };
+  return {
+    ok: true,
+    message: `"${product.title}" removed from the storefront.`,
+  };
 }
 
 /** Toggle featured flag on an active listing (admin only). */
@@ -333,6 +337,7 @@ export async function setFeaturedListingCore(
   productId: string,
   featured: boolean,
 ): Promise<ListingModerationResult> {
+  await assertAdminUser(adminUserId);
   const product = await loadProduct(productId);
   if (!product) {
     return { ok: false, error: "Listing not found." };

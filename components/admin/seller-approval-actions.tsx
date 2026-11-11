@@ -9,7 +9,7 @@ import {
   approveSellerApplication,
   rejectSellerApplication,
   type SellerApprovalActionState,
-} from "@/lib/appwrite/seller-approval-actions";
+} from "@/lib/backend/seller-approval-actions";
 import { toast } from "@/lib/ui/toast";
 
 const approveInitial: SellerApprovalActionState = {};

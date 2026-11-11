@@ -16,6 +16,7 @@ import {
 import { createProductReport } from "@/lib/services/report-actions";
 import { toast } from "@/lib/ui/toast";
 import { cn } from "@/lib/utils";
+import { FormGuardFields } from "@/components/security/form-guard-fields";
 
 type ReportListingButtonProps = {
   productId: string;
@@ -58,13 +59,13 @@ export function ReportListingButton({
       toast.error("Please provide a reason for your report.");
       return;
     }
+    const formData = new FormData(event.currentTarget);
+    formData.set("productId", productId);
+    formData.set("reason", trimmedReason);
+    formData.set("details", details.trim());
 
     startTransition(async () => {
-      const result = await createProductReport({
-        productId,
-        reason: trimmedReason,
-        details: details.trim() || null,
-      });
+      const result = await createProductReport(formData);
       if (result.error) {
         toast.error(result.error);
         return;
@@ -97,6 +98,7 @@ export function ReportListingButton({
           </SheetDescription>
         </SheetHeader>
         <form onSubmit={handleSubmit} className="flex flex-1 flex-col gap-5 px-4">
+          <FormGuardFields action="report.product.create" />
           <div className="space-y-2">
             <label htmlFor="report-reason" className="block text-sm text-muted-foreground">
               Reason

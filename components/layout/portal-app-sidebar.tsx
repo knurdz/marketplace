@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { ChevronDown, ChevronsLeft, ChevronsRight, ExternalLink, LogOut } from "lucide-react";
-import { signOut } from "@/lib/appwrite/auth";
+import { signOut } from "@/lib/backend/auth";
 import {
   NAV_ICONS,
   type PortalNavGroup,

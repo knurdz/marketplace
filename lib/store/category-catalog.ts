@@ -7,8 +7,8 @@
 import {
   BUCKET_CATEGORIES,
   BUCKET_PRODUCT_IMAGES,
-} from "@/lib/appwrite/config";
-import { getFileViewUrl } from "@/lib/appwrite/storage-urls";
+} from "@/lib/backend/config";
+import { getFileViewUrl } from "@/lib/backend/storage-urls";
 
 export type CatalogCategory = {
   name: string;

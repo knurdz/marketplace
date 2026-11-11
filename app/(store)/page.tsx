@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import {
   HomeBrowseControls,
   HomeBrowseListings,
@@ -6,6 +7,12 @@ import { HomeIntro } from "@/components/store/home/home-intro";
 import { HomeListings } from "@/components/store/home/home-listings";
 import { ScrollToBrowse } from "@/components/store/home/scroll-to-browse";
 import {
+  buildPublicMetadata,
+  SITE_DESCRIPTION,
+  SITE_TITLE_DEFAULT,
+} from "@/lib/seo/metadata";
+import {
+  getCategoryBySlug,
   listActiveProducts,
   listActiveProductsPage,
   listCategoriesWithActiveProducts,
@@ -26,6 +33,41 @@ type HomePageProps = {
     sort?: string;
   }>;
 };
+
+export async function generateMetadata({
+  searchParams,
+}: HomePageProps): Promise<Metadata> {
+  const params = await searchParams;
+  const categorySlug = params.category?.trim() || null;
+  const catalog = parseProductCatalogParams(params);
+  const hasFacetParams =
+    categorySlug != null ||
+    catalog.minPrice != null ||
+    catalog.maxPrice != null ||
+    catalog.sort !== "newest" ||
+    catalog.invalidPriceRange;
+
+  if (categorySlug) {
+    const matchedCategory = await getCategoryBySlug(categorySlug);
+    if (matchedCategory) {
+      return buildPublicMetadata({
+        title: `${matchedCategory.name} Listings`,
+        description: `Browse ${matchedCategory.name} listings from community sellers on Knurdz Marketplace. Connect directly with sellers with zero platform fees.`,
+        canonicalPath: `/categories/${matchedCategory.slug}`,
+        noIndex: true,
+        follow: true,
+      });
+    }
+  }
+
+  return buildPublicMetadata({
+    title: SITE_TITLE_DEFAULT,
+    description: SITE_DESCRIPTION,
+    canonicalPath: "/",
+    noIndex: hasFacetParams,
+    follow: true,
+  });
+}
 
 export default async function Home({ searchParams }: HomePageProps) {
   const params = await searchParams;

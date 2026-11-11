@@ -1,5 +1,18 @@
 import nodemailer from "nodemailer";
 
+const EMAIL_ADDRESS = /^[^\s@<>\r\n]+@[^\s@<>\r\n]+\.[^\s@<>\r\n]+$/;
+
+function withoutHeaderBreaks(value: string): string {
+  return value.replace(/[\r\n]+/g, " ").trim();
+}
+
+export function maskEmailAddress(email: string): string {
+  const normalized = email.trim();
+  const at = normalized.indexOf("@");
+  if (at <= 0) return "[invalid-email]";
+  return `${normalized[0]}***${normalized.slice(at)}`;
+}
+
 type SmtpConfig = {
   host: string;
   port: number;
@@ -26,6 +39,9 @@ function readSmtpConfig(): SmtpConfig {
   if (!Number.isFinite(port) || port <= 0) {
     throw new Error("SMTP_PORT must be a positive number.");
   }
+  if (/[\r\n]/.test(from)) {
+    throw new Error("SMTP_FROM contains invalid header characters.");
+  }
 
   return {
     host,
@@ -43,6 +59,13 @@ export async function sendSmtpMail(params: {
   text: string;
   html?: string;
 }): Promise<void> {
+  const to = withoutHeaderBreaks(params.to).toLowerCase();
+  if (!EMAIL_ADDRESS.test(to) || to !== params.to.trim().toLowerCase()) {
+    throw new Error("Invalid email recipient.");
+  }
+  const subject = withoutHeaderBreaks(params.subject).slice(0, 200);
+  if (!subject) throw new Error("Email subject is required.");
+
   const config = readSmtpConfig();
   const transporter = nodemailer.createTransport({
     host: config.host,
@@ -56,8 +79,8 @@ export async function sendSmtpMail(params: {
 
   await transporter.sendMail({
     from: config.from,
-    to: params.to,
-    subject: params.subject,
+    to,
+    subject,
     text: params.text,
     ...(params.html ? { html: params.html } : {}),
   });

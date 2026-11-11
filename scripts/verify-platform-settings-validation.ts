@@ -22,7 +22,7 @@ function assertAccepted(key: string, value: string): void {
   assert(result.ok, `Expected accept for key=${key} value=${value}`);
 }
 
-assertRejected("payhere.merchant_secret", "x");
+assertRejected("checkout.merchant_secret", "x");
 assertRejected("random.key", "x");
 assertRejected("site.name", "");
 assertRejected(PLATFORM_SETTING_KEYS.featuresFreeListings, "yes");
@@ -32,7 +32,7 @@ assertAccepted(PLATFORM_SETTING_KEYS.featuresFreeListings, "true");
 assertAccepted(PLATFORM_SETTING_KEYS.siteSupportEmail, "support@knurdz.org");
 
 assert(isPlatformSettingKeyDenied("checkout.merchant_secret"), "denylist merchant");
-assert(isPlatformSettingKeyDenied("payhere.api_key"), "denylist api_key");
+assert(isPlatformSettingKeyDenied("billing.api_key"), "denylist api_key");
 assert(!isPlatformSettingKeyDenied(PLATFORM_SETTING_KEYS.siteName), "site.name allowed");
 
 console.log("platform-settings validation checks passed");

@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import {
@@ -14,11 +15,12 @@ import { BuyerRequestCard } from "@/components/store/buyer-request-card";
 import { RecentlyViewedSection } from "@/components/store/recently-viewed-section";
 import { Button } from "@/components/ui/button";
 import { StorageImage } from "@/components/ui/storage-image";
-import { BUCKET_PRODUCT_IMAGES } from "@/lib/appwrite/config";
-import { getOwnProfile } from "@/lib/appwrite/profiles";
-import { getLoggedInUser } from "@/lib/appwrite/session";
-import { toSessionUserView } from "@/lib/appwrite/session-user";
-import { getFilePreviewUrl } from "@/lib/appwrite/storage-urls";
+import { BUCKET_PRODUCT_IMAGES } from "@/lib/backend/config";
+import { getOwnProfile } from "@/lib/backend/profiles";
+import { getLoggedInUser } from "@/lib/backend/session";
+import { toSessionUserView } from "@/lib/backend/session-user";
+import { getFilePreviewUrl } from "@/lib/backend/storage-urls";
+import { buildNoIndexMetadata } from "@/lib/seo/metadata";
 import { getOwnBuyerCommerceCounts } from "@/lib/services/buyer-commerce-counts";
 import {
   getOwnWishlistView,
@@ -26,6 +28,11 @@ import {
   listOwnPurchaseRequests,
 } from "@/lib/services";
 import type { WishlistLine } from "@/lib/types";
+
+export const metadata: Metadata = buildNoIndexMetadata(
+  "Dashboard",
+  "Your Knurdz Marketplace buy requests, wishlist, and recently viewed items.",
+);
 
 const RECENT_REQUESTS_LIMIT = 5;
 const WISHLIST_PREVIEW_LIMIT = 4;

@@ -1,18 +1,19 @@
 import { and, count, eq } from "drizzle-orm";
-import { AppwriteException, ID, Query } from "@/lib/db/appwrite-shim";
 import {
   DATABASE_ID,
   TABLE_CATEGORIES,
   TABLE_PRODUCTS,
-  hasAppwritePublicConfig,
-} from "@/lib/appwrite/config";
+} from "@/lib/backend/config";
 import {
   createAdminClient,
   createPublicClient,
   createSessionClient,
-} from "@/lib/appwrite/server";
-import { getDb, hasDatabaseConfig } from "@/lib/db/client";
+} from "@/lib/backend/server";
+import { hasDatabaseConfig } from "@/lib/config/app";
+import { DbException, ID, Query } from "@/lib/db/compat";
+import { getDb } from "@/lib/db/client";
 import { products as productsTable } from "@/lib/db/schema";
+import { assertAdminUser } from "@/lib/security/admin-auth";
 import type { Category } from "@/lib/types";
 import { writeAuditLog } from "./audit-logs";
 
@@ -40,10 +41,7 @@ function asNullableString(value: unknown): string | null {
 }
 
 function adminSdkAvailable(): boolean {
-  return (
-    hasAppwritePublicConfig() &&
-    Boolean(process.env.DATABASE_URL?.trim())
-  );
+  return hasDatabaseConfig();
 }
 
 /** Map a TablesDB row to Category; returns null if required fields are missing. */
@@ -152,7 +150,7 @@ function sortCategoriesByLiveCount(
 }
 
 function isSlugConflict(error: unknown): boolean {
-  if (!(error instanceof AppwriteException)) return false;
+  if (!(error instanceof DbException)) return false;
   const msg = (error.message ?? "").toLowerCase();
   return (
     error.code === 409 ||
@@ -167,7 +165,7 @@ async function loadCategoryById(
   client: "session" | "public" = "session",
 ): Promise<Category | null> {
   const trimmed = categoryId?.trim();
-  if (!trimmed || !hasAppwritePublicConfig()) return null;
+  if (!trimmed || !hasDatabaseConfig()) return null;
 
   try {
     const tables =
@@ -185,10 +183,7 @@ async function loadCategoryById(
   }
 }
 
-async function slugExists(
-  slug: string,
-  excludeId?: string,
-): Promise<boolean> {
+async function slugExists(slug: string, excludeId?: string): Promise<boolean> {
   const { tables } = await createSessionClient();
   const result = await tables.listRows({
     databaseId: DATABASE_ID,
@@ -260,7 +255,7 @@ function buildCategoryTree(
 export async function listCategories(opts?: {
   limit?: number;
 }): Promise<Category[]> {
-  if (!hasAppwritePublicConfig()) return [];
+  if (!hasDatabaseConfig()) return [];
 
   const limit = Math.min(Math.max(opts?.limit ?? 50, 1), MAX_LIST_LIMIT);
 
@@ -293,7 +288,7 @@ export async function listCategories(opts?: {
 export async function listCategoriesWithActiveProducts(opts?: {
   limit?: number;
 }): Promise<Category[]> {
-  if (!hasAppwritePublicConfig() || !hasDatabaseConfig()) return [];
+  if (!hasDatabaseConfig()) return [];
 
   const limit = Math.min(Math.max(opts?.limit ?? 50, 1), MAX_LIST_LIMIT);
 
@@ -335,7 +330,7 @@ export async function getCategoryBySlug(
   slug: string,
 ): Promise<Category | null> {
   const trimmed = slug?.trim();
-  if (!trimmed || !hasAppwritePublicConfig()) return null;
+  if (!trimmed || !hasDatabaseConfig()) return null;
 
   try {
     const { tables } = await createPublicClient();
@@ -348,7 +343,7 @@ export async function getCategoryBySlug(
     if (!row) return null;
     return asCategory(row as unknown as Record<string, unknown>);
   } catch (error) {
-    if (error instanceof AppwriteException && error.code === 404) {
+    if (error instanceof DbException && error.code === 404) {
       return null;
     }
     return null;
@@ -364,6 +359,7 @@ export async function createCategoryCore(
     imageFileId?: string | null;
   },
 ): Promise<CategoryMutationResult> {
+  await assertAdminUser(actorId);
   const parsedName = parseName(input.name);
   if (typeof parsedName !== "string") return parsedName;
 
@@ -421,7 +417,8 @@ export async function createCategoryCore(
   } catch {
     return {
       ok: false,
-      error: "Category created but audit log failed. Please notify an operator.",
+      error:
+        "Category created but audit log failed. Please notify an operator.",
     };
   }
 
@@ -442,6 +439,7 @@ export async function updateCategoryCore(
     imageFileId?: string | null;
   },
 ): Promise<CategoryMutationResult> {
+  await assertAdminUser(actorId);
   const trimmedId = categoryId?.trim();
   if (!trimmedId) {
     return { ok: false, error: "Missing category." };
@@ -541,7 +539,8 @@ export async function updateCategoryCore(
   } catch {
     return {
       ok: false,
-      error: "Category updated but audit log failed. Please notify an operator.",
+      error:
+        "Category updated but audit log failed. Please notify an operator.",
     };
   }
 
@@ -558,6 +557,7 @@ export async function deleteCategoryCore(
   actorId: string,
   categoryId: string,
 ): Promise<CategoryMutationResult> {
+  await assertAdminUser(actorId);
   const trimmedId = categoryId?.trim();
   if (!trimmedId) {
     return { ok: false, error: "Missing category." };
@@ -628,7 +628,8 @@ export async function deleteCategoryCore(
   } catch {
     return {
       ok: false,
-      error: "Category deleted but audit log failed. Please notify an operator.",
+      error:
+        "Category deleted but audit log failed. Please notify an operator.",
     };
   }
 

@@ -6,7 +6,7 @@ import {
   blockedSellerPortalDestination,
   parseSellerApplicationInput,
 } from "../lib/services/seller-application";
-import { homePathForUser, postLoginPath } from "../lib/appwrite/roles";
+import { homePathForUser, postLoginPath } from "../lib/backend/roles";
 import type { SellerProfile } from "../lib/types";
 
 function assert(condition: boolean, message: string): void {

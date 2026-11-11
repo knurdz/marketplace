@@ -1,8 +1,8 @@
 import { redirect } from "next/navigation";
 import { SellerApplicationStatus } from "@/components/seller/seller-application-status";
 import { PageHeader } from "@/components/layout/page-header";
-import { ROLE_LABELS, userHasLabel } from "@/lib/appwrite/roles";
-import { getLoggedInUser } from "@/lib/appwrite/session";
+import { ROLE_LABELS, userHasLabel } from "@/lib/backend/roles";
+import { getLoggedInUser } from "@/lib/backend/session";
 import { getOwnSellerProfile } from "@/lib/services/seller-application";
 
 export default async function SellerPendingPage() {

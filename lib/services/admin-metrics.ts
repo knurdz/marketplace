@@ -1,10 +1,10 @@
-import { Query } from "@/lib/db/appwrite-shim";
+import { Query } from "@/lib/db/compat";
 import {
   DATABASE_ID,
   TABLE_SELLER_PROFILES,
-  hasAppwritePublicConfig,
-} from "@/lib/appwrite/config";
-import { createAdminClient } from "@/lib/appwrite/server";
+  hasDatabaseConfig,
+} from "@/lib/backend/config";
+import { createAdminClient } from "@/lib/backend/server";
 import type { SellerStatus } from "@/lib/types";
 import { countPurchaseRequestsByStatus } from "./purchase-requests";
 
@@ -68,7 +68,7 @@ async function countTableRows(
  * Returns zeros on empty data or Appwrite errors: never throws to callers.
  */
 export async function getAdminMetrics(): Promise<AdminMetrics> {
-  if (!hasAppwritePublicConfig()) return emptyMetrics();
+  if (!hasDatabaseConfig()) return emptyMetrics();
   if (!process.env.DATABASE_URL?.trim()) return emptyMetrics();
 
   try {

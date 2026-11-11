@@ -3,10 +3,10 @@ import { redirect } from "next/navigation";
 import { SkipToContent } from "@/components/layout/skip-to-content";
 import { PortalFrame } from "@/components/layout/portal-frame";
 import type { PortalNavGroup } from "@/components/layout/portal-side-nav";
-import { getOwnProfile } from "@/lib/appwrite/profiles";
-import { getLoggedInUser } from "@/lib/appwrite/session";
-import { toSessionUserView } from "@/lib/appwrite/session-user";
-import { resolveAvatarUrl } from "@/lib/appwrite/storage-urls";
+import { getOwnProfile } from "@/lib/backend/profiles";
+import { getLoggedInUser } from "@/lib/backend/session";
+import { toSessionUserView } from "@/lib/backend/session-user";
+import { resolveAvatarUrl } from "@/lib/backend/storage-urls";
 
 export type {
   PortalNavGroup,

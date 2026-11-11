@@ -1,11 +1,15 @@
+import type { Metadata } from "next";
 import type { ReactNode } from "react";
 import {
   PortalShell,
   type PortalNavGroup,
 } from "@/components/layout/portal-shell";
-import { redirectIfRegistrationIncomplete } from "@/lib/appwrite/registration-complete";
-import { requireLabel } from "@/lib/appwrite/roles";
+import { redirectIfRegistrationIncomplete } from "@/lib/backend/registration-complete";
+import { requireLabel } from "@/lib/backend/roles";
+import { buildNoIndexMetadata } from "@/lib/seo/metadata";
 import { hasPendingSellerApplications } from "@/lib/services/seller-approvals";
+
+export const metadata: Metadata = buildNoIndexMetadata("Admin Portal");
 
 function buildAdminNav(pendingSellers: boolean): PortalNavGroup[] {
   return [

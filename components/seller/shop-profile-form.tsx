@@ -23,8 +23,8 @@ import {
   updateOwnShopBanner,
   updateOwnShopProfile,
   type ShopProfileActionState,
-} from "@/lib/appwrite/seller-application-actions";
-import { AVATAR_MAX_BYTES, IMAGE_MIME_TYPES } from "@/lib/appwrite/config";
+} from "@/lib/backend/seller-application-actions";
+import { AVATAR_MAX_BYTES, IMAGE_MIME_TYPES } from "@/lib/backend/config";
 import type { SellerProfile } from "@/lib/types";
 import { toast } from "@/lib/ui/toast";
 import { cn } from "@/lib/utils";
@@ -39,6 +39,7 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { FormGuardFields } from "@/components/security/form-guard-fields";
 
 const profileInitial: ShopProfileActionState = {};
 const bannerInitial: ShopProfileActionState = {};
@@ -353,6 +354,7 @@ export function ShopProfileForm({
       <div className="grid w-full gap-6 xl:grid-cols-[minmax(0,1.35fr)_minmax(0,1fr)]">
         <Card className="w-full">
           <form action={bannerAction} className="contents">
+            <FormGuardFields action="seller.shop.banner.update" />
             <CardHeader>
               <CardTitle>Banner</CardTitle>
               <CardDescription>
@@ -404,6 +406,7 @@ export function ShopProfileForm({
 
         <Card className="w-full">
           <form action={profileAction} className="contents">
+            <FormGuardFields action="seller.shop.profile.update" />
             <CardHeader>
               <CardTitle>Shop details</CardTitle>
               <CardDescription>

@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { Heart } from "lucide-react";
@@ -5,10 +6,16 @@ import { BuyerAccountShell } from "@/components/store/buyer-account-shell";
 import { WishlistList } from "@/components/store/wishlist-list";
 import { EmptyState } from "@/components/layout/empty-state";
 import { Button } from "@/components/ui/button";
-import { BUCKET_PRODUCT_IMAGES } from "@/lib/appwrite/config";
-import { getFilePreviewUrl } from "@/lib/appwrite/storage-urls";
-import { getLoggedInUser } from "@/lib/appwrite/session";
+import { BUCKET_PRODUCT_IMAGES } from "@/lib/backend/config";
+import { getFilePreviewUrl } from "@/lib/backend/storage-urls";
+import { getLoggedInUser } from "@/lib/backend/session";
+import { buildNoIndexMetadata } from "@/lib/seo/metadata";
 import { getOwnWishlistView, listCoverImagesByProductIds } from "@/lib/services";
+
+export const metadata: Metadata = buildNoIndexMetadata(
+  "Wishlist",
+  "Products saved to your Knurdz Marketplace wishlist.",
+);
 
 export default async function WishlistPage() {
   const user = await getLoggedInUser();

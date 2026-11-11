@@ -24,7 +24,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { getShopBannerPreviewUrl } from "@/lib/appwrite/storage-urls";
+import { getShopBannerPreviewUrl } from "@/lib/backend/storage-urls";
 import { formatPurchaseRequestStatus } from "@/lib/request-display";
 import { getAdminShopDetail } from "@/lib/services";
 import type { SellerStatus } from "@/lib/types";

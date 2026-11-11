@@ -1,12 +1,12 @@
-import { ID, Query } from "@/lib/db/appwrite-shim";
+import { ID, Query } from "@/lib/db/compat";
 import {
   DATABASE_ID,
   TABLE_PLATFORM_SETTINGS,
-  hasAppwritePublicConfig,
-} from "@/lib/appwrite/config";
-import { ROLE_LABELS, userHasLabel } from "@/lib/appwrite/roles";
-import { getLoggedInUser } from "@/lib/appwrite/session";
-import { createAdminClient, createSessionClient } from "@/lib/appwrite/server";
+  hasDatabaseConfig,
+} from "@/lib/backend/config";
+import { ROLE_LABELS, userHasLabel } from "@/lib/backend/roles";
+import { getLoggedInUser } from "@/lib/backend/session";
+import { createAdminClient, createSessionClient } from "@/lib/backend/server";
 import {
   ALL_PLATFORM_SETTING_KEYS,
   PLATFORM_SETTING_KEYS,
@@ -154,7 +154,7 @@ async function findSettingByKey(
 export async function listAllPlatformSettings(): Promise<
   PlatformSettingListItem[] | { error: string }
 > {
-  if (!hasAppwritePublicConfig()) {
+  if (!hasDatabaseConfig()) {
     return { error: "Appwrite is not configured." };
   }
 

@@ -1,14 +1,14 @@
-import { Query } from "@/lib/db/appwrite-shim";
+import { Query } from "@/lib/db/compat";
 import {
   DATABASE_ID,
   TABLE_PRODUCTS,
   TABLE_REPORTS,
   TABLE_SELLER_PROFILES,
-  hasAppwritePublicConfig,
-} from "@/lib/appwrite/config";
-import { requireLabel } from "@/lib/appwrite/roles";
-import { createAdminClient } from "@/lib/appwrite/server";
+  hasDatabaseConfig,
+} from "@/lib/backend/config";
+import { createAdminClient } from "@/lib/backend/server";
 import { notifyUserEvent } from "@/lib/email/events";
+import { assertAdminUser } from "@/lib/security/admin-auth";
 import type { Product, ProductStatus, Report, ReportStatus } from "@/lib/types";
 import {
   ACTIVE_PRODUCT_STATUS,
@@ -47,9 +47,7 @@ export type AdminReportView = {
 };
 
 function adminSdkAvailable(): boolean {
-  return (
-    hasAppwritePublicConfig() && Boolean(process.env.DATABASE_URL?.trim())
-  );
+  return hasDatabaseConfig();
 }
 
 function asCreatedAt(row: Record<string, unknown>): string | null {
@@ -96,7 +94,8 @@ async function loadShopNameBySellerId(
       tableId: TABLE_SELLER_PROFILES,
       queries: [Query.equal("userId", trimmed), Query.limit(1)],
     });
-    const row = result.rows[0] as unknown as Record<string, unknown> | undefined;
+    const row = result.rows[0] as unknown as
+      Record<string, unknown> | undefined;
     if (!row) return null;
     return asNullableString(row.shopName);
   } catch {
@@ -119,7 +118,8 @@ async function loadSellerProfileByUserId(sellerId: string): Promise<{
       tableId: TABLE_SELLER_PROFILES,
       queries: [Query.equal("userId", trimmed), Query.limit(1)],
     });
-    const row = result.rows[0] as unknown as Record<string, unknown> | undefined;
+    const row = result.rows[0] as unknown as
+      Record<string, unknown> | undefined;
     if (!row) return null;
     const $id = asNullableString(row.$id);
     const status = asNullableString(row.status);
@@ -170,8 +170,12 @@ async function listActiveProductIdsForSeller(
 
     if (result.rows.length < 100) break;
     const lastId = asNullableString(
-      (result.rows[result.rows.length - 1] as unknown as Record<string, unknown>)
-        .$id,
+      (
+        result.rows[result.rows.length - 1] as unknown as Record<
+          string,
+          unknown
+        >
+      ).$id,
     );
     if (!lastId) break;
     cursor = lastId;
@@ -261,7 +265,7 @@ export async function listReports(opts?: {
   limit?: number;
   cursor?: string;
 }): Promise<AdminReportView[]> {
-  await requireLabel("admin");
+  await assertAdminUser();
 
   if (!adminSdkAvailable()) return [];
 
@@ -344,6 +348,7 @@ export async function startReviewCore(
   adminUserId: string,
   reportId: string,
 ): Promise<ReportTriageResult> {
+  await assertAdminUser(adminUserId);
   const loaded = await loadReport(reportId);
   if (!loaded) {
     return { ok: false, error: "Report not found." };
@@ -403,6 +408,7 @@ export async function resolveReportCore(
   reportId: string,
   note: string,
 ): Promise<ReportTriageResult> {
+  await assertAdminUser(adminUserId);
   const parsedNote = parseNote(note);
   if (typeof parsedNote !== "string") return parsedNote;
 
@@ -471,6 +477,7 @@ export async function dismissReportCore(
   reportId: string,
   note: string,
 ): Promise<ReportTriageResult> {
+  await assertAdminUser(adminUserId);
   const parsedNote = parseNote(note);
   if (typeof parsedNote !== "string") return parsedNote;
 
@@ -539,6 +546,7 @@ export async function takeDownListingFromReportCore(
   reportId: string,
   note: string,
 ): Promise<ReportTriageResult> {
+  await assertAdminUser(adminUserId);
   const parsedNote = parseNote(note);
   if (typeof parsedNote !== "string") return parsedNote;
 
@@ -591,6 +599,7 @@ export async function banShopFromReportCore(
   reportId: string,
   note: string,
 ): Promise<ReportTriageResult> {
+  await assertAdminUser(adminUserId);
   const parsedNote = parseNote(note);
   if (typeof parsedNote !== "string") return parsedNote;
 
@@ -681,8 +690,7 @@ export async function banShopFromReportCore(
   } catch {
     return {
       ok: false,
-      error:
-        "Shop banned but audit log failed. Please notify an operator.",
+      error: "Shop banned but audit log failed. Please notify an operator.",
     };
   }
 

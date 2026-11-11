@@ -1,4 +1,13 @@
+import type { Metadata } from "next";
 import { LegalPage, LegalSection } from "@/components/legal/legal-page";
+import { buildPublicMetadata } from "@/lib/seo/metadata";
+
+export const metadata: Metadata = buildPublicMetadata({
+  title: "Terms of Service",
+  description:
+    "Read the Terms of Service for buyers and sellers using Knurdz Marketplace, including account rules, listings, purchase requests, and reviews.",
+  canonicalPath: "/legal/terms",
+});
 
 export default function TermsPage() {
   return (

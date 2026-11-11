@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
-import { ROLE_LABELS, userHasLabel } from "@/lib/appwrite/roles";
-import { getLoggedInUser } from "@/lib/appwrite/session";
+import { ROLE_LABELS, userHasLabel } from "@/lib/backend/roles";
+import { getLoggedInUser } from "@/lib/backend/session";
 import { getOwnSellerProfile } from "@/lib/services/seller-application";
 
 /** Buyer-facing apply URL is retired: send people to register or their holding page. */

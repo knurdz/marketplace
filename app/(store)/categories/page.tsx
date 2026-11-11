@@ -1,9 +1,18 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { CategoryImage } from "@/components/store/category-image";
 import { PageHeader } from "@/components/layout/page-header";
 import { EmptyState } from "@/components/layout/empty-state";
 import { Button } from "@/components/ui/button";
+import { buildPublicMetadata } from "@/lib/seo/metadata";
 import { listCategories } from "@/lib/services";
+
+export const metadata: Metadata = buildPublicMetadata({
+  title: "Browse Categories",
+  description:
+    "Explore product categories on Knurdz Marketplace. Jump into electronics, fashion, home, books, and more from community sellers.",
+  canonicalPath: "/categories",
+});
 
 export default async function CategoriesPage() {
   const categories = await listCategories();

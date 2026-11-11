@@ -3,7 +3,7 @@ import { ExternalLink } from "lucide-react";
 import { ShopPolicyForm } from "@/components/seller/shop-policy-form";
 import { PortalPageHeader } from "@/components/layout/portal-page-header";
 import { Button } from "@/components/ui/button";
-import { requireLabel } from "@/lib/appwrite/roles";
+import { requireLabel } from "@/lib/backend/roles";
 import { getOwnSellerProfile } from "@/lib/services/seller-application";
 
 export default async function SellerSettingsPage() {

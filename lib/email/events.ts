@@ -1,12 +1,17 @@
 import { and, eq } from "drizzle-orm";
-import { createNotificationForUser } from "@/lib/appwrite/notifications";
-import { getActiveUserById } from "@/lib/appwrite/session";
+import { createHash } from "node:crypto";
+import { createNotificationForUser } from "@/lib/backend/notifications";
+import { getActiveUserById } from "@/lib/backend/session";
 import { getAppUrl } from "@/lib/config/app";
 import { getDb } from "@/lib/db/client";
 import { authUser } from "@/lib/db/schema";
 import { sendSmtpMail } from "@/lib/email/smtp";
 import { renderMarketplaceEmail } from "@/lib/email/template";
 import { logError } from "@/lib/observability/log-error";
+import {
+  assertRateLimit,
+  RATE_LIMITS,
+} from "@/lib/security/rate-limit";
 
 export type EventNotifyParams = {
   type: string;
@@ -43,6 +48,16 @@ async function sendMailSafe(params: {
   link?: string | null;
 }): Promise<void> {
   try {
+    const recipientKey = createHash("sha256")
+      .update(params.to.trim().toLowerCase())
+      .digest("hex");
+    const rate = await assertRateLimit({
+      bucket: "email.events",
+      key: recipientKey,
+      ...RATE_LIMITS.eventEmail,
+    });
+    if (!rate.ok) return;
+
     const rendered = renderMarketplaceEmail({
       greetingName: params.greetingName,
       title: params.title,

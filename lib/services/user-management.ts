@@ -1,8 +1,9 @@
-import { Query } from "@/lib/db/appwrite-shim";
-import type { Models } from "@/lib/db/appwrite-shim";
-import { hasAppwritePublicConfig } from "@/lib/appwrite/config";
-import { ROLE_LABELS, userHasLabel } from "@/lib/appwrite/roles";
-import { createAdminClient } from "@/lib/appwrite/server";
+import { Query } from "@/lib/db/compat";
+import type { Models } from "@/lib/db/compat";
+import { hasDatabaseConfig } from "@/lib/backend/config";
+import { ROLE_LABELS, userHasLabel } from "@/lib/backend/roles";
+import { createAdminClient } from "@/lib/backend/server";
+import { assertAdminUser } from "@/lib/security/admin-auth";
 import { writeAuditLog } from "./audit-logs";
 
 const PAGE_SIZE = 25;
@@ -25,8 +26,7 @@ export type UserListResult = {
 };
 
 export type UserManagementResult =
-  | { ok: true; message: string }
-  | { ok: false; error: string };
+  { ok: true; message: string } | { ok: false; error: string };
 
 function toAdminUserView(user: Models.User<Models.Preferences>): AdminUserView {
   const labels = Array.isArray(user.labels) ? user.labels : [];
@@ -85,7 +85,8 @@ export async function listUsers(params?: {
   cursor?: string;
   role?: "buyer" | "seller" | "admin";
 }): Promise<UserListResult> {
-  if (!hasAppwritePublicConfig()) {
+  await assertAdminUser();
+  if (!hasDatabaseConfig()) {
     return { users: [], total: 0, nextCursor: null };
   }
 
@@ -109,8 +110,7 @@ export async function listUsers(params?: {
 
   const page = result.users.map(toAdminUserView);
   const last = page.at(-1);
-  const nextCursor =
-    page.length === PAGE_SIZE && last ? last.userId : null;
+  const nextCursor = page.length === PAGE_SIZE && last ? last.userId : null;
 
   return {
     users: page,
@@ -234,8 +234,7 @@ export async function unsuspendUserCore(
   } catch {
     return {
       ok: false,
-      error:
-        "User unsuspended, but audit log failed. Notify an operator.",
+      error: "User unsuspended, but audit log failed. Notify an operator.",
     };
   }
 

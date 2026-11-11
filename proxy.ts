@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
-import { SESSION_COOKIE } from "@/lib/appwrite/config";
+import { SESSION_COOKIE } from "@/lib/backend/config";
 
 /**
  * Cookie gate for role portals. Authoritative label checks live in

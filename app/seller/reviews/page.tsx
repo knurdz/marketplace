@@ -1,6 +1,6 @@
 import { SellerReviewsPanel } from "@/components/seller/seller-reviews-panel";
 import { PortalPageHeader } from "@/components/layout/portal-page-header";
-import { requireLabel } from "@/lib/appwrite/roles";
+import { requireLabel } from "@/lib/backend/roles";
 import { getOwnSellerProfile } from "@/lib/services/seller-application";
 import { getOwnSellerReviewInsights } from "@/lib/services/reviews";
 

@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useActionState } from "react";
-import { signInWithEmail, type AuthActionState } from "@/lib/appwrite/auth";
+import { signInWithEmail, type AuthActionState } from "@/lib/backend/auth";
 import { AuthLegalLinks } from "@/components/auth/auth-legal-links";
 import { OAuthButtons } from "@/components/auth/oauth-buttons";
 import {
@@ -12,6 +12,8 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { FormGuardFields } from "@/components/security/form-guard-fields";
+import { Turnstile } from "@/components/security/turnstile";
 
 const initialState: AuthActionState = {};
 
@@ -33,6 +35,7 @@ export function LoginForm({
   return (
     <div className="space-y-6">
       <form action={formAction} className="space-y-4">
+        <FormGuardFields action="auth.login" />
         {nextPath ? <input type="hidden" name="next" value={nextPath} /> : null}
 
         {state?.error ? (
@@ -83,6 +86,10 @@ export function LoginForm({
             aria-describedby={hasError ? errorId : undefined}
           />
         </div>
+
+        {state?.requireCaptcha ? (
+          <Turnstile action="auth_login" pending={pending} />
+        ) : null}
 
         <Button
           type="submit"

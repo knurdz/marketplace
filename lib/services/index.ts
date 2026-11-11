@@ -205,6 +205,7 @@ export {
   getPublicSellerBySlug,
   getPublicSellerByUserId,
   isApprovedPublicSellerStatus,
+  listPublicSellers,
   toPublicSellerInfo,
 } from "./sellers";
 export type { PublicSellerInfo } from "./sellers";

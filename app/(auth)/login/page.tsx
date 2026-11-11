@@ -1,9 +1,16 @@
+import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { LoginForm } from "@/components/auth/login-form";
-import { resolvePostLoginPath } from "@/lib/appwrite/home-path";
-import { oauthErrorMessage } from "@/lib/appwrite/oauth-errors";
-import { safeNextPath } from "@/lib/appwrite/roles";
-import { getLoggedInUser } from "@/lib/appwrite/session";
+import { resolvePostLoginPath } from "@/lib/backend/home-path";
+import { oauthErrorMessage } from "@/lib/backend/oauth-errors";
+import { safeNextPath } from "@/lib/backend/roles";
+import { getLoggedInUser } from "@/lib/backend/session";
+import { buildNoIndexMetadata } from "@/lib/seo/metadata";
+
+export const metadata: Metadata = buildNoIndexMetadata(
+  "Sign In",
+  "Sign in to your Knurdz Marketplace account.",
+);
 
 export default async function LoginPage({
   searchParams,

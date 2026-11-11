@@ -1,12 +1,12 @@
-import { ID, Query } from "@/lib/db/appwrite-shim";
+import { ID, Query } from "@/lib/db/compat";
 import {
   DATABASE_ID,
   TABLE_VIEW_STATS,
-  hasAppwritePublicConfig,
-} from "@/lib/appwrite/config";
-import { ROLE_LABELS, userHasLabel } from "@/lib/appwrite/roles";
-import { createAdminClient } from "@/lib/appwrite/server";
-import { getLoggedInUser } from "@/lib/appwrite/session";
+  hasDatabaseConfig,
+} from "@/lib/backend/config";
+import { ROLE_LABELS, userHasLabel } from "@/lib/backend/roles";
+import { createAdminClient } from "@/lib/backend/server";
+import { getLoggedInUser } from "@/lib/backend/session";
 import {
   assertRateLimit,
   getClientIp,
@@ -105,7 +105,7 @@ export async function recordMarketplaceView(input: {
   kind: ViewKind;
   targetId: string;
 }): Promise<void> {
-  if (!hasAppwritePublicConfig() || !process.env.DATABASE_URL?.trim()) {
+  if (!hasDatabaseConfig()) {
     return;
   }
 
@@ -116,7 +116,7 @@ export async function recordMarketplaceView(input: {
 
   const ip = await getClientIp();
   const day = utcDay();
-  const rate = assertRateLimit({
+  const rate = await assertRateLimit({
     bucket: "views",
     key: `${ip}:${input.kind}:${targetId}:${day}`,
     ...RATE_LIMITS.views,
@@ -291,7 +291,7 @@ export async function getSellerViewInsightsForSellerId(
   const trimmed = sellerId?.trim();
   if (
     !trimmed ||
-    !hasAppwritePublicConfig() ||
+    !hasDatabaseConfig() ||
     !process.env.DATABASE_URL?.trim()
   ) {
     return emptyInsights();
@@ -307,7 +307,7 @@ export async function getSellerViewInsightsForSellerId(
 
 /** Own-only view aggregates for the seller dashboard. */
 export async function getSellerViewInsights(): Promise<SellerViewInsights> {
-  if (!hasAppwritePublicConfig() || !process.env.DATABASE_URL?.trim()) {
+  if (!hasDatabaseConfig()) {
     return emptyInsights();
   }
 

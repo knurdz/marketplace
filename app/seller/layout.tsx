@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import type { ReactNode } from "react";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
@@ -6,12 +7,15 @@ import {
   PortalShell,
   type PortalNavGroup,
 } from "@/components/layout/portal-shell";
-import { redirectIfRegistrationIncomplete } from "@/lib/appwrite/registration-complete";
-import { ROLE_LABELS, requireUser, userHasLabel } from "@/lib/appwrite/roles";
+import { redirectIfRegistrationIncomplete } from "@/lib/backend/registration-complete";
+import { ROLE_LABELS, requireUser, userHasLabel } from "@/lib/backend/roles";
+import { buildNoIndexMetadata } from "@/lib/seo/metadata";
 import {
   blockedSellerPortalDestination,
   getOwnSellerProfile,
 } from "@/lib/services/seller-application";
+
+export const metadata: Metadata = buildNoIndexMetadata("Seller Portal");
 
 const SELLER_NAV: PortalNavGroup[] = [
   {
@@ -47,8 +51,11 @@ export default async function SellerLayout({
   await redirectIfRegistrationIncomplete(pathname);
   const hasSellerLabel = userHasLabel(user, ROLE_LABELS.seller);
   const isPendingPage = pathname === "/seller/pending";
+  const profile = await getOwnSellerProfile();
+  const hasApprovedSellerAccess =
+    hasSellerLabel && profile?.status === "approved";
 
-  if (hasSellerLabel) {
+  if (hasApprovedSellerAccess) {
     if (isPendingPage) {
       redirect("/seller");
     }
@@ -60,18 +67,13 @@ export default async function SellerLayout({
   }
 
   if (isPendingPage) {
-    const profile = await getOwnSellerProfile();
     if (!profile) {
       redirect("/");
-    }
-    if (profile.status === "approved") {
-      redirect("/seller");
     }
     return <PendingSellerShell>{children}</PendingSellerShell>;
   }
 
-  const profile = await getOwnSellerProfile();
-  const dest = blockedSellerPortalDestination(hasSellerLabel, profile);
+  const dest = blockedSellerPortalDestination(false, profile);
   if (dest) {
     redirect(dest);
   }

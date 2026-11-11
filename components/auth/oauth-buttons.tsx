@@ -2,11 +2,12 @@
 
 import type { ComponentType } from "react";
 import { useFormStatus } from "react-dom";
-import { startOAuth } from "@/lib/appwrite/oauth-actions";
+import { startOAuth } from "@/lib/backend/oauth-actions";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
-import type { OAuthProviderId } from "@/lib/appwrite/oauth-providers";
+import type { OAuthProviderId } from "@/lib/backend/oauth-providers";
 import { cn } from "@/lib/utils";
+import { FormGuardFields } from "@/components/security/form-guard-fields";
 
 type OAuthButtonsProps = {
   from: "login" | "register";
@@ -129,6 +130,7 @@ export function OAuthButtons({
       <div className="space-y-3">
         {PROVIDERS.map((provider) => (
           <form key={provider.id} action={startOAuth}>
+            <FormGuardFields action="auth.oauth.start" />
             <input type="hidden" name="provider" value={provider.id} />
             <input type="hidden" name="from" value={from} />
             {nextPath ? <input type="hidden" name="next" value={nextPath} /> : null}

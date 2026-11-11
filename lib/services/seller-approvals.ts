@@ -1,11 +1,11 @@
-import { Query } from "@/lib/db/appwrite-shim";
+import { Query } from "@/lib/db/compat";
 import {
   DATABASE_ID,
   TABLE_SELLER_PROFILES,
-  hasAppwritePublicConfig,
-} from "@/lib/appwrite/config";
-import { ROLE_LABELS } from "@/lib/appwrite/roles";
-import { createAdminClient } from "@/lib/appwrite/server";
+  hasDatabaseConfig,
+} from "@/lib/backend/config";
+import { ROLE_LABELS } from "@/lib/backend/roles";
+import { createAdminClient } from "@/lib/backend/server";
 import { notifyUserEvent } from "@/lib/email/events";
 import type { SellerProfile } from "@/lib/types";
 import { isSellerStatus } from "@/lib/types";
@@ -143,7 +143,7 @@ export async function listSellerProfilesAdmin(opts?: {
   status?: SellerProfile["status"];
   limit?: number;
 }): Promise<AdminSellerRow[]> {
-  if (!hasAppwritePublicConfig()) return [];
+  if (!hasDatabaseConfig()) return [];
   if (!process.env.DATABASE_URL?.trim()) return [];
 
   const limit = Math.min(Math.max(opts?.limit ?? 100, 1), 100);

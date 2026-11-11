@@ -11,7 +11,7 @@ import {
 import {
   portalHomeForSessionUser,
   type SessionUserView,
-} from "@/lib/appwrite/session-user";
+} from "@/lib/backend/session-user";
 import { BrandLogo, BrandLogoLink } from "@/components/brand/brand-logo";
 import { AccountMenu } from "@/components/layout/account-menu";
 import { NavCountBadge } from "@/components/layout/nav-count-badge";

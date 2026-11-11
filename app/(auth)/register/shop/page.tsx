@@ -1,9 +1,13 @@
+import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { SellerApplyForm } from "@/components/seller/seller-apply-form";
 import { PageHeader } from "@/components/layout/page-header";
-import { ROLE_LABELS, userHasLabel } from "@/lib/appwrite/roles";
-import { getLoggedInUser } from "@/lib/appwrite/session";
+import { ROLE_LABELS, userHasLabel } from "@/lib/backend/roles";
+import { getLoggedInUser } from "@/lib/backend/session";
+import { buildNoIndexMetadata } from "@/lib/seo/metadata";
 import { getOwnSellerProfile } from "@/lib/services/seller-application";
+
+export const metadata: Metadata = buildNoIndexMetadata("Apply to Sell");
 
 export default async function RegisterShopPage() {
   const user = await getLoggedInUser();

@@ -7,7 +7,7 @@ import {
   getOwnNotificationFeed,
   markAllOwnNotificationsRead,
   markOwnNotificationRead,
-} from "@/lib/appwrite/notification-actions";
+} from "@/lib/backend/notification-actions";
 import type { Notification } from "@/lib/types";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";

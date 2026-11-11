@@ -1,7 +1,7 @@
 import { cache } from "react";
 import { count, eq } from "drizzle-orm";
-import { mayBrowsePublicCatalog } from "@/lib/appwrite/roles";
-import { getLoggedInUser } from "@/lib/appwrite/session";
+import { mayBrowsePublicCatalog } from "@/lib/backend/roles";
+import { getLoggedInUser } from "@/lib/backend/session";
 import { getDb, hasDatabaseConfig } from "@/lib/db/client";
 import { purchaseRequests, wishlistItems } from "@/lib/db/schema";
 import { logError } from "@/lib/observability/log-error";

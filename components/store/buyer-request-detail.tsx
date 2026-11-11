@@ -8,8 +8,8 @@ import { BuyerAccountShell } from "@/components/store/buyer-account-shell";
 import { StatusPill } from "@/components/layout/status-pill";
 import { Button } from "@/components/ui/button";
 import { StorageImage } from "@/components/ui/storage-image";
-import { BUCKET_PRODUCT_IMAGES } from "@/lib/appwrite/config";
-import { getFilePreviewUrl } from "@/lib/appwrite/storage-urls";
+import { BUCKET_PRODUCT_IMAGES } from "@/lib/backend/config";
+import { getFilePreviewUrl } from "@/lib/backend/storage-urls";
 import { formatPurchaseRequestStatus } from "@/lib/request-display";
 import type {
   PurchaseRequest,

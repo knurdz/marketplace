@@ -1,9 +1,11 @@
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { InfiniteProductGrid } from "@/components/store/infinite-product-grid";
 import { SellerPolicyBlocks } from "@/components/store/seller-policy-blocks";
 import { ShopHeader } from "@/components/store/shop-header";
 import { EmptyState } from "@/components/layout/empty-state";
-import { getShopBannerPreviewUrl } from "@/lib/appwrite/storage-urls";
+import { getShopBannerPreviewUrl } from "@/lib/backend/storage-urls";
+import { buildNoIndexMetadata, buildPublicMetadata } from "@/lib/seo/metadata";
 import {
   computeSellerReviewMetrics,
   getPublicSellerBySlug,
@@ -17,6 +19,35 @@ import { CATALOG_PAGE_SIZE } from "@/lib/services/products";
 type ShopPageProps = {
   params: Promise<{ slug: string }>;
 };
+
+export async function generateMetadata({
+  params,
+}: ShopPageProps): Promise<Metadata> {
+  const { slug } = await params;
+  const seller = await getPublicSellerBySlug(slug);
+  if (!seller) {
+    return buildNoIndexMetadata("Shop not found");
+  }
+
+  const bannerUrl = getShopBannerPreviewUrl(seller.bannerFileId);
+  const description =
+    seller.bio?.trim() ||
+    `Browse active listings from ${seller.shopName} on Knurdz Marketplace. Buy directly from the seller with zero platform fees.`;
+
+  return buildPublicMetadata({
+    title: seller.shopName,
+    description,
+    canonicalPath: `/shop/${seller.slug}`,
+    image: bannerUrl
+      ? {
+          url: bannerUrl,
+          alt: `${seller.shopName} shop banner`,
+          width: 1200,
+          height: 320,
+        }
+      : null,
+  });
+}
 
 export default async function ShopPage({ params }: ShopPageProps) {
   const { slug } = await params;

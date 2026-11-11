@@ -1,19 +1,14 @@
 import { NextResponse } from "next/server";
-import { completeOAuthLogin } from "@/lib/appwrite/oauth";
+import { completeOAuthLogin } from "@/lib/backend/oauth";
+import { getAppUrl, getAuthAllowedHosts } from "@/lib/config/app";
 
 function isAllowedHost(host: string): boolean {
-  const lower = host.toLowerCase().split(":")[0] ?? "";
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL?.trim().replace(/\/$/, "");
-  if (appUrl) {
-    try {
-      if (lower === new URL(appUrl).hostname) return true;
-    } catch {
-      /* skip */
-    }
-  }
-  if (lower.endsWith(".vercel.app")) return true;
-  if (lower === "localhost" || lower === "127.0.0.1") return true;
-  return false;
+  const normalized = host.trim().toLowerCase();
+  if (!normalized || /[/\\@,\s]/.test(normalized)) return false;
+  // Exact allowlist only; never trust an arbitrary *.vercel.app host.
+  return getAuthAllowedHosts().some(
+    (allowed) => allowed.toLowerCase() === normalized,
+  );
 }
 
 function redirectTo(request: Request, path: string): NextResponse {
@@ -21,14 +16,13 @@ function redirectTo(request: Request, path: string): NextResponse {
     request.headers.get("x-forwarded-host") || request.headers.get("host");
   const validHost = host && isAllowedHost(host) ? host : null;
   if (validHost) {
-    const proto =
-      request.headers.get("x-forwarded-proto") ||
-      (validHost.includes("localhost") || validHost.includes("127.0.0.1")
-        ? "http"
-        : "https");
+    const isLocal =
+      validHost.startsWith("localhost:") ||
+      validHost.startsWith("127.0.0.1:");
+    const proto = isLocal ? "http" : "https";
     return NextResponse.redirect(new URL(path, `${proto}://${validHost}`));
   }
-  return NextResponse.redirect(new URL(path, request.url));
+  return NextResponse.redirect(new URL(path, getAppUrl()));
 }
 
 export async function GET(request: Request) {

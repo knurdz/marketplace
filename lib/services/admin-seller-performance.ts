@@ -1,12 +1,12 @@
-import { Query } from "@/lib/db/appwrite-shim";
+import { Query } from "@/lib/db/compat";
 import {
   DATABASE_ID,
   TABLE_PURCHASE_REQUESTS,
   TABLE_SELLER_PROFILES,
-  hasAppwritePublicConfig,
-} from "@/lib/appwrite/config";
-import { requireLabel } from "@/lib/appwrite/roles";
-import { createAdminClient } from "@/lib/appwrite/server";
+  hasDatabaseConfig,
+} from "@/lib/backend/config";
+import { requireLabel } from "@/lib/backend/roles";
+import { createAdminClient } from "@/lib/backend/server";
 import type { PurchaseRequest, SellerStatus } from "@/lib/types";
 import { asPurchaseRequest } from "./purchase-requests";
 import { asSellerProfile } from "./seller-approvals";
@@ -44,7 +44,7 @@ function asNullableString(value: unknown): string | null {
 }
 
 function adminSdkAvailable(): boolean {
-  return hasAppwritePublicConfig() && Boolean(process.env.DATABASE_URL?.trim());
+  return hasDatabaseConfig();
 }
 
 function clampLimit(raw?: number): number {

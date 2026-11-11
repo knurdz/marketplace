@@ -9,7 +9,7 @@ import {
   suspendUser,
   unsuspendUser,
   type UserManagementActionState,
-} from "@/lib/appwrite/user-management-actions";
+} from "@/lib/backend/user-management-actions";
 import { toast } from "@/lib/ui/toast";
 
 const suspendInitial: UserManagementActionState = {};

@@ -1,4 +1,13 @@
+import type { Metadata } from "next";
 import { LegalPage, LegalSection } from "@/components/legal/legal-page";
+import { buildPublicMetadata } from "@/lib/seo/metadata";
+
+export const metadata: Metadata = buildPublicMetadata({
+  title: "Privacy Policy",
+  description:
+    "Learn what personal data Knurdz Marketplace collects, how purchase request contact details are shared, and how your account is protected.",
+  canonicalPath: "/legal/privacy",
+});
 
 export default function PrivacyPage() {
   return (

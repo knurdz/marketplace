@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label";
 import {
   updatePlatformSettingFormAction,
   type PlatformSettingActionState,
-} from "@/lib/appwrite/platform-settings-actions";
+} from "@/lib/backend/platform-settings-actions";
 import { PLATFORM_SETTING_KEYS } from "@/lib/platform-settings/keys";
 import type { PlatformSettingListItem } from "@/lib/services/platform-settings-admin";
 import { toast } from "@/lib/ui/toast";

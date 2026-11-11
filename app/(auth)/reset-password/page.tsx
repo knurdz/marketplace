@@ -1,9 +1,13 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { ResetPasswordForm } from "@/components/auth/reset-password-form";
 import { AuthBackLink } from "@/components/auth/auth-back-link";
 import { AuthLegalLinks } from "@/components/auth/auth-legal-links";
 import { AUTH_PRIMARY_BUTTON_CLASS } from "@/components/auth/auth-form-styles";
 import { Button } from "@/components/ui/button";
+import { buildNoIndexMetadata } from "@/lib/seo/metadata";
+
+export const metadata: Metadata = buildNoIndexMetadata("Reset Password");
 
 type SearchParams = Promise<{
   token?: string;

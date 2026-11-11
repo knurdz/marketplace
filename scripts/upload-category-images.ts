@@ -10,7 +10,7 @@ import path from "node:path";
 import {
   BUCKET_CATEGORIES,
   BUCKET_PRODUCT_IMAGES,
-} from "../lib/appwrite/config";
+} from "../lib/backend/config";
 import {
   CATEGORY_CATALOG,
   categoryImageFileId,

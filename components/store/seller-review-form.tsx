@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { createSellerReview } from "@/lib/services/review-actions";
 import type { Review, ReviewStatus } from "@/lib/types";
 import { toast } from "@/lib/ui/toast";
+import { FormGuardFields } from "@/components/security/form-guard-fields";
 
 type SellerReviewFormProps = {
   requestId: string;
@@ -87,13 +88,13 @@ export function SellerReviewForm({
       toast.error("Please select a rating.");
       return;
     }
+    const formData = new FormData(event.currentTarget);
+    formData.set("requestId", requestId);
+    formData.set("rating", String(rating));
+    formData.set("comment", comment.trim());
 
     startTransition(async () => {
-      const result = await createSellerReview({
-        requestId,
-        rating,
-        comment: comment.trim() || null,
-      });
+      const result = await createSellerReview(formData);
       if (result.error) {
         toast.error(result.error);
         return;
@@ -116,6 +117,7 @@ export function SellerReviewForm({
         their shop.
       </p>
       <form onSubmit={handleSubmit} className="mt-4 space-y-4">
+        <FormGuardFields action="review.seller.create" />
         <fieldset className="space-y-2">
           <legend className="text-sm text-muted-foreground">Rating</legend>
           <div className="flex flex-wrap gap-2">
