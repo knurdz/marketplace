@@ -1,3 +1,4 @@
+import { and, eq } from "drizzle-orm";
 import { AppwriteException, ID, Query } from "@/lib/db/appwrite-shim";
 import {
   DATABASE_ID,
@@ -11,6 +12,8 @@ import {
   createPublicClient,
   createSessionClient,
 } from "@/lib/appwrite/server";
+import { getDb, hasDatabaseConfig } from "@/lib/db/client";
+import { products as productsTable } from "@/lib/db/schema";
 import type { Category } from "@/lib/types";
 
 const MAX_NAME_LENGTH = 128;
@@ -263,6 +266,45 @@ export async function listCategories(opts?: {
       if (category) categories.push(category);
     }
     return categories;
+  } catch {
+    return [];
+  }
+}
+
+/**
+ * Categories that currently have at least one publicly listed product
+ * (`status=active` and `available=true`). Used for home category circles.
+ */
+export async function listCategoriesWithActiveProducts(opts?: {
+  limit?: number;
+}): Promise<Category[]> {
+  if (!hasAppwritePublicConfig() || !hasDatabaseConfig()) return [];
+
+  const limit = Math.min(Math.max(opts?.limit ?? 50, 1), MAX_LIST_LIMIT);
+
+  try {
+    const db = getDb();
+    const activeCategoryRows = await db
+      .selectDistinct({ categoryId: productsTable.categoryId })
+      .from(productsTable)
+      .where(
+        and(
+          eq(productsTable.status, "active"),
+          eq(productsTable.available, true),
+        ),
+      );
+
+    const categoryIds = new Set(
+      activeCategoryRows
+        .map((row) => row.categoryId?.trim())
+        .filter((id): id is string => Boolean(id)),
+    );
+    if (categoryIds.size === 0) return [];
+
+    const all = await listCategories({ limit: MAX_LIST_LIMIT });
+    return all
+      .filter((category) => categoryIds.has(category.$id))
+      .slice(0, limit);
   } catch {
     return [];
   }

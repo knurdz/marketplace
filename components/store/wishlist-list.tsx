@@ -1,21 +1,26 @@
 import Image from "next/image";
 import Link from "next/link";
+import { Package } from "lucide-react";
 import { WishlistRemoveButton } from "@/components/store/wishlist-remove-button";
+import { StatusPill } from "@/components/layout/status-pill";
 import type { WishlistLine } from "@/lib/types";
+import type { StatusTone } from "@/components/layout/status-pill";
 
 type WishlistListProps = {
   lines: WishlistLine[];
   imageByProductId: Record<string, string | null>;
 };
 
-function issueLabel(issue: WishlistLine["issue"]): string | null {
+function issueMeta(
+  issue: WishlistLine["issue"],
+): { label: string; tone: StatusTone } | null {
   switch (issue) {
     case "inactive":
-      return "No longer listed";
+      return { label: "No longer listed", tone: "warning" };
     case "unavailable":
-      return "Unavailable";
+      return { label: "Unavailable", tone: "warning" };
     case "missing":
-      return "Product removed";
+      return { label: "Product removed", tone: "danger" };
     default:
       return null;
   }
@@ -25,7 +30,10 @@ export function WishlistList({ lines, imageByProductId }: WishlistListProps) {
   if (lines.length === 0) return null;
 
   return (
-    <ul className="mt-10 space-y-0" aria-label="Saved products">
+    <ul
+      className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3"
+      aria-label="Saved products"
+    >
       {lines.map((line) => {
         const product = line.product;
         const title = product?.title ?? "Unknown product";
@@ -34,57 +42,90 @@ export function WishlistList({ lines, imageByProductId }: WishlistListProps) {
             ? "free"
             : `${product.currency} ${product.price.toFixed(2)}`
           : null;
-        const note = issueLabel(line.issue);
+        const issue = issueMeta(line.issue);
         const previewUrl = imageByProductId[line.item.productId] ?? null;
         const href = product ? `/products/${product.$id}` : undefined;
 
         return (
           <li
             key={line.item.$id}
-            className="flex flex-col gap-4 border-b border-border py-5 last:border-b-0 sm:flex-row sm:items-center sm:justify-between"
+            className="flex flex-col overflow-hidden rounded-2xl border border-border/80 bg-card shadow-none"
           >
-            <div className="flex min-w-0 flex-1 items-start gap-4">
-              {previewUrl ? (
-                <div className="relative size-16 shrink-0 overflow-hidden rounded-md border border-border bg-muted">
-                  <Image
-                    src={previewUrl}
-                    alt=""
-                    fill
-                    sizes="64px"
-                    className="object-cover"
-                  />
+            {href ? (
+              <Link href={href} className="group block">
+                <div className="relative aspect-square overflow-hidden bg-muted">
+                  {previewUrl ? (
+                    <Image
+                      src={previewUrl}
+                      alt=""
+                      fill
+                      sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                      className="object-cover transition duration-300 group-hover:scale-105"
+                    />
+                  ) : (
+                    <div
+                      className="flex size-full items-center justify-center text-muted-foreground"
+                      aria-hidden
+                    >
+                      <Package className="size-8 opacity-60" />
+                    </div>
+                  )}
                 </div>
-              ) : (
-                <div
-                  className="size-16 shrink-0 rounded-md border border-border bg-muted"
-                  aria-hidden
-                />
-              )}
-              <div className="min-w-0">
-                {href ? (
-                  <Link
-                    href={href}
-                    className="font-medium tracking-tight hover:text-accent"
-                  >
+                <div className="space-y-1.5 p-4 pb-0">
+                  <p className="line-clamp-2 text-sm font-semibold leading-snug tracking-tight group-hover:text-accent">
                     {title}
-                  </Link>
-                ) : (
-                  <span className="font-medium tracking-tight">{title}</span>
-                )}
-                {priceLabel ? (
-                  <p className="mt-1 font-mono text-sm text-muted-foreground">
-                    {priceLabel}
                   </p>
-                ) : null}
-                {note ? (
-                  <p className="mt-1 text-xs text-muted-foreground">{note}</p>
-                ) : null}
+                  {priceLabel ? (
+                    <p className="text-base font-bold text-foreground">
+                      {priceLabel}
+                    </p>
+                  ) : null}
+                </div>
+              </Link>
+            ) : (
+              <div>
+                <div className="relative aspect-square overflow-hidden bg-muted">
+                  {previewUrl ? (
+                    <Image
+                      src={previewUrl}
+                      alt=""
+                      fill
+                      sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                      className="object-cover"
+                    />
+                  ) : (
+                    <div
+                      className="flex size-full items-center justify-center text-muted-foreground"
+                      aria-hidden
+                    >
+                      <Package className="size-8 opacity-60" />
+                    </div>
+                  )}
+                </div>
+                <div className="space-y-1.5 p-4 pb-0">
+                  <p className="line-clamp-2 text-sm font-semibold leading-snug tracking-tight">
+                    {title}
+                  </p>
+                  {priceLabel ? (
+                    <p className="text-base font-bold text-foreground">
+                      {priceLabel}
+                    </p>
+                  ) : null}
+                </div>
               </div>
+            )}
+
+            <div className="mt-auto flex flex-wrap items-center justify-between gap-2 p-4 pt-3">
+              {issue ? (
+                <StatusPill tone={issue.tone} label={issue.label} />
+              ) : (
+                <span className="text-xs text-muted-foreground">Saved</span>
+              )}
+              <WishlistRemoveButton
+                productId={line.item.productId}
+                productTitle={product?.title ?? null}
+              />
             </div>
-            <WishlistRemoveButton
-              productId={line.item.productId}
-              productTitle={product?.title ?? null}
-            />
           </li>
         );
       })}

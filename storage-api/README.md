@@ -1,6 +1,6 @@
 # Knurdz Marketplace Storage API (`marketplace-storage.knurdz.org`)
 
-Minimal Laravel 12 service for storing and serving marketplace files (`avatars` and `product-images`) on Hostinger while the Next.js storefront runs on Vercel.
+Minimal Laravel 12 service for storing and serving marketplace files (`avatars`, `product-images`, and `categories`) on Hostinger while the Next.js storefront runs on Vercel.
 
 ## Behaviour
 
@@ -15,7 +15,7 @@ Minimal Laravel 12 service for storing and serving marketplace files (`avatars` 
 
 | Method | Path | Auth | Description |
 |--------|------|------|-------------|
-| `POST` | `/api/v1/files` | `Authorization: Bearer <STORAGE_API_TOKEN>` | Multipart upload (`bucket`, `file`, optional `fileId`). Allowed buckets: `avatars` (max 2MB), `product-images` (max 5MB). Content must be JPEG, PNG, or WebP (magic-byte checked). Existing `fileId` returns **409**. Throttled ~30/min/IP. |
+| `POST` | `/api/v1/files` | `Authorization: Bearer <STORAGE_API_TOKEN>` | Multipart upload (`bucket`, `file`, optional `fileId`). Allowed buckets: `avatars` (max 2MB), `product-images` (max 5MB), `categories` (max 2MB). Content must be JPEG, PNG, or WebP (magic-byte checked). Existing `fileId` returns **409**. Throttled ~30/min/IP. |
 | `DELETE` | `/api/v1/files/{bucket}/{fileId}` | `Authorization: Bearer <STORAGE_API_TOKEN>` | Deletes a stored file and its metadata sidecar (idempotent `200`). Same write throttle. |
 | `GET` | `/files/{bucket}/{fileId}` | Public | Streams the file with allowlisted `Content-Type`, `Content-Disposition: inline`, `Cache-Control: public, max-age=86400`, `X-Content-Type-Options: nosniff`. Throttled ~120/min/IP. |
 
@@ -38,7 +38,7 @@ Writes reject requests when `STORAGE_API_TOKEN` is empty. Tokens are compared wi
 5. Ensure `storage/` and `bootstrap/cache/` are writable:
    ```bash
    chmod -R 775 storage bootstrap/cache
-   mkdir -p storage/app/marketplace/avatars storage/app/marketplace/product-images
+   mkdir -p storage/app/marketplace/avatars storage/app/marketplace/product-images storage/app/marketplace/categories
    chmod -R 775 storage/app/marketplace
    ```
 6. After each deploy/pull:

@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
+import { CategoryImage } from "@/components/store/category-image";
 import type { Category } from "@/lib/types";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -14,11 +15,6 @@ type CategoryRailProps = {
 };
 
 const SCROLL_STEP = 280;
-
-function categoryInitial(name: string): string {
-  const trimmed = name.trim();
-  return trimmed ? trimmed.charAt(0).toUpperCase() : "?";
-}
 
 export function CategoryRail({
   categories,
@@ -111,13 +107,22 @@ export function CategoryRail({
               >
                 <span
                   className={cn(
-                    "flex size-16 items-center justify-center rounded-full border text-base font-semibold transition",
+                    "flex size-16 items-center justify-center overflow-hidden rounded-full border transition",
                     active
-                      ? "border-accent bg-accent text-accent-foreground"
-                      : "border-border bg-muted text-foreground group-hover:border-accent/50 group-hover:bg-card-hover",
+                      ? "border-accent outline outline-2 outline-accent -outline-offset-2"
+                      : "border-border group-hover:border-accent/50",
                   )}
                 >
-                  {categoryInitial(category.name)}
+                  <CategoryImage
+                    name={category.name}
+                    slug={category.slug}
+                    imgClassName="transition duration-300 group-hover:scale-105"
+                    fallbackClassName={
+                      active
+                        ? "bg-accent text-accent-foreground"
+                        : "bg-muted text-foreground group-hover:bg-card-hover"
+                    }
+                  />
                 </span>
                 <span
                   className={cn(

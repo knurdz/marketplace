@@ -7,12 +7,13 @@ import { SectionHeading } from "@/components/store/section-heading";
 import { Button } from "@/components/ui/button";
 import {
   filterMarketListings,
-  MARKET_CATEGORIES,
   type MarketListingSort,
 } from "@/lib/store/home-demo";
+import type { Category } from "@/lib/types";
 
 type HomeBrowseSharedProps = {
   category: string | null;
+  categoryLabel: string | null;
   minPrice: number | null;
   maxPrice: number | null;
   sort: MarketListingSort;
@@ -21,15 +22,21 @@ type HomeBrowseSharedProps = {
 
 /** Category circles + sort/price filters: place near the top of home. */
 export function HomeBrowseControls({
+  categoriesWithProducts,
   category,
   minPrice,
   maxPrice,
   sort,
   invalidPriceRange,
-}: HomeBrowseSharedProps) {
+}: HomeBrowseSharedProps & {
+  categoriesWithProducts: Category[];
+}) {
   return (
     <div id="browse" className="scroll-mt-24 space-y-10">
-      <MarketCategoryCircles activeSlug={category} />
+      <MarketCategoryCircles
+        categories={categoriesWithProducts}
+        activeSlug={category}
+      />
       <MarketFilters
         category={category}
         minPrice={minPrice}
@@ -41,9 +48,10 @@ export function HomeBrowseControls({
   );
 }
 
-/** Filtered multi-row product grid. */
+/** Filtered multi-row product grid (demo showcase listings). */
 export function HomeBrowseListings({
   category,
+  categoryLabel,
   minPrice,
   maxPrice,
   sort,
@@ -58,8 +66,6 @@ export function HomeBrowseListings({
     minPrice != null ||
     maxPrice != null ||
     sort !== "newest";
-  const categoryLabel =
-    MARKET_CATEGORIES.find((entry) => entry.slug === category)?.label ?? null;
 
   return (
     <section className="space-y-5 pb-6">

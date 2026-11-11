@@ -1,12 +1,28 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { RecentlyViewedSection } from "@/components/store/recently-viewed-section";
+import {
+  CheckCircle2,
+  Heart,
+  Package,
+  XCircle,
+} from "lucide-react";
 import { EmptyState } from "@/components/layout/empty-state";
+import { portalWelcomeName } from "@/components/layout/portal-greeting";
+import { StatCardGrid } from "@/components/layout/stat-card";
+import { BuyerAccountShell } from "@/components/store/buyer-account-shell";
+import { BuyerRequestCard } from "@/components/store/buyer-request-card";
+import { RecentlyViewedSection } from "@/components/store/recently-viewed-section";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
+import { BUCKET_PRODUCT_IMAGES } from "@/lib/appwrite/config";
+import { getOwnProfile } from "@/lib/appwrite/profiles";
 import { getLoggedInUser } from "@/lib/appwrite/session";
-import { getOwnWishlistView, listOwnPurchaseRequests } from "@/lib/services";
-import { formatPurchaseRequestStatus } from "@/lib/request-display";
+import { toSessionUserView } from "@/lib/appwrite/session-user";
+import { getFilePreviewUrl } from "@/lib/appwrite/storage-urls";
+import {
+  getOwnWishlistView,
+  listCoverImagesByProductIds,
+  listOwnPurchaseRequests,
+} from "@/lib/services";
 import type { PurchaseRequest, WishlistLine } from "@/lib/types";
 
 const RECENT_REQUESTS_LIMIT = 5;
@@ -51,68 +67,92 @@ export default async function DashboardPage() {
     redirect("/login?next=/dashboard");
   }
 
-  const [requests, wishlistView] = await Promise.all([
+  const [requests, wishlistView, profile] = await Promise.all([
     listOwnPurchaseRequests({ limit: 50 }),
-    getOwnWishlistView({ limit: WISHLIST_PREVIEW_LIMIT }),
+    getOwnWishlistView(),
+    getOwnProfile(),
   ]);
 
   const summary = countRequests(requests);
   const recentRequests = requests.slice(0, RECENT_REQUESTS_LIMIT);
+  const wishlistPreview = wishlistView.lines.slice(0, WISHLIST_PREVIEW_LIMIT);
+  const coverProductIds = [
+    ...recentRequests.map((r) => r.productId),
+    ...wishlistPreview.map((line) => line.item.productId),
+  ];
+  const covers = await listCoverImagesByProductIds(coverProductIds);
+  const coverUrlByProductId = Object.fromEntries(
+    Object.entries(covers).map(([id, cover]) => [
+      id,
+      getFilePreviewUrl(BUCKET_PRODUCT_IMAGES, cover.fileId, {
+        width: 160,
+        height: 160,
+      }),
+    ]),
+  );
+
+  const welcome = portalWelcomeName(
+    toSessionUserView(user),
+    profile?.displayName,
+  );
 
   return (
-    <main className="mx-auto w-full max-w-4xl px-4 py-10 sm:px-6">
-      <header>
-        <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">
-          Your dashboard
-        </h1>
-        <p className="mt-2 max-w-2xl text-sm text-muted-foreground">
-          Buy requests, saved products, and what you viewed on this device.
-        </p>
-      </header>
+    <BuyerAccountShell
+      title={`Hi, ${welcome}`}
+      description="Buy requests, saved products, and what you viewed on this device."
+      actions={
+        <Button size="sm" asChild>
+          <Link href="/market">Browse market</Link>
+        </Button>
+      }
+    >
+      <StatCardGrid
+        className="xl:grid-cols-4"
+        cards={[
+          {
+            label: "Open",
+            value: String(summary.open),
+            hint: "Waiting on seller",
+            href: "/requests?filter=open",
+            icon: Package,
+          },
+          {
+            label: "Sold",
+            value: String(summary.sold),
+            hint: "Completed deals",
+            href: "/requests?filter=sold",
+            icon: CheckCircle2,
+          },
+          {
+            label: "Cancelled",
+            value: String(summary.cancelled),
+            hint: "Closed without sale",
+            href: "/requests?filter=cancelled",
+            icon: XCircle,
+          },
+          {
+            label: "Saved",
+            value: String(wishlistView.itemCount),
+            hint: "Wishlist items",
+            href: "/wishlist",
+            icon: Heart,
+          },
+        ]}
+      />
 
-      <section className="mt-12" aria-labelledby="request-summary-heading">
-        <h2
-          id="request-summary-heading"
-          className="text-lg font-semibold tracking-tight"
-        >
-          Request summary
-        </h2>
-        <dl className="mt-6 grid grid-cols-3 gap-3">
-          <Card>
-            <CardContent>
-              <dt className="text-sm text-muted-foreground">Open</dt>
-              <dd className="mt-1 font-mono text-2xl tabular-nums">
-                {summary.open}
-              </dd>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent>
-              <dt className="text-sm text-muted-foreground">Sold</dt>
-              <dd className="mt-1 font-mono text-2xl tabular-nums">
-                {summary.sold}
-              </dd>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent>
-              <dt className="text-sm text-muted-foreground">Cancelled</dt>
-              <dd className="mt-1 font-mono text-2xl tabular-nums">
-                {summary.cancelled}
-              </dd>
-            </CardContent>
-          </Card>
-        </dl>
-      </section>
-
-      <section className="mt-12" aria-labelledby="recent-requests-heading">
+      <section className="mt-10" aria-labelledby="recent-requests-heading">
         <div className="flex flex-wrap items-end justify-between gap-3">
-          <h2
-            id="recent-requests-heading"
-            className="text-lg font-semibold tracking-tight"
-          >
-            Recent requests
-          </h2>
+          <div>
+            <h2
+              id="recent-requests-heading"
+              className="text-lg font-semibold tracking-tight"
+            >
+              Recent requests
+            </h2>
+            <p className="mt-1 text-sm text-muted-foreground">
+              Contact sellers from each request detail.
+            </p>
+          </div>
           <Button variant="secondary" size="sm" asChild>
             <Link href="/requests">View all</Link>
           </Button>
@@ -120,72 +160,105 @@ export default async function DashboardPage() {
         {recentRequests.length === 0 ? (
           <EmptyState
             className="mt-6"
+            icon={Package}
             title="No requests yet"
             description="Browse listings and tap Buy to send a request to a seller."
             action={
               <Button asChild>
-                <Link href="/">Browse market</Link>
+                <Link href="/market">Browse market</Link>
               </Button>
             }
           />
         ) : (
-          <ul className="mt-6 divide-y divide-border rounded-xl border border-border">
+          <ul className="mt-6 space-y-3">
             {recentRequests.map((request) => (
-              <li
+              <BuyerRequestCard
                 key={request.$id}
-                className="flex items-center justify-between gap-3 px-4 py-3"
-              >
-                <div>
-                  <p className="font-medium">{request.title}</p>
-                  <p className="text-sm text-muted-foreground">
-                    Qty {request.quantity} ·{" "}
-                    {formatPurchaseRequestStatus(request.status)}
-                  </p>
-                </div>
-                <Button variant="ghost" size="sm" asChild>
-                  <Link href={`/requests/${request.$id}`}>Open</Link>
-                </Button>
-              </li>
+                request={request}
+                coverUrl={coverUrlByProductId[request.productId]}
+              />
             ))}
           </ul>
         )}
       </section>
 
-      <section className="mt-12" aria-labelledby="wishlist-heading">
+      <section className="mt-10" aria-labelledby="wishlist-heading">
         <div className="flex flex-wrap items-end justify-between gap-3">
-          <h2
-            id="wishlist-heading"
-            className="text-lg font-semibold tracking-tight"
-          >
-            Wishlist
-          </h2>
+          <div>
+            <h2
+              id="wishlist-heading"
+              className="text-lg font-semibold tracking-tight"
+            >
+              Wishlist
+            </h2>
+            <p className="mt-1 text-sm text-muted-foreground">
+              Products you saved for later.
+            </p>
+          </div>
           <Button variant="secondary" size="sm" asChild>
             <Link href="/wishlist">View wishlist</Link>
           </Button>
         </div>
-        {wishlistView.lines.length === 0 ? (
+        {wishlistPreview.length === 0 ? (
           <p className="mt-4 text-sm text-muted-foreground">
-            Nothing saved yet.
+            Nothing saved yet. Open a listing and tap Save.
           </p>
         ) : (
-          <ul className="mt-4 space-y-2">
-            {wishlistView.lines.map((line) => {
+          <ul className="mt-6 grid grid-cols-2 gap-4 sm:grid-cols-4">
+            {wishlistPreview.map((line) => {
               const issue = wishlistIssueLabel(line.issue);
+              const coverUrl = coverUrlByProductId[line.item.productId];
+              const product = line.product;
+              const href = product ? `/products/${product.$id}` : undefined;
+              const title = product?.title ?? "Unavailable";
+              const price =
+                product == null
+                  ? null
+                  : product.isFree
+                    ? "free"
+                    : `${product.currency} ${product.price.toFixed(2)}`;
+
+              const body = (
+                <>
+                  <div className="relative aspect-square overflow-hidden rounded-xl bg-muted">
+                    {coverUrl ? (
+                      // eslint-disable-next-line @next/next/no-img-element -- storage preview URL
+                      <img
+                        src={coverUrl}
+                        alt=""
+                        className="size-full object-cover transition duration-300 group-hover:scale-105"
+                      />
+                    ) : (
+                      <div className="flex size-full items-center justify-center text-muted-foreground">
+                        <Package className="size-7 opacity-60" aria-hidden />
+                      </div>
+                    )}
+                  </div>
+                  <div className="mt-3 min-w-0">
+                    <p className="line-clamp-2 text-sm font-medium leading-snug group-hover:text-accent">
+                      {title}
+                    </p>
+                    {price ? (
+                      <p className="mt-1 text-sm font-semibold">{price}</p>
+                    ) : null}
+                    {issue ? (
+                      <p className="mt-1 text-xs text-muted-foreground">
+                        {issue}
+                      </p>
+                    ) : null}
+                  </div>
+                </>
+              );
+
               return (
-                <li key={line.item.$id} className="text-sm">
-                  {line.product ? (
-                    <Link
-                      href={`/products/${line.product.$id}`}
-                      className="font-medium hover:underline"
-                    >
-                      {line.product.title}
+                <li key={line.item.$id}>
+                  {href ? (
+                    <Link href={href} className="group block">
+                      {body}
                     </Link>
                   ) : (
-                    <span className="text-muted-foreground">Unavailable</span>
+                    <div className="block opacity-80">{body}</div>
                   )}
-                  {issue ? (
-                    <span className="ml-2 text-muted-foreground">({issue})</span>
-                  ) : null}
                 </li>
               );
             })}
@@ -194,8 +267,8 @@ export default async function DashboardPage() {
       </section>
 
       <div className="mt-12">
-        <RecentlyViewedSection />
+        <RecentlyViewedSection embedded />
       </div>
-    </main>
+    </BuyerAccountShell>
   );
 }

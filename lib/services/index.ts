@@ -44,6 +44,7 @@ export {
   generateSlug,
   getCategoryBySlug,
   listCategories,
+  listCategoriesWithActiveProducts,
   listCategoryTree,
 } from "./categories";
 export type { CategoryTreeNode } from "./categories";

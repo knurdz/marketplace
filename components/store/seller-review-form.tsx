@@ -67,7 +67,19 @@ export function SellerReviewForm({
     );
   }
 
-  if (!canReview) return null;
+  if (!canReview) {
+    return (
+      <section
+        className="rounded-xl border border-border bg-card p-4"
+        data-testid="seller-review-unavailable"
+      >
+        <h2 className="text-sm font-semibold tracking-tight">Seller review</h2>
+        <p className="mt-2 text-sm text-muted-foreground">
+          Review unavailable for this request.
+        </p>
+      </section>
+    );
+  }
 
   function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();

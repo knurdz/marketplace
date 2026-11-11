@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { CategoryImage } from "@/components/store/category-image";
 import { PageHeader } from "@/components/layout/page-header";
 import { EmptyState } from "@/components/layout/empty-state";
 import { Button } from "@/components/ui/button";
@@ -32,13 +33,22 @@ export default async function CategoriesPage() {
             <li key={category.$id}>
               <Link
                 href={`/categories/${category.slug}`}
-                className="flex min-h-24 flex-col justify-between rounded-xl border border-border bg-card px-5 py-4 transition-colors hover:border-foreground/20 hover:bg-card-hover"
+                className="flex min-h-24 items-center gap-4 rounded-xl border border-border bg-card px-5 py-4 transition-colors hover:border-foreground/20 hover:bg-card-hover"
               >
-                <span className="text-lg font-semibold tracking-tight">
-                  {category.name}
+                <span className="size-14 shrink-0 overflow-hidden rounded-full border border-border bg-muted">
+                  <CategoryImage
+                    name={category.name}
+                    slug={category.slug}
+                    fallbackClassName="bg-muted text-foreground"
+                  />
                 </span>
-                <span className="mt-3 font-mono text-xs text-muted-foreground">
-                  {category.slug}
+                <span className="min-w-0 flex-1">
+                  <span className="block text-lg font-semibold tracking-tight">
+                    {category.name}
+                  </span>
+                  <span className="mt-1 block font-mono text-xs text-muted-foreground">
+                    {category.slug}
+                  </span>
                 </span>
               </Link>
             </li>

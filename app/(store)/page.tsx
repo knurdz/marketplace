@@ -5,9 +5,9 @@ import {
 import { HomeIntro } from "@/components/store/home/home-intro";
 import { HomeListings } from "@/components/store/home/home-listings";
 import { ScrollToBrowse } from "@/components/store/home/scroll-to-browse";
+import { listCategoriesWithActiveProducts } from "@/lib/services";
 import {
   HOME_LISTINGS,
-  isMarketCategorySlug,
   type MarketListingSort,
 } from "@/lib/store/home-demo";
 
@@ -37,8 +37,13 @@ function parseSort(raw: string | undefined): MarketListingSort {
 
 export default async function Home({ searchParams }: HomePageProps) {
   const params = await searchParams;
+  const categoriesWithProducts = await listCategoriesWithActiveProducts();
   const categoryRaw = params.category?.trim() || null;
-  const category = isMarketCategorySlug(categoryRaw) ? categoryRaw : null;
+  const matchedCategory = categoryRaw
+    ? categoriesWithProducts.find((entry) => entry.slug === categoryRaw) ?? null
+    : null;
+  const category = matchedCategory?.slug ?? null;
+  const categoryLabel = matchedCategory?.name ?? null;
   const minPrice = parseOptionalPrice(params.minPrice);
   const maxPrice = parseOptionalPrice(params.maxPrice);
   const sort = parseSort(params.sort);
@@ -47,6 +52,7 @@ export default async function Home({ searchParams }: HomePageProps) {
 
   const browseProps = {
     category,
+    categoryLabel,
     minPrice,
     maxPrice,
     sort,
@@ -64,7 +70,10 @@ export default async function Home({ searchParams }: HomePageProps) {
     <main className="mx-auto w-full max-w-7xl space-y-12 px-4 py-8 sm:px-6 sm:py-10 lg:px-8">
       <ScrollToBrowse enabled={hasBrowseParams} />
       <HomeIntro />
-      <HomeBrowseControls {...browseProps} />
+      <HomeBrowseControls
+        {...browseProps}
+        categoriesWithProducts={categoriesWithProducts}
+      />
       <HomeListings listings={HOME_LISTINGS.slice(0, JUST_LISTED_LIMIT)} />
       <HomeBrowseListings {...browseProps} />
     </main>
