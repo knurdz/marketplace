@@ -3,7 +3,7 @@ import type { ReactNode } from "react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
-/** Bordered, horizontally scrollable frame for portal `Table`s. */
+/** Bordered, horizontally scrollable frame for portal tables. */
 export function DataTableShell({
   children,
   className,
@@ -14,7 +14,7 @@ export function DataTableShell({
   return (
     <div
       className={cn(
-        "overflow-x-auto rounded-xl border border-border bg-card",
+        "w-full overflow-x-auto rounded-xl border border-border bg-card shadow-xs",
         className,
       )}
     >
@@ -33,7 +33,7 @@ export function DataTableEmpty({
   return (
     <div
       className={cn(
-        "rounded-xl border border-dashed border-border bg-card px-4 py-10 text-center text-sm text-muted-foreground",
+        "w-full rounded-xl border border-dashed border-border bg-card px-4 py-10 text-center text-sm text-muted-foreground shadow-xs",
         className,
       )}
     >
@@ -54,7 +54,7 @@ export function FilterTabs({
     <nav
       aria-label="Filter"
       className={cn(
-        "scrollbar-none inline-flex max-w-full gap-1 overflow-x-auto rounded-lg border border-border bg-card p-1",
+        "scrollbar-none inline-flex max-w-full gap-1 overflow-x-auto rounded-xl bg-muted p-1",
         className,
       )}
     >
@@ -66,8 +66,8 @@ export function FilterTabs({
           className={cn(
             "shrink-0 rounded-md px-3 py-1.5 text-sm whitespace-nowrap transition-colors",
             tab.active
-              ? "bg-primary text-primary-foreground"
-              : "text-muted-foreground hover:bg-card-hover hover:text-foreground",
+              ? "bg-card font-medium text-foreground"
+              : "text-muted-foreground hover:text-foreground",
           )}
         >
           {tab.label}

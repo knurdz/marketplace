@@ -33,8 +33,6 @@ const KEY_DENYLIST_SUBSTRINGS = [
 
 const BOOLEAN_KEYS: readonly PlatformSettingKey[] = [
   PLATFORM_SETTING_KEYS.featuresFreeListings,
-  PLATFORM_SETTING_KEYS.checkoutSandboxModeDisplay,
-  PLATFORM_SETTING_KEYS.checkoutPayhereEnabled,
 ];
 
 export type PlatformSettingMutationResult =
@@ -112,11 +110,6 @@ export function validatePlatformSettingInput(
   if (BOOLEAN_KEYS.includes(normalized)) {
     const boolErr = validateBooleanValue(trimmedValue);
     if (boolErr) return boolErr;
-  }
-
-  if (normalized === PLATFORM_SETTING_KEYS.checkoutFeePercent) {
-    const feeErr = validateFeePercent(trimmedValue);
-    if (feeErr) return feeErr;
   }
 
   return { ok: true, key: normalized, value: trimmedValue };

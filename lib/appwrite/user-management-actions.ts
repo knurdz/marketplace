@@ -27,6 +27,7 @@ async function assertAdmin(): Promise<
 }
 
 function revalidateUserPaths(): void {
+  revalidatePath("/admin/buyers");
   revalidatePath("/admin/users");
   revalidatePath("/admin");
 }

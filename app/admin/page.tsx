@@ -1,30 +1,15 @@
-import { getAdminMetrics } from "@/lib/services";
+import { AdminDashboardCharts } from "@/components/admin/admin-dashboard-charts";
 import { PortalPageHeader } from "@/components/layout/portal-page-header";
-import { StatCardGrid } from "@/components/layout/stat-card";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
-import Link from "next/link";
+import {
+  getAdminMetrics,
+  getSalesOverTime,
+  getUserGrowthOverTime,
+} from "@/lib/services";
 
 function formatCount(value: number): string {
   return new Intl.NumberFormat(undefined, {
     maximumFractionDigits: 0,
   }).format(value);
-}
-
-function formatRevenue(amount: number, currency: string): string {
-  try {
-    return new Intl.NumberFormat(undefined, {
-      style: "currency",
-      currency,
-      maximumFractionDigits: 2,
-    }).format(amount);
-  } catch {
-    return new Intl.NumberFormat(undefined, {
-      style: "currency",
-      currency: "LKR",
-      maximumFractionDigits: 2,
-    }).format(amount);
-  }
 }
 
 const QUEUES = [
@@ -41,10 +26,10 @@ const QUEUES = [
     cta: "Review listings",
   },
   {
-    title: "Bank slips",
-    body: "Read-only view; sellers approve their own order slips.",
-    href: "/admin/payments/bank-slips",
-    cta: "View slips",
+    title: "Buy requests",
+    body: "Read-only requests between buyers and sellers.",
+    href: "/admin/requests",
+    cta: "View requests",
   },
   {
     title: "Reports",
@@ -55,64 +40,36 @@ const QUEUES = [
 ] as const;
 
 export default async function AdminPage() {
-  const metrics = await getAdminMetrics();
-
-  const cards = [
-    {
-      label: "Total users",
-      value: formatCount(metrics.totalUsers),
-      href: "/admin/users",
-    },
-    {
-      label: "Active sellers",
-      value: formatCount(metrics.activeSellers),
-      href: "/admin/sellers/performance",
-    },
-    {
-      label: "Total orders",
-      value: formatCount(metrics.totalOrders),
-      href: "/admin/orders",
-    },
-    {
-      label: "Gross revenue",
-      value: formatRevenue(metrics.grossRevenue, metrics.currency),
-      hint: "Paid payments only",
-      href: "/admin/analytics",
-    },
-  ];
+  const [metrics, sales30d, sales12m, growth30d, growth12m] = await Promise.all([
+    getAdminMetrics(),
+    getSalesOverTime({ range: "30d" }),
+    getSalesOverTime({ range: "12m" }),
+    getUserGrowthOverTime({ range: "30d" }),
+    getUserGrowthOverTime({ range: "12m" }),
+  ]);
 
   return (
     <div>
       <PortalPageHeader
         title="Dashboard"
-        description="Platform snapshot. Approvals, slips, and moderation live in the sidebar."
-        actions={
-          <Button variant="secondary" size="sm" asChild>
-            <Link href="/admin/analytics">Analytics</Link>
-          </Button>
-        }
+        description="Platform snapshot. Open a metric or queue for the trend and the matching page."
       />
 
-      <StatCardGrid cards={cards} className="mt-6" />
-
-      <div className="mt-8 grid gap-3 sm:grid-cols-2">
-        {QUEUES.map((queue) => (
-          <Card key={queue.title}>
-            <CardContent className="flex flex-wrap items-center justify-between gap-3">
-              <div className="min-w-0">
-                <p className="text-sm font-semibold tracking-tight">
-                  {queue.title}
-                </p>
-                <p className="mt-1 text-sm text-muted-foreground">
-                  {queue.body}
-                </p>
-              </div>
-              <Button variant="secondary" size="sm" asChild>
-                <Link href={queue.href}>{queue.cta}</Link>
-              </Button>
-            </CardContent>
-          </Card>
-        ))}
+      <div className="mt-6">
+        <AdminDashboardCharts
+          metrics={{
+            totalUsers: formatCount(metrics.totalUsers),
+            activeSellers: formatCount(metrics.activeSellers),
+            totalOrders: formatCount(metrics.openRequests),
+            grossRevenue: formatCount(metrics.soldRequests),
+            currency: "REQ",
+          }}
+          sales30d={sales30d}
+          sales12m={sales12m}
+          growth30d={growth30d}
+          growth12m={growth12m}
+          queues={[...QUEUES]}
+        />
       </div>
     </div>
   );

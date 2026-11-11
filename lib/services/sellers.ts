@@ -5,9 +5,8 @@ import {
 } from "@/lib/appwrite/config";
 import { createAdminClient } from "@/lib/appwrite/server";
 import { isSellerStatus } from "@/lib/types";
-import { getOwnOrder, getOwnPaymentForOrder } from "./orders";
 
-/** Public storefront seller card: never includes bank or rejection fields. */
+/** Public storefront seller card: never includes rejection-only fields. */
 export type PublicSellerInfo = {
   userId: string;
   shopName: string;
@@ -52,7 +51,7 @@ export function toPublicSellerInfo(
 /**
  * Approved seller profile for storefront display.
  * Uses admin client (seller_profiles is admin-read only); returns null when
- * missing, non-approved, or on error: never exposes bank account fields.
+ * missing, non-approved, or on error.
  */
 export async function getPublicSellerByUserId(
   userId: string,
@@ -99,72 +98,6 @@ export async function getPublicSellerBySlug(
     if (!row) return null;
 
     return toPublicSellerInfo(row as unknown as Record<string, unknown>);
-  } catch {
-    return null;
-  }
-}
-
-const CHECKOUT_BANK_PAYMENT_STATUSES = [
-  "pending",
-  "awaiting_verification",
-] as const;
-
-/** Bank details for an owned bank-transfer checkout: server-only, never on public seller cards. */
-export type CheckoutSellerBankDetails = {
-  bankAccountName: string | null;
-  bankAccountNumber: string | null;
-  bankName: string | null;
-  bankTransferNotes: string | null;
-};
-
-/**
- * Seller bank account fields for an owned bank-transfer order that still needs payment.
- * Verifies the signed-in buyer owns the order, method is bank_transfer, and payment
- * is pending or awaiting_verification. Returns null otherwise.
- */
-export async function getSellerBankDetailsForCheckout(
-  orderId: string,
-): Promise<CheckoutSellerBankDetails | null> {
-  const trimmed = orderId?.trim();
-  if (!trimmed) return null;
-
-  const order = await getOwnOrder(trimmed);
-  if (!order || order.paymentMethod !== "bank_transfer") return null;
-
-  const payment = await getOwnPaymentForOrder(trimmed);
-  if (
-    !payment ||
-    payment.method !== "bank_transfer" ||
-    !(CHECKOUT_BANK_PAYMENT_STATUSES as readonly string[]).includes(
-      payment.status,
-    )
-  ) {
-    return null;
-  }
-
-  try {
-    const { tables } = await createAdminClient();
-    const result = await tables.listRows({
-      databaseId: DATABASE_ID,
-      tableId: TABLE_SELLER_PROFILES,
-      queries: [Query.equal("userId", order.sellerId), Query.limit(1)],
-    });
-
-    const row = result.rows[0];
-    if (!row) return null;
-
-    const record = row as unknown as Record<string, unknown>;
-    const statusRaw = record.status;
-    if (!isSellerStatus(statusRaw) || statusRaw !== "approved") {
-      return null;
-    }
-
-    return {
-      bankAccountName: asNullableString(record.bankAccountName),
-      bankAccountNumber: asNullableString(record.bankAccountNumber),
-      bankName: asNullableString(record.bankName),
-      bankTransferNotes: asNullableString(record.bankTransferNotes),
-    };
   } catch {
     return null;
   }

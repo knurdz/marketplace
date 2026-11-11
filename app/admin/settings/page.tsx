@@ -7,7 +7,7 @@ export default async function AdminSettingsPage() {
 
   if ("error" in result) {
     return (
-      <div className="max-w-3xl">
+      <div className="w-full">
         <PortalPageHeader title="Platform settings" />
         <p className="mt-4 text-sm text-destructive">{result.error}</p>
       </div>
@@ -15,10 +15,10 @@ export default async function AdminSettingsPage() {
   }
 
   return (
-    <div className="max-w-3xl">
+    <div className="w-full">
       <PortalPageHeader
         title="Platform settings"
-        description="Edit public-safe platform configuration. All values are readable by any signed-in user. Never store secrets here. Sandbox banner is display-only; PayHere sandbox mode is controlled by Function env."
+        description="Edit public-safe platform configuration. All values are readable by any signed-in user. Never store secrets here."
       />
       <div className="mt-6">
         <PlatformSettingsManager items={result} />

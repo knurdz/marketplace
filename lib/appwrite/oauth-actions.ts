@@ -7,6 +7,10 @@ import {
 } from "@/lib/security/rate-limit";
 import { assertDurableRateLimit } from "@/lib/security/durable-rate-limit";
 import { logError } from "@/lib/observability/log-error";
+import {
+  clearOAuthSellerIntentCookie,
+  setOAuthSellerIntentCookie,
+} from "./oauth-seller-intent";
 import { getRequestOrigin } from "./server-origin";
 import {
   buildOAuthSuccessUrl,
@@ -25,8 +29,8 @@ function oauthFrom(raw: string): "login" | "register" {
 }
 
 /**
- * Begin Google / Apple / Facebook OAuth (Appwrite createOAuth2Token).
- * Provider secrets stay in Appwrite Console: never in Next.js env.
+ * Begin Google / GitHub OAuth via Better Auth social sign-in.
+ * Provider secrets stay in server env: never in client code.
  */
 export async function startOAuth(formData: FormData): Promise<void> {
   const origin = await getRequestOrigin();
@@ -52,11 +56,18 @@ export async function startOAuth(formData: FormData): Promise<void> {
   const intent = intentRaw === "seller" ? "seller" : null;
   const next = readString(formData, "next") || null;
 
+  if (intent === "seller") {
+    await setOAuthSellerIntentCookie();
+  } else {
+    await clearOAuthSellerIntentCookie();
+  }
+
   try {
     const redirectUrl = await createOAuthRedirectUrl({
       provider,
       success: buildOAuthSuccessUrl({ next, intent, origin }),
       failure: failUrl,
+      origin,
     });
     redirect(redirectUrl);
   } catch (error) {

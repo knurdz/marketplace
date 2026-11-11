@@ -1,12 +1,16 @@
 import Link from "next/link";
 import {
   Heart,
+  LayoutDashboard,
   Menu,
+  Package,
   Search,
-  ShoppingBag,
   UserRound,
 } from "lucide-react";
-import type { SessionUserView } from "@/lib/appwrite/session-user";
+import {
+  portalHomeForSessionUser,
+  type SessionUserView,
+} from "@/lib/appwrite/session-user";
 import { BrandLogo, BrandLogoLink } from "@/components/brand/brand-logo";
 import { AccountMenu } from "@/components/layout/account-menu";
 import { NotificationBell } from "@/components/notifications/notification-bell";
@@ -21,7 +25,6 @@ import {
 
 type StoreNavbarProps = {
   user: SessionUserView | null;
-  cartItemCount?: number;
   displayName?: string | null;
   avatarUrl?: string | null;
 };
@@ -54,30 +57,19 @@ function SearchForm({ className }: { className?: string }) {
   );
 }
 
-function CartLink({ cartItemCount }: { cartItemCount: number }) {
-  return (
-    <Button variant="ghost" size="icon" className="relative" asChild>
-      <Link
-        href="/cart"
-        aria-label={`Cart${cartItemCount > 0 ? `, ${cartItemCount} items` : ""}`}
-      >
-        <ShoppingBag className="size-5" aria-hidden />
-        {cartItemCount > 0 ? (
-          <span className="absolute top-1 right-1 flex size-4 items-center justify-center rounded-full bg-accent font-mono text-[10px] text-accent-foreground">
-            {cartItemCount > 9 ? "9+" : cartItemCount}
-          </span>
-        ) : null}
-      </Link>
-    </Button>
-  );
-}
-
 export function StoreNavbar({
   user,
-  cartItemCount = 0,
   displayName,
   avatarUrl,
 }: StoreNavbarProps) {
+  const portalHome = user ? portalHomeForSessionUser(user) : null;
+  const portalLabel =
+    portalHome === "/admin"
+      ? "Admin"
+      : portalHome === "/seller"
+        ? "Seller"
+        : null;
+
   return (
     <header className="sticky top-0 z-40 border-b border-border bg-background/95 backdrop-blur-md">
       <div className="mx-auto grid h-16 w-full max-w-7xl grid-cols-[1fr_auto] items-center gap-3 px-4 sm:px-6 md:grid-cols-[1fr_minmax(0,40rem)_1fr] md:gap-6 lg:px-8">
@@ -90,12 +82,27 @@ export function StoreNavbar({
         <div className="hidden items-center justify-end gap-1 md:flex">
           {user ? (
             <>
-              <Button variant="ghost" size="icon" asChild>
-                <Link href="/wishlist" aria-label="Wishlist">
-                  <Heart className="size-5" aria-hidden />
-                </Link>
-              </Button>
-              <CartLink cartItemCount={cartItemCount} />
+              {portalHome ? (
+                <Button variant="ghost" size="sm" className="gap-2" asChild>
+                  <Link href={portalHome}>
+                    <LayoutDashboard className="size-5" aria-hidden />
+                    {portalLabel} portal
+                  </Link>
+                </Button>
+              ) : (
+                <>
+                  <Button variant="ghost" size="icon" asChild>
+                    <Link href="/wishlist" aria-label="Wishlist">
+                      <Heart className="size-5" aria-hidden />
+                    </Link>
+                  </Button>
+                  <Button variant="ghost" size="icon" asChild>
+                    <Link href="/requests" aria-label="Requests">
+                      <Package className="size-5" aria-hidden />
+                    </Link>
+                  </Button>
+                </>
+              )}
               <NotificationBell className="size-10" />
               <AccountMenu
                 user={user}
@@ -119,11 +126,17 @@ export function StoreNavbar({
         </div>
 
         <div className="flex items-center justify-end gap-1 md:hidden">
-          {user ? (
+          {user && !portalHome ? (
             <>
-              <CartLink cartItemCount={cartItemCount} />
+              <Button variant="ghost" size="icon" asChild>
+                <Link href="/requests" aria-label="Requests">
+                  <Package className="size-5" aria-hidden />
+                </Link>
+              </Button>
               <NotificationBell className="size-10" />
             </>
+          ) : user ? (
+            <NotificationBell className="size-10" />
           ) : null}
           <Sheet>
             <SheetTrigger asChild>
@@ -140,18 +153,23 @@ export function StoreNavbar({
               <div className="mt-6 flex flex-col gap-4 px-4">
                 {user ? (
                   <div className="flex flex-col gap-2">
-                    <Button variant="secondary" asChild>
-                      <Link href="/cart">
-                        Cart
-                        {cartItemCount > 0 ? ` (${cartItemCount})` : ""}
-                      </Link>
-                    </Button>
-                    <Button variant="secondary" asChild>
-                      <Link href="/wishlist">Wishlist</Link>
-                    </Button>
-                    <Button variant="secondary" asChild>
-                      <Link href="/dashboard">Dashboard</Link>
-                    </Button>
+                    {portalHome ? (
+                      <Button variant="secondary" asChild>
+                        <Link href={portalHome}>{portalLabel} portal</Link>
+                      </Button>
+                    ) : (
+                      <>
+                        <Button variant="secondary" asChild>
+                          <Link href="/requests">Requests</Link>
+                        </Button>
+                        <Button variant="secondary" asChild>
+                          <Link href="/wishlist">Wishlist</Link>
+                        </Button>
+                        <Button variant="secondary" asChild>
+                          <Link href="/dashboard">Dashboard</Link>
+                        </Button>
+                      </>
+                    )}
                     <Button variant="secondary" asChild>
                       <Link href="/account">Account</Link>
                     </Button>

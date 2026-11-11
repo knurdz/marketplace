@@ -11,7 +11,7 @@ export function HomeIntro() {
         Buy directly from people
       </h1>
       <p className="text-base text-muted-foreground sm:text-lg">
-        Items listed by individuals in the community, not shops or brands.
+        Buy from people in the community, for the community. No hidden charges.
       </p>
     </section>
   );

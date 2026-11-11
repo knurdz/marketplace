@@ -1,6 +1,5 @@
 import { redirect } from "next/navigation";
 import { RegisterForm } from "@/components/auth/register-form";
-import { PageHeader } from "@/components/layout/page-header";
 import { resolveHomePath } from "@/lib/appwrite/home-path";
 import { oauthErrorMessage } from "@/lib/appwrite/oauth-errors";
 import { getLoggedInUser } from "@/lib/appwrite/session";
@@ -18,15 +17,18 @@ export default async function RegisterPage({
   }
 
   return (
-    <div>
-      <PageHeader
-        eyebrow="Account"
-        title="Create account"
-        description="Register as a buyer to shop, or as a seller to apply for a shop. Admin accounts are created by the team."
-      />
+    <main className="mx-auto w-full max-w-lg px-4 py-14 sm:px-6 sm:py-20">
+      <h1 className="text-center text-2xl font-semibold tracking-tight text-foreground">
+        Create your account
+      </h1>
+      <p className="mt-2 text-center text-sm leading-relaxed text-muted-foreground">
+        Join as a buyer, or apply as a seller.
+        <br />
+        Social sign-up asks for any missing details next.
+      </p>
       <div className="mt-8">
         <RegisterForm oauthError={oauthError} />
       </div>
-    </div>
+    </main>
   );
 }

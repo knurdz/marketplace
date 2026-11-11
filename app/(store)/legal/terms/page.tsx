@@ -2,41 +2,39 @@ import { LegalPage, LegalSection } from "@/components/legal/legal-page";
 
 export default function TermsPage() {
   return (
-    <LegalPage
-      title="Terms of use"
-      updated="11 August 2026"
-    >
+    <LegalPage title="Terms of service" updated="10 November 2026">
       <LegalSection title="1. Agreement">
         <p>
           By creating an account or using Knurdz Marketplace (“Knurdz”), you
-          agree to these Terms. If you do not agree, do not use the service.
+          agree to these Terms of Service. If you do not agree, do not use the
+          service.
         </p>
       </LegalSection>
 
       <LegalSection title="2. Roles">
         <p>
-          Users register as a buyer or a seller. Sellers wait for admin
-          approval before opening a shop. Admins are created by the team in
-          Appwrite. Access to seller and admin areas is restricted by role
-          labels enforced on the server.
+          Users register as a buyer or apply as a seller. Sellers wait for admin
+          approval before opening a shop. Admins are provisioned by the Knurdz
+          team. Access to seller and admin areas is restricted by role checks
+          enforced on the server.
         </p>
       </LegalSection>
 
       <LegalSection title="3. Listings and orders">
         <p>
           Sellers are responsible for accurate listing details, stock, and
-          fulfillment. Buyers are responsible for providing correct checkout
-          information. Knurdz provides the platform; sellers fulfill their own
-          orders unless otherwise stated.
+          completing sales they mark as sold. Buyers are responsible for
+          providing a reachable phone and email. Knurdz connects parties; sales
+          happen between buyer and seller directly.
         </p>
       </LegalSection>
 
       <LegalSection title="4. Payments">
         <p>
-          Checkout may use PayHere (sandbox in development), bank transfer with
-          slip verification, or free listings when price is zero. Payment status
-          is confirmed through trusted server flows. Return URLs alone are not
-          proof of payment.
+          Knurdz does not process payments. After a buy request, buyers and
+          sellers contact each other using the phone and email shown on that
+          request and settle personally. The seller marks the request sold or
+          cancelled when the deal is finished or abandoned.
         </p>
       </LegalSection>
 
@@ -61,6 +59,16 @@ export default function TermsPage() {
         <p>
           We may update these Terms as the product evolves. Continued use after
           changes are posted constitutes acceptance of the updated Terms.
+        </p>
+      </LegalSection>
+
+      <LegalSection title="8. Contact">
+        <p>
+          Questions about these Terms:{" "}
+          <a href="mailto:support@knurdz.org" className="underline">
+            support@knurdz.org
+          </a>
+          .
         </p>
       </LegalSection>
     </LegalPage>

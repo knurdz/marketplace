@@ -28,6 +28,22 @@ function readString(formData: FormData, key: string): string {
   return typeof value === "string" ? value.trim() : "";
 }
 
+function isSmtpOrMailSendError(error: unknown): boolean {
+  if (!(error instanceof Error)) return false;
+  const message = error.message.toLowerCase();
+  return (
+    message.includes("smtp") ||
+    message.includes("nodemailer") ||
+    message.includes("econnrefused") ||
+    message.includes("authentication failed") ||
+    message.includes("invalid login") ||
+    message.includes("envelope") ||
+    // Generic "mail" only when paired with send/transport wording.
+    (message.includes("mail") &&
+      (message.includes("send") || message.includes("transport")))
+  );
+}
+
 function mapRecoveryError(error: unknown): string {
   if (error instanceof AppwriteException) {
     return "This reset link is invalid or has expired. Request a new one.";
@@ -35,6 +51,9 @@ function mapRecoveryError(error: unknown): string {
   if (error instanceof Error) {
     if (error.message.includes("NEXT_PUBLIC_APP_URL")) {
       return "App URL is not configured. Set NEXT_PUBLIC_APP_URL in .env.local.";
+    }
+    if (isSmtpOrMailSendError(error)) {
+      return "Could not send email. Ask an admin to check SMTP settings.";
     }
   }
   return "Something went wrong. Please try again.";
@@ -82,9 +101,12 @@ export async function requestPasswordRecovery(
     });
   } catch (error) {
     unstable_rethrow(error);
+    // Unknown emails are handled inside Better Auth without throwing.
+    // SMTP / config failures should surface so the user can retry.
     if (
-      error instanceof Error &&
-      error.message.includes("NEXT_PUBLIC_APP_URL")
+      (error instanceof Error &&
+        error.message.includes("NEXT_PUBLIC_APP_URL")) ||
+      isSmtpOrMailSendError(error)
     ) {
       return { error: mapRecoveryError(error) };
     }
@@ -134,7 +156,7 @@ export async function completePasswordRecovery(
     return { error: mapRecoveryError(error) };
   }
 
-  redirect("/login");
+  redirect("/login?reset=1");
 }
 
 export async function requestEmailVerification(
@@ -163,7 +185,7 @@ export async function requestEmailVerification(
     await authApi().sendVerificationEmail({
       body: {
         email: user.email,
-        callbackURL: `${origin}/verify-email`,
+        callbackURL: `${origin}/verify-email?verified=1`,
       },
       headers: await headers(),
     });

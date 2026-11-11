@@ -8,10 +8,7 @@ type PortalPageHeaderProps = {
   className?: string;
 };
 
-/**
- * Dashboard-density header for `/admin` and `/seller`.
- * Storefront and auth pages keep the larger `PageHeader`.
- */
+/** Section title below the welcome bar. */
 export function PortalPageHeader({
   title,
   description,
@@ -26,9 +23,11 @@ export function PortalPageHeader({
       )}
     >
       <div className="min-w-0">
-        <h2 className="text-xl font-bold tracking-tight sm:text-2xl">{title}</h2>
+        <h2 className="text-lg font-semibold tracking-tight text-foreground">
+          {title}
+        </h2>
         {description ? (
-          <p className="mt-1.5 max-w-2xl text-sm leading-relaxed text-muted-foreground">
+          <p className="mt-1 max-w-2xl text-sm leading-relaxed text-muted-foreground">
             {description}
           </p>
         ) : null}

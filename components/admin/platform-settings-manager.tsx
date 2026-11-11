@@ -17,31 +17,17 @@ const initial: PlatformSettingActionState = {};
 
 const BOOLEAN_KEYS = new Set<string>([
   PLATFORM_SETTING_KEYS.featuresFreeListings,
-  PLATFORM_SETTING_KEYS.checkoutSandboxModeDisplay,
-  PLATFORM_SETTING_KEYS.checkoutPayhereEnabled,
 ]);
 
 const KEY_LABELS: Record<string, string> = {
   [PLATFORM_SETTING_KEYS.siteName]: "Site name",
   [PLATFORM_SETTING_KEYS.siteSupportEmail]: "Support email",
-  [PLATFORM_SETTING_KEYS.checkoutCurrencyDefault]: "Default currency",
-  [PLATFORM_SETTING_KEYS.checkoutBankInstructions]:
-    "Bank transfer instructions",
-  [PLATFORM_SETTING_KEYS.checkoutSandboxModeDisplay]: "Sandbox mode banner",
-  [PLATFORM_SETTING_KEYS.checkoutFeePercent]: "Platform fee (%)",
   [PLATFORM_SETTING_KEYS.featuresFreeListings]: "Free listings enabled",
-  [PLATFORM_SETTING_KEYS.checkoutPayhereEnabled]: "PayHere checkout enabled",
 };
 
 const KEY_HELP: Record<string, string> = {
-  [PLATFORM_SETTING_KEYS.checkoutSandboxModeDisplay]:
-    "Shows a public “Sandbox (test mode)” banner to signed-in users. Does not control PayHere Function env.",
-  [PLATFORM_SETTING_KEYS.checkoutFeePercent]:
-    "Platform fee percentage (0–100). Stored as a numeric string.",
-  [PLATFORM_SETTING_KEYS.checkoutBankInstructions]:
-    "Buyer-facing bank transfer copy shown at checkout.",
-  [PLATFORM_SETTING_KEYS.checkoutPayhereEnabled]:
-    "Shows PayHere at checkout and allows createOrder with payhere. Keep false until merchant authorization.",
+  [PLATFORM_SETTING_KEYS.featuresFreeListings]:
+    "When true, sellers may list products at price 0.",
 };
 
 function useSettingToast(state: PlatformSettingActionState) {
@@ -69,122 +55,66 @@ function useSettingToast(state: PlatformSettingActionState) {
   }, [state, router]);
 }
 
-function SettingFieldForm({ item }: { item: PlatformSettingListItem }) {
+function SettingRow({ item }: { item: PlatformSettingListItem }) {
   const [state, formAction, pending] = useActionState(
     updatePlatformSettingFormAction,
     initial,
   );
   useSettingToast(state);
-
-  const currentValue = item.setting?.value ?? "";
-  const description =
-    item.setting?.description ?? KEY_HELP[item.key] ?? undefined;
-  const label = KEY_LABELS[item.key] ?? item.key;
+  const [value, setValue] = useState(item.setting?.value ?? "");
   const isBoolean = BOOLEAN_KEYS.has(item.key);
-  const isFee = item.key === PLATFORM_SETTING_KEYS.checkoutFeePercent;
-  const isBankInstructions =
-    item.key === PLATFORM_SETTING_KEYS.checkoutBankInstructions;
-
-  const [prevValue, setPrevValue] = useState(currentValue);
-  const [boolChecked, setBoolChecked] = useState(currentValue === "true");
-
-  if (prevValue !== currentValue) {
-    setPrevValue(currentValue);
-    setBoolChecked(currentValue === "true");
-  }
 
   return (
     <form
       action={formAction}
-      className="rounded-md border border-border bg-card px-4 py-5"
+      className="space-y-3 rounded-lg border border-border p-4"
     >
       <input type="hidden" name="key" value={item.key} />
-      {description ? (
-        <input type="hidden" name="description" value={description} />
-      ) : null}
-
-      <p className="font-mono text-xs text-muted-foreground">{item.key}</p>
-      <Label htmlFor={`setting-${item.key}`} className="mt-1 text-lg font-bold">
-        {label}
-      </Label>
-      {description ? (
-        <p className="mt-1 text-sm text-muted-foreground">{description}</p>
-      ) : null}
-
-      <div className="mt-4">
-        {isBoolean ? (
-          <div className="flex items-center gap-3">
-            <input
-              type="hidden"
-              name="value"
-              value={boolChecked ? "true" : "false"}
-            />
-            <input
-              id={`setting-${item.key}`}
-              type="checkbox"
-              checked={boolChecked}
-              onChange={(e) => setBoolChecked(e.target.checked)}
-              className="size-4 rounded border border-border"
-            />
-            <span className="text-sm text-muted-foreground">
-              {boolChecked ? "Enabled" : "Disabled"}
-            </span>
-          </div>
-        ) : isFee ? (
-          <Input
-            id={`setting-${item.key}`}
-            name="value"
-            type="number"
-            min={0}
-            max={100}
-            step="0.01"
-            defaultValue={currentValue}
-            required
-          />
-        ) : isBankInstructions ? (
-          <textarea
-            id={`setting-${item.key}`}
-            name="value"
-            defaultValue={currentValue}
-            required
-            rows={5}
-            className="flex min-h-[80px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-          />
-        ) : (
-          <Input
-            id={`setting-${item.key}`}
-            name="value"
-            type="text"
-            defaultValue={currentValue}
-            required
-          />
-        )}
+      <div>
+        <Label htmlFor={`setting-${item.key}`}>
+          {KEY_LABELS[item.key] ?? item.key}
+        </Label>
+        {KEY_HELP[item.key] ? (
+          <p className="mt-1 text-xs text-muted-foreground">
+            {KEY_HELP[item.key]}
+          </p>
+        ) : null}
       </div>
-
-      {!item.setting ? (
-        <p className="mt-2 font-mono text-xs text-accent">
-          Not set yet. Save to create this row.
-        </p>
-      ) : null}
-
-      <Button type="submit" className="mt-4" disabled={pending}>
+      {isBoolean ? (
+        <select
+          id={`setting-${item.key}`}
+          name="value"
+          className="h-9 w-full rounded-lg border border-input bg-transparent px-2.5 text-sm"
+          value={value === "true" ? "true" : "false"}
+          onChange={(e) => setValue(e.target.value)}
+        >
+          <option value="true">true</option>
+          <option value="false">false</option>
+        </select>
+      ) : (
+        <Input
+          id={`setting-${item.key}`}
+          name="value"
+          value={value}
+          onChange={(e) => setValue(e.target.value)}
+        />
+      )}
+      <Button type="submit" size="sm" disabled={pending}>
         {pending ? "Saving…" : "Save"}
       </Button>
     </form>
   );
 }
 
-type PlatformSettingsManagerProps = {
-  items: PlatformSettingListItem[];
-};
-
 export function PlatformSettingsManager({
   items,
-}: PlatformSettingsManagerProps) {
+}: {
+  items: PlatformSettingListItem[];
+}) {
   return (
-    <div className="mt-10 space-y-4">
+    <div className="mt-6 grid gap-4">
       {items.map((item) => (
-        <SettingFieldForm key={item.key} item={item} />
+        <SettingRow key={item.key} item={item} />
       ))}
     </div>
   );

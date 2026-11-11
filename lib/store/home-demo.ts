@@ -399,12 +399,200 @@ export function getDemoProduct(id: string): DemoProduct | null {
   return ALL_PRODUCTS.find((product) => product.id === id) ?? null;
 }
 
+export type DemoSellerMeta = {
+  listedBy: string;
+  sellerRating: number;
+  sellerReviews: number;
+};
+
+const DEMO_SELLER_RATINGS: Record<string, { rating: number; reviews: number }> = {
+  headphones: { rating: 4.9, reviews: 38 },
+  watch: { rating: 4.7, reviews: 21 },
+  sneakers: { rating: 4.8, reviews: 56 },
+  camera: { rating: 4.6, reviews: 14 },
+  sunglasses: { rating: 4.5, reviews: 19 },
+  jacket: { rating: 4.7, reviews: 27 },
+  hoodie: { rating: 4.8, reviews: 44 },
+  "graphic-tee": { rating: 4.4, reviews: 16 },
+  "tee-pack": { rating: 4.3, reviews: 11 },
+  phone: { rating: 4.6, reviews: 33 },
+  laptop: { rating: 4.9, reviews: 18 },
+  earbuds: { rating: 4.5, reviews: 29 },
+  speaker: { rating: 4.4, reviews: 22 },
+  smartwatch: { rating: 4.6, reviews: 31 },
+  skincare: { rating: 4.8, reviews: 47 },
+  cosmetics: { rating: 4.5, reviews: 25 },
+  perfume: { rating: 4.7, reviews: 17 },
+  handbag: { rating: 4.6, reviews: 20 },
+};
+
+/** Person selling this showcase listing (demo data). */
+export function getDemoSellerMeta(productId: string): DemoSellerMeta {
+  const listedBy =
+    HOME_LISTINGS.find((row) => row.id === productId)?.listedBy ??
+    MARKET_LISTINGS.find((row) => row.id === productId)?.listedBy ??
+    "Community seller";
+  const stats = DEMO_SELLER_RATINGS[productId] ?? { rating: 4.6, reviews: 12 };
+  return {
+    listedBy,
+    sellerRating: stats.rating,
+    sellerReviews: stats.reviews,
+  };
+}
+
 export function listDemoProductIds(): string[] {
   return ALL_PRODUCTS.map((product) => product.id);
 }
 
 export function demoProductDescription(id: string): string {
   return DESCRIPTIONS[id] ?? "";
+}
+
+/** Extra angles for the showcase gallery. First id is the listing photo. */
+const EXTRA_PHOTOS: Record<string, string[]> = {
+  headphones: ["1484704849700-f032a568e944", "1583394838336-acd977736f90", "1546435770-a3e426bf472b"],
+  watch: ["1524805444758-089113d48a6d", "1434056886845-dac89ffe9b56", "1508685096489-7aacd43bd3b1"],
+  sneakers: ["1460353581641-37baddab0fa2", "1606107557195-0e29a4b5b4aa", "1595950653106-6c9ebd614d3a"],
+  camera: ["1516035069371-29a1b244cc32", "1495707902641-75cac588d2e9", "1452780212940-6f5c0d14d848"],
+  sunglasses: ["1511499767150-a48a237f0083", "1473496169904-658ba7c44d8a", "1508296695146-257a814070b4"],
+  jacket: ["1521223890158-f9f7c3d5d504", "1487222477894-8943e31ef7b2", "1551028719-00167b16eac5"],
+  hoodie: ["1620799140408-edc6dcb6d633", "1556821840-3a63f95609a7", "1578768079052-aa76e52ff62e"],
+  "graphic-tee": ["1521572163474-6864f9cf17ab", "1576566588028-4147f3842f27", "1562157873-818bc0726f68"],
+  "tee-pack": ["1521572163474-6864f9cf17ab", "1576871337622-98d48d1cf531", "1489987707025-afc232f7ea0f"],
+  phone: ["1510557880182-3d4d3cba35a5", "1592899677977-9c10ca588bbd", "1511707171634-5f897ff02aa9"],
+  laptop: ["1517336714731-489689fd1ca8", "1498050108023-c5249f4df085", "1496181133206-80ce9b88a853"],
+  earbuds: ["1606220945770-b5b6c2c55bf1", "1590658268037-6bf12165a8df", "1588423771073-b9701af588b3"],
+  speaker: ["1545454675-3531b543be5d", "1608043152269-423dbba4e7e1", "1558089687-f282ffcbc0d4"],
+  smartwatch: ["1579586337278-3befd40fd17a", "1434493789847-2f02dc6ca35d", "1546868871-7041f2a55e12"],
+  skincare: ["1570172619644-dfd03ed5d881", "1556228720-195a672e8a03", "1556228578-8c89e6adf883"],
+  cosmetics: ["1596462502278-27bfdc403348", "1522335789203-aabd1fc54bc9", "1512496015851-a90fb38ba796"],
+  perfume: ["1594035910387-fea47794261f", "1541643600914-78b084683601", "1592945403244-b3fbafd7f539"],
+  handbag: ["1590874103328-eac38a683ce7", "1584917865442-de89df76afd3", "1548036328-c9fa89d128fa"],
+};
+
+const BULLETS: Record<string, string[]> = {
+  headphones: [
+    "Closed-back cups with active noise cancelling for commutes and late nights.",
+    "Soft memory-foam cushions that stay comfortable for long listening.",
+    "About 30 hours of playback on a single charge.",
+    "Fold-flat design, so it packs into a bag without a hard case.",
+    "Listed by a person in the community, not a brand store.",
+  ],
+  watch: [
+    "Clean minimal dial on a slim stainless case.",
+    "Soft leather strap that works for workdays and weekends.",
+    "No smart features: just the time, easy to read.",
+    "Lightweight enough to wear all day.",
+    "From one person, not a brand counter.",
+  ],
+  sneakers: [
+    "Breathable knit upper for warm days and daily walks.",
+    "Cushioned sole built for everyday miles, not a race kit.",
+    "Light enough to wear from morning errands to evening.",
+    "Easy to wipe clean after the road.",
+    "Sold by someone nearby, not a chain store.",
+  ],
+  camera: [
+    "Point, shoot, and print a photo you can hold right away.",
+    "Automatic exposure, so you do not fiddle with settings.",
+    "Built-in flash for indoor shots.",
+    "Pocket size for trips and gatherings.",
+    "A person's camera, not a shop display model.",
+  ],
+  sunglasses: [
+    "Polarised UV400 lenses that cut glare on bright days.",
+    "Classic frames that sit light on the nose.",
+    "Useful for driving, the beach, and walking around.",
+    "Comes from a person clearing their own things.",
+  ],
+  jacket: [
+    "Biker cut with an asymmetric zip and snap lapels.",
+    "Supple leather with a quilted lining.",
+    "Worn-in feel rather than a stiff new-shop finish.",
+    "A single piece from one person, not a seasonal drop.",
+  ],
+  hoodie: [
+    "Heavyweight brushed cotton that softens with wear.",
+    "Roomy hood and a deep kangaroo pocket.",
+    "Easy layer for cooler evenings.",
+    "From a person in the community, not a label rack.",
+  ],
+  "graphic-tee": [
+    "Soft ringspun cotton with a bold front print.",
+    "Relaxed fit for everyday wear.",
+    "Holds its shape after a normal wash.",
+    "One person's listing, not a brand collection.",
+  ],
+  "tee-pack": [
+    "Three crew-neck tees in breathable cotton.",
+    "Plain colours for mixing with what you already own.",
+    "Cut for a clean everyday fit.",
+    "Bundled by a person, not packed by a warehouse brand.",
+  ],
+  phone: [
+    "Bright edge-to-edge display for photos and messages.",
+    "Dual camera for everyday shots.",
+    "128 GB of storage and a battery that lasts the day.",
+    "Slim body that still feels solid in the hand.",
+    "Previously used by a person, not sold as new-in-box retail.",
+  ],
+  laptop: [
+    "Thin 13-inch screen that is easy to carry.",
+    "16 GB of memory for classes, work, and browsing.",
+    "Fast storage so it wakes up quickly.",
+    "Battery that covers a normal working day.",
+    "From a person upgrading, not a brand outlet.",
+  ],
+  earbuds: [
+    "True wireless pair with a small charging case.",
+    "Touch controls for music and calls.",
+    "Secure fit for walks and commutes.",
+    "Listed by a person, not a brand kiosk.",
+  ],
+  speaker: [
+    "Room-filling sound from a portable body.",
+    "Splash-resistant finish for the kitchen or a picnic.",
+    "Easy to pair from a phone.",
+    "One person's speaker, not a store demo unit.",
+  ],
+  smartwatch: [
+    "Tracks workouts, heart rate, and sleep.",
+    "Shows notifications without pulling out a phone.",
+    "Bright display you can read outdoors.",
+    "From a person in the community, not a brand boutique.",
+  ],
+  skincare: [
+    "Cleanser, hydrating serum, and moisturiser for a simple daily routine.",
+    "Gentle formula suited to most skin types.",
+    "Small set, so you can try it before committing.",
+    "Passed on by a person, not a beauty counter.",
+  ],
+  cosmetics: [
+    "Soft synthetic brushes plus a versatile everyday palette.",
+    "Works for a quick daytime look or an evening one.",
+    "Compact enough to keep in a bag.",
+    "From a person, not a brand display.",
+  ],
+  perfume: [
+    "100 ml eau de parfum with citrus on top and a soft woody base.",
+    "Scent that stays through the day.",
+    "One bottle from a person, not a duty-free wall.",
+  ],
+  handbag: [
+    "Structured leather tote with room for a laptop and daily bits.",
+    "Inner zip pocket and sturdy top handles.",
+    "Carries well on the shoulder.",
+    "From a person, not a brand boutique.",
+  ],
+};
+
+export function demoProductPhotos(product: Pick<DemoProduct, "id" | "photoId">): string[] {
+  const extras = EXTRA_PHOTOS[product.id] ?? [];
+  return [product.photoId, ...extras.filter((id) => id !== product.photoId)];
+}
+
+export function demoProductBullets(id: string): string[] {
+  return BULLETS[id] ?? [];
 }
 
 /** Other items from the first homepage section that features this product. */

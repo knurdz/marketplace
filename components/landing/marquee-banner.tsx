@@ -17,10 +17,10 @@ const TICKER_ITEMS = [
   { icon: Sparkles, text: "Verified Creators & Builders" },
   { icon: Package, text: "Instant Digital & Direct Dispatch" },
   { icon: ShieldCheck, text: "Buyer Protection Guarantee" },
-  { icon: CreditCard, text: "PayHere & Bank Transfer Ready" },
+  { icon: CreditCard, text: "Direct Contact Buy Requests" },
   { icon: Tag, text: "Zero Buyer Platform Fees" },
   { icon: Rocket, text: "Built for Builders Who Ship" },
-  { icon: Lock, text: "Secure Community Checkout" },
+  { icon: Lock, text: "Phone & Email After You Request" },
 ];
 
 export function MarqueeBanner({ className }: { className?: string }) {

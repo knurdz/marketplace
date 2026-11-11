@@ -1,6 +1,6 @@
 import { AppwriteException } from "@/lib/db/appwrite-shim";
 import { newId } from "@/lib/db/client";
-import { putStoredFile } from "@/lib/storage/disk";
+import { deleteStoredFile, putStoredFile } from "@/lib/storage";
 import {
   assertRateLimit,
   RATE_LIMIT_MESSAGE,
@@ -8,17 +8,12 @@ import {
 } from "@/lib/security/rate-limit";
 import {
   AVATAR_MAX_BYTES,
-  BANK_SLIP_EXTENSIONS,
-  BANK_SLIP_MAX_BYTES,
-  BANK_SLIP_MIME_TYPES,
   BUCKET_AVATARS,
-  BUCKET_BANK_SLIPS,
   BUCKET_PRODUCT_IMAGES,
   IMAGE_EXTENSIONS,
   IMAGE_MIME_TYPES,
   PRODUCT_IMAGE_MAX_BYTES,
 } from "./config";
-import { deleteStoredFile } from "@/lib/storage/disk";
 import { getLoggedInUser } from "./session";
 
 export type UploadValidationError = {
@@ -150,22 +145,6 @@ export async function uploadProductImage(
   }
   return uploadFile({
     bucketId: BUCKET_PRODUCT_IMAGES,
-    file: validated.file,
-  });
-}
-
-export async function uploadBankSlip(file: File): Promise<{ fileId: string }> {
-  const validated = validateUpload({
-    file,
-    maxBytes: BANK_SLIP_MAX_BYTES,
-    allowedMime: BANK_SLIP_MIME_TYPES,
-    allowedExt: BANK_SLIP_EXTENSIONS,
-  });
-  if (!validated.ok) {
-    throw new Error(validated.error);
-  }
-  return uploadFile({
-    bucketId: BUCKET_BANK_SLIPS,
     file: validated.file,
   });
 }

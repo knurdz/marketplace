@@ -1,10 +1,9 @@
 import { AppwriteException, Query } from "@/lib/db/appwrite-shim";
 import {
   DATABASE_ID,
-  TABLE_ORDER_ITEMS,
-  TABLE_ORDERS,
   TABLE_PRODUCT_IMAGES,
   TABLE_PRODUCTS,
+  TABLE_PURCHASE_REQUESTS,
   hasAppwritePublicConfig,
 } from "@/lib/appwrite/config";
 import { createAdminClient, createPublicClient } from "@/lib/appwrite/server";
@@ -73,7 +72,7 @@ function isPubliclyListed(product: Product): boolean {
   return isActiveProduct(product) && product.available;
 }
 
-/** Buy CTA / cart: active + available, even when stock > 0 is not enough. */
+/** Buy CTA: active + available + in stock. */
 export function isProductPurchasable(
   product: Pick<Product, "status" | "available" | "stock">,
 ): boolean {
@@ -452,7 +451,7 @@ export async function listCoverImagesByProductIds(
 }
 
 /**
- * Top sellers from recent completed orders (admin read; no soldCount column).
+ * Top sellers from recent sold purchase requests (admin read; no soldCount column).
  * Returns active + available + in-stock products only.
  */
 export async function listTrendingProducts(opts?: {
@@ -466,11 +465,11 @@ export async function listTrendingProducts(opts?: {
 
   try {
     const { tables } = await createAdminClient();
-    const ordersResult = await tables.listRows({
+    const requestsResult = await tables.listRows({
       databaseId: DATABASE_ID,
-      tableId: TABLE_ORDERS,
+      tableId: TABLE_PURCHASE_REQUESTS,
       queries: [
-        Query.equal("status", "completed"),
+        Query.equal("status", "sold"),
         Query.orderDesc("$createdAt"),
         Query.limit(100),
       ],
@@ -478,25 +477,12 @@ export async function listTrendingProducts(opts?: {
 
     const counts = new Map<string, number>();
 
-    for (const orderRow of ordersResult.rows) {
-      const orderId = asNullableString(
-        (orderRow as Record<string, unknown>).$id,
-      );
-      if (!orderId) continue;
-
-      const itemsResult = await tables.listRows({
-        databaseId: DATABASE_ID,
-        tableId: TABLE_ORDER_ITEMS,
-        queries: [Query.equal("orderId", orderId), Query.limit(50)],
-      });
-
-      for (const itemRow of itemsResult.rows) {
-        const row = itemRow as Record<string, unknown>;
-        const productId = asNullableString(row.productId);
-        const quantity = Math.max(1, Math.floor(asNumber(row.quantity)));
-        if (productId) {
-          counts.set(productId, (counts.get(productId) ?? 0) + quantity);
-        }
+    for (const requestRow of requestsResult.rows) {
+      const row = requestRow as Record<string, unknown>;
+      const productId = asNullableString(row.productId);
+      const quantity = Math.max(1, Math.floor(asNumber(row.quantity)));
+      if (productId) {
+        counts.set(productId, (counts.get(productId) ?? 0) + quantity);
       }
     }
 

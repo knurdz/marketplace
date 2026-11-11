@@ -180,6 +180,112 @@ html:has(.storefront) {
   --sidebar-ring: #2563eb;
 }
 
+/*
+  Admin and seller portals. Light canvas when html.light; Cursor-style neutral
+  dark when html.dark (or default before hydration). Storefront stays light.
+*/
+html.light:has(.portal),
+html[data-theme="light"]:has(.portal) {
+  color-scheme: light;
+  /* Match storefront / home: Nunito Sans via the shared --font-space-grotesk hook. */
+  --font-space-grotesk: var(--font-nunito-sans);
+  --background: #f3f4f6;
+  --foreground: #1c1d27;
+  --muted: #f3f4f6;
+  --muted-foreground: #6b7280;
+  --background-alt: #eef0f3;
+  --border: #e6e8ee;
+  --input: #e6e8ee;
+  --card: #ffffff;
+  --card-foreground: #1c1d27;
+  --card-hover: #fafafa;
+  --popover: #ffffff;
+  --popover-foreground: #1c1d27;
+  --primary: #1c1d27;
+  --primary-foreground: #ffffff;
+  --secondary: #f3f4f6;
+  --secondary-foreground: #1c1d27;
+  --accent: #0a7a45;
+  --accent-bright: #0b8a4e;
+  --accent-deep: #086338;
+  --accent-foreground: #ffffff;
+  --destructive: #dc2626;
+  --ring: #0a7a45;
+  --radius: 0.75rem;
+
+  --chart-1: #0a7a45;
+  --chart-2: #16a34a;
+  --chart-3: #94a3b8;
+  --chart-4: #1c1d27;
+  --chart-5: #086338;
+
+  --sidebar: #ffffff;
+  --sidebar-foreground: #1c1d27;
+  --sidebar-primary: #0a7a45;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #f0f1f5;
+  --sidebar-accent-foreground: #1c1d27;
+  --sidebar-border: #e6e8ee;
+  --sidebar-ring: #0a7a45;
+}
+
+/* Cursor.com-inspired neutral dark for seller + admin portals */
+html:not(.light):not([data-theme="light"]):has(.portal),
+html.dark:has(.portal) {
+  color-scheme: dark;
+  --font-space-grotesk: var(--font-nunito-sans);
+  --background: #0c0c0d;
+  --foreground: #ececec;
+  --muted: #1a1a1c;
+  --muted-foreground: #8e8e93;
+  --background-alt: #121214;
+  --border: #ffffff14;
+  --input: #ffffff1a;
+  --card: #141416;
+  --card-foreground: #ececec;
+  --card-hover: #1c1c1f;
+  --popover: #161618;
+  --popover-foreground: #ececec;
+  --primary: #f2f2f2;
+  --primary-foreground: #0c0c0d;
+  --secondary: #1e1e21;
+  --secondary-foreground: #ececec;
+  --accent: #159c55;
+  --accent-bright: #22c55e;
+  --accent-deep: #0f7a42;
+  --accent-foreground: #ffffff;
+  --destructive: #ef4444;
+  --ring: #159c55;
+  --radius: 0.75rem;
+
+  --chart-1: #22c55e;
+  --chart-2: #4ade80;
+  --chart-3: #71717a;
+  --chart-4: #ececec;
+  --chart-5: #15803d;
+
+  --sidebar: #101012;
+  --sidebar-foreground: #ececec;
+  --sidebar-primary: #22c55e;
+  --sidebar-primary-foreground: #0c0c0d;
+  --sidebar-accent: #1c1c1f;
+  --sidebar-accent-foreground: #ececec;
+  --sidebar-border: #ffffff12;
+  --sidebar-ring: #22c55e;
+}
+
+html:has(.portal) [data-slot="sidebar-container"] [data-sidebar="sidebar"] {
+  box-shadow: none;
+}
+
+html:has(.portal) [data-sidebar="menu-button"] svg:not([class*="text-"]) {
+  color: var(--muted-foreground);
+}
+
+html:has(.portal) [data-sidebar="menu-button"][data-active="true"] svg {
+  color: var(--accent);
+}
+
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
@@ -217,7 +323,8 @@ html:has(.storefront) {
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring);
   --font-sans: var(--font-space-grotesk), ui-sans-serif, system-ui, sans-serif;
-  --font-mono: var(--font-jetbrains-mono), ui-monospace, monospace;
+  /* Use the site sans stack everywhere — no separate mono face. */
+  --font-mono: var(--font-sans);
   --font-heading: var(--font-space-grotesk), ui-sans-serif, system-ui, sans-serif;
   --text-xs: 0.8125rem;
   --text-xs--line-height: 1.25rem;
@@ -298,8 +405,30 @@ html[data-theme="light"] {
     -ms-overflow-style: none;
   }
 
-  .scrollbar-none::-webkit-scrollbar {
+  .scrollbar-none::-webkit-scrollbar,
+  .no-scrollbar::-webkit-scrollbar {
     display: none;
+  }
+
+  .no-scrollbar {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+
+  /* Portal surfaces: border only, no elevation shadows. */
+  html:has(.portal) :where(
+    [data-slot="card"],
+    .rounded-xl.border.bg-card,
+    .rounded-2xl.border.bg-card,
+    .rounded-md.border.bg-card
+  ) {
+    box-shadow: none !important;
+  }
+
+  html:has(.portal) [data-slot="table-head"] {
+    color: var(--muted-foreground);
+    font-size: 0.8125rem;
+    font-weight: 500;
   }
 
   .animate-hero-glow {

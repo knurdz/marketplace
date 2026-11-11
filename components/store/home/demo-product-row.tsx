@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Heart, Star } from "lucide-react";
+import { Heart } from "lucide-react";
 import { SectionHeading } from "@/components/store/section-heading";
 import {
   formatLkr,
@@ -7,39 +7,6 @@ import {
   type DemoProduct,
   type DemoSection,
 } from "@/lib/store/home-demo";
-
-export function Rating({
-  value,
-  reviews,
-  size = "sm",
-}: {
-  value: number;
-  reviews: number;
-  size?: "sm" | "md";
-}) {
-  const filled = Math.round(value);
-  const star = size === "md" ? "size-4.5" : "size-3.5";
-  return (
-    <div className="flex items-center gap-1.5">
-      <span className="flex" aria-label={`Rated ${value} out of 5`}>
-        {Array.from({ length: 5 }, (_, i) => (
-          <Star
-            key={i}
-            className={
-              i < filled
-                ? `${star} fill-amber-400 text-amber-400`
-                : `${star} fill-muted text-muted-foreground/40`
-            }
-            aria-hidden
-          />
-        ))}
-      </span>
-      <span className={size === "md" ? "text-sm text-muted-foreground" : "text-xs text-muted-foreground"}>
-        {size === "md" ? `${value} · ${reviews} ratings` : `(${reviews})`}
-      </span>
-    </div>
-  );
-}
 
 function DemoProductCard({ product }: { product: DemoProduct }) {
   const discount = product.compareAtPrice
@@ -76,7 +43,6 @@ function DemoProductCard({ product }: { product: DemoProduct }) {
           <p className="line-clamp-2 text-sm leading-snug text-foreground group-hover:text-accent">
             {product.title}
           </p>
-          <Rating value={product.rating} reviews={product.reviews} />
           <p className="flex flex-wrap items-baseline gap-2">
             <span className="text-base font-bold text-foreground">
               {formatLkr(product.price)}

@@ -73,6 +73,22 @@ function fromAppwriteData(data: Record<string, unknown>): Record<string, unknown
   return out;
 }
 
+/** Drizzle datetime columns need Date; Appwrite-style queries often pass ISO strings. */
+function coerceCompareValue(attribute: string, value: unknown): unknown {
+  if (typeof value !== "string" || value.trim() === "") return value;
+  const attr = attribute.replace(/^\$/, "");
+  if (
+    attr !== "createdAt" &&
+    attr !== "updatedAt" &&
+    attr !== "registration" &&
+    !attr.toLowerCase().endsWith("at")
+  ) {
+    return value;
+  }
+  const parsed = new Date(value);
+  return Number.isNaN(parsed.getTime()) ? value : parsed;
+}
+
 function buildWhere(
   table: MySqlTable,
   descriptors: QueryDescriptor[],
@@ -88,14 +104,29 @@ function buildWhere(
       if (Array.isArray(d.value)) {
         parts.push(inArray(col, d.value));
       } else {
-        parts.push(eq(col, d.value));
+        parts.push(eq(col, coerceCompareValue(d.attribute, d.value) as never));
       }
     } else if (d.type === "greaterThanEqual") {
-      parts.push(gte(colRef(table, d.attribute), d.value));
+      parts.push(
+        gte(
+          colRef(table, d.attribute),
+          coerceCompareValue(d.attribute, d.value) as never,
+        ),
+      );
     } else if (d.type === "lessThan") {
-      parts.push(lt(colRef(table, d.attribute), d.value));
+      parts.push(
+        lt(
+          colRef(table, d.attribute),
+          coerceCompareValue(d.attribute, d.value) as never,
+        ),
+      );
     } else if (d.type === "lessThanEqual") {
-      parts.push(lte(colRef(table, d.attribute), d.value));
+      parts.push(
+        lte(
+          colRef(table, d.attribute),
+          coerceCompareValue(d.attribute, d.value) as never,
+        ),
+      );
     } else if (d.type === "search") {
       parts.push(
         like(colRef(table, d.attribute) as never, `%${d.value}%`),

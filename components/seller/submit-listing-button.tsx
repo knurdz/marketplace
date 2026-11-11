@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useActionState, useEffect, useRef } from "react";
+import { Send } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   submitListingForReview,
@@ -18,7 +19,7 @@ type SubmitListingButtonProps = {
 
 export function SubmitListingButton({
   productId,
-  label = "Submit for review",
+  label = "Submit",
 }: SubmitListingButtonProps) {
   const [state, formAction, pending] = useActionState(
     submitListingForReview,
@@ -50,7 +51,14 @@ export function SubmitListingButton({
   return (
     <form action={formAction}>
       <input type="hidden" name="productId" value={productId} />
-      <Button type="submit" size="sm" variant="outline" disabled={pending} data-testid="listing-submit-review">
+      <Button
+        type="submit"
+        size="xs"
+        variant="outline"
+        disabled={pending}
+        data-testid="listing-submit-review"
+      >
+        <Send data-icon="inline-start" className="size-3" />
         {pending ? "Submitting…" : label}
       </Button>
     </form>

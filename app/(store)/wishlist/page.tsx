@@ -37,7 +37,7 @@ export default async function WishlistPage() {
         description="Saved products for your account."
         actions={
           <Button variant="secondary" asChild>
-            <Link href="/orders">Orders</Link>
+            <Link href="/requests">Requests</Link>
           </Button>
         }
       />

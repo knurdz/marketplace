@@ -24,6 +24,7 @@ const USERS = [
     name: "Demo Admin",
     role: "admin" as const,
     displayName: "Demo Admin",
+    phone: "0770000001",
   },
   {
     key: "seller",
@@ -31,6 +32,7 @@ const USERS = [
     name: "Demo Seller",
     role: "seller" as const,
     displayName: "Demo Seller",
+    phone: "0770000002",
     shop: {
       shopName: "Demo Shop",
       slug: "demo-shop",
@@ -43,6 +45,7 @@ const USERS = [
     name: "Demo Buyer",
     role: "buyer" as const,
     displayName: "Demo Buyer",
+    phone: "0770000003",
   },
 ];
 
@@ -54,6 +57,10 @@ async function ensureUser(u: (typeof USERS)[number]) {
     .where(eq(authUser.email, u.email))
     .limit(1);
   if (existing[0]) {
+    await db
+      .update(profiles)
+      .set({ phone: u.phone, registrationComplete: true })
+      .where(eq(profiles.userId, existing[0].id));
     return existing[0].id;
   }
 
@@ -78,6 +85,8 @@ async function ensureUser(u: (typeof USERS)[number]) {
     id: userId,
     userId,
     displayName: u.displayName,
+    phone: u.phone,
+    registrationComplete: true,
   });
 
   if (u.shop) {
@@ -87,9 +96,6 @@ async function ensureUser(u: (typeof USERS)[number]) {
       shopName: u.shop.shopName,
       slug: u.shop.slug,
       status: u.shop.status,
-      bankAccountName: "Demo Seller",
-      bankName: "Demo Bank",
-      bankAccountNumber: "****1234",
     });
   }
 
@@ -121,41 +127,55 @@ async function main() {
     .from(products)
     .where(eq(products.id, "seed_demo_product"))
     .limit(1);
-  if (!existingProduct[0] && sellerId) {
-    await db.insert(products).values({
-      id: "seed_demo_product",
-      sellerId,
-      categoryId,
-      title: "Demo Sticker Pack",
-      description: "Seeded PayHere SKU.",
-      price: "500.00",
-      isFree: false,
-      status: "active",
-      stock: 25,
-      available: true,
-      currency: "LKR",
-      featured: false,
-    });
-    await db.insert(products).values({
-      id: "seed_demo_free_product",
-      sellerId,
-      categoryId,
-      title: "Demo Free Sticker",
-      description: "Seeded free SKU.",
-      price: "0.00",
-      isFree: true,
-      status: "active",
-      stock: 25,
-      available: true,
-      currency: "LKR",
-      featured: false,
-    });
+  if (sellerId) {
+    if (!existingProduct[0]) {
+      await db.insert(products).values({
+        id: "seed_demo_product",
+        sellerId,
+        categoryId,
+        title: "Demo Sticker Pack",
+        description: "Seeded contact-request SKU.",
+        price: "500.00",
+        isFree: false,
+        status: "active",
+        stock: 25,
+        available: true,
+        currency: "LKR",
+        featured: false,
+      });
+      await db.insert(products).values({
+        id: "seed_demo_free_product",
+        sellerId,
+        categoryId,
+        title: "Demo Free Sticker",
+        description: "Seeded free SKU.",
+        price: "0.00",
+        isFree: true,
+        status: "active",
+        stock: 25,
+        available: true,
+        currency: "LKR",
+        featured: false,
+      });
+    } else {
+      await db
+        .update(products)
+        .set({ description: "Seeded contact-request SKU." })
+        .where(eq(products.id, "seed_demo_product"));
+    }
+  }
+
+  // Ensure demo users have phones for contact-request flow.
+  for (const userId of Object.values(userIds)) {
+    await db
+      .update(profiles)
+      .set({ phone: "0770000000" })
+      .where(eq(profiles.userId, userId));
   }
 
   const settings = [
-    { key: "checkout.payhere_enabled", value: "false" },
-    { key: "checkout.bank_transfer_enabled", value: "true" },
-    { key: "checkout.cod_enabled", value: "true" },
+    { key: "features.free_listings", value: "true" },
+    { key: "site.name", value: "Knurdz Marketplace" },
   ];
   for (const row of settings) {
     const found = await db

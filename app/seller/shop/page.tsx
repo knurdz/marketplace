@@ -13,7 +13,7 @@ export default async function SellerShopPage() {
       <div>
         <PortalPageHeader
           title="Shop profile"
-          description="How buyers see your shop, plus bank details for transfer payouts."
+          description="How buyers see your shop on the storefront."
         />
         <p
           role="alert"
@@ -29,12 +29,12 @@ export default async function SellerShopPage() {
   const bannerPreviewUrl = getShopBannerPreviewUrl(profile.bannerFileId);
 
   return (
-    <div>
+    <div className="w-full">
       <PortalPageHeader
         title="Shop profile"
-        description="How buyers see your shop, plus bank details for transfer payouts."
+        description="How buyers see your shop on the storefront."
       />
-      <div className="mt-8">
+      <div className="mt-6 w-full">
         <ShopProfileForm profile={profile} bannerPreviewUrl={bannerPreviewUrl} />
       </div>
     </div>

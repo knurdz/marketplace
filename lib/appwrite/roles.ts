@@ -46,6 +46,40 @@ export function pathIsPublicStoreException(path: string): boolean {
   return pathname === "/faq" || pathname.startsWith("/legal/");
 }
 
+const PUBLIC_CATALOG_EXACT = new Set([
+  "/",
+  "/market",
+  "/search",
+  "/categories",
+  "/faq",
+]);
+
+const PUBLIC_CATALOG_PREFIXES = [
+  "/categories/",
+  "/products/",
+  "/shop/",
+  "/showcase/",
+  "/legal/",
+] as const;
+
+/**
+ * Public browse routes admins and labeled sellers may open.
+ * Buyer account hubs (requests, wishlist, dashboard) stay excluded.
+ */
+export function pathIsPublicCatalog(path: string): boolean {
+  const pathname = pathnameOf(path);
+  if (PUBLIC_CATALOG_EXACT.has(pathname)) return true;
+  return PUBLIC_CATALOG_PREFIXES.some((prefix) => pathname.startsWith(prefix));
+}
+
+/** Approved portal roles may browse the public catalog while signed in. */
+export function mayBrowsePublicCatalog(user: LabeledUser): boolean {
+  return (
+    userHasLabel(user, ROLE_LABELS.admin) ||
+    userHasLabel(user, ROLE_LABELS.seller)
+  );
+}
+
 const AUTH_PREFIXES = [
   "/login",
   "/register",
@@ -64,7 +98,7 @@ function pathIsAuth(path: string): boolean {
 }
 
 /**
- * Buyer-only commerce (catalog, cart, checkout, buyer hub).
+ * Buyer-only commerce (catalog, requests, wishlist, buyer hub).
  * Portals, auth, FAQ, and legal are excluded.
  */
 export function pathIsBuyerCommerce(path: string): boolean {
@@ -104,7 +138,8 @@ export function homePathForUser(
 
 /**
  * Post-login destination: honor a safe `next` only when the user may visit it.
- * Admins and sellers (and pending applicants) cannot be sent into buyer commerce.
+ * Admins and sellers may land on the public catalog; buyer-account hubs and
+ * pending applicants still resolve to the role home.
  */
 export function postLoginPath(
   user: LabeledUser,
@@ -131,6 +166,13 @@ export function postLoginPath(
     if (!userHasLabel(user, "seller")) {
       return roleHome;
     }
+  }
+
+  if (
+    pathIsPublicCatalog(safe) &&
+    mayBrowsePublicCatalog(user)
+  ) {
+    return safe;
   }
 
   if (

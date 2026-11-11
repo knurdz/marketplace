@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { AnalyticsCharts } from "@/components/admin/analytics-charts";
+import { PortalPageHeader } from "@/components/layout/portal-page-header";
 import { cn } from "@/lib/utils";
 import {
   getSalesOverTime,
@@ -30,11 +31,10 @@ export default async function AdminAnalyticsPage({ searchParams }: PageProps) {
 
   return (
     <div>
-      <h2 className="text-xl font-bold tracking-tight sm:text-2xl">Analytics</h2>
-      <p className="mt-1.5 max-w-2xl text-sm text-muted-foreground">
-        Aggregate platform trends only. Charts show counts and totals. Never
-        individual users, orders, or sellers.
-      </p>
+      <PortalPageHeader
+        title="Analytics"
+        description="Aggregate platform trends only. Charts show counts and totals. Never individual users, orders, or sellers."
+      />
 
       <div className="mt-8 flex flex-wrap gap-2">
         <Link

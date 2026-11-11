@@ -12,7 +12,8 @@ const FOOTER_COLUMNS = [
     title: "Help",
     links: [
       { href: "/faq", label: "FAQ" },
-      { href: "/legal/terms", label: "Terms" },
+      { href: "/legal/terms", label: "Terms of Service" },
+      { href: "/legal/privacy", label: "Privacy Policy" },
     ],
   },
   {
@@ -26,9 +27,9 @@ const FOOTER_COLUMNS = [
   {
     title: "Legal",
     links: [
-      { href: "/legal/terms", label: "Terms" },
-      { href: "/legal/privacy", label: "Privacy" },
-      { href: "/faq", label: "Help" },
+      { href: "/legal/terms", label: "Terms of Service" },
+      { href: "/legal/privacy", label: "Privacy Policy" },
+      { href: "/faq", label: "FAQ" },
     ],
   },
 ] as const;

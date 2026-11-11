@@ -2,27 +2,28 @@ import { LegalPage, LegalSection } from "@/components/legal/legal-page";
 
 export default function FaqPage() {
   return (
-    <LegalPage title="FAQ" updated="11 August 2026">
+    <LegalPage title="FAQ" updated="10 November 2026">
       <LegalSection title="How do I buy something?">
         <p>
-          Browse or search active listings, then check out when Member 2’s cart
-          and checkout flows are available. You will choose PayHere, bank
-          transfer, or free when the listing price is zero.
+          Browse or search active listings, open a product, choose a quantity,
+          and tap Buy. That sends a request to the seller and shows their phone
+          and email so you can arrange the sale directly.
         </p>
       </LegalSection>
 
-      <LegalSection title="What payment methods are supported?">
+      <LegalSection title="Does Knurdz process payments?">
         <p>
-          PayHere (sandbox during development), bank transfer with slip upload
-          for seller verification, and free checkout for zero-price listings.
+          No. Buyers and sellers contact each other and settle personally. When
+          the deal is done, the seller marks the request sold or cancelled.
+          Stock drops only when a request is marked sold.
         </p>
       </LegalSection>
 
       <LegalSection title="How do I sell on Knurdz?">
         <p>
           Create an account and choose Seller at registration. An admin reviews
-          your shop before you can publish listings. Buyer and seller accounts
-          are separate: buyers cannot convert later.
+          your shop before you can publish listings. Add a phone number so
+          buyers can reach you after they send a request.
         </p>
       </LegalSection>
 
@@ -34,18 +35,19 @@ export default function FaqPage() {
         </p>
       </LegalSection>
 
+      <LegalSection title="How do seller reviews work?">
+        <p>
+          After a seller marks your request sold, you can rate the seller from
+          that request. An admin must approve the review before it appears on
+          the seller’s shop. Reviews are about the seller, not a product.
+        </p>
+      </LegalSection>
+
       <LegalSection title="How does email verification work?">
         <p>
           After sign-up you can request a verification email from your account
           page. Password reset uses a secure recovery link. Sensitive auth
-          actions are rate-limited to reduce abuse.
-        </p>
-      </LegalSection>
-
-      <LegalSection title="Where do notifications appear?">
-        <p>
-          Signed-in users see a bell in the storefront and portal headers.
-          Unread items poll about every 45 seconds during MVP (realtime later).
+          actions are rate-limited.
         </p>
       </LegalSection>
     </LegalPage>

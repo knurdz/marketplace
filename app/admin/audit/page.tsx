@@ -97,107 +97,119 @@ export default async function AdminAuditPage({ searchParams }: PageProps) {
       })
     : null;
 
+  const filterForm = (
+    <form method="get" className="flex flex-wrap items-end gap-2.5">
+      <div className="grid min-w-[10rem] gap-1">
+        <Label htmlFor="actorId" className="text-xs text-muted-foreground">
+          Actor ID
+        </Label>
+        <Input
+          id="actorId"
+          type="text"
+          name="actorId"
+          defaultValue={actorId ?? ""}
+          placeholder="User ID"
+          className="h-8 text-xs"
+        />
+      </div>
+
+      <div className="grid min-w-[10rem] gap-1">
+        <Label htmlFor="event" className="text-xs text-muted-foreground">
+          Event
+        </Label>
+        <Input
+          id="event"
+          type="text"
+          name="event"
+          defaultValue={event ?? ""}
+          placeholder="e.g. seller.approved"
+          className="h-8 text-xs"
+        />
+      </div>
+
+      <div className="grid min-w-[10rem] gap-1">
+        <Label htmlFor="resourceType" className="text-xs text-muted-foreground">
+          Resource type
+        </Label>
+        <Input
+          id="resourceType"
+          type="text"
+          name="resourceType"
+          defaultValue={resourceType ?? ""}
+          placeholder="e.g. seller_profile"
+          className="h-8 text-xs"
+        />
+      </div>
+
+      <div className="grid min-w-[10rem] gap-1">
+        <Label htmlFor="resourceId" className="text-xs text-muted-foreground">
+          Resource ID
+        </Label>
+        <Input
+          id="resourceId"
+          type="text"
+          name="resourceId"
+          defaultValue={resourceId ?? ""}
+          placeholder="Resource ID"
+          className="h-8 text-xs"
+        />
+      </div>
+
+      <Button type="submit" size="xs" variant="outline" className="h-8 px-3">
+        Apply filters
+      </Button>
+
+      {hasFilters ? (
+        <Button variant="ghost" size="xs" asChild className="h-8 px-2.5">
+          <Link href="/admin/audit">Clear</Link>
+        </Button>
+      ) : null}
+    </form>
+  );
+
   return (
-    <div>
+    <div className="w-full">
       <PortalPageHeader
         title="Audit log"
         description="Read-only history of admin actions. Append-only. No edits or deletions from this view."
       />
 
-      <form method="get" className="mt-6 flex flex-wrap items-end gap-3">
-        <div className="grid min-w-[12rem] gap-1.5">
-          <Label htmlFor="actorId" className="font-mono text-xs text-muted-foreground">
-            Actor ID
-          </Label>
-          <Input
-            id="actorId"
-            type="text"
-            name="actorId"
-            defaultValue={actorId ?? ""}
-            placeholder="User ID"
-            className="h-9 text-sm"
-          />
-        </div>
-
-        <div className="grid min-w-[12rem] gap-1.5">
-          <Label htmlFor="event" className="font-mono text-xs text-muted-foreground">
-            Event
-          </Label>
-          <Input
-            id="event"
-            type="text"
-            name="event"
-            defaultValue={event ?? ""}
-            placeholder="e.g. seller.approved"
-            className="h-9 text-sm"
-          />
-        </div>
-
-        <div className="grid min-w-[10rem] gap-1.5">
-          <Label
-            htmlFor="resourceType"
-            className="font-mono text-xs text-muted-foreground"
-          >
-            Resource type
-          </Label>
-          <Input
-            id="resourceType"
-            type="text"
-            name="resourceType"
-            defaultValue={resourceType ?? ""}
-            placeholder="e.g. seller_profile"
-            className="h-9 text-sm"
-          />
-        </div>
-
-        <div className="grid min-w-[12rem] gap-1.5">
-          <Label
-            htmlFor="resourceId"
-            className="font-mono text-xs text-muted-foreground"
-          >
-            Resource ID
-          </Label>
-          <Input
-            id="resourceId"
-            type="text"
-            name="resourceId"
-            defaultValue={resourceId ?? ""}
-            placeholder="Resource ID"
-            className="h-9 text-sm"
-          />
-        </div>
-
-        <Button type="submit" size="sm" variant="outline">
-          Apply filters
-        </Button>
-
-        {hasFilters ? (
-          <Button variant="ghost" size="sm" asChild>
-            <Link href="/admin/audit">Clear</Link>
-          </Button>
-        ) : null}
-      </form>
-
       {entries.length === 0 ? (
-        <DataTableEmpty
-          className="mt-6"
-          message={
-            hasFilters
-              ? "No audit entries match the selected filters."
-              : "No audit entries yet. Admin actions from seller approval, moderation, bank slip review, and settings will appear here."
-          }
-        />
+        <div className="mt-6 space-y-4">
+          {filterForm}
+          <DataTableEmpty
+            message={
+              hasFilters
+                ? "No audit entries match the selected filters."
+                : "No audit entries yet. Admin actions from seller approval, moderation, and settings will appear here."
+            }
+          />
+        </div>
       ) : (
-        <DataTableShell className="mt-6">
+        <div className="mt-6 space-y-4">
+          {filterForm}
+        <DataTableShell>
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead className="px-4">When</TableHead>
-                <TableHead className="px-4">Event</TableHead>
-                <TableHead className="px-4">Actor</TableHead>
-                <TableHead className="px-4">Resource</TableHead>
-                <TableHead className="px-4">IP</TableHead>
-                <TableHead className="px-4">Meta</TableHead>
+                <TableHead>
+                  When
+                </TableHead>
+                <TableHead>
+                  Event
+                </TableHead>
+                <TableHead>
+                  Actor
+                </TableHead>
+                <TableHead>
+                  Resource
+                </TableHead>
+                <TableHead>
+                  IP
+                </TableHead>
+                <TableHead>
+                  Meta
+                </TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -205,29 +217,29 @@ export default async function AdminAuditPage({ searchParams }: PageProps) {
                 const meta = formatMetaDisplay(entry.meta);
                 return (
                   <TableRow key={entry.$id}>
-                    <TableCell className="px-4 font-mono text-xs text-muted-foreground whitespace-nowrap">
-                      {formatCreatedAt(entry.$createdAt)}
+                    <TableCell className="text-xs text-muted-foreground whitespace-nowrap">
+                      {formatCreatedAt(entry.$createdAt ?? "")}
                     </TableCell>
-                    <TableCell className="px-4 font-medium">{entry.event}</TableCell>
-                    <TableCell className="px-4 font-mono text-xs">
+                    <TableCell className="font-medium">{entry.event}</TableCell>
+                    <TableCell className="text-xs">
                       {entry.actorId ?? "system"}
                     </TableCell>
-                    <TableCell className="px-4 whitespace-normal font-mono text-xs text-muted-foreground">
+                    <TableCell className="text-xs whitespace-normal text-muted-foreground">
                       {entry.resourceType}
                       {entry.resourceId ? ` · ${entry.resourceId}` : ""}
                     </TableCell>
-                    <TableCell className="px-4 font-mono text-xs text-muted-foreground">
+                    <TableCell className="text-xs text-muted-foreground">
                       {entry.ip ?? "-"}
                     </TableCell>
-                    <TableCell className="px-4 whitespace-normal">
+                    <TableCell className="whitespace-normal">
                       {meta.kind === "empty" ? (
                         <span className="text-xs text-muted-foreground">-</span>
                       ) : (
                         <details>
-                          <summary className="cursor-pointer font-mono text-xs text-muted-foreground hover:text-foreground">
+                          <summary className="cursor-pointer text-xs text-muted-foreground hover:text-foreground">
                             Meta
                           </summary>
-                          <pre className="mt-2 max-h-64 max-w-md overflow-auto rounded-md border border-border bg-muted/30 p-3 font-mono text-xs whitespace-pre-wrap break-all">
+                          <pre className="mt-2 max-h-64 max-w-md overflow-auto rounded-md border border-border bg-muted/30 p-3 text-xs whitespace-pre-wrap break-all">
                             {meta.content}
                           </pre>
                         </details>
@@ -239,9 +251,9 @@ export default async function AdminAuditPage({ searchParams }: PageProps) {
             </TableBody>
           </Table>
         </DataTableShell>
+          {nextHref ? <LoadMoreLink href={nextHref} label="Next page" /> : null}
+        </div>
       )}
-
-      {nextHref ? <LoadMoreLink href={nextHref} label="Next page" /> : null}
     </div>
   );
 }

@@ -2,17 +2,16 @@ import { Query } from "@/lib/db/appwrite-shim";
 import type { Models } from "@/lib/db/appwrite-shim";
 import {
   DATABASE_ID,
-  TABLE_ORDERS,
-  TABLE_PAYMENTS,
+  TABLE_PURCHASE_REQUESTS,
   TABLE_SELLER_PROFILES,
   hasAppwritePublicConfig,
 } from "@/lib/appwrite/config";
 import { requireLabel } from "@/lib/appwrite/roles";
 import { createAdminClient } from "@/lib/appwrite/server";
-import type { PaymentStatus, SellerStatus } from "@/lib/types";
+import type { SellerStatus } from "@/lib/types";
 
 const APPROVED_SELLER_STATUS: SellerStatus = "approved";
-const PAID_PAYMENT_STATUS: PaymentStatus = "paid";
+const SOLD_REQUEST_STATUS = "sold" as const;
 const DEFAULT_CURRENCY = "LKR";
 const PAGE_SIZE = 100;
 
@@ -243,55 +242,45 @@ function userRegistrationIso(user: Models.User<Models.Preferences>): string | nu
 }
 
 /**
- * Aggregate paid revenue + order counts per time bucket (bounded range only).
- * Server-only; admin label + DATABASE_URL required. Never throws.
+ * Aggregate sold purchase-request counts per time bucket (bounded range only).
+ * Revenue is always zero (off-platform settlement). Server-only; admin + DATABASE_URL.
  */
 export async function getSalesOverTime(opts?: {
   range?: AnalyticsRange;
   bucket?: AnalyticsBucket;
 }): Promise<SalesBucket[]> {
   await requireLabel("admin");
-  if (!adminSdkAvailable()) return [];
 
   const { start, end, bucket } = resolveRange(opts?.range);
   const keys = generateBucketKeys(start, end, bucket);
   if (keys.length === 0) return [];
 
   const buckets = initSalesBuckets(keys);
-  let currency = DEFAULT_CURRENCY;
+  const currency = DEFAULT_CURRENCY;
+
+  if (!adminSdkAvailable()) {
+    return mapToSortedSales(buckets, currency);
+  }
 
   try {
-    await pageTableRowsInRange(TABLE_ORDERS, start, end, [], (row) => {
-      const createdAt = asNullableString(row.$createdAt);
-      if (!createdAt) return;
-      const key = bucketKeyFromIso(createdAt, bucket);
-      if (!key || !buckets.has(key)) return;
-      const entry = buckets.get(key)!;
-      entry.orderCount += 1;
-    });
-
     await pageTableRowsInRange(
-      TABLE_PAYMENTS,
+      TABLE_PURCHASE_REQUESTS,
       start,
       end,
-      [Query.equal("status", PAID_PAYMENT_STATUS)],
+      [Query.equal("status", SOLD_REQUEST_STATUS)],
       (row) => {
         const createdAt = asNullableString(row.$createdAt);
         if (!createdAt) return;
         const key = bucketKeyFromIso(createdAt, bucket);
         if (!key || !buckets.has(key)) return;
         const entry = buckets.get(key)!;
-        entry.revenue += asNumber(row.amount);
-        if (currency === DEFAULT_CURRENCY) {
-          const rowCurrency = asNullableString(row.currency);
-          if (rowCurrency) currency = rowCurrency;
-        }
+        entry.orderCount += 1;
       },
     );
 
     return mapToSortedSales(buckets, currency);
   } catch {
-    return [];
+    return mapToSortedSales(buckets, currency);
   }
 }
 
@@ -304,13 +293,16 @@ export async function getUserGrowthOverTime(opts?: {
   bucket?: AnalyticsBucket;
 }): Promise<UserGrowthBucket[]> {
   await requireLabel("admin");
-  if (!adminSdkAvailable()) return [];
 
   const { start, end, bucket } = resolveRange(opts?.range);
   const keys = generateBucketKeys(start, end, bucket);
   if (keys.length === 0) return [];
 
   const buckets = initGrowthBuckets(keys);
+
+  if (!adminSdkAvailable()) {
+    return mapToSortedGrowth(buckets);
+  }
 
   try {
     await pageUsersInRegistrationRange(start, end, (user) => {
@@ -337,7 +329,7 @@ export async function getUserGrowthOverTime(opts?: {
 
     return mapToSortedGrowth(buckets);
   } catch {
-    return [];
+    return mapToSortedGrowth(buckets);
   }
 }
 

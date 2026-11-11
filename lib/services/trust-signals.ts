@@ -1,9 +1,8 @@
 import { Query } from "@/lib/db/appwrite-shim";
 import {
   DATABASE_ID,
-  TABLE_BANK_SLIPS,
-  TABLE_ORDERS,
   TABLE_PRODUCTS,
+  TABLE_PURCHASE_REQUESTS,
   TABLE_REPORTS,
   TABLE_SELLER_PROFILES,
   hasAppwritePublicConfig,
@@ -22,7 +21,7 @@ import {
 } from "@/lib/trust/rules";
 import type { ReportStatus, SellerStatus } from "@/lib/types";
 import { isReportStatus, isSellerStatus } from "@/lib/types";
-import { asBankSlip, asOrder } from "./orders";
+import { asPurchaseRequest } from "./purchase-requests";
 import { asSellerProfile } from "./seller-approvals";
 
 const APPROVED_SELLER_STATUS: SellerStatus = "approved";
@@ -80,26 +79,24 @@ function toTrustProfile(
   };
 }
 
-function toTrustOrder(row: Record<string, unknown>): TrustOrder | null {
-  const order = asOrder(row);
-  const createdAt = asNullableString(row.$createdAt);
-  if (!order || !createdAt) return null;
-  return {
-    $id: order.$id,
-    sellerId: order.sellerId,
-    status: order.status,
-    totalAmount: order.totalAmount,
-    createdAt,
-  };
+function purchaseStatusToTrustOrderStatus(
+  status: string,
+): TrustOrder["status"] {
+  if (status === "sold") return "completed";
+  if (status === "cancelled") return "cancelled";
+  return "processing";
 }
 
-function toTrustSlip(row: Record<string, unknown>): TrustBankSlip | null {
-  const slip = asBankSlip(row);
+function toTrustOrder(row: Record<string, unknown>): TrustOrder | null {
+  const request = asPurchaseRequest(row);
   const createdAt = asNullableString(row.$createdAt);
-  if (!slip || !createdAt) return null;
+  if (!request || !createdAt) return null;
+  const totalAmount = request.unitPrice * request.quantity;
   return {
-    orderId: slip.orderId,
-    status: slip.status,
+    $id: request.$id,
+    sellerId: request.sellerId,
+    status: purchaseStatusToTrustOrderStatus(request.status),
+    totalAmount,
     createdAt,
   };
 }
@@ -221,7 +218,7 @@ async function fetchOrdersForSellerIds(
 
       const result = await tables.listRows({
         databaseId: DATABASE_ID,
-        tableId: TABLE_ORDERS,
+        tableId: TABLE_PURCHASE_REQUESTS,
         queries,
       });
 
@@ -246,23 +243,7 @@ async function fetchOrdersForSellerIds(
 }
 
 async function fetchRejectedSlipsInWindow(): Promise<TrustBankSlip[]> {
-  const windowStart = rollingWindowStartIso();
-  const rows = await listRowsPaginated(
-    TABLE_BANK_SLIPS,
-    [
-      Query.equal("status", "rejected"),
-      Query.greaterThanEqual("$createdAt", windowStart),
-      Query.orderDesc("$createdAt"),
-    ],
-    500,
-  );
-
-  const slips: TrustBankSlip[] = [];
-  for (const row of rows) {
-    const s = toTrustSlip(row);
-    if (s) slips.push(s);
-  }
-  return slips;
+  return [];
 }
 
 async function fetchProductIdsForSellers(

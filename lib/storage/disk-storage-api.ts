@@ -3,7 +3,7 @@ import {
   getStoredFileMeta,
   putStoredFile,
   readStoredFile,
-} from "./disk";
+} from "./index";
 
 /** Appwrite Storage-shaped API backed by local disk. */
 export class DiskStorage {

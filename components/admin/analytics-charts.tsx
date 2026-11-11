@@ -76,7 +76,7 @@ function SalesTooltip({ active, payload, currency }: SalesTooltipProps) {
   if (!row) return null;
 
   return (
-    <div className="rounded-md border border-border bg-card px-3 py-2 text-xs shadow-sm">
+    <div className="rounded-md border border-border bg-card px-3 py-2 text-xs shadow-none">
       <p className="font-mono text-muted-foreground">{row.bucket}</p>
       <p className="mt-1">Orders: {row.orderCount}</p>
       <p>Revenue: {formatCurrency(row.revenue, currency)}</p>
@@ -95,7 +95,7 @@ function GrowthTooltip({ active, payload }: GrowthTooltipProps) {
   if (!row) return null;
 
   return (
-    <div className="rounded-md border border-border bg-card px-3 py-2 text-xs shadow-sm">
+    <div className="rounded-md border border-border bg-card px-3 py-2 text-xs shadow-none">
       <p className="font-mono text-muted-foreground">{row.bucket}</p>
       <p className="mt-1">New users: {row.newUsers}</p>
       <p>New sellers: {row.newSellers}</p>

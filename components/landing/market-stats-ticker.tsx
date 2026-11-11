@@ -12,9 +12,9 @@ const STATS = [
   },
   {
     icon: ShieldCheck,
-    label: "Safe Transactions",
-    value: "PayHere & Escrow",
-    sub: "Card, Bank & COD",
+    label: "Direct deals",
+    value: "Contact & settle",
+    sub: "Phone and email on request",
   },
   {
     icon: Users,

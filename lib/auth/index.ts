@@ -1,12 +1,70 @@
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { nextCookies } from "better-auth/next-js";
-import { getAppUrl } from "@/lib/config/app";
+import {
+  getAppUrl,
+  getAuthAllowedHosts,
+  getAuthAppOrigins,
+} from "@/lib/config/app";
 import { getDb } from "@/lib/db/client";
 import * as schema from "@/lib/db/schema";
+import { sendSmtpMail } from "@/lib/email/smtp";
+import { logError } from "@/lib/observability/log-error";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 let instance: any;
+
+async function sendVerificationEmail({
+  user,
+  url,
+}: {
+  user: { email: string; name?: string | null };
+  url: string;
+}) {
+  try {
+    await sendSmtpMail({
+      to: user.email,
+      subject: "Verify your Knurdz Marketplace email",
+      text: [
+        `Hi${user.name ? ` ${user.name}` : ""},`,
+        "",
+        "Confirm your email for Knurdz Marketplace by opening this link:",
+        url,
+        "",
+        "If you did not create an account, you can ignore this message.",
+      ].join("\n"),
+    });
+  } catch (error) {
+    logError("auth.email.verify_send", error, { email: user.email });
+    throw error;
+  }
+}
+
+async function sendResetPassword({
+  user,
+  url,
+}: {
+  user: { email: string; name?: string | null };
+  url: string;
+}) {
+  try {
+    await sendSmtpMail({
+      to: user.email,
+      subject: "Reset your Knurdz Marketplace password",
+      text: [
+        `Hi${user.name ? ` ${user.name}` : ""},`,
+        "",
+        "Reset your password by opening this link:",
+        url,
+        "",
+        "If you did not request a reset, you can ignore this message.",
+      ].join("\n"),
+    });
+  } catch (error) {
+    logError("auth.email.reset_send", error, { email: user.email });
+    throw error;
+  }
+}
 
 export function getAuth() {
   if (!instance) {
@@ -23,6 +81,17 @@ export function getAuth() {
       emailAndPassword: {
         enabled: true,
         minPasswordLength: 8,
+        requireEmailVerification: true,
+        autoSignIn: false,
+        sendResetPassword,
+      },
+      // Better Auth reads verification send from this top-level key (not emailAndPassword).
+      emailVerification: {
+        sendVerificationEmail,
+        sendOnSignUp: true,
+        // Resend when an unverified user tries to sign in (they cannot use /account yet).
+        sendOnSignIn: true,
+        autoSignInAfterVerification: false,
       },
       socialProviders: {
         google: {
@@ -30,10 +99,10 @@ export function getAuth() {
           clientSecret: process.env.GOOGLE_CLIENT_SECRET ?? "",
           enabled: Boolean(process.env.GOOGLE_CLIENT_ID?.trim()),
         },
-        facebook: {
-          clientId: process.env.FACEBOOK_CLIENT_ID ?? "",
-          clientSecret: process.env.FACEBOOK_CLIENT_SECRET ?? "",
-          enabled: Boolean(process.env.FACEBOOK_CLIENT_ID?.trim()),
+        github: {
+          clientId: process.env.GITHUB_CLIENT_ID ?? "",
+          clientSecret: process.env.GITHUB_CLIENT_SECRET ?? "",
+          enabled: Boolean(process.env.GITHUB_CLIENT_ID?.trim()),
         },
       },
       user: {
@@ -54,9 +123,16 @@ export function getAuth() {
       },
       advanced: {
         cookiePrefix: "knurdz",
+        // Resolve Host / X-Forwarded-* behind reverse proxies (Hostinger, Vercel, etc.).
+        trustedProxyHeaders: true,
       },
-      baseURL: getAppUrl(),
-      trustedOrigins: [getAppUrl()],
+      // Per-request base URL from Host, allowlisted for local + production.
+      baseURL: {
+        allowedHosts: getAuthAllowedHosts(),
+        protocol: "auto",
+        fallback: getAppUrl(),
+      },
+      trustedOrigins: getAuthAppOrigins(),
       // Server actions call auth.api directly; without this, Set-Cookie is dropped. Must stay last.
       plugins: [nextCookies()],
     });

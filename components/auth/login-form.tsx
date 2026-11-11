@@ -3,7 +3,12 @@
 import Link from "next/link";
 import { useActionState } from "react";
 import { signInWithEmail, type AuthActionState } from "@/lib/appwrite/auth";
+import { AuthLegalLinks } from "@/components/auth/auth-legal-links";
 import { OAuthButtons } from "@/components/auth/oauth-buttons";
+import {
+  AUTH_FIELD_CLASS,
+  AUTH_PRIMARY_BUTTON_CLASS,
+} from "@/components/auth/auth-form-styles";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -26,23 +31,21 @@ export function LoginForm({
   const errorId = "login-form-error";
 
   return (
-    <div className="space-y-5">
-      <OAuthButtons from="login" nextPath={nextPath} error={oauthError} />
-
-      <form action={formAction} className="space-y-5">
+    <div className="space-y-6">
+      <form action={formAction} className="space-y-4">
         {nextPath ? <input type="hidden" name="next" value={nextPath} /> : null}
 
         {state?.error ? (
           <p
             id={errorId}
             role="alert"
-            className="rounded-lg border border-border bg-card px-3 py-2 text-sm"
+            className="rounded-lg border border-destructive/30 bg-destructive/5 px-3 py-2 text-sm text-destructive"
           >
             {state.error}
           </p>
         ) : null}
 
-        <div className="space-y-2">
+        <div className="space-y-1.5">
           <Label htmlFor="email">Email</Label>
           <Input
             id="email"
@@ -50,13 +53,23 @@ export function LoginForm({
             type="email"
             autoComplete="email"
             required
+            placeholder="Enter your email"
+            className={AUTH_FIELD_CLASS}
             aria-invalid={hasError || undefined}
             aria-describedby={hasError ? errorId : undefined}
           />
         </div>
 
-        <div className="space-y-2">
-          <Label htmlFor="password">Password</Label>
+        <div className="space-y-1.5">
+          <div className="flex items-center justify-between gap-3">
+            <Label htmlFor="password">Password</Label>
+            <Link
+              href="/forgot-password"
+              className="text-xs text-muted-foreground hover:text-foreground"
+            >
+              Forgot password?
+            </Link>
+          </div>
           <Input
             id="password"
             name="password"
@@ -64,28 +77,37 @@ export function LoginForm({
             autoComplete="current-password"
             required
             minLength={8}
+            placeholder="Enter your password"
+            className={AUTH_FIELD_CLASS}
             aria-invalid={hasError || undefined}
             aria-describedby={hasError ? errorId : undefined}
           />
         </div>
 
-        <Button type="submit" className="w-full" disabled={pending} data-testid="login-submit">
-          {pending ? "Signing in…" : "Sign in"}
+        <Button
+          type="submit"
+          variant="default"
+          className={AUTH_PRIMARY_BUTTON_CLASS}
+          disabled={pending}
+          data-testid="login-submit"
+        >
+          {pending ? "Signing in…" : "Sign in with email"}
         </Button>
-
-        <p className="text-sm text-muted-foreground">
-          <Link href="/forgot-password" className="hover:text-foreground">
-            Forgot password?
-          </Link>
-        </p>
-
-        <p className="text-sm text-muted-foreground">
-          New here?{" "}
-          <Link href="/register" className="text-foreground hover:underline">
-            Create an account
-          </Link>
-        </p>
       </form>
+
+      <OAuthButtons from="login" nextPath={nextPath} error={oauthError} />
+
+      <p className="text-center text-sm text-muted-foreground">
+        Don&apos;t have an account?{" "}
+        <Link
+          href="/register"
+          className="font-semibold text-primary underline-offset-4 hover:underline"
+        >
+          Create account
+        </Link>
+      </p>
+
+      <AuthLegalLinks />
     </div>
   );
 }

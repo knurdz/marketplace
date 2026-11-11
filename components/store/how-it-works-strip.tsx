@@ -1,4 +1,4 @@
-import { CreditCard, PackageCheck, Search } from "lucide-react";
+import { MessageCircle, PackageCheck, Search } from "lucide-react";
 
 const STEPS = [
   {
@@ -7,14 +7,14 @@ const STEPS = [
     body: "Filter by category and price across active listings from approved sellers.",
   },
   {
-    icon: CreditCard,
-    title: "Pay your way",
-    body: "PayHere, bank transfer, cash on delivery, or free when the price is zero.",
+    icon: MessageCircle,
+    title: "Request & contact",
+    body: "Send a buy request, then talk on phone or email. Knurdz does not take payment.",
   },
   {
     icon: PackageCheck,
-    title: "Track it",
-    body: "Follow fulfillment from your dashboard. One seller per order.",
+    title: "Close the deal",
+    body: "Seller marks the request sold or cancelled. Stock updates when sold.",
   },
 ] as const;
 
@@ -31,8 +31,12 @@ export function HowItWorksStrip() {
           </div>
           <div className="min-w-0">
             <div className="flex items-center gap-2">
-              <span className="font-mono text-xs text-accent font-semibold">0{index + 1}</span>
-              <p className="text-sm font-semibold tracking-tight text-foreground">{title}</p>
+              <span className="font-mono text-xs font-semibold text-accent">
+                0{index + 1}
+              </span>
+              <p className="text-sm font-semibold tracking-tight text-foreground">
+                {title}
+              </p>
             </div>
             <p className="mt-1.5 text-sm leading-relaxed text-muted-foreground">
               {body}

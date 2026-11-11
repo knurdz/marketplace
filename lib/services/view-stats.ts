@@ -33,6 +33,7 @@ export type SellerViewInsights = {
   shopTotal: number;
   shopSeries: Array<{ bucket: string; count: number }>;
   productTotal: number;
+  productSeries: Array<{ bucket: string; count: number }>;
   topProducts: SellerProductViewRow[];
 };
 
@@ -67,6 +68,7 @@ function emptyInsights(): SellerViewInsights {
     shopTotal: 0,
     shopSeries: [],
     productTotal: 0,
+    productSeries: [],
     topProducts: [],
   };
 }
@@ -242,6 +244,7 @@ export async function getSellerViewInsights(): Promise<SellerViewInsights> {
     const rows = await listOwnViewRows(user.$id);
     const days = lastNDays(30);
     const shopByDay = new Map(days.map((day) => [day, 0]));
+    const productByDay = new Map(days.map((day) => [day, 0]));
     const productTotals = new Map<string, number>();
     let shopTotal = 0;
     let productTotal = 0;
@@ -254,6 +257,12 @@ export async function getSellerViewInsights(): Promise<SellerViewInsights> {
         }
       } else if (row.kind === "product") {
         productTotal += row.count;
+        if (productByDay.has(row.day)) {
+          productByDay.set(
+            row.day,
+            (productByDay.get(row.day) ?? 0) + row.count,
+          );
+        }
         productTotals.set(
           row.targetId,
           (productTotals.get(row.targetId) ?? 0) + row.count,
@@ -272,6 +281,10 @@ export async function getSellerViewInsights(): Promise<SellerViewInsights> {
       shopSeries: days.map((bucket) => ({
         bucket,
         count: shopByDay.get(bucket) ?? 0,
+      })),
+      productSeries: days.map((bucket) => ({
+        bucket,
+        count: productByDay.get(bucket) ?? 0,
       })),
       topProducts,
     };

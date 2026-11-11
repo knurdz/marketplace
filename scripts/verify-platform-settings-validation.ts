@@ -25,19 +25,11 @@ function assertAccepted(key: string, value: string): void {
 assertRejected("payhere.merchant_secret", "x");
 assertRejected("random.key", "x");
 assertRejected("site.name", "");
-assertRejected(PLATFORM_SETTING_KEYS.checkoutFeePercent, "abc");
-assertRejected(PLATFORM_SETTING_KEYS.checkoutFeePercent, "101");
-assertRejected(PLATFORM_SETTING_KEYS.checkoutFeePercent, "-1");
 assertRejected(PLATFORM_SETTING_KEYS.featuresFreeListings, "yes");
-assertRejected(PLATFORM_SETTING_KEYS.checkoutSandboxModeDisplay, "1");
 
 assertAccepted(PLATFORM_SETTING_KEYS.siteName, "Knurdz");
-assertAccepted(PLATFORM_SETTING_KEYS.checkoutFeePercent, "0");
-assertAccepted(PLATFORM_SETTING_KEYS.checkoutFeePercent, "100");
-assertAccepted(PLATFORM_SETTING_KEYS.checkoutFeePercent, "2.5");
 assertAccepted(PLATFORM_SETTING_KEYS.featuresFreeListings, "true");
-assertAccepted(PLATFORM_SETTING_KEYS.checkoutSandboxModeDisplay, "false");
-assertAccepted(PLATFORM_SETTING_KEYS.checkoutBankInstructions, "Transfer to …");
+assertAccepted(PLATFORM_SETTING_KEYS.siteSupportEmail, "support@knurdz.org");
 
 assert(isPlatformSettingKeyDenied("checkout.merchant_secret"), "denylist merchant");
 assert(isPlatformSettingKeyDenied("payhere.api_key"), "denylist api_key");

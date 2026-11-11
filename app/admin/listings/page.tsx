@@ -79,49 +79,66 @@ export default async function AdminListingsPage({ searchParams }: PageProps) {
       }).toString()}`
     : null;
 
+  const filterBar = (
+    <FilterTabs
+      tabs={[
+        {
+          href: "/admin/listings?view=pending",
+          label: "Pending review",
+          active: view === "pending",
+        },
+        {
+          href: "/admin/listings?view=active",
+          label: "Active listings",
+          active: view === "active",
+        },
+      ]}
+    />
+  );
+
   return (
-    <div>
+    <div className="w-full">
       <PortalPageHeader
         title="Listing moderation"
         description="Review pending listings before they go live, or remove active listings from the storefront."
       />
 
-      <FilterTabs
-        className="mt-6"
-        tabs={[
-          {
-            href: "/admin/listings?view=pending",
-            label: "Pending review",
-            active: view === "pending",
-          },
-          {
-            href: "/admin/listings?view=active",
-            label: "Active listings",
-            active: view === "active",
-          },
-        ]}
-      />
-
       {listings.length === 0 ? (
-        <DataTableEmpty
-          className="mt-6"
-          message={
-            view === "pending"
-              ? "No listings awaiting review. When sellers submit products for approval, they will appear here."
-              : "No active listings to manage."
-          }
-        />
+        <div className="mt-6 space-y-4">
+          {filterBar}
+          <DataTableEmpty
+            message={
+              view === "pending"
+                ? "No listings awaiting review. When sellers submit products for approval, they will appear here."
+                : "No active listings to manage."
+            }
+          />
+        </div>
       ) : (
-        <DataTableShell className="mt-6">
+        <div className="mt-6 space-y-4">
+          {filterBar}
+        <DataTableShell>
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead className="px-4">Listing</TableHead>
-                <TableHead className="px-4">Seller</TableHead>
-                <TableHead className="px-4">Category</TableHead>
-                <TableHead className="px-4 text-right">Price</TableHead>
-                <TableHead className="px-4">Stock</TableHead>
-                <TableHead className="px-4">Actions</TableHead>
+                <TableHead>
+                  Listing
+                </TableHead>
+                <TableHead>
+                  Seller
+                </TableHead>
+                <TableHead>
+                  Category
+                </TableHead>
+                <TableHead>
+                  Price
+                </TableHead>
+                <TableHead>
+                  Stock
+                </TableHead>
+                <TableHead>
+                  Actions
+                </TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -132,7 +149,7 @@ export default async function AdminListingsPage({ searchParams }: PageProps) {
 
                 return (
                   <TableRow key={product.$id} className="align-top">
-                    <TableCell className="max-w-[420px] px-4 py-3 whitespace-normal">
+                    <TableCell className="max-w-[420px] whitespace-normal">
                       <div className="flex flex-wrap items-center gap-2">
                         <Link
                           href={`/products/${product.$id}`}
@@ -150,26 +167,24 @@ export default async function AdminListingsPage({ searchParams }: PageProps) {
                       </div>
                       <ListingDescription description={product.description} />
                     </TableCell>
-                    <TableCell className="px-4 py-3 font-mono text-xs text-muted-foreground">
+                    <TableCell className="text-xs text-muted-foreground">
                       {shopName ?? product.sellerId}
                     </TableCell>
-                    <TableCell className="px-4 py-3 text-sm text-muted-foreground">
+                    <TableCell className="text-sm text-muted-foreground">
                       {categoryName}
                     </TableCell>
-                    <TableCell className="px-4 py-3 text-right font-mono text-sm font-semibold tabular-nums">
+                    <TableCell className="text-sm font-medium tabular-nums">
                       {formatPrice(
                         product.price,
                         product.currency,
                         product.isFree,
                       )}
                     </TableCell>
-                    <TableCell className="px-4 py-3 font-mono text-xs text-muted-foreground tabular-nums">
-                      {product.stock}
-                      <span className="block">
-                        {product.available ? "available" : "unavailable"}
-                      </span>
+                    <TableCell className="text-xs text-muted-foreground tabular-nums">
+                      {product.stock} ·{" "}
+                      {product.available ? "Available" : "Unavailable"}
                     </TableCell>
-                    <TableCell className="w-[260px] max-w-[260px] px-4 py-3 whitespace-normal">
+                    <TableCell className="w-[260px] max-w-[260px] whitespace-normal">
                       <ListingRowActions
                         productId={product.$id}
                         title={product.title}
@@ -183,9 +198,9 @@ export default async function AdminListingsPage({ searchParams }: PageProps) {
             </TableBody>
           </Table>
         </DataTableShell>
+          {nextHref ? <LoadMoreLink href={nextHref} /> : null}
+        </div>
       )}
-
-      {nextHref ? <LoadMoreLink href={nextHref} /> : null}
     </div>
   );
 }

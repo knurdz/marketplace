@@ -1,12 +1,15 @@
 import { notFound } from "next/navigation";
 import { ProductGrid } from "@/components/store/product-grid";
 import { SellerPolicyBlocks } from "@/components/store/seller-policy-blocks";
+import { SellerReviewsList } from "@/components/store/seller-reviews-list";
 import { EmptyState } from "@/components/layout/empty-state";
 import { PageHeader } from "@/components/layout/page-header";
 import { getShopBannerPreviewUrl } from "@/lib/appwrite/storage-urls";
 import {
   getPublicSellerBySlug,
+  getSellerRatingSummary,
   listActiveProducts,
+  listApprovedSellerReviews,
   listCoverImagesByProductIds,
   recordMarketplaceView,
 } from "@/lib/services";
@@ -26,10 +29,14 @@ export default async function ShopPage({ params }: ShopPageProps) {
     targetId: seller.userId,
   });
 
-  const products = await listActiveProducts({
-    sellerId: seller.userId,
-    limit: 48,
-  });
+  const [products, reviews, ratingSummary] = await Promise.all([
+    listActiveProducts({
+      sellerId: seller.userId,
+      limit: 48,
+    }),
+    listApprovedSellerReviews(seller.userId),
+    getSellerRatingSummary(seller.userId),
+  ]);
   const covers = await listCoverImagesByProductIds(products.map((p) => p.$id));
   const bannerUrl = getShopBannerPreviewUrl(seller.bannerFileId);
 
@@ -49,6 +56,12 @@ export default async function ShopPage({ params }: ShopPageProps) {
         title={seller.shopName}
         description={seller.bio ?? undefined}
       />
+      {ratingSummary.count > 0 && ratingSummary.average != null ? (
+        <p className="mt-3 font-mono text-sm text-muted-foreground">
+          {ratingSummary.average.toFixed(1)} avg · {ratingSummary.count}{" "}
+          seller {ratingSummary.count === 1 ? "rating" : "ratings"}
+        </p>
+      ) : null}
       <SellerPolicyBlocks seller={seller} className="mt-8" />
 
       <section aria-labelledby="shop-listings-heading" className="mt-12">
@@ -67,6 +80,11 @@ export default async function ShopPage({ params }: ShopPageProps) {
           />
         )}
       </section>
+
+      <SellerReviewsList
+        reviews={reviews}
+        average={ratingSummary.average}
+      />
     </main>
   );
 }

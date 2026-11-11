@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useActionState, useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
+import { ConfirmActionDialog } from "@/components/ui/confirm-action-dialog";
 import {
   approveSellerApplication,
   rejectSellerApplication,
@@ -74,55 +75,41 @@ export function SellerRejectForm({
   sellerProfileId,
   shopName,
 }: SellerApprovalRowProps) {
-  const [showReason, setShowReason] = useState(false);
+  const [open, setOpen] = useState(false);
   const [state, formAction, pending] = useActionState(
     rejectSellerApplication,
     rejectInitial,
   );
 
-  useApprovalToast(state, () => setShowReason(false));
+  useApprovalToast(state, () => setOpen(false));
 
-  if (!showReason) {
-    return (
+  return (
+    <>
       <Button
         type="button"
         variant="outline"
         size="sm"
-        onClick={() => setShowReason(true)}
+        onClick={() => setOpen(true)}
       >
         Reject
       </Button>
-    );
-  }
-
-  return (
-    <form action={formAction} className="mt-3 space-y-2">
-      <input type="hidden" name="sellerProfileId" value={sellerProfileId} />
-      <label className="block font-mono text-xs text-muted-foreground">
-        Reason for rejecting {shopName}
-        <textarea
-          name="reason"
-          required
-          maxLength={500}
-          rows={3}
-          placeholder="Required. Visible to the applicant"
-          className="mt-1 w-full rounded-md border border-border bg-background px-3 py-2 text-sm"
-        />
-      </label>
-      <div className="flex gap-2">
-        <Button type="submit" variant="outline" size="sm" disabled={pending}>
-          {pending ? "Rejecting…" : "Confirm reject"}
-        </Button>
-        <Button
-          type="button"
-          variant="ghost"
-          size="sm"
-          disabled={pending}
-          onClick={() => setShowReason(false)}
-        >
-          Cancel
-        </Button>
-      </div>
-    </form>
+      <ConfirmActionDialog
+        open={open}
+        onOpenChange={setOpen}
+        title="Reject seller application?"
+        description={`Reject “${shopName}”? The reason is visible to the applicant.`}
+        confirmLabel="Confirm reject"
+        pendingLabel="Rejecting…"
+        confirmVariant="outline"
+        pending={pending}
+        formAction={formAction}
+        hiddenFields={{ sellerProfileId }}
+        note={{
+          name: "reason",
+          label: `Reason for rejecting ${shopName}`,
+          placeholder: "Required. Visible to the applicant",
+        }}
+      />
+    </>
   );
 }

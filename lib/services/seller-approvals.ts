@@ -41,25 +41,13 @@ export function asSellerProfile(
     bio: asNullableString(row.bio),
     bannerFileId: asNullableString(row.bannerFileId),
     status: statusRaw,
-    bankAccountName: asNullableString(row.bankAccountName),
-    bankAccountNumber: asNullableString(row.bankAccountNumber),
-    bankName: asNullableString(row.bankName),
-    bankTransferNotes: asNullableString(row.bankTransferNotes),
     rejectionReason: asNullableString(row.rejectionReason),
     returnPolicy: asNullableString(row.returnPolicy),
     shippingPolicy: asNullableString(row.shippingPolicy),
   };
 }
 
-/** Mask bank account number: last 4 digits only; never expose full value. */
-export function maskBankAccountNumber(value: string | null): string | null {
-  if (!value) return null;
-  const digits = value.replace(/\D/g, "");
-  if (digits.length < 4) return "****";
-  return `****${digits.slice(-4)}`;
-}
-
-/** Admin queue view: omits raw bank fields. */
+/** Admin queue view for pending seller applications. */
 export type AdminSellerApplication = {
   $id: string;
   userId: string;
@@ -67,8 +55,18 @@ export type AdminSellerApplication = {
   slug: string;
   bio: string | null;
   status: "pending";
-  bankName: string | null;
-  maskedBankAccountNumber: string | null;
+  $createdAt?: string;
+};
+
+/** Admin list row for any seller profile status. */
+export type AdminSellerRow = {
+  $id: string;
+  userId: string;
+  shopName: string;
+  slug: string;
+  bio: string | null;
+  status: SellerProfile["status"];
+  rejectionReason: string | null;
   $createdAt?: string;
 };
 
@@ -84,8 +82,23 @@ function toAdminApplication(
     slug: profile.slug,
     bio: profile.bio,
     status: PENDING_STATUS,
-    bankName: profile.bankName,
-    maskedBankAccountNumber: maskBankAccountNumber(profile.bankAccountNumber),
+    $createdAt:
+      typeof row.$createdAt === "string" ? row.$createdAt : undefined,
+  };
+}
+
+function toAdminSellerRow(
+  profile: SellerProfile,
+  row: Record<string, unknown>,
+): AdminSellerRow {
+  return {
+    $id: profile.$id,
+    userId: profile.userId,
+    shopName: profile.shopName,
+    slug: profile.slug,
+    bio: profile.bio,
+    status: profile.status,
+    rejectionReason: profile.rejectionReason,
     $createdAt:
       typeof row.$createdAt === "string" ? row.$createdAt : undefined,
   };
@@ -146,38 +159,74 @@ export type SellerApprovalResult =
   | { ok: false; error: string };
 
 /**
+ * Seller profiles for admin (server-only). Pass status to filter, or omit for all.
+ */
+export async function listSellerProfilesAdmin(opts?: {
+  status?: SellerProfile["status"];
+  limit?: number;
+}): Promise<AdminSellerRow[]> {
+  if (!hasAppwritePublicConfig()) return [];
+  if (!process.env.DATABASE_URL?.trim()) return [];
+
+  const limit = Math.min(Math.max(opts?.limit ?? 100, 1), 100);
+
+  try {
+    const { tables } = await createAdminClient();
+    const queries = [Query.orderDesc("$createdAt"), Query.limit(limit)];
+    if (opts?.status) {
+      queries.unshift(Query.equal("status", opts.status));
+    }
+
+    const result = await tables.listRows({
+      databaseId: DATABASE_ID,
+      tableId: TABLE_SELLER_PROFILES,
+      queries,
+    });
+
+    const rows: AdminSellerRow[] = [];
+    for (const row of result.rows) {
+      const record = row as unknown as Record<string, unknown>;
+      const profile = asSellerProfile(record);
+      if (!profile) continue;
+      if (opts?.status && profile.status !== opts.status) continue;
+      rows.push(toAdminSellerRow(profile, record));
+    }
+    return rows;
+  } catch {
+    return [];
+  }
+}
+
+/**
  * Pending seller applications for admin review (server-only; admin SDK).
  */
 export async function listPendingSellerApplications(): Promise<
   AdminSellerApplication[]
 > {
-  if (!hasAppwritePublicConfig()) return [];
-  if (!process.env.DATABASE_URL?.trim()) return [];
-
-  try {
-    const { tables } = await createAdminClient();
-    const result = await tables.listRows({
-      databaseId: DATABASE_ID,
-      tableId: TABLE_SELLER_PROFILES,
-      queries: [
-        Query.equal("status", PENDING_STATUS),
-        Query.orderDesc("$createdAt"),
-        Query.limit(100),
-      ],
+  const rows = await listSellerProfilesAdmin({ status: PENDING_STATUS });
+  const apps: AdminSellerApplication[] = [];
+  for (const row of rows) {
+    if (row.status !== PENDING_STATUS) continue;
+    apps.push({
+      $id: row.$id,
+      userId: row.userId,
+      shopName: row.shopName,
+      slug: row.slug,
+      bio: row.bio,
+      status: PENDING_STATUS,
+      $createdAt: row.$createdAt,
     });
-
-    const apps: AdminSellerApplication[] = [];
-    for (const row of result.rows) {
-      const record = row as unknown as Record<string, unknown>;
-      const profile = asSellerProfile(record);
-      if (!profile) continue;
-      const app = toAdminApplication(profile, record);
-      if (app) apps.push(app);
-    }
-    return apps;
-  } catch {
-    return [];
   }
+  return apps;
+}
+
+/** True when at least one seller application awaits admin review. */
+export async function hasPendingSellerApplications(): Promise<boolean> {
+  const rows = await listSellerProfilesAdmin({
+    status: PENDING_STATUS,
+    limit: 1,
+  });
+  return rows.some((row) => row.status === PENDING_STATUS);
 }
 
 /**

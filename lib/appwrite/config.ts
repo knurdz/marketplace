@@ -12,29 +12,19 @@ export const SESSION_COOKIE = "knurdz.session_token";
 /** TablesDB database id (console: Marketplace). */
 export const DATABASE_ID = "marketplace";
 
-/** Table IDs: must match Appwrite console / docs/agent/SCHEMA.md. */
+/** Table IDs: must match docs/agent/SCHEMA.md. */
 export const TABLE_PROFILES = "profiles";
 export const TABLE_SELLER_PROFILES = "seller_profiles";
 export const TABLE_CATEGORIES = "categories";
 export const TABLE_PRODUCTS = "products";
 export const TABLE_PRODUCT_IMAGES = "product_images";
-export const TABLE_CARTS = "carts";
-export const TABLE_CART_ITEMS = "cart_items";
 export const TABLE_WISHLIST_ITEMS = "wishlist_items";
-export const TABLE_ORDERS = "orders";
-export const TABLE_ORDER_ITEMS = "order_items";
-export const TABLE_PAYMENTS = "payments";
-export const TABLE_BANK_SLIPS = "bank_slips";
+export const TABLE_PURCHASE_REQUESTS = "purchase_requests";
 export const TABLE_REVIEWS = "reviews";
 export const TABLE_REPORTS = "reports";
 export const TABLE_NOTIFICATIONS = "notifications";
 export const TABLE_PLATFORM_SETTINGS = "platform_settings";
 export const TABLE_AUDIT_LOGS = "audit_logs";
-export const TABLE_PAYHERE_NOTIFY_LOGS = "payhere_notify_logs";
-export const TABLE_COUPONS = "coupons";
-export const TABLE_COUPON_REDEMPTIONS = "coupon_redemptions";
-export const TABLE_THREADS = "threads";
-export const TABLE_MESSAGES = "messages";
 export const TABLE_VIEW_STATS = "view_stats";
 export const TABLE_RATE_LIMITS = "rate_limits";
 
@@ -45,49 +35,29 @@ export const ALL_TABLE_IDS = [
   TABLE_CATEGORIES,
   TABLE_PRODUCTS,
   TABLE_PRODUCT_IMAGES,
-  TABLE_CARTS,
-  TABLE_CART_ITEMS,
   TABLE_WISHLIST_ITEMS,
-  TABLE_ORDERS,
-  TABLE_ORDER_ITEMS,
-  TABLE_PAYMENTS,
-  TABLE_BANK_SLIPS,
+  TABLE_PURCHASE_REQUESTS,
   TABLE_REVIEWS,
   TABLE_REPORTS,
   TABLE_NOTIFICATIONS,
   TABLE_PLATFORM_SETTINGS,
   TABLE_AUDIT_LOGS,
-  TABLE_PAYHERE_NOTIFY_LOGS,
-  TABLE_COUPONS,
-  TABLE_COUPON_REDEMPTIONS,
-  TABLE_THREADS,
-  TABLE_MESSAGES,
   TABLE_VIEW_STATS,
   TABLE_RATE_LIMITS,
 ] as const;
 
-/** Storage bucket IDs: must match Appwrite console / docs/agent/SCHEMA.md. */
+/** Storage bucket IDs: must match docs/agent/SCHEMA.md. */
 export const BUCKET_AVATARS = "avatars";
 export const BUCKET_PRODUCT_IMAGES = "product-images";
-export const BUCKET_BANK_SLIPS = "bank-slips";
 
 export const ALL_BUCKET_IDS = [
   BUCKET_AVATARS,
   BUCKET_PRODUCT_IMAGES,
-  BUCKET_BANK_SLIPS,
 ] as const;
-
-/** Re-export PayHere Function IDs (canonical values in lib/types/payhere.ts). */
-export {
-  FUNCTION_PAYHERE_CHECKOUT_HASH,
-  FUNCTION_PAYHERE_NOTIFY,
-  PAYHERE_FUNCTION_IDS as ALL_PAYHERE_FUNCTION_IDS,
-} from "@/lib/types/payhere";
 
 /** Max upload sizes (bytes): mirror bucket settings. */
 export const AVATAR_MAX_BYTES = 2 * 1024 * 1024; // 2MB
 export const PRODUCT_IMAGE_MAX_BYTES = 5 * 1024 * 1024; // 5MB
-export const BANK_SLIP_MAX_BYTES = 5 * 1024 * 1024; // 5MB
 
 export const IMAGE_MIME_TYPES = [
   "image/jpeg",
@@ -96,21 +66,6 @@ export const IMAGE_MIME_TYPES = [
 ] as const;
 
 export const IMAGE_EXTENSIONS = ["jpg", "jpeg", "png", "webp"] as const;
-
-export const BANK_SLIP_MIME_TYPES = [
-  "image/jpeg",
-  "image/png",
-  "image/webp",
-  "application/pdf",
-] as const;
-
-export const BANK_SLIP_EXTENSIONS = [
-  "jpg",
-  "jpeg",
-  "png",
-  "webp",
-  "pdf",
-] as const;
 
 export function getAppwriteEndpoint(): string {
   const endpoint = process.env.NEXT_PUBLIC_APPWRITE_ENDPOINT?.trim();
