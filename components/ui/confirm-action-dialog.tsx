@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { FormGuardFields } from "@/components/security/form-guard-fields";
 
 type NoteField = {
   name: string;
@@ -34,6 +35,7 @@ type ConfirmActionDialogProps = {
   pending?: boolean;
   /** Server action / useActionState dispatch for a form submit. */
   formAction?: (payload: FormData) => void;
+  formGuardAction?: string;
   hiddenFields?: Record<string, string>;
   note?: NoteField;
   /** Client-side confirm (e.g. clear cart). Prefer formAction when possible. */
@@ -54,6 +56,7 @@ export function ConfirmActionDialog({
   confirmVariant = "default",
   pending = false,
   formAction,
+  formGuardAction,
   hiddenFields,
   note,
   onConfirm,
@@ -105,6 +108,9 @@ export function ConfirmActionDialog({
 
         {usesForm ? (
           <form id={formId} action={formAction} className="space-y-3 text-center">
+            {formGuardAction ? (
+              <FormGuardFields action={formGuardAction} />
+            ) : null}
             {hiddenFields
               ? Object.entries(hiddenFields).map(([name, value]) => (
                   <input key={name} type="hidden" name={name} value={value} />

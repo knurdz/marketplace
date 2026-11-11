@@ -7,8 +7,9 @@ import { Button } from "@/components/ui/button";
 import {
   submitListingForReview,
   type SubmitListingActionState,
-} from "@/lib/appwrite/seller-listing-actions";
+} from "@/lib/backend/seller-listing-actions";
 import { toast } from "@/lib/ui/toast";
+import { FormGuardFields } from "@/components/security/form-guard-fields";
 
 const initial: SubmitListingActionState = {};
 
@@ -50,6 +51,7 @@ export function SubmitListingButton({
 
   return (
     <form action={formAction}>
+      <FormGuardFields action="seller.listing.submit" />
       <input type="hidden" name="productId" value={productId} />
       <Button
         type="submit"

@@ -5,12 +5,13 @@ import { RotateCcw, Truck, type LucideIcon } from "lucide-react";
 import {
   updateOwnShopPolicies,
   type ShopProfileActionState,
-} from "@/lib/appwrite/seller-application-actions";
+} from "@/lib/backend/seller-application-actions";
 import type { SellerProfile } from "@/lib/types";
 import { toast } from "@/lib/ui/toast";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
+import { FormGuardFields } from "@/components/security/form-guard-fields";
 
 const initial: ShopProfileActionState = {};
 
@@ -127,6 +128,7 @@ export function ShopPolicyForm({ profile }: ShopPolicyFormProps) {
       </div>
 
       <form action={action}>
+        <FormGuardFields action="seller.shop.policies.update" />
         <div className="px-6 py-6">
           {state.error ? (
             <p

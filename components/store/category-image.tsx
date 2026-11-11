@@ -2,8 +2,8 @@
 
 import type { ReactNode } from "react";
 import { StorageImage } from "@/components/ui/storage-image";
-import { BUCKET_CATEGORIES } from "@/lib/appwrite/config";
-import { getFileViewUrl } from "@/lib/appwrite/storage-urls";
+import { BUCKET_CATEGORIES } from "@/lib/backend/config";
+import { getFileViewUrl } from "@/lib/backend/storage-urls";
 import { categoryImagePath } from "@/lib/store/category-catalog";
 import { cn } from "@/lib/utils";
 

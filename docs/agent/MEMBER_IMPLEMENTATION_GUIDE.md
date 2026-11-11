@@ -21,11 +21,11 @@ A **3-portal marketplace**:
 | Seller     | `/seller/**`     | Approved sellers |
 | Admin      | `/admin/**`      | Admins           |
 
-**Payments (MVP):** PayHere sandbox · bank transfer (seller verifies slips) · free (`price = 0`).  
-**Business model:** Free selling (no paid listing fee required for MVP).  
-**Order model:** **One seller per order** (split cart by seller at checkout).
+**Commerce (current):** Purchase requests only — buyers and sellers settle off-platform (phone/email on the request).  
+**Business model:** Free selling (no platform listing fee for MVP).  
+**Stock:** Decreases when the seller marks a request **sold**; unchanged on **cancelled**.
 
-**Success for MVP:** A buyer can discover a product, check out via all 3 payment paths, a seller can fulfill and verify bank slips, and an admin can approve sellers — securely.
+**Success for MVP:** A buyer can discover a product, send a buy request, and a seller can resolve it; admins can approve sellers and moderate listings — securely.
 
 ---
 
@@ -33,38 +33,31 @@ A **3-portal marketplace**:
 
 | Layer              | Choice                                         | Notes for agents                                                 |
 | ------------------ | ---------------------------------------------- | ---------------------------------------------------------------- |
-| Frontend           | **Next.js App Router + TypeScript**            | Server Components where possible; client for forms/cart          |
-| Styling/UI         | Team choice (prefer **shadcn** via MCP)        | Match Member 1 UI kit once it exists                             |
-| Auth               | **Appwrite Auth**                              | Sessions; email verify; password recovery                        |
-| Roles              | Appwrite **labels** and/or **Teams**           | `buyer` default, `seller` after approval, `admin` elevated       |
-| Database           | **Appwrite Databases / TablesDB**              | Collections below; document permissions                          |
-| Files              | **Appwrite Storage**                           | Public product images; private bank slips / digital goods        |
-| Secrets / webhooks | **Appwrite Functions**                         | PayHere hash + `notify_url` only here                            |
-| Payments           | **PayHere sandbox**                            | `https://sandbox.payhere.lk/pay/checkout`; trust notify + md5sig |
+| Frontend           | **Next.js App Router + TypeScript**            | Server Components where possible; client for forms                 |
+| Styling/UI         | **shadcn** (MCP)                               | Match Member 1 UI kit                                            |
+| Auth               | **Better Auth** + Drizzle adapter              | Sessions; email verify; password recovery; optional OAuth        |
+| Roles              | User **labels** on auth records                | `buyer` default, `seller` after approval, `admin` elevated       |
+| Database           | **MariaDB + Drizzle**                            | Tables in `lib/db/schema.ts`; services use `lib/db/compat` Query |
+| Files              | **Local disk** or **Hostinger storage API**    | Public product images via `/api/files` or CDN                      |
+| Email              | SMTP (nodemailer)                              | Verify/reset templates; server-only creds                        |
 | Local quality      | Graphify before/after · Playwright MCP for E2E | See MCP list below                                               |
 
 ### Approved MCPs (agents)
 
-1. Appwrite MCP
-2. PayHere docs MCP (+ optional PayHere Merchant MCP — sandbox secrets only)
-3. Context7
-4. next-devtools-mcp
-5. shadcn MCP
-6. Playwright MCP
+1. Context7
+2. next-devtools-mcp
+3. shadcn MCP
+4. Playwright MCP
 
-**Do not use GitHub MCP.** Do not use Supabase for this app’s data.
+**Do not use GitHub MCP.** Do not use Supabase for this app’s MariaDB data plane.
 
-### Suggested env (Member 1 defines `.env.example`)
+### Suggested env (see `.env.example`)
 
 ```text
-NEXT_PUBLIC_APPWRITE_ENDPOINT=
-NEXT_PUBLIC_APPWRITE_PROJECT_ID=
 NEXT_PUBLIC_APP_URL=
-# Server / Function only — never NEXT_PUBLIC:
-APPWRITE_API_KEY=
-PAYHERE_MERCHANT_ID=
-PAYHERE_MERCHANT_SECRET=
-PAYHERE_SANDBOX=true
+DATABASE_URL=
+BETTER_AUTH_SECRET=
+# Optional: SMTP_*, STORAGE_API_*, OAuth, Turnstile
 ```
 
 ### Suggested folder layout (Member 1 establishes; others follow)
@@ -73,19 +66,20 @@ PAYHERE_SANDBOX=true
 app/
   (auth)/login|register|...
   (store)/...                 # Member 2
-  (seller)/seller/...         # Member 3
-  (admin)/admin/...           # Member 4
-lib/appwrite/                 # clients, helpers (Member 1)
-lib/types/ | types/           # shared enums (Member 1)
+  seller/...                  # Member 3
+  admin/...                   # Member 4
+lib/backend/                  # session, roles, storage helpers (Member 1)
+lib/services/                 # data access (Member 1+)
+lib/types/                    # shared enums (Member 1)
 components/ui/                # design system (Member 1)
-functions/                    # PayHere Functions (Member 1 payment setup)
-docs/agent/                   # Agent reference docs (guide, schema, PayHere contract)
-WORK_DISTRIBUTION.md          # Root — checklists + step plans
+docs/agent/                   # Agent reference docs (guide, schema)
 ```
 
 ---
 
 ## 3. Shared contracts (do not fork)
+
+> **Legacy:** Member step tables below still mention checkout, PayHere, and Appwrite in places. The **shipped product** uses purchase requests only (§1). Implement against `docs/agent/SCHEMA.md` and `lib/types`, not removed payment flows.
 
 ### Status enums
 
@@ -123,7 +117,7 @@ WORK_DISTRIBUTION.md          # Root — checklists + step plans
 ```text
 1. Read this Member section + WORK_DISTRIBUTION.md for your lane
 2. Graphify query the area you will touch (if graph exists)
-3. Use MCP (Appwrite / Context7 / PayHere docs / shadcn) — don't invent APIs
+3. Use MCP (Context7 / shadcn / Playwright) — don't invent APIs
 4. Implement ONE step below (smallest vertical slice)
 5. Security + certainty re-read
 6. Tick checklist items
@@ -137,7 +131,7 @@ WORK_DISTRIBUTION.md          # Root — checklists + step plans
 ```text
 You are implementing Knurdz Marketplace for Member {N}.
 Read first: docs/agent/INDEX.md, WORK_DISTRIBUTION.md (root), docs/agent/MEMBER_IMPLEMENTATION_GUIDE.md § Member {N}, and .cursor/rules/*.
-Stack: Next.js App Router + Appwrite. Do not commit/push/PR.
+Stack: Next.js App Router + MariaDB + Better Auth. Do not commit/push/PR.
 Complete ONLY Step {X}: {title}.
 Constraints: {enums / ownership / security}.
 After: verify checklist, graphify update if code changed, summarize for human commit.
@@ -149,11 +143,11 @@ After: verify checklist, graphify update if code changed, summarize for human co
 
 ### You are building
 
-The **platform foundation** everyone else plugs into: Appwrite wiring, auth, roles, schema, storage, UI shells, shared types, seeds.
+The **platform foundation** everyone else plugs into: auth, roles, schema, storage, UI shells, shared types, seeds.
 
 ### Blocker rule
 
-**Members 2–4 must not bind production UI to live Appwrite until Member 1 Phase 0 “done when” is met.** They may mock UI earlier.
+**Members 2–4 must not bind production UI to live APIs until Member 1 Phase 0 “done when” is met.** They may mock UI earlier.
 
 ### Dependencies
 
@@ -164,12 +158,12 @@ None (you start first). Own **payment setup** (PayHere Functions + free confirm)
 | Step     | Goal                          | Do                                                                        | Verify                                     | Agent prompt hint                                                           |
 | -------- | ----------------------------- | ------------------------------------------------------------------------- | ------------------------------------------ | --------------------------------------------------------------------------- |
 | **1.1**  | Bootstrap Next.js             | App Router, TS, ESLint/Prettier, `.env.example`, README run steps         | `npm run dev` works                        | “Scaffold Next.js only; no features yet.”                                   |
-| **1.2**  | Appwrite clients              | Browser + server clients in `lib/appwrite`; env documented                | Can ping project / get session null safely | “Use Appwrite MCP docs; no secrets in NEXT_PUBLIC except endpoint/project.” |
+| **1.2**  | Backend helpers               | Session/roles/storage in `lib/backend`; env documented                  | Can read session null safely               | “Better Auth + Drizzle; no secrets in NEXT_PUBLIC.”                         |
 | **1.3**  | Auth pages                    | Register, login, logout, session display                                  | Round-trip auth                            | “Email/password only; optional phone on profile later.”                     |
-| **1.4**  | Password reset + email verify | Recovery + verify flows                                                   | Links work in sandbox/dev                  | “Wire Appwrite recovery/verification; clear error toasts.”                  |
+| **1.4**  | Password reset + email verify | Recovery + verify flows                                                   | Links work in sandbox/dev                  | “Wire Better Auth + SMTP; clear error toasts.”                              |
 | **1.5**  | Profiles collection           | `profiles` linked to `userId`; create on register                         | Profile exists after signup                | “Least-privilege permissions; user updates own profile only.”               |
 | **1.6**  | Roles & guards                | Labels/teams; middleware: `/seller`, `/admin`                             | Buyer blocked from admin                   | “Server-side checks, not UI-only.”                                          |
-| **1.7**  | SCHEMA.md + collections       | All MVP collections + indexes + permission notes → `docs/agent/SCHEMA.md` | Document matches console                   | “Use Appwrite MCP; write docs/agent/SCHEMA.md; freeze field names.”         |
+| **1.7**  | SCHEMA.md + tables            | Drizzle schema + notes → `docs/agent/SCHEMA.md`                           | Document matches migrations                | “Write docs/agent/SCHEMA.md; freeze field names.”                           |
 | **1.8**  | Storage buckets               | `avatars`, `product-images`, `bank-slips` (private), helpers              | Upload avatar works                        | “Validate mime/size; private slips.”                                        |
 | **1.9**  | UI kit + shells               | Layouts for store/seller/admin + navbar                                   | Empty dashboards render                    | “shadcn MCP; consistent buttons/forms/tables.”                              |
 | **1.10** | Shared types/enums            | Order/payment/product statuses exported                                   | Others can import                          | “Single source of truth; no string literals elsewhere.”                     |
@@ -183,7 +177,7 @@ None (you start first). Own **payment setup** (PayHere Functions + free confirm)
 
 Others can: register/login → hit role shell → upload a file → list seeded `active` products.
 
-**Payment setup (1.22–1.28):** others can complete **free** checkout via `confirmFreeOrder` (seeded `seed_demo_free_product`) and **PayHere sandbox** via `requestPayHereCheckout` + Member 2 UX, once Function merchant env + `PAYHERE_NOTIFY_URL` are set in the console. See [`PAYHERE.md`](./PAYHERE.md) consumer contract.
+**Payment setup (1.22–1.28):** others can complete **free** checkout via `confirmFreeOrder` (seeded `seed_demo_free_product`) and **PayHere sandbox** via `requestPayHereCheckout` + Member 2 UX, once Function merchant env + `PAYHERE_NOTIFY_URL` are set in the console. See [`SCHEMA.md`](./SCHEMA.md) consumer contract.
 
 **Phase 6:** Member 1 closes remaining MVP (seller listings through fulfillment, leftover admin, E2E). Canonical steps **6.1–6.22** in `WORK_DISTRIBUTION.md`.
 

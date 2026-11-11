@@ -8,9 +8,12 @@ import {
   markPurchaseRequestSold,
 } from "./purchase-requests";
 import {
-  PURCHASE_REQUEST_ERROR_CODES,
   type PurchaseRequestActionState,
 } from "./purchase-request-errors";
+import { verifyFormGuard } from "@/lib/security/bot-guard";
+
+const FORM_GUARD_ERROR =
+  "Could not submit this form. Please refresh and try again.";
 
 function readString(formData: FormData, key: string): string {
   const value = formData.get(key);
@@ -33,6 +36,9 @@ export async function createPurchaseRequestAction(
   _prev: PurchaseRequestActionState,
   formData: FormData,
 ): Promise<PurchaseRequestActionState> {
+  const guard = await verifyFormGuard(formData, "purchase-request.create");
+  if (!guard.ok) return { error: FORM_GUARD_ERROR };
+
   const productId = readString(formData, "productId");
   const quantityRaw = readString(formData, "quantity");
   const quantity = Number(quantityRaw);
@@ -51,6 +57,9 @@ export async function markPurchaseRequestSoldAction(
   _prev: PurchaseRequestActionState,
   formData: FormData,
 ): Promise<PurchaseRequestActionState> {
+  const guard = await verifyFormGuard(formData, "purchase-request.mark-sold");
+  if (!guard.ok) return { error: FORM_GUARD_ERROR };
+
   const requestId = readString(formData, "requestId");
   const result = await markPurchaseRequestSold(requestId);
   if (!result.ok) {
@@ -65,6 +74,9 @@ export async function markPurchaseRequestCancelledAction(
   _prev: PurchaseRequestActionState,
   formData: FormData,
 ): Promise<PurchaseRequestActionState> {
+  const guard = await verifyFormGuard(formData, "purchase-request.cancel");
+  if (!guard.ok) return { error: FORM_GUARD_ERROR };
+
   const requestId = readString(formData, "requestId");
   const result = await markPurchaseRequestCancelled(requestId);
   if (!result.ok) {

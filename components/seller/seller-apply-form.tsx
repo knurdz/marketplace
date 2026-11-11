@@ -4,10 +4,11 @@ import { useActionState } from "react";
 import {
   submitSellerApplication,
   type SellerApplicationActionState,
-} from "@/lib/appwrite/seller-application-actions";
+} from "@/lib/backend/seller-application-actions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { FormGuardFields } from "@/components/security/form-guard-fields";
 
 const initialState: SellerApplicationActionState = {};
 
@@ -19,6 +20,7 @@ export function SellerApplyForm() {
 
   return (
     <form action={formAction} className="mt-8 max-w-lg space-y-5">
+      <FormGuardFields action="seller.application.submit" />
       {state.error ? (
         <p
           role="alert"

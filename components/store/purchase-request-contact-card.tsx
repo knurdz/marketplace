@@ -1,4 +1,5 @@
 import type { PurchaseRequestContact } from "@/lib/types";
+import { emailHref, phoneHref } from "@/lib/security/contact";
 import { cn } from "@/lib/utils";
 
 type PurchaseRequestContactCardProps = {
@@ -88,13 +89,13 @@ export function PurchaseRequestContactCard({
               label="Phone"
               value={contact.phone ?? "Not provided"}
               testId="request-contact-phone"
-              href={contact.phone ? `tel:${contact.phone}` : undefined}
+              href={phoneHref(contact.phone)}
             />
             <ContactCell
               label="Email"
               value={contact.email ?? "Not provided"}
               testId="request-contact-email"
-              href={contact.email ? `mailto:${contact.email}` : undefined}
+              href={emailHref(contact.email)}
             />
           </>
         ) : (

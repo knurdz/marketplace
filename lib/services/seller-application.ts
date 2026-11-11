@@ -1,14 +1,20 @@
-import { AppwriteException, ID, Permission, Query, Role } from "@/lib/db/appwrite-shim";
+import {
+  DbException,
+  ID,
+  Permission,
+  Query,
+  Role,
+} from "@/lib/db/compat";
 import {
   BUCKET_AVATARS,
   DATABASE_ID,
   TABLE_SELLER_PROFILES,
-  hasAppwritePublicConfig,
-} from "@/lib/appwrite/config";
-import { ROLE_LABELS, userHasLabel } from "@/lib/appwrite/roles";
-import { createAdminClient, createSessionClient } from "@/lib/appwrite/server";
-import { deleteFile, uploadAvatar } from "@/lib/appwrite/storage";
-import { getLoggedInUser } from "@/lib/appwrite/session";
+  hasDatabaseConfig,
+} from "@/lib/backend/config";
+import { ROLE_LABELS, userHasLabel } from "@/lib/backend/roles";
+import { createAdminClient, createSessionClient } from "@/lib/backend/server";
+import { deleteFile, uploadAvatar } from "@/lib/backend/storage";
+import { getLoggedInUser } from "@/lib/backend/session";
 import { notifyAdminsEvent, notifyUserEvent } from "@/lib/email/events";
 import type { SellerProfile } from "@/lib/types";
 import { generateSlug } from "./categories";
@@ -41,12 +47,10 @@ export type UpdateShopProfileInput = {
 };
 
 export type ShopProfileUpdateResult =
-  | { ok: true; message: string; slug: string }
-  | { ok: false; error: string };
+  { ok: true; message: string; slug: string } | { ok: false; error: string };
 
 export type ShopBannerUpdateResult =
-  | { ok: true; message: string; slug: string }
-  | { ok: false; error: string };
+  { ok: true; message: string; slug: string } | { ok: false; error: string };
 
 export type UpdateShopPoliciesInput = {
   returnPolicy?: string;
@@ -236,7 +240,7 @@ function existingApplicationMessage(profile: SellerProfile): string {
 export async function submitSellerApplicationCore(
   input: SubmitSellerApplicationInput,
 ): Promise<SellerApplicationResult> {
-  if (!hasAppwritePublicConfig()) {
+  if (!hasDatabaseConfig()) {
     return { ok: false, error: "Marketplace is not configured." };
   }
 
@@ -284,7 +288,10 @@ export async function submitSellerApplicationCore(
 
     const profile = asSellerProfile(row as unknown as Record<string, unknown>);
     if (!profile || profile.userId !== user.$id) {
-      return { ok: false, error: "Application was created but could not be verified." };
+      return {
+        ok: false,
+        error: "Application was created but could not be verified.",
+      };
     }
 
     await Promise.all([
@@ -313,18 +320,22 @@ export async function submitSellerApplicationCore(
       profileId: profile.$id,
     };
   } catch (error) {
-    if (error instanceof AppwriteException) {
+    if (error instanceof DbException) {
       if (error.code === 409) {
         return {
           ok: false,
-          error: "You already have a seller application or this shop URL is taken.",
+          error:
+            "You already have a seller application or this shop URL is taken.",
         };
       }
       if (error.code === 401) {
         return { ok: false, error: "You must be signed in to apply." };
       }
     }
-    return { ok: false, error: "Could not submit application. Please try again." };
+    return {
+      ok: false,
+      error: "Could not submit application. Please try again.",
+    };
   }
 }
 
@@ -336,7 +347,7 @@ export async function createPendingSellerProfileForUser(
   userId: string,
   input: SubmitSellerApplicationInput,
 ): Promise<SellerApplicationResult> {
-  if (!hasAppwritePublicConfig() || !process.env.DATABASE_URL?.trim()) {
+  if (!hasDatabaseConfig()) {
     return { ok: false, error: "Marketplace is not configured." };
   }
 
@@ -384,7 +395,10 @@ export async function createPendingSellerProfileForUser(
 
     const profile = asSellerProfile(row as unknown as Record<string, unknown>);
     if (!profile || profile.userId !== trimmedUserId) {
-      return { ok: false, error: "Application was created but could not be verified." };
+      return {
+        ok: false,
+        error: "Application was created but could not be verified.",
+      };
     }
 
     await Promise.all([
@@ -413,13 +427,17 @@ export async function createPendingSellerProfileForUser(
       profileId: profile.$id,
     };
   } catch (error) {
-    if (error instanceof AppwriteException && error.code === 409) {
+    if (error instanceof DbException && error.code === 409) {
       return {
         ok: false,
-        error: "You already have a seller application or this shop URL is taken.",
+        error:
+          "You already have a seller application or this shop URL is taken.",
       };
     }
-    return { ok: false, error: "Could not submit application. Please try again." };
+    return {
+      ok: false,
+      error: "Could not submit application. Please try again.",
+    };
   }
 }
 
@@ -430,7 +448,7 @@ export async function createPendingSellerProfileForUser(
 export async function updateOwnShopProfileCore(
   input: UpdateShopProfileInput,
 ): Promise<ShopProfileUpdateResult> {
-  if (!hasAppwritePublicConfig()) {
+  if (!hasDatabaseConfig()) {
     return { ok: false, error: "Marketplace is not configured." };
   }
 
@@ -474,12 +492,15 @@ export async function updateOwnShopProfileCore(
       slug: existing.slug,
     };
   } catch (error) {
-    if (error instanceof AppwriteException) {
+    if (error instanceof DbException) {
       if (error.code === 401 || error.code === 404) {
         return { ok: false, error: "Not allowed to update this shop." };
       }
     }
-    return { ok: false, error: "Could not update shop profile. Please try again." };
+    return {
+      ok: false,
+      error: "Could not update shop profile. Please try again.",
+    };
   }
 }
 
@@ -490,13 +511,16 @@ export async function updateOwnShopProfileCore(
 export async function updateOwnShopPoliciesCore(
   input: UpdateShopPoliciesInput,
 ): Promise<ShopProfileUpdateResult> {
-  if (!hasAppwritePublicConfig()) {
+  if (!hasDatabaseConfig()) {
     return { ok: false, error: "Marketplace is not configured." };
   }
 
   const user = await getLoggedInUser();
   if (!user) {
-    return { ok: false, error: "You must be signed in to update shop policies." };
+    return {
+      ok: false,
+      error: "You must be signed in to update shop policies.",
+    };
   }
 
   const parsed = parseShopPolicyInput(input);
@@ -536,12 +560,15 @@ export async function updateOwnShopPoliciesCore(
       slug: existing.slug,
     };
   } catch (error) {
-    if (error instanceof AppwriteException) {
+    if (error instanceof DbException) {
       if (error.code === 401 || error.code === 404) {
         return { ok: false, error: "Not allowed to update shop policies." };
       }
     }
-    return { ok: false, error: "Could not update shop policies. Please try again." };
+    return {
+      ok: false,
+      error: "Could not update shop policies. Please try again.",
+    };
   }
 }
 
@@ -552,7 +579,7 @@ export async function updateOwnShopPoliciesCore(
 export async function updateOwnShopBannerCore(
   file: File,
 ): Promise<ShopBannerUpdateResult> {
-  if (!hasAppwritePublicConfig()) {
+  if (!hasDatabaseConfig()) {
     return { ok: false, error: "Marketplace is not configured." };
   }
 
@@ -612,10 +639,7 @@ export async function updateOwnShopBannerCore(
         // Ignore cleanup failure.
       }
     }
-    if (error instanceof Error && !(error instanceof AppwriteException)) {
-      return { ok: false, error: error.message };
-    }
-    if (error instanceof AppwriteException) {
+    if (error instanceof DbException) {
       if (error.code === 401 || error.code === 404) {
         return { ok: false, error: "Not allowed to update this shop." };
       }

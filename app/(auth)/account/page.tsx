@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { ProfileForm } from "@/components/auth/profile-form";
@@ -14,14 +15,17 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { signOut } from "@/lib/appwrite/auth";
-import { getOwnProfile } from "@/lib/appwrite/profiles";
+import { signOut } from "@/lib/backend/auth";
+import { getOwnProfile } from "@/lib/backend/profiles";
 import {
   ROLE_LABELS,
   userHasLabel,
-} from "@/lib/appwrite/roles";
-import { getLoggedInUser } from "@/lib/appwrite/session";
-import { resolveAvatarUrl } from "@/lib/appwrite/storage-urls";
+} from "@/lib/backend/roles";
+import { getLoggedInUser } from "@/lib/backend/session";
+import { resolveAvatarUrl } from "@/lib/backend/storage-urls";
+import { buildNoIndexMetadata } from "@/lib/seo/metadata";
+
+export const metadata: Metadata = buildNoIndexMetadata("Account");
 
 function roleLabel(user: {
   labels?: string[];

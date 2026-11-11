@@ -1,8 +1,8 @@
 import {
   DATABASE_ID,
   TABLE_PRODUCTS,
-} from "@/lib/appwrite/config";
-import { createAdminClient } from "@/lib/appwrite/server";
+} from "@/lib/backend/config";
+import { createAdminClient } from "@/lib/backend/server";
 
 type StockLine = { productId: string; quantity: number };
 

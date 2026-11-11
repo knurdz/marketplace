@@ -5,7 +5,7 @@ import Link from "next/link";
 import { Settings } from "lucide-react";
 import { AccountMenu } from "@/components/layout/account-menu";
 import { portalWelcomeName } from "@/components/layout/portal-greeting";
-import type { SessionUserView } from "@/lib/appwrite/session-user";
+import type { SessionUserView } from "@/lib/backend/session-user";
 import { NotificationBell } from "@/components/notifications/notification-bell";
 import { ThemeToggle } from "@/components/theme/theme-toggle";
 import { SidebarTrigger } from "@/components/ui/sidebar";

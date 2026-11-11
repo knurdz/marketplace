@@ -90,6 +90,7 @@ export function SellerRequestResolveActions({
         pending={soldPending}
         confirmTestId="seller-mark-sold-confirm"
         formAction={soldAction}
+        formGuardAction="purchase-request.mark-sold"
         hiddenFields={{ requestId }}
       />
 
@@ -115,6 +116,7 @@ export function SellerRequestResolveActions({
         pending={cancelPending}
         confirmTestId="seller-mark-cancelled-confirm"
         formAction={cancelAction}
+        formGuardAction="purchase-request.cancel"
         hiddenFields={{ requestId }}
       />
     </div>

@@ -5,7 +5,7 @@ import { PortalAppSidebar } from "@/components/layout/portal-app-sidebar";
 import { PortalDrawerHost } from "@/components/layout/portal-drawer-host";
 import { PortalTopBar } from "@/components/layout/portal-top-bar";
 import type { PortalNavGroup } from "@/components/layout/portal-side-nav";
-import type { SessionUserView } from "@/lib/appwrite/session-user";
+import type { SessionUserView } from "@/lib/backend/session-user";
 import {
   SidebarInset,
   SidebarProvider,

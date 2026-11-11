@@ -17,4 +17,4 @@ Canonical task ownership and checklists live in `WORK_DISTRIBUTION.md`.
 1. Open `WORK_DISTRIBUTION.md` and tick every **relevant** checklist item for that change (security, role, payments, graphify, MCP, etc.).
 2. If an item cannot be checked, fix the gap or document why it does not apply — do not silently skip.
 3. Do not expand scope into another member’s lane without updating `WORK_DISTRIBUTION.md`.
-4. Prefer approved MCPs (Appwrite, PayHere, Context7, next-devtools, shadcn, Playwright) per `mcp-acceleration.mdc` — never GitHub MCP.
+4. Prefer approved MCPs (Context7, next-devtools, shadcn, Playwright) per `mcp-acceleration.mdc` — never GitHub MCP.

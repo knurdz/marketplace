@@ -1,6 +1,6 @@
 <!-- BEGIN:nextjs-agent-rules -->
 
-# This is NOT the Next.js you know
+## This is NOT the Next.js you know
 
 This version has breaking changes — APIs, conventions, and file structure may all differ from your training data. Read the relevant guide in `node_modules/next/dist/docs/` (resolved from this file's directory; in monorepos the `next` package may not be visible from the repo root) before writing any code. Heed deprecation notices.
 
@@ -16,7 +16,7 @@ Before planning or implementing, read:
 2. `WORK_DISTRIBUTION.md` (repo root — checklists + numbered steps)
 3. `docs/agent/MEMBER_IMPLEMENTATION_GUIDE.md` (your Member section)
 4. `.cursor/rules/*`
-5. `docs/agent/SCHEMA.md` and `docs/agent/PAYHERE.md` when they exist
+5. `docs/agent/SCHEMA.md` when it exists
 
 Implement **one numbered step** at a time. Tick the matching step in `WORK_DISTRIBUTION.md` when done. Do not commit unless the human explicitly asks. When a commit is allowed, follow the Git Commit Identity rules below (invoking member as author and committer).
 
@@ -24,13 +24,13 @@ Implement **one numbered step** at a time. Tick the matching step in `WORK_DISTR
 
 ## Stack & Architecture Conventions
 - **Frontend**: Next.js App Router + TypeScript.
-- **Backend**: Appwrite (Auth, Database, Storage, Functions).
-- **Roles**: `buyer` (default), `seller` (approved), `admin` — enforce with labels/teams **and** collection permissions.
-- **Portals**: storefront `/`, seller `/seller`, admin `/admin` (adjust only if project structure already differs).
-- **Payments**: PayHere sandbox, bank transfer, free (`amount = 0`) — single-seller orders for MVP.
-- **Statuses**: Use shared types/enums for order and payment statuses; do not invent parallel status strings.
-- **SDK & Secrets**: Client SDK for public reads/user actions; secrets and PayHere notify only in Appwrite Functions (or secure server routes).
-- **Permissions**: Prefer least privilege on every new collection/bucket; document permission intent in PR/commit message when touching schema.
+- **Backend**: MariaDB (Drizzle), Better Auth, local disk or Hostinger storage API.
+- **Roles**: `buyer` (default), `seller` (approved), `admin` — enforce with labels **and** server-side checks in services/actions.
+- **Portals**: storefront `/`, seller `/seller`, admin `/admin`.
+- **Commerce**: Purchase requests only; off-platform settlement; stock updates on **sold**.
+- **Statuses**: Use shared types/enums from `lib/types`; do not invent parallel status strings.
+- **Secrets**: Server-only env; never merchant secrets or API keys in client code or `NEXT_PUBLIC_*`.
+- **Uploads**: Validate type/size; private buckets with least-privilege access.
 
 ---
 
@@ -58,17 +58,14 @@ When the agent creates a git commit (because the human explicitly requested it):
 
 ## Approved MCP Tools
 Use **only** approved MCP servers:
-1. **Appwrite MCP** — project ops, Auth, DB, Storage, Functions, Appwrite docs
-2. **PayHere docs MCP** — checkout, hash, notify_url, SDK guides
-3. **PayHere Merchant MCP** (optional) — signed checkout payloads, hash verify, payment lookup (sandbox only; never commit secrets)
-4. **Context7** — up-to-date Next.js / React / library docs
-5. **next-devtools-mcp** — live Next.js routes, errors, logs (when dev server runs)
-6. **shadcn MCP** — browse/search/install UI components
-7. **Playwright MCP** — browser E2E for buyer/seller/admin flows
+1. **Context7** — up-to-date Next.js / React / library docs
+2. **next-devtools-mcp** — live Next.js routes, errors, logs (when dev server runs)
+3. **shadcn MCP** — browse/search/install UI components
+4. **Playwright MCP** — browser E2E for buyer/seller/admin flows
 
 **Strict MCP Prohibitions**:
 - Do **not** add or use GitHub MCP (or equivalent) for commits, PRs, issues, or merges.
-- Do **not** use Supabase MCP for this app's data plane (Appwrite is backend).
+- Do **not** use Supabase MCP for this app's MariaDB/Drizzle data plane.
 - MCP speed never overrides security review or `WORK_DISTRIBUTION.md` checklist ticks.
 
 ---
@@ -79,16 +76,15 @@ This project maintains a knowledge graph at `graphify-out/`.
 - If `graphify-out/wiki/index.md` exists, navigate it instead of reading raw files.
 - Read `graphify-out/GRAPH_REPORT.md` for broad architecture review.
 - If the graph is missing or stale before large features, run `/graphify .` (or `/graphify . --update`).
-- **After implementing**: Run `graphify update .` (or `/graphify . --update`) so new files and edges are indexed. Never skip this when adding modules, routes, Functions, or schema code.
+- **After implementing**: Run `graphify update .` (or `/graphify . --update`) so new files and edges are indexed. Never skip this when adding modules, routes, or schema code.
 
 ---
 
 ## Security First
 After each implementation, run a security pass and fix gaps before finishing:
-- **AuthZ**: Server-side Appwrite permissions / role labels — never rely on UI hiding alone.
-- **Secrets**: No merchant secrets, API keys, or service keys in client code or `NEXT_PUBLIC_*`.
-- **Payments**: PayHere hash + `notify_url` verification only on server/Functions; never trust `return_url` alone; keep payment updates idempotent.
-- **Uploads**: Validate type and size; bank slips and digital goods stay in private buckets with least-privilege access.
+- **AuthZ**: Server-side role labels and service-layer ownership checks — never rely on UI hiding alone.
+- **Secrets**: No API keys or service keys in client code or `NEXT_PUBLIC_*`.
+- **Uploads**: Validate type and size; user uploads stay in private buckets with least-privilege access.
 - **Input**: Validate and sanitize user input; avoid unchecked strings in queries or HTML.
 - **IDOR**: Confirm the caller owns the order/listing/profile they mutate.
 - **Logs**: Do not log secrets, full card data, or raw bank account numbers.

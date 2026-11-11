@@ -11,7 +11,7 @@ import {
   removeListingFormAction,
   setFeaturedListingFormAction,
   type ListingModerationActionState,
-} from "@/lib/appwrite/listing-moderation-actions";
+} from "@/lib/backend/listing-moderation-actions";
 import { toast } from "@/lib/ui/toast";
 
 const initial: ListingModerationActionState = {};

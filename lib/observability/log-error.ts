@@ -1,9 +1,9 @@
 /**
- * Server-side error logger. Records Appwrite type/code/message and a call-site
+ * Server-side error logger. Records DbException type/code/message and a call-site
  * tag. Never logs payloads, secrets, card data, or raw bank account numbers.
  */
 
-import { AppwriteException } from "@/lib/db/appwrite-shim";
+import { DbException } from "@/lib/db/compat";
 
 const SENSITIVE_KEY =
   /secret|password|token|authorization|cookie|md5sig|card|pan|cvv|account/i;
@@ -31,9 +31,9 @@ export function logError(
     ...sanitizeExtra(extra),
   };
 
-  if (error instanceof AppwriteException) {
-    payload.appwriteType = error.type;
-    payload.appwriteCode = error.code;
+  if (error instanceof DbException) {
+    payload.dbType = error.type;
+    payload.dbCode = error.code;
     payload.message = error.message;
   } else if (error instanceof Error) {
     payload.name = error.name;

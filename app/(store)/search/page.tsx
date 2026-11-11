@@ -1,5 +1,7 @@
+import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { CatalogView } from "@/components/store/catalog-view";
+import { buildPublicMetadata } from "@/lib/seo/metadata";
 import {
   listCategories,
   listCoverImagesByProductIds,
@@ -17,6 +19,25 @@ type SearchPageProps = {
     sort?: string;
   }>;
 };
+
+export async function generateMetadata({
+  searchParams,
+}: SearchPageProps): Promise<Metadata> {
+  const params = await searchParams;
+  const rawQ = typeof params.q === "string" ? params.q : "";
+  const normalized = normalizeProductSearchQuery(rawQ);
+  const title = normalized ? `Search “${normalized}”` : "Search Listings";
+
+  return buildPublicMetadata({
+    title,
+    description: normalized
+      ? `Search results for “${normalized}” on Knurdz Marketplace.`
+      : "Search active listings on Knurdz Marketplace.",
+    canonicalPath: "/search",
+    noIndex: true,
+    follow: true,
+  });
+}
 
 export default async function SearchPage({ searchParams }: SearchPageProps) {
   const params = await searchParams;

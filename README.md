@@ -19,7 +19,7 @@ Multi-role marketplace web app built with **Next.js**, **MariaDB** (Drizzle), **
 3. They settle the sale personally.
 4. Seller marks the request **sold** (stock decreases) or **cancelled** (stock unchanged).
 
-See [`docs/agent/PAYHERE.md`](./docs/agent/PAYHERE.md) (payments note) and [`docs/agent/SCHEMA.md`](./docs/agent/SCHEMA.md).
+See [`docs/agent/SCHEMA.md`](./docs/agent/SCHEMA.md).
 
 ## Team & agent docs
 
@@ -69,34 +69,20 @@ npm run seed      # demo users + sample product
 
 Default DB URL: `mysql://knurdz:knurdz_dev@127.0.0.1:3306/marketplace`
 
-## Legacy Appwrite setup (removed)
-
-1. Copy env: `cp .env.example .env.local`
-2. In [Appwrite Console](https://cloud.appwrite.io/console) open the **Knurdz Marketplace** project.
-3. Set in `.env.local`:
-   - `NEXT_PUBLIC_APPWRITE_ENDPOINT=https://sgp.cloud.appwrite.io/v1` (sgp region)
-   - `NEXT_PUBLIC_APPWRITE_PROJECT_ID=` project id from **Settings**
-   - `APPWRITE_API_KEY=` a server API key with **`sessions.write`**, **`users.write`**, and **`databases.write`** (SSR auth + profile create-on-register; never `NEXT_PUBLIC_*`)
-   - `NEXT_PUBLIC_APP_URL=http://localhost:3000` for local dev
-4. Under **Add a platform**, add a **Web** app with hostname `localhost` (required for browser SDK CORS and recovery/verify redirect URLs).
-5. Set `NEXT_PUBLIC_APP_URL` to the same origin you open in the browser (e.g. `http://localhost:3000`) so password-reset and email-verify links redirect correctly.
-
-Clients live in [`lib/appwrite/`](./lib/appwrite/): browser (`appwrite`) + server session/admin (`node-appwrite`). Session cookie name: `knurdz_session`. TablesDB database id: `marketplace` — full table contract in [`docs/agent/SCHEMA.md`](./docs/agent/SCHEMA.md). Re-apply with `node --env-file=.env.local scripts/setup-mvp-schema.mjs`. Storage buckets (`avatars`, `product-images`, `bank-slips`): `node --env-file=.env.local scripts/setup-storage-buckets.mjs` (API key needs **storage** write).
-
-Shared contracts for other members:
+Server helpers live in [`lib/backend/`](./lib/backend/) (session, roles, storage wrappers). Table contract: [`docs/agent/SCHEMA.md`](./docs/agent/SCHEMA.md). Shared contracts for other members:
 
 - Statuses / row types: [`lib/types/`](./lib/types/)
 - Session / products / uploads: [`lib/services/`](./lib/services/)
 
 ### Demo seed (dev / sandbox only)
 
-After schema + buckets are applied:
+After migrations:
 
 ```bash
 npm run seed
 ```
 
-Creates idempotent demo users, profiles, **two** approved seller shops with bank details, two categories, and **five** active sample products (paid bank/COD, free, multi-seller). PayHere is off by default; bank + COD + free paths are demoable after seed.
+Creates idempotent demo users, profiles, **two** approved seller shops, categories, and sample products for local testing.
 
 | Role    | Email                  | Labels            | Shop slug      |
 | ------- | ---------------------- | ----------------- | -------------- |
@@ -108,9 +94,7 @@ Creates idempotent demo users, profiles, **two** approved seller shops with bank
 Sample SKUs: `seed_demo_product` (500 LKR), `seed_demo_free_product` (free), `seed_demo_tote` (goods), `seed_seller2_digital`, `seed_seller2_goods`.
 
 Password for all demo accounts: `DemoPass123!`  
-**Sandbox only** — never reuse in production. Not a merchant/Appwrite secret; do not put in `NEXT_PUBLIC_*`.
-
-API key for seed needs **users.write** + TablesDB write (same key used for schema setup).
+**Sandbox only** — never reuse in production.
 
 ### Auth routes
 
@@ -130,20 +114,9 @@ Shared storefront `/` is the buyer landing page. There is a single `/login` (no 
 
 ## Status
 
-**Phase 0 complete (steps 1.1–1.13).** Member 1 foundation is ready: auth, schema, storage, UI shells, shared types/services, and demo seed. **Members 2–4 may bind UI to live Appwrite APIs.**
+**Phase 0 complete (steps 1.1–1.13).** Member 1 foundation is ready: auth, schema, storage, UI shells, shared types/services, and demo seed.
 
-**Payment setup complete (steps 1.22–1.28).** Member 2 checkout UX calls `requestPayHereCheckout` and `confirmFreeOrder`; Member 4 reads notify logs. Sandbox test cards and the consume contract: [`docs/agent/PAYHERE.md`](./docs/agent/PAYHERE.md). Card E2E still needs merchant id/secret + notify domain on Function env in the console (never `NEXT_PUBLIC_*`).
-
-Setup order for a fresh clone: env → `setup-mvp-schema.mjs` → `setup-storage-buckets.mjs` → `npm run seed` → `npm run dev`.
-
-### Phase 6.17 — PayHere sandbox console (human, once)
-
-Code paths are complete (steps 1.22–1.28). Before `npm run test:e2e:payhere`, a human must set **Function env in the Appwrite console only** (never git / `NEXT_PUBLIC_*`):
-
-1. Deploy `payhere-checkout-hash` (execute **users**) and `payhere-notify` (execute **any**, timeout ≥ 15s, databases read/write).
-2. On **both** Functions: `PAYHERE_MERCHANT_ID`, `PAYHERE_MERCHANT_SECRET`.
-3. On hash Function: `PAYHERE_SANDBOX=true`, `APP_URL=http://localhost:3000`, `PAYHERE_NOTIFY_URL=` public `payhere-notify` HTTP URL.
-4. Manual click-path: [`docs/agent/PAYHERE.md`](./docs/agent/PAYHERE.md#sandbox-demo-step-127) (buyer → seed PayHere SKU → sandbox card → admin notify logs).
+Setup order for a fresh clone: `cp .env.example .env.local` → `docker compose up -d` → `npm run schema` → `npm run seed` → `npm run dev`.
 
 ### E2E tests (Phase 6.18)
 
@@ -154,4 +127,5 @@ npx playwright install chromium
 npm run test:e2e
 ```
 
-Uses unique `@knurdz.demo` emails per run. Default password matches demo seed: `DemoPass123!` (override with `E2E_PASSWORD`). PayHere spec is skipped unless `PAYHERE_E2E=1` after **6.17** console setup.
+Uses unique `@knurdz.demo` emails per run. Default password matches demo seed:
+`DemoPass123!` (override with `E2E_PASSWORD`).

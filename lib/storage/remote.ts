@@ -1,8 +1,11 @@
 import { eq } from "drizzle-orm";
+import { IMAGE_MIME_TYPES } from "@/lib/backend/config";
 import { getDb, newId } from "@/lib/db/client";
 import { storedFiles } from "@/lib/db/schema";
+import type { DetectedImageMime } from "@/lib/security/file-signature";
 
 const REMOTE_TIMEOUT_MS = 20_000;
+const SAFE_FILE_ID = /^[A-Za-z0-9_-]{8,64}$/;
 
 function getRemoteStorageConfig(): { baseUrl: string; token: string } | null {
   const baseUrl = process.env.STORAGE_API_URL?.trim().replace(/\/$/, "") ?? "";
@@ -44,13 +47,29 @@ async function fetchWithTimeout(
   }
 }
 
-function sanitizeRemoteError(status: number, bodyError?: string): string {
-  const safe =
-    bodyError &&
-    !/token|bearer|authorization|\/home\/|storage\/app/i.test(bodyError)
-      ? bodyError
-      : `HTTP ${status}`;
-  return `Storage request failed: ${safe}`;
+function sanitizeRemoteError(status: number): string {
+  return `Storage request failed (HTTP ${status}).`;
+}
+
+async function deleteRemoteObject(
+  cfg: { baseUrl: string; token: string },
+  bucketId: string,
+  fileId: string,
+): Promise<void> {
+  try {
+    await fetchWithTimeout(
+      `${cfg.baseUrl}/api/v1/files/${encodeURIComponent(bucketId)}/${encodeURIComponent(fileId)}`,
+      {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${cfg.token}`,
+          Accept: "application/json",
+        },
+      },
+    );
+  } catch {
+    // Best-effort orphan cleanup.
+  }
 }
 
 export async function putRemoteFile(params: {
@@ -58,6 +77,7 @@ export async function putRemoteFile(params: {
   ownerId: string;
   file: File;
   fileId?: string;
+  detectedMime: DetectedImageMime;
 }): Promise<{ fileId: string }> {
   const cfg = getRemoteStorageConfig();
   if (!cfg) {
@@ -85,54 +105,76 @@ export async function putRemoteFile(params: {
   }
 
   if (!response.ok) {
-    let detail: string | undefined;
-    try {
-      const json = (await response.json()) as { error?: string };
-      detail = json?.error;
-    } catch {
-      // ignore non-json error body
-    }
-    throw new Error(sanitizeRemoteError(response.status, detail));
+    throw new Error(sanitizeRemoteError(response.status));
   }
 
-  const payload = (await response.json()) as { fileId?: string };
-  const resolvedId = payload.fileId?.trim() || fileId;
+  let payload: unknown;
+  try {
+    payload = await response.json();
+  } catch {
+    await deleteRemoteObject(cfg, params.bucketId, fileId);
+    throw new Error("Storage API returned an invalid response.");
+  }
 
-  const db = getDb();
-  await db.insert(storedFiles).values({
-    id: resolvedId,
-    bucketId: params.bucketId,
-    ownerId: params.ownerId,
-    mimeType: params.file.type || "application/octet-stream",
-    sizeBytes: params.file.size,
-    originalName: params.file.name,
-  });
+  const responseFileId =
+    payload &&
+    typeof payload === "object" &&
+    "fileId" in payload &&
+    typeof payload.fileId === "string"
+      ? payload.fileId.trim()
+      : "";
+  const responseMime =
+    payload &&
+    typeof payload === "object" &&
+    "mimeType" in payload &&
+    typeof payload.mimeType === "string"
+      ? payload.mimeType.trim().toLowerCase()
+      : "";
 
-  return { fileId: resolvedId };
+  if (
+    !SAFE_FILE_ID.test(responseFileId) ||
+    responseFileId !== fileId ||
+    !IMAGE_MIME_TYPES.includes(
+      responseMime as (typeof IMAGE_MIME_TYPES)[number],
+    ) ||
+    responseMime !== params.detectedMime
+  ) {
+    await deleteRemoteObject(cfg, params.bucketId, fileId);
+    throw new Error("Storage API returned invalid file metadata.");
+  }
+
+  try {
+    const db = getDb();
+    await db.insert(storedFiles).values({
+      id: responseFileId,
+      bucketId: params.bucketId,
+      ownerId: params.ownerId,
+      mimeType: responseMime,
+      sizeBytes: params.file.size,
+      originalName: params.file.name,
+    });
+  } catch {
+    await deleteRemoteObject(cfg, params.bucketId, responseFileId);
+    throw new Error("Unable to save uploaded file.");
+  }
+
+  return { fileId: responseFileId };
 }
 
 export async function deleteRemoteFile(
   bucketId: string,
   fileId: string,
-): Promise<void> {
+): Promise<boolean> {
   const cfg = getRemoteStorageConfig();
   if (!cfg) {
     throw new Error("Remote storage API is not configured.");
   }
 
-  const url = `${cfg.baseUrl}/api/v1/files/${encodeURIComponent(bucketId)}/${encodeURIComponent(fileId)}`;
-  try {
-    await fetchWithTimeout(url, {
-      method: "DELETE",
-      headers: {
-        Authorization: `Bearer ${cfg.token}`,
-        Accept: "application/json",
-      },
-    });
-  } catch {
-    // Keep deletion idempotent when remote is unreachable or already removed
-  }
+  await deleteRemoteObject(cfg, bucketId, fileId);
 
   const db = getDb();
-  await db.delete(storedFiles).where(eq(storedFiles.id, fileId));
+  const [result] = await db
+    .delete(storedFiles)
+    .where(eq(storedFiles.id, fileId));
+  return result.affectedRows > 0;
 }

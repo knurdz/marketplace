@@ -1,7 +1,7 @@
 import { ShopProfileForm } from "@/components/seller/shop-profile-form";
 import { PortalPageHeader } from "@/components/layout/portal-page-header";
-import { requireLabel } from "@/lib/appwrite/roles";
-import { getShopBannerPreviewUrl } from "@/lib/appwrite/storage-urls";
+import { requireLabel } from "@/lib/backend/roles";
+import { getShopBannerPreviewUrl } from "@/lib/backend/storage-urls";
 import { getOwnSellerProfile } from "@/lib/services/seller-application";
 
 export default async function SellerShopPage() {

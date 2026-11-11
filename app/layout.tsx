@@ -3,6 +3,14 @@ import { Nunito_Sans, Space_Grotesk } from "next/font/google";
 import type { ReactNode } from "react";
 import { ThemeProvider } from "@/components/theme/theme-provider";
 import { Toaster } from "@/components/ui/sonner";
+import {
+  DEFAULT_OG_IMAGE_PATH,
+  getMetadataBase,
+  SITE_DESCRIPTION,
+  SITE_LOCALE,
+  SITE_NAME,
+  SITE_TITLE_DEFAULT,
+} from "@/lib/seo/metadata";
 import "./globals.css";
 import { cn } from "@/lib/utils";
 
@@ -19,9 +27,56 @@ const nunitoSans = Nunito_Sans({
 });
 
 export const metadata: Metadata = {
-  title: "Knurdz Marketplace",
-  description:
-    "Multi-role marketplace for buyers, sellers, and admins. Built by Knurdz.",
+  metadataBase: getMetadataBase(),
+  title: {
+    default: SITE_TITLE_DEFAULT,
+    template: `%s | ${SITE_NAME}`,
+  },
+  description: SITE_DESCRIPTION,
+  applicationName: SITE_NAME,
+  keywords: [
+    "Knurdz Marketplace",
+    "Knurdz",
+    "community marketplace",
+    "buy and sell Sri Lanka",
+    "peer to peer marketplace",
+    "local shops",
+    "zero commission marketplace",
+  ],
+  alternates: {
+    canonical: "/",
+  },
+  openGraph: {
+    title: SITE_TITLE_DEFAULT,
+    description: SITE_DESCRIPTION,
+    url: "/",
+    siteName: SITE_NAME,
+    locale: SITE_LOCALE,
+    type: "website",
+    images: [
+      {
+        url: DEFAULT_OG_IMAGE_PATH,
+        alt: SITE_NAME,
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: SITE_TITLE_DEFAULT,
+    description: SITE_DESCRIPTION,
+    images: [DEFAULT_OG_IMAGE_PATH],
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+      "max-video-preview": -1,
+    },
+  },
   icons: {
     icon: [
       { url: "/icons/favicon-16.png", sizes: "16x16", type: "image/png" },

@@ -1,10 +1,14 @@
+import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { CompleteRegistrationForm } from "@/components/auth/complete-registration-form";
-import { resolvePostLoginPath } from "@/lib/appwrite/home-path";
-import { hasOAuthSellerIntent } from "@/lib/appwrite/oauth-seller-intent";
-import { createProfileForUser, getOwnProfile } from "@/lib/appwrite/profiles";
-import { safeNextPath } from "@/lib/appwrite/roles";
-import { getLoggedInUser } from "@/lib/appwrite/session";
+import { resolvePostLoginPath } from "@/lib/backend/home-path";
+import { hasOAuthSellerIntent } from "@/lib/backend/oauth-seller-intent";
+import { createProfileForUser, getOwnProfile } from "@/lib/backend/profiles";
+import { safeNextPath } from "@/lib/backend/roles";
+import { getLoggedInUser } from "@/lib/backend/session";
+import { buildNoIndexMetadata } from "@/lib/seo/metadata";
+
+export const metadata: Metadata = buildNoIndexMetadata("Finish Registration");
 
 export default async function RegisterCompletePage({
   searchParams,

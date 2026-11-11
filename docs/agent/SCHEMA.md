@@ -62,6 +62,7 @@ Owner-only saved products.
 | Column | Notes |
 |--------|-------|
 | `buyerId`, `sellerId`, `productId` | Parties + listing |
+| `openKey` | Nullable unique `buyerId:productId`; present only while `requested`, preventing duplicate open requests |
 | `title` | Snapshot |
 | `quantity`, `unitPrice`, `currency` | Snapshot |
 | `status` | `requested` \| `sold` \| `cancelled` |
@@ -88,7 +89,17 @@ Storefront/admin lists rank categories by live product count (`status=active` an
 
 ### Also retained
 
-`reports`, `notifications`, `platform_settings`, `audit_logs`, `view_stats`, `rate_limits`, `stored_files`, Better Auth `user` / `session` / `account` / `verification`.
+`reports`, `notifications`, `platform_settings`, `audit_logs`, `view_stats`,
+`rate_limits`, `stored_files`, `storage_quotas`, Better Auth `user` / `session`
+/ `account` / `verification` / `auth_rate_limit`.
+
+`auth_rate_limit` is Better Auth's database-backed HTTP endpoint limiter. It is
+separate from the marketplace `rate_limits` table so Better Auth can manage its
+own key, count, and request-window state atomically.
+
+`storage_quotas` is an atomic per-owner reservation counter (maximum 100 files
+and 250MB). Uploads reserve before writing and release on failed upload or
+deletion, preventing parallel requests from bypassing aggregate quotas.
 
 ## Removed
 

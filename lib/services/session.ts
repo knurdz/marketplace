@@ -1,5 +1,5 @@
-import type { Models } from "@/lib/db/appwrite-shim";
-import { getLoggedInUser } from "@/lib/appwrite/session";
+import type { Models } from "@/lib/db/compat";
+import { getLoggedInUser } from "@/lib/backend/session";
 
 /**
  * Stable session contract for Members 2–4.

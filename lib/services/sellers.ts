@@ -1,9 +1,9 @@
-import { Query } from "@/lib/db/appwrite-shim";
+import { Query } from "@/lib/db/compat";
 import {
   DATABASE_ID,
   TABLE_SELLER_PROFILES,
-} from "@/lib/appwrite/config";
-import { createAdminClient } from "@/lib/appwrite/server";
+} from "@/lib/backend/config";
+import { createAdminClient } from "@/lib/backend/server";
 import { isSellerStatus } from "@/lib/types";
 
 /** Public storefront seller card: never includes rejection-only fields. */
@@ -104,5 +104,37 @@ export async function getPublicSellerBySlug(
     return toPublicSellerInfo(row as unknown as Record<string, unknown>);
   } catch {
     return null;
+  }
+}
+
+/**
+ * List approved public seller profiles (used for sitemap generation).
+ * Returns [] if database is unavailable.
+ */
+export async function listPublicSellers(opts?: {
+  limit?: number;
+}): Promise<PublicSellerInfo[]> {
+  const limit = Math.min(Math.max(opts?.limit ?? 100, 1), 500);
+
+  try {
+    const { tables } = await createAdminClient();
+    const result = await tables.listRows({
+      databaseId: DATABASE_ID,
+      tableId: TABLE_SELLER_PROFILES,
+      queries: [
+        Query.equal("status", "approved"),
+        Query.orderDesc("$createdAt"),
+        Query.limit(limit),
+      ],
+    });
+
+    const sellers: PublicSellerInfo[] = [];
+    for (const row of result.rows) {
+      const info = toPublicSellerInfo(row as unknown as Record<string, unknown>);
+      if (info) sellers.push(info);
+    }
+    return sellers;
+  } catch {
+    return [];
   }
 }

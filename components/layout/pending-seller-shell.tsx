@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { signOut } from "@/lib/appwrite/auth";
+import { signOut } from "@/lib/backend/auth";
 import { SkipToContent } from "@/components/layout/skip-to-content";
 import { ThemeToggle } from "@/components/theme/theme-toggle";
 import { Button } from "@/components/ui/button";

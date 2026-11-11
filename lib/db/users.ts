@@ -1,5 +1,5 @@
 import { and, desc, eq, gt } from "drizzle-orm";
-import { ROLE_LABELS, type RoleLabel } from "@/lib/appwrite/roles";
+import { ROLE_LABELS, type RoleLabel } from "@/lib/backend/roles";
 import { getDb } from "./client";
 import { authSession, authUser } from "./schema";
 
@@ -77,7 +77,9 @@ export class UsersApi {
           value?: number | string;
           attribute?: string;
         };
-        if (d.type === "limit" && typeof d.value === "number") limit = d.value;
+        if (d.type === "limit" && typeof d.value === "number") {
+          limit = Math.min(Math.max(Math.floor(d.value), 1), 100);
+        }
         if (d.type === "cursorAfter" && typeof d.value === "string") {
           cursor = d.value;
         }

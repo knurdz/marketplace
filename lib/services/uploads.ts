@@ -1,6 +1,6 @@
 /**
  * Upload contract for Members 2–4.
- * Implementations live in lib/appwrite/storage.ts (server-only).
+ * Implementations live in lib/backend/storage.ts (server-only).
  */
 export {
   deleteFile,
@@ -9,9 +9,9 @@ export {
   uploadFile,
   uploadProductImage,
   validateUpload,
-} from "@/lib/appwrite/storage";
+} from "@/lib/backend/storage";
 export type {
   UploadValidationError,
   UploadValidationOk,
   UploadValidationResult,
-} from "@/lib/appwrite/storage";
+} from "@/lib/backend/storage";

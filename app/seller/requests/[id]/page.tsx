@@ -1,6 +1,6 @@
 import { notFound, redirect } from "next/navigation";
 import { SellerRequestDetail } from "@/components/seller/seller-request-detail";
-import { getLoggedInUser } from "@/lib/appwrite/session";
+import { getLoggedInUser } from "@/lib/backend/session";
 import { getOwnPurchaseRequestDetail } from "@/lib/services";
 import { listCoverImagesByProductIds } from "@/lib/services/products";
 

@@ -1,8 +1,15 @@
+import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { RegisterForm } from "@/components/auth/register-form";
-import { resolveHomePath } from "@/lib/appwrite/home-path";
-import { oauthErrorMessage } from "@/lib/appwrite/oauth-errors";
-import { getLoggedInUser } from "@/lib/appwrite/session";
+import { resolveHomePath } from "@/lib/backend/home-path";
+import { oauthErrorMessage } from "@/lib/backend/oauth-errors";
+import { getLoggedInUser } from "@/lib/backend/session";
+import { buildNoIndexMetadata } from "@/lib/seo/metadata";
+
+export const metadata: Metadata = buildNoIndexMetadata(
+  "Create Account",
+  "Create a Knurdz Marketplace buyer account or apply as a community seller.",
+);
 
 export default async function RegisterPage({
   searchParams,

@@ -1,8 +1,13 @@
 "use client";
 
 import Link from "next/link";
-import { useActionState, useState } from "react";
-import { signUpWithEmail, type AuthActionState } from "@/lib/appwrite/auth";
+import { useActionState, useEffect, useRef, useState } from "react";
+import {
+  signUpWithEmail,
+  type AuthActionState,
+  type RegisterFieldKey,
+  type RegisterFormValues,
+} from "@/lib/backend/auth";
 import { AuthLegalLinks } from "@/components/auth/auth-legal-links";
 import { OAuthButtons } from "@/components/auth/oauth-buttons";
 import {
@@ -12,30 +17,96 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { toast } from "@/lib/ui/toast";
+import { FormGuardFields } from "@/components/security/form-guard-fields";
+import { Turnstile } from "@/components/security/turnstile";
 
 const initialState: AuthActionState = {};
+
+const emptyValues: RegisterFormValues = {
+  accountType: "buyer",
+  name: "",
+  email: "",
+  phone: "",
+  shopName: "",
+  slug: "",
+  bio: "",
+};
+
+function fieldErrorId(field: RegisterFieldKey): string {
+  return `register-field-error-${field}`;
+}
+
+function RegisterFieldError({
+  field,
+  message,
+}: {
+  field: RegisterFieldKey;
+  message?: string;
+}) {
+  if (!message) return null;
+  return (
+    <p
+      id={fieldErrorId(field)}
+      role="alert"
+      className="text-sm text-destructive"
+    >
+      {message}
+    </p>
+  );
+}
 
 export function RegisterForm({ oauthError }: { oauthError?: string }) {
   const [state, formAction, pending] = useActionState(
     signUpWithEmail,
     initialState,
   );
-  const [accountType, setAccountType] = useState<"buyer" | "seller">("buyer");
+  const [fields, setFields] = useState<RegisterFormValues>(emptyValues);
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const lastToast = useRef<string | null>(null);
+
+  useEffect(() => {
+    if (state?.values) {
+      setFields(state.values);
+    }
+  }, [state?.values]);
+
+  useEffect(() => {
+    if (!state?.error) return;
+    const key = `e:${state.error}`;
+    if (key === lastToast.current) return;
+    lastToast.current = key;
+    toast.error(state.error);
+  }, [state?.error]);
+
+  const fieldErrors = state?.fieldErrors;
+
+  function fieldAria(field: RegisterFieldKey) {
+    const message = fieldErrors?.[field];
+    if (!message) return {};
+    return {
+      "aria-invalid": true as const,
+      "aria-describedby": fieldErrorId(field),
+    };
+  }
+
+  function patchFields(patch: Partial<RegisterFormValues>) {
+    setFields((current) => ({ ...current, ...patch }));
+  }
 
   return (
     <div className="space-y-4">
       <fieldset className="space-y-3">
         <legend className="text-sm font-medium">Account type</legend>
         <div className="grid gap-2 sm:grid-cols-2">
-          <label
-            className="flex cursor-pointer items-start gap-3 rounded-lg border border-border bg-card px-3 py-3 has-[:checked]:border-foreground"
-          >
+          <label className="flex cursor-pointer items-start gap-3 rounded-lg border border-border bg-card px-3 py-3 has-[:checked]:border-foreground">
             <input
               type="radio"
-              name="accountType"
+              name="accountTypePicker"
               value="buyer"
-              checked={accountType === "buyer"}
-              onChange={() => setAccountType("buyer")}
+              checked={fields.accountType === "buyer"}
+              onChange={() => patchFields({ accountType: "buyer" })}
               className="mt-1"
               data-testid="register-account-buyer"
             />
@@ -46,15 +117,13 @@ export function RegisterForm({ oauthError }: { oauthError?: string }) {
               </span>
             </span>
           </label>
-          <label
-            className="flex cursor-pointer items-start gap-3 rounded-lg border border-border bg-card px-3 py-3 has-[:checked]:border-foreground"
-          >
+          <label className="flex cursor-pointer items-start gap-3 rounded-lg border border-border bg-card px-3 py-3 has-[:checked]:border-foreground">
             <input
               type="radio"
-              name="accountType"
+              name="accountTypePicker"
               value="seller"
-              checked={accountType === "seller"}
-              onChange={() => setAccountType("seller")}
+              checked={fields.accountType === "seller"}
+              onChange={() => patchFields({ accountType: "seller" })}
               className="mt-1"
               data-testid="register-account-seller"
             />
@@ -66,13 +135,26 @@ export function RegisterForm({ oauthError }: { oauthError?: string }) {
             </span>
           </label>
         </div>
+        {fieldErrors?.accountType ? (
+          <p
+            id={fieldErrorId("accountType")}
+            role="alert"
+            className="text-sm text-destructive"
+          >
+            {fieldErrors.accountType}
+          </p>
+        ) : null}
       </fieldset>
 
-      <form action={formAction} className="space-y-4">
-        <input type="hidden" name="accountType" value={accountType} />
+      <form action={formAction} noValidate className="space-y-4">
+        <FormGuardFields action="auth.register" />
+        <input type="hidden" name="accountType" value={fields.accountType} />
 
         {state?.error ? (
-          <p role="alert" className="rounded-lg border border-border bg-card px-3 py-2 text-sm">
+          <p
+            role="alert"
+            className="rounded-lg border border-destructive/30 bg-destructive/5 px-3 py-2 text-sm text-destructive"
+          >
             {state.error}
           </p>
         ) : null}
@@ -86,7 +168,11 @@ export function RegisterForm({ oauthError }: { oauthError?: string }) {
             autoComplete="name"
             placeholder="Your name"
             className={AUTH_FIELD_CLASS}
+            value={fields.name}
+            onChange={(e) => patchFields({ name: e.target.value })}
+            {...fieldAria("name")}
           />
+          <RegisterFieldError field="name" message={fieldErrors?.name} />
         </div>
 
         <div className="space-y-2">
@@ -96,10 +182,13 @@ export function RegisterForm({ oauthError }: { oauthError?: string }) {
             name="email"
             type="email"
             autoComplete="email"
-            required
             placeholder="Enter your email"
             className={AUTH_FIELD_CLASS}
+            value={fields.email}
+            onChange={(e) => patchFields({ email: e.target.value })}
+            {...fieldAria("email")}
           />
+          <RegisterFieldError field="email" message={fieldErrors?.email} />
         </div>
 
         <div className="space-y-2">
@@ -109,14 +198,17 @@ export function RegisterForm({ oauthError }: { oauthError?: string }) {
             name="phone"
             type="tel"
             autoComplete="tel"
-            required
             maxLength={32}
             placeholder="e.g. 077 123 4567"
             className={AUTH_FIELD_CLASS}
+            value={fields.phone}
+            onChange={(e) => patchFields({ phone: e.target.value })}
+            {...fieldAria("phone")}
           />
+          <RegisterFieldError field="phone" message={fieldErrors?.phone} />
         </div>
 
-        {accountType === "seller" ? (
+        {fields.accountType === "seller" ? (
           <div className="space-y-4 rounded-lg border border-border bg-card px-3 py-4">
             <div className="space-y-2">
               <Label htmlFor="shopName">Shop name</Label>
@@ -124,11 +216,17 @@ export function RegisterForm({ oauthError }: { oauthError?: string }) {
                 id="shopName"
                 name="shopName"
                 type="text"
-                required
                 maxLength={128}
                 autoComplete="organization"
                 placeholder="e.g. Campus Crafts"
                 className={AUTH_FIELD_CLASS}
+                value={fields.shopName}
+                onChange={(e) => patchFields({ shopName: e.target.value })}
+                {...fieldAria("shopName")}
+              />
+              <RegisterFieldError
+                field="shopName"
+                message={fieldErrors?.shopName}
               />
             </div>
             <div className="space-y-2">
@@ -141,7 +239,11 @@ export function RegisterForm({ oauthError }: { oauthError?: string }) {
                 autoComplete="off"
                 placeholder="campus-crafts"
                 className={AUTH_FIELD_CLASS}
+                value={fields.slug}
+                onChange={(e) => patchFields({ slug: e.target.value })}
+                {...fieldAria("slug")}
               />
+              <RegisterFieldError field="slug" message={fieldErrors?.slug} />
             </div>
             <div className="space-y-2">
               <Label htmlFor="bio">Bio (optional)</Label>
@@ -152,7 +254,14 @@ export function RegisterForm({ oauthError }: { oauthError?: string }) {
                 maxLength={2000}
                 placeholder="What do you sell?"
                 className="w-full rounded-lg border border-input bg-transparent px-2.5 py-2 text-sm outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
+                value={fields.bio}
+                onChange={(e) => patchFields({ bio: e.target.value })}
+                aria-invalid={fieldErrors?.bio ? true : undefined}
+                aria-describedby={
+                  fieldErrors?.bio ? fieldErrorId("bio") : undefined
+                }
               />
+              <RegisterFieldError field="bio" message={fieldErrors?.bio} />
             </div>
           </div>
         ) : null}
@@ -164,11 +273,14 @@ export function RegisterForm({ oauthError }: { oauthError?: string }) {
             name="password"
             type="password"
             autoComplete="new-password"
-            required
-            minLength={8}
+            maxLength={128}
             placeholder="At least 8 characters"
             className={AUTH_FIELD_CLASS}
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            {...fieldAria("password")}
           />
+          <RegisterFieldError field="password" message={fieldErrors?.password} />
         </div>
 
         <div className="space-y-2">
@@ -178,12 +290,19 @@ export function RegisterForm({ oauthError }: { oauthError?: string }) {
             name="confirm"
             type="password"
             autoComplete="new-password"
-            required
-            minLength={8}
+            maxLength={128}
             placeholder="Repeat your password"
             className={AUTH_FIELD_CLASS}
+            value={confirmPassword}
+            onChange={(e) => setConfirmPassword(e.target.value)}
+            {...fieldAria("confirm")}
           />
+          <RegisterFieldError field="confirm" message={fieldErrors?.confirm} />
         </div>
+
+        {state?.requireCaptcha ? (
+          <Turnstile action="auth_register" pending={pending} />
+        ) : null}
 
         <Button
           type="submit"
@@ -194,7 +313,7 @@ export function RegisterForm({ oauthError }: { oauthError?: string }) {
         >
           {pending
             ? "Creating account…"
-            : accountType === "seller"
+            : fields.accountType === "seller"
               ? "Apply as seller"
               : "Create account"}
         </Button>
@@ -206,7 +325,7 @@ export function RegisterForm({ oauthError }: { oauthError?: string }) {
 
       <OAuthButtons
         from="register"
-        intent={accountType === "seller" ? "seller" : undefined}
+        intent={fields.accountType === "seller" ? "seller" : undefined}
         error={oauthError}
       />
 

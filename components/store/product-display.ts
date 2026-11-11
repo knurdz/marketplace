@@ -1,5 +1,5 @@
-import { BUCKET_PRODUCT_IMAGES } from "@/lib/appwrite/config";
-import { getFilePreviewUrl } from "@/lib/appwrite/storage-urls";
+import { BUCKET_PRODUCT_IMAGES } from "@/lib/backend/config";
+import { getFilePreviewUrl } from "@/lib/backend/storage-urls";
 import type { ProductCover } from "@/lib/services/products";
 import type { Product } from "@/lib/types";
 import { cn } from "@/lib/utils";

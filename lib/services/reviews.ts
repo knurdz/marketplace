@@ -1,16 +1,16 @@
-import { AppwriteException, ID, Permission, Query, Role } from "@/lib/db/appwrite-shim";
+import { DbException, ID, Permission, Query, Role } from "@/lib/db/compat";
 import {
   DATABASE_ID,
   TABLE_REVIEWS,
-  hasAppwritePublicConfig,
-} from "@/lib/appwrite/config";
-import { ROLE_LABELS, requireLabel, userHasLabel } from "@/lib/appwrite/roles";
+  hasDatabaseConfig,
+} from "@/lib/backend/config";
+import { ROLE_LABELS, requireLabel, userHasLabel } from "@/lib/backend/roles";
 import {
   createAdminClient,
   createPublicClient,
   createSessionClient,
-} from "@/lib/appwrite/server";
-import { getLoggedInUser } from "@/lib/appwrite/session";
+} from "@/lib/backend/server";
+import { getLoggedInUser } from "@/lib/backend/session";
 import { notifyAdminsEvent, notifyUserEvent } from "@/lib/email/events";
 import {
   assertRateLimit,
@@ -135,7 +135,7 @@ function reviewRowPermissions(buyerId: string): string[] {
 }
 
 function isUniqueConstraintError(error: unknown): boolean {
-  if (error instanceof AppwriteException) {
+  if (error instanceof DbException) {
     if (error.code === 409) return true;
     const msg = String(error.message || "").toLowerCase();
     return msg.includes("unique") || msg.includes("already exists");
@@ -145,7 +145,7 @@ function isUniqueConstraintError(error: unknown): boolean {
 
 async function assertReviewMutationRateLimit(userId: string): Promise<void> {
   const ip = await getClientIp();
-  const result = assertRateLimit({
+  const result = await assertRateLimit({
     bucket: "reviews",
     key: `${userId}:${ip}`,
     ...RATE_LIMITS.reviews,
@@ -203,7 +203,7 @@ function mapReviewError(err: unknown): ReviewActionState {
 }
 
 async function findReviewForRequest(requestId: string): Promise<Review | null> {
-  if (!hasAppwritePublicConfig()) return null;
+  if (!hasDatabaseConfig()) return null;
   try {
     const { tables } = await createAdminClient();
     const result = await tables.listRows({
@@ -228,7 +228,7 @@ export async function listApprovedSellerReviews(
   sellerId: string,
   opts?: { limit?: number; cursor?: string },
 ): Promise<Review[]> {
-  if (!hasAppwritePublicConfig()) return [];
+  if (!hasDatabaseConfig()) return [];
 
   const trimmed = sellerId?.trim();
   if (!trimmed) return [];
@@ -271,7 +271,7 @@ export async function listAllApprovedSellerReviews(
   sellerId: string,
 ): Promise<Review[]> {
   const trimmed = sellerId?.trim();
-  if (!trimmed || !hasAppwritePublicConfig()) return [];
+  if (!trimmed || !hasDatabaseConfig()) return [];
 
   const out: Review[] = [];
   let cursor: string | undefined;
@@ -371,7 +371,7 @@ export async function getOwnSellerReviewInsights(): Promise<OwnSellerReviewInsig
     reviews: [],
   };
 
-  if (!hasAppwritePublicConfig()) return empty;
+  if (!hasDatabaseConfig()) return empty;
 
   const user = await getLoggedInUser();
   if (!user || !userHasLabel(user, ROLE_LABELS.seller)) return empty;
@@ -397,7 +397,7 @@ export async function getOwnReviewForRequest(
 export async function canReviewSellerRequest(
   requestId: string,
 ): Promise<ReviewEligibility> {
-  if (!hasAppwritePublicConfig()) return { eligible: false };
+  if (!hasDatabaseConfig()) return { eligible: false };
 
   const user = await getLoggedInUser();
   if (!user) return { eligible: false };
@@ -429,7 +429,7 @@ export async function canReviewSellerRequest(
 export async function createSellerReview(
   input: CreateSellerReviewInput,
 ): Promise<ReviewActionState> {
-  if (!hasAppwritePublicConfig()) return notConfiguredState();
+  if (!hasDatabaseConfig()) return notConfiguredState();
 
   try {
     const user = await requireUser();
@@ -542,7 +542,7 @@ export async function listReviewsForAdmin(opts?: {
   limit?: number;
 }): Promise<AdminReviewView[]> {
   await requireLabel("admin");
-  if (!hasAppwritePublicConfig()) return [];
+  if (!hasDatabaseConfig()) return [];
 
   const limit = Math.min(Math.max(opts?.limit ?? 50, 1), 100);
   const queries = [Query.orderDesc("$createdAt"), Query.limit(limit)];
@@ -588,7 +588,7 @@ async function moderateReview(
   reviewId: string,
   nextStatus: "approved" | "rejected",
 ): Promise<ReviewModerationResult> {
-  if (!hasAppwritePublicConfig()) {
+  if (!hasDatabaseConfig()) {
     return { ok: false, error: "Reviews are not available right now." };
   }
 

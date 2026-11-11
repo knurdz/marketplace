@@ -4,7 +4,7 @@ import { useActionState } from "react";
 import {
   requestPasswordRecovery,
   type RecoveryActionState,
-} from "@/lib/appwrite/recovery";
+} from "@/lib/backend/recovery";
 import { AuthBackLink } from "@/components/auth/auth-back-link";
 import { AuthLegalLinks } from "@/components/auth/auth-legal-links";
 import {
@@ -14,6 +14,8 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { FormGuardFields } from "@/components/security/form-guard-fields";
+import { Turnstile } from "@/components/security/turnstile";
 
 const initialState: RecoveryActionState = {};
 
@@ -26,6 +28,7 @@ export function ForgotPasswordForm() {
   return (
     <div className="space-y-6">
       <form action={formAction} className="space-y-4">
+        <FormGuardFields action="auth.password-recovery.request" />
         {state?.error ? (
           <p
             role="alert"
@@ -55,6 +58,10 @@ export function ForgotPasswordForm() {
             className={AUTH_FIELD_CLASS}
           />
         </div>
+
+        {state?.requireCaptcha ? (
+          <Turnstile action="auth_recovery_request" pending={pending} />
+        ) : null}
 
         <Button
           type="submit"

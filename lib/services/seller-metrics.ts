@@ -1,5 +1,5 @@
-import { hasAppwritePublicConfig } from "@/lib/appwrite/config";
-import { getLoggedInUser } from "@/lib/appwrite/session";
+import { hasDatabaseConfig } from "@/lib/backend/config";
+import { getLoggedInUser } from "@/lib/backend/session";
 import { countPurchaseRequestsByStatus } from "./purchase-requests";
 
 export type SellerMetrics = {
@@ -21,7 +21,7 @@ function emptyMetrics(): SellerMetrics {
  * Returns zeros on empty data or errors: never throws to callers.
  */
 export async function getSellerMetrics(): Promise<SellerMetrics> {
-  if (!hasAppwritePublicConfig()) return emptyMetrics();
+  if (!hasDatabaseConfig()) return emptyMetrics();
 
   const user = await getLoggedInUser();
   if (!user) return emptyMetrics();

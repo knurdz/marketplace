@@ -10,13 +10,12 @@ All documents coding agents should read for Knurdz Marketplace live here (except
 4. **Cursor rules** — [`.cursor/rules/`](../../.cursor/rules/) (quality, security, graphify, MCP, human-git, stack conventions)
 5. **README** — [`../../README.md`](../../README.md)
 6. **Schema** — [`SCHEMA.md`](./SCHEMA.md)
-7. **Payments note** — [`PAYHERE.md`](./PAYHERE.md) _(platform does not process payments; contact-request flow)_
 
 ## Product model
 
 Knurdz connects buyers and sellers. A signed-in buyer opens a product, chooses a quantity, and sends a **purchase request**. That request shows the seller’s phone and email to the buyer, and the buyer’s phone and email to the seller. They contact each other directly. The seller marks the request **sold** or **cancelled**. Stock decreases only on **sold**.
 
-Wishlist, reviews (after sold), listing reports, and admin moderation remain. Cart, checkout, PayHere, bank slips, coupons, in-app messages, and seller earnings were removed.
+Wishlist, reviews (after sold), listing reports, and admin moderation remain. Cart, checkout, bank slips, coupons, in-app messages, and seller earnings were removed. The platform does not process payments.
 
 ## Non-negotiables
 

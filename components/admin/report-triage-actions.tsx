@@ -12,7 +12,7 @@ import {
   startReportReviewFormAction,
   takeDownListingFromReportFormAction,
   type ReportTriageActionState,
-} from "@/lib/appwrite/report-triage-actions";
+} from "@/lib/backend/report-triage-actions";
 import type { ProductStatus, ReportStatus } from "@/lib/types";
 import { toast } from "@/lib/ui/toast";
 

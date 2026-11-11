@@ -8,9 +8,9 @@ import {
   deleteOwnListingImage,
   updateOwnListing,
   type EditListingActionState,
-} from "@/lib/appwrite/seller-listing-actions";
-import { BUCKET_PRODUCT_IMAGES } from "@/lib/appwrite/config";
-import { getFilePreviewUrl } from "@/lib/appwrite/storage-urls";
+} from "@/lib/backend/seller-listing-actions";
+import { BUCKET_PRODUCT_IMAGES } from "@/lib/backend/config";
+import { getFilePreviewUrl } from "@/lib/backend/storage-urls";
 import { StorageImage } from "@/components/ui/storage-image";
 import type { Category, Product, ProductImage, ProductStatus } from "@/lib/types";
 import { toast } from "@/lib/ui/toast";
@@ -34,6 +34,7 @@ import { DrawerClose } from "@/components/ui/drawer";
 import { Input } from "@/components/ui/input";
 import { StatusPill } from "@/components/layout/status-pill";
 import { productStatusTone } from "@/lib/ui/status-tone";
+import { FormGuardFields } from "@/components/security/form-guard-fields";
 
 const DETAILS_FORM_ID = "edit-listing-details";
 const initial: EditListingActionState = {};
@@ -167,6 +168,7 @@ export function EditListingForm({
 
               {!isArchived && images.length < 8 ? (
                 <form action={addImagesAction} className="flex flex-col gap-3">
+                  <FormGuardFields action="seller.listing.images.add" />
                   <input type="hidden" name="productId" value={product.$id} />
                   {addImagesState.error ? (
                     <p
@@ -200,6 +202,7 @@ export function EditListingForm({
           fields={
             <>
               <form id={DETAILS_FORM_ID} action={updateAction} className="contents">
+                <FormGuardFields action="seller.listing.update" />
                 <input type="hidden" name="productId" value={product.$id} />
 
                 <ListingFormSection
@@ -344,6 +347,7 @@ export function EditListingForm({
                     confirmVariant="destructive"
                     pending={archivePending}
                     formAction={archiveAction}
+                    formGuardAction="seller.listing.archive"
                     hiddenFields={{ productId: product.$id }}
                   />
                 </ListingFormSection>
@@ -394,6 +398,7 @@ function DeleteImageButton({
 
   return (
     <form action={formAction}>
+      <FormGuardFields action="seller.listing.image.delete" />
       <input type="hidden" name="productId" value={productId} />
       <input type="hidden" name="imageId" value={imageId} />
       <Button

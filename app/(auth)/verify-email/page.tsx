@@ -1,9 +1,14 @@
+import type { Metadata } from "next";
 import Link from "next/link";
-import { completeEmailVerification } from "@/lib/appwrite/recovery";
+import { completeEmailVerification } from "@/lib/backend/recovery";
 import { AuthBackLink } from "@/components/auth/auth-back-link";
 import { AuthLegalLinks } from "@/components/auth/auth-legal-links";
+import { VerifyEmailToast } from "@/components/auth/verify-email-toast";
 import { AUTH_PRIMARY_BUTTON_CLASS } from "@/components/auth/auth-form-styles";
 import { Button } from "@/components/ui/button";
+import { buildNoIndexMetadata } from "@/lib/seo/metadata";
+
+export const metadata: Metadata = buildNoIndexMetadata("Verify Email");
 
 type SearchParams = Promise<{
   token?: string;
@@ -33,8 +38,31 @@ export default async function VerifyEmailPage({
   const failed = Boolean(linkError) || Boolean(result && !result.ok);
   const missingParams = !success && !failed;
 
+  const defaultFailureMessage =
+    "This verification link is invalid or has expired.";
+  const failureMessage =
+    (result && !result.ok ? result.error : null) ??
+    (linkError
+      ? "We couldn't verify your email. Request a new link from your account."
+      : null) ??
+    (missingParams
+      ? "This verification link is missing required parameters."
+      : defaultFailureMessage);
+
+  const toastStatus: "success" | "error" | null = success
+    ? "success"
+    : failed || missingParams
+      ? "error"
+      : null;
+  const toastMessage = success
+    ? "Email verified. Sign in to continue."
+    : toastStatus === "error"
+      ? failureMessage
+      : "";
+
   return (
     <main className="mx-auto w-full max-w-[30rem] px-4 py-14 sm:px-6 sm:py-20">
+      <VerifyEmailToast status={toastStatus} message={toastMessage} />
       <h1 className="text-center text-2xl font-semibold tracking-tight text-foreground">
         {success ? "Email verified" : "Verify email"}
       </h1>

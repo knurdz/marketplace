@@ -4,9 +4,11 @@ import { useActionState } from "react";
 import {
   requestEmailVerification,
   type RecoveryActionState,
-} from "@/lib/appwrite/recovery";
+} from "@/lib/backend/recovery";
 import { AUTH_PRIMARY_BUTTON_CLASS } from "@/components/auth/auth-form-styles";
 import { Button } from "@/components/ui/button";
+import { FormGuardFields } from "@/components/security/form-guard-fields";
+import { Turnstile } from "@/components/security/turnstile";
 
 const initialState: RecoveryActionState = {};
 
@@ -18,6 +20,7 @@ export function ResendVerificationForm() {
 
   return (
     <form action={formAction} className="space-y-3">
+      <FormGuardFields action="auth.email-verification.resend" />
       {state?.error ? (
         <p
           role="alert"
@@ -33,6 +36,9 @@ export function ResendVerificationForm() {
         >
           {state.success}
         </p>
+      ) : null}
+      {state?.requireCaptcha ? (
+        <Turnstile action="auth_verification_resend" pending={pending} />
       ) : null}
       <Button
         type="submit"

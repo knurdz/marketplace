@@ -2,11 +2,11 @@
 
 import Link from "next/link";
 import { Heart, LayoutDashboard, LogOut, Package, UserRound } from "lucide-react";
-import { signOut } from "@/lib/appwrite/auth";
+import { signOut } from "@/lib/backend/auth";
 import {
   portalHomeForSessionUser,
   type SessionUserView,
-} from "@/lib/appwrite/session-user";
+} from "@/lib/backend/session-user";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { AvatarStorageImage } from "@/components/ui/avatar-storage-image";
 import { Button } from "@/components/ui/button";

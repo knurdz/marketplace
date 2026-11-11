@@ -1,11 +1,11 @@
 /** Error shape services already branch on (`code` 404 / 409). */
-export class AppwriteException extends Error {
+export class DbException extends Error {
   code: number;
   type?: string;
 
   constructor(message: string, code: number, type?: string) {
     super(message);
-    this.name = "AppwriteException";
+    this.name = "DbException";
     this.code = code;
     this.type = type;
   }

@@ -3,7 +3,7 @@ services:
     image: mariadb:11
     restart: unless-stopped
     ports:
-      - "3306:3306"
+      - "127.0.0.1:3306:3306"
     environment:
       MARIADB_ROOT_PASSWORD: knurdz_root
       MARIADB_DATABASE: marketplace

@@ -4,7 +4,7 @@ import { useActionState, useState } from "react";
 import {
   createDraftListing,
   type CreateListingActionState,
-} from "@/lib/appwrite/seller-listing-actions";
+} from "@/lib/backend/seller-listing-actions";
 import type { Category } from "@/lib/types";
 import {
   ListingFormBody,
@@ -22,6 +22,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { DrawerClose } from "@/components/ui/drawer";
 import { Input } from "@/components/ui/input";
+import { FormGuardFields } from "@/components/security/form-guard-fields";
 
 const initialState: CreateListingActionState = {};
 
@@ -42,6 +43,7 @@ export function CreateListingForm({
 
   return (
     <form action={formAction} className="flex min-h-0 flex-1 flex-col">
+      <FormGuardFields action="seller.listing.create" />
       <ListingFormBody>
         {state.error ? (
           <p

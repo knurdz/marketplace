@@ -1,11 +1,9 @@
 import { headers } from "next/headers";
+import { and, eq, lt, sql } from "drizzle-orm";
+import { getDb, hasDatabaseConfig, newId } from "@/lib/db/client";
+import { rateLimits } from "@/lib/db/schema";
 
-/**
- * In-process sliding-window rate limiter for server actions.
- *
- * Suitable for single-instance `next start` / local MVP. Multi-instance
- * hosts need a shared store (Redis, etc.): limits are per process only.
- */
+/** MariaDB-backed rate limiter with a development-only memory fallback. */
 
 export const RATE_LIMIT_MESSAGE =
   "Too many attempts. Please try again later." as const;
@@ -26,7 +24,12 @@ export const RATE_LIMITS = {
   reviews: { limit: 20, windowMs: MS_MINUTE },
   reports: { limit: 10, windowMs: MS_MINUTE },
   purchaseRequests: { limit: 20, windowMs: MS_MINUTE },
+  purchaseRequestsDaily: { limit: 50, windowMs: 24 * MS_HOUR },
   listings: { limit: 20, windowMs: MS_HOUR },
+  accountMutations: { limit: 30, windowMs: MS_HOUR },
+  adminMutations: { limit: 120, windowMs: MS_HOUR },
+  publicReads: { limit: 120, windowMs: MS_MINUTE },
+  eventEmail: { limit: 20, windowMs: MS_HOUR },
   views: { limit: 1, windowMs: 24 * MS_HOUR },
 } as const;
 
@@ -53,12 +56,17 @@ function pruneIfNeeded(now: number) {
 export type RateLimitOk = { ok: true };
 export type RateLimitBlocked = { ok: false; retryAfterSec: number };
 export type RateLimitResult = RateLimitOk | RateLimitBlocked;
+export type RateLimitBucket = {
+  bucket: string;
+  key: string;
+  windowMs: number;
+};
 
 /**
  * Record a hit and return whether the request is allowed.
  * Counts the current attempt; if over `limit` within `windowMs`, blocks.
  */
-export function assertRateLimit(params: {
+function assertMemoryRateLimit(params: {
   bucket: string;
   key: string;
   limit: number;
@@ -92,7 +100,7 @@ export function assertRateLimit(params: {
  * Apply several keys; any key already at limit fails the whole check.
  * Only records hits when every key is under limit (avoids burning sibling quotas on a blocked request).
  */
-export function assertRateLimits(
+function assertMemoryRateLimits(
   checks: Array<{
     bucket: string;
     key: string;
@@ -111,10 +119,135 @@ export function assertRateLimits(
   }
   if (worst) return worst;
   for (const check of checks) {
-    const result = assertRateLimit(check);
+    const result = assertMemoryRateLimit(check);
     if (!result.ok) return result;
   }
   return { ok: true };
+}
+
+let lastDurablePruneAt = 0;
+const DURABLE_PRUNE_INTERVAL_MS = 5 * MS_MINUTE;
+const DURABLE_RETENTION_MS = 48 * MS_HOUR;
+
+/**
+ * Apply one rate-limit hit using MariaDB row locks. The unique bucket/key row
+ * and deterministic lock order make checks atomic across Vercel instances.
+ */
+export async function assertRateLimit(params: {
+  bucket: string;
+  key: string;
+  limit: number;
+  windowMs: number;
+}): Promise<RateLimitResult> {
+  return assertRateLimits([params]);
+}
+
+export async function assertRateLimits(
+  checks: Array<{
+    bucket: string;
+    key: string;
+    limit: number;
+    windowMs: number;
+  }>,
+): Promise<RateLimitResult> {
+  if (!hasDatabaseConfig()) {
+    if (process.env.NODE_ENV === "production") {
+      throw new Error("DATABASE_URL is required for production rate limiting.");
+    }
+    return assertMemoryRateLimits(checks);
+  }
+
+  const ordered = [...checks].sort((a, b) =>
+    `${a.bucket}:${a.key}`.localeCompare(`${b.bucket}:${b.key}`),
+  );
+  const now = Date.now();
+  const result = await getDb().transaction(async (tx) => {
+    const states: Array<{
+      check: (typeof ordered)[number];
+      id: string;
+      count: number;
+      windowStart: number;
+    }> = [];
+
+    for (const check of ordered) {
+      await tx
+        .insert(rateLimits)
+        .values({
+          id: newId(),
+          bucket: check.bucket,
+          limitKey: check.key.slice(0, 256),
+          windowStart: now,
+          count: 0,
+        })
+        .onDuplicateKeyUpdate({
+          set: { bucket: sql`${rateLimits.bucket}` },
+        });
+
+      const [row] = await tx
+        .select({
+          id: rateLimits.id,
+          count: rateLimits.count,
+          windowStart: rateLimits.windowStart,
+        })
+        .from(rateLimits)
+        .where(
+          and(
+            eq(rateLimits.bucket, check.bucket),
+            eq(rateLimits.limitKey, check.key.slice(0, 256)),
+          ),
+        )
+        .limit(1)
+        .for("update");
+
+      if (!row) throw new Error("Could not lock rate-limit row.");
+      const activeWindow = now - row.windowStart < check.windowMs;
+      const count = activeWindow ? row.count : 0;
+      const windowStart = activeWindow ? row.windowStart : now;
+      if (count >= check.limit) {
+        return {
+          ok: false as const,
+          retryAfterSec: Math.max(
+            1,
+            Math.ceil((windowStart + check.windowMs - now) / 1000),
+          ),
+        };
+      }
+      states.push({ check, id: row.id, count, windowStart });
+    }
+
+    for (const state of states) {
+      await tx
+        .update(rateLimits)
+        .set({
+          count: state.count + 1,
+          windowStart: state.windowStart,
+        })
+        .where(eq(rateLimits.id, state.id));
+    }
+    return { ok: true as const };
+  });
+
+  if (now - lastDurablePruneAt >= DURABLE_PRUNE_INTERVAL_MS) {
+    lastDurablePruneAt = now;
+    try {
+      await getDb()
+        .delete(rateLimits)
+        .where(lt(rateLimits.updatedAt, new Date(now - DURABLE_RETENTION_MS)));
+    } catch {
+      // Pruning is best effort; enforcement has already completed atomically.
+    }
+  }
+  return result;
+}
+
+export async function assertAdminMutationRateLimit(
+  userId: string,
+): Promise<RateLimitResult> {
+  return assertRateLimit({
+    bucket: "admin.mutations",
+    key: `user:${userId}`,
+    ...RATE_LIMITS.adminMutations,
+  });
 }
 
 /** Read-only check: does not record a hit. */
@@ -141,19 +274,125 @@ function peekRateLimit(params: {
   return { ok: true };
 }
 
+/** Read the active hit count without consuming quota. */
+export async function getRateLimitCount(
+  params: RateLimitBucket,
+): Promise<number> {
+  const key = params.key.slice(0, 256);
+  const now = Date.now();
+  if (!hasDatabaseConfig()) {
+    if (process.env.NODE_ENV === "production") {
+      throw new Error("DATABASE_URL is required for production rate limiting.");
+    }
+    pruneIfNeeded(now);
+    return (store.get(`${params.bucket}:${key}`) ?? []).filter(
+      (hit) => hit > now - params.windowMs,
+    ).length;
+  }
+
+  const [row] = await getDb()
+    .select({
+      count: rateLimits.count,
+      windowStart: rateLimits.windowStart,
+    })
+    .from(rateLimits)
+    .where(
+      and(eq(rateLimits.bucket, params.bucket), eq(rateLimits.limitKey, key)),
+    )
+    .limit(1);
+  if (!row || now - row.windowStart >= params.windowMs) return 0;
+  return row.count;
+}
+
 /**
- * Client IP from proxy headers. First `x-forwarded-for` hop, then `x-real-ip`.
+ * Record failure-only hits. MariaDB row locks keep a group of bucket updates
+ * atomic across server instances.
+ */
+export async function recordRateLimitHits(
+  hits: RateLimitBucket[],
+): Promise<void> {
+  const unique = new Map<string, RateLimitBucket>();
+  for (const hit of hits) {
+    const key = hit.key.slice(0, 256);
+    unique.set(`${hit.bucket}:${key}`, { ...hit, key });
+  }
+  const ordered = [...unique.values()].sort((a, b) =>
+    `${a.bucket}:${a.key}`.localeCompare(`${b.bucket}:${b.key}`),
+  );
+  if (ordered.length === 0) return;
+
+  const now = Date.now();
+  if (!hasDatabaseConfig()) {
+    if (process.env.NODE_ENV === "production") {
+      throw new Error("DATABASE_URL is required for production rate limiting.");
+    }
+    pruneIfNeeded(now);
+    for (const hit of ordered) {
+      const storeKey = `${hit.bucket}:${hit.key}`;
+      const recent = (store.get(storeKey) ?? []).filter(
+        (timestamp) => timestamp > now - hit.windowMs,
+      );
+      recent.push(now);
+      store.set(storeKey, recent);
+    }
+    return;
+  }
+
+  await getDb().transaction(async (tx) => {
+    for (const hit of ordered) {
+      await tx
+        .insert(rateLimits)
+        .values({
+          id: newId(),
+          bucket: hit.bucket,
+          limitKey: hit.key,
+          windowStart: now,
+          count: 0,
+        })
+        .onDuplicateKeyUpdate({
+          set: { bucket: sql`${rateLimits.bucket}` },
+        });
+
+      const [row] = await tx
+        .select({
+          id: rateLimits.id,
+          count: rateLimits.count,
+          windowStart: rateLimits.windowStart,
+        })
+        .from(rateLimits)
+        .where(
+          and(
+            eq(rateLimits.bucket, hit.bucket),
+            eq(rateLimits.limitKey, hit.key),
+          ),
+        )
+        .limit(1)
+        .for("update");
+      if (!row) throw new Error("Could not lock rate-limit row.");
+
+      const activeWindow = now - row.windowStart < hit.windowMs;
+      await tx
+        .update(rateLimits)
+        .set({
+          count: (activeWindow ? row.count : 0) + 1,
+          windowStart: activeWindow ? row.windowStart : now,
+        })
+        .where(eq(rateLimits.id, row.id));
+    }
+  });
+}
+
+/**
+ * Client IP from Vercel's overwritten forwarding header.
  * Falls back to `"unknown"` (still rate-limited as one shared bucket).
  */
 export async function getClientIp(): Promise<string> {
   const h = await headers();
-  const forwarded = h.get("x-forwarded-for");
+  const forwarded = h.get("x-vercel-forwarded-for");
   if (forwarded) {
     const first = forwarded.split(",")[0]?.trim();
     if (first) return first.slice(0, 64);
   }
-  const realIp = h.get("x-real-ip")?.trim();
-  if (realIp) return realIp.slice(0, 64);
   return "unknown";
 }
 

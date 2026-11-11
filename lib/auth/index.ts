@@ -8,9 +8,10 @@ import {
 } from "@/lib/config/app";
 import { getDb } from "@/lib/db/client";
 import * as schema from "@/lib/db/schema";
-import { sendSmtpMail } from "@/lib/email/smtp";
+import { maskEmailAddress, sendSmtpMail } from "@/lib/email/smtp";
 import { renderMarketplaceEmail } from "@/lib/email/template";
 import { logError } from "@/lib/observability/log-error";
+import { MAX_PASSWORD_LENGTH } from "@/lib/security/password";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 let instance: any;
@@ -37,7 +38,9 @@ async function sendVerificationEmail({
       html: rendered.html,
     });
   } catch (error) {
-    logError("auth.email.verify_send", error, { email: user.email });
+    logError("auth.email.verify_send", error, {
+      recipient: maskEmailAddress(user.email),
+    });
     throw error;
   }
 }
@@ -64,7 +67,9 @@ async function sendResetPassword({
       html: rendered.html,
     });
   } catch (error) {
-    logError("auth.email.reset_send", error, { email: user.email });
+    logError("auth.email.reset_send", error, {
+      recipient: maskEmailAddress(user.email),
+    });
     throw error;
   }
 }
@@ -79,11 +84,38 @@ export function getAuth() {
           session: schema.authSession,
           account: schema.authAccount,
           verification: schema.authVerification,
+          rateLimit: schema.authRateLimit,
         },
       }),
+      // Public email/password HTTP endpoints are disabled because the app calls
+      // auth.api from rate-limited server actions. OAuth callbacks and token
+      // link GET endpoints remain available through the Better Auth handler.
+      disabledPaths: [
+        "/sign-up/email",
+        "/sign-in/email",
+        "/request-password-reset",
+        "/send-verification-email",
+        "/change-email",
+        "/change-password",
+        "/reset-password",
+      ],
+      rateLimit: {
+        enabled: true,
+        storage: "database",
+        window: 60,
+        max: 60,
+        customRules: {
+          "/sign-up/email": { window: 60 * 60, max: 5 },
+          "/sign-in/email": { window: 15 * 60, max: 5 },
+          "/request-password-reset": { window: 60 * 60, max: 3 },
+          "/send-verification-email": { window: 60 * 60, max: 5 },
+          "/reset-password": { window: 15 * 60, max: 10 },
+        },
+      },
       emailAndPassword: {
         enabled: true,
         minPasswordLength: 8,
+        maxPasswordLength: MAX_PASSWORD_LENGTH,
         requireEmailVerification: true,
         autoSignIn: false,
         sendResetPassword,
@@ -129,6 +161,9 @@ export function getAuth() {
       },
       advanced: {
         cookiePrefix: "knurdz",
+        ipAddress: {
+          ipAddressHeaders: ["x-vercel-forwarded-for"],
+        },
         // Resolve Host / X-Forwarded-* behind reverse proxies (Hostinger, Vercel, etc.).
         trustedProxyHeaders: true,
       },

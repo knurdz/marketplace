@@ -1,4 +1,10 @@
-import { AppwriteException, ID, Permission, Query, Role } from "@/lib/db/appwrite-shim";
+import {
+  DbException,
+  ID,
+  Permission,
+  Query,
+  Role,
+} from "@/lib/db/compat";
 import {
   BUCKET_PRODUCT_IMAGES,
   DATABASE_ID,
@@ -8,16 +14,16 @@ import {
   TABLE_CATEGORIES,
   TABLE_PRODUCT_IMAGES,
   TABLE_PRODUCTS,
-  hasAppwritePublicConfig,
-} from "@/lib/appwrite/config";
-import { ROLE_LABELS, userHasLabel } from "@/lib/appwrite/roles";
-import { createAdminClient, createSessionClient } from "@/lib/appwrite/server";
-import { getLoggedInUser } from "@/lib/appwrite/session";
+  hasDatabaseConfig,
+} from "@/lib/backend/config";
+import { ROLE_LABELS, userHasLabel } from "@/lib/backend/roles";
+import { createAdminClient, createSessionClient } from "@/lib/backend/server";
+import { getLoggedInUser } from "@/lib/backend/session";
 import {
   deleteFile,
   uploadProductImage,
   validateUpload,
-} from "@/lib/appwrite/storage";
+} from "@/lib/backend/storage";
 import { notifyAdminsEvent, notifyUserEvent } from "@/lib/email/events";
 import {
   assertRateLimit,
@@ -38,8 +44,7 @@ const DEFAULT_CURRENCY = "LKR";
 const MAX_TITLE_LENGTH = 200;
 const MAX_DESCRIPTION_LENGTH = 10000;
 const MAX_IMAGES = 8;
-const FREE_LISTINGS_DISABLED =
-  "Free listings are currently disabled." as const;
+const FREE_LISTINGS_DISABLED = "Free listings are currently disabled." as const;
 
 export type CreateDraftProductInput = {
   title: string;
@@ -59,12 +64,10 @@ export type CreateDraftProductResult =
   | { ok: false; error: string };
 
 export type SubmitListingForReviewResult =
-  | { ok: true; message: string }
-  | { ok: false; error: string };
+  { ok: true; message: string } | { ok: false; error: string };
 
 export type SellerListingMutationResult =
-  | { ok: true; message: string }
-  | { ok: false; error: string };
+  { ok: true; message: string } | { ok: false; error: string };
 
 export type ParsedCreateDraftProductInput =
   | {
@@ -212,7 +215,9 @@ async function categoryExists(categoryId: string): Promise<boolean> {
   }
 }
 
-function validateImageFiles(files: File[]): { ok: true; files: File[] } | { ok: false; error: string } {
+async function validateImageFiles(
+  files: File[],
+): Promise<{ ok: true; files: File[] } | { ok: false; error: string }> {
   if (files.length > MAX_IMAGES) {
     return {
       ok: false,
@@ -220,7 +225,7 @@ function validateImageFiles(files: File[]): { ok: true; files: File[] } | { ok: 
     };
   }
   for (const file of files) {
-    const validated = validateUpload({
+    const validated = await validateUpload({
       file,
       maxBytes: PRODUCT_IMAGE_MAX_BYTES,
       allowedMime: IMAGE_MIME_TYPES,
@@ -243,12 +248,10 @@ async function cleanupUploadedFiles(fileIds: string[]): Promise<void> {
   }
 }
 
-type SellerAuth =
-  | { ok: true; userId: string }
-  | { ok: false; error: string };
+type SellerAuth = { ok: true; userId: string } | { ok: false; error: string };
 
 async function requireSellerUser(): Promise<SellerAuth> {
-  if (!hasAppwritePublicConfig()) {
+  if (!hasDatabaseConfig()) {
     return { ok: false, error: "Marketplace is not configured." };
   }
 
@@ -274,7 +277,9 @@ export function parseSellerListingId(productId: string): string | null {
 }
 
 /** Load a product only when owned by the signed-in seller. */
-export async function getOwnProduct(productId: string): Promise<Product | null> {
+export async function getOwnProduct(
+  productId: string,
+): Promise<Product | null> {
   const id = parseProductId(productId);
   if (!id) return null;
 
@@ -299,8 +304,7 @@ export async function getOwnProduct(productId: string): Promise<Product | null> 
 async function loadOwnedProductForMutation(
   productId: string,
 ): Promise<
-  | { ok: true; userId: string; product: Product }
-  | { ok: false; error: string }
+  { ok: true; userId: string; product: Product } | { ok: false; error: string }
 > {
   const auth = await requireSellerUser();
   if (!auth.ok) return auth;
@@ -323,7 +327,7 @@ async function loadOwnedProductForMutation(
     }
     return { ok: true, userId: auth.userId, product };
   } catch (error) {
-    if (error instanceof AppwriteException && error.code === 404) {
+    if (error instanceof DbException && error.code === 404) {
       return { ok: false, error: "Listing not found." };
     }
     return { ok: false, error: "Could not load listing." };
@@ -347,7 +351,7 @@ export async function updateOwnProductCore(
   const auth = await requireSellerUser();
   if (!auth.ok) return auth;
 
-  const rate = assertRateLimit({
+  const rate = await assertRateLimit({
     bucket: "listings.update",
     key: `user:${auth.userId}`,
     ...RATE_LIMITS.listings,
@@ -395,7 +399,7 @@ export async function updateOwnProductCore(
 
     return { ok: true, message: "Listing updated." };
   } catch (error) {
-    if (error instanceof AppwriteException && error.code === 401) {
+    if (error instanceof DbException && error.code === 401) {
       return { ok: false, error: "You must be signed in." };
     }
     return { ok: false, error: "Could not update listing. Please try again." };
@@ -412,7 +416,7 @@ export async function archiveOwnProductCore(
   const auth = await requireSellerUser();
   if (!auth.ok) return auth;
 
-  const rate = assertRateLimit({
+  const rate = await assertRateLimit({
     bucket: "listings.archive",
     key: `user:${auth.userId}`,
     ...RATE_LIMITS.listings,
@@ -439,7 +443,7 @@ export async function archiveOwnProductCore(
 
     return { ok: true, message: "Listing archived." };
   } catch (error) {
-    if (error instanceof AppwriteException && error.code === 401) {
+    if (error instanceof DbException && error.code === 401) {
       return { ok: false, error: "You must be signed in." };
     }
     return { ok: false, error: "Could not archive listing. Please try again." };
@@ -456,7 +460,7 @@ export async function addOwnProductImagesCore(
   const auth = await requireSellerUser();
   if (!auth.ok) return auth;
 
-  const rate = assertRateLimit({
+  const rate = await assertRateLimit({
     bucket: "listings.images",
     key: `user:${auth.userId}`,
     ...RATE_LIMITS.listings,
@@ -485,7 +489,7 @@ export async function addOwnProductImagesCore(
     };
   }
 
-  const imageCheck = validateImageFiles(nonEmptyImages);
+  const imageCheck = await validateImageFiles(nonEmptyImages);
   if (!imageCheck.ok) {
     return { ok: false, error: imageCheck.error };
   }
@@ -517,12 +521,9 @@ export async function addOwnProductImagesCore(
     }
 
     return { ok: true, message: "Images added." };
-  } catch (error) {
+  } catch {
     await cleanupUploadedFiles(uploadedFileIds);
 
-    if (error instanceof Error && !(error instanceof AppwriteException)) {
-      return { ok: false, error: error.message };
-    }
     return { ok: false, error: "Could not upload images. Please try again." };
   }
 }
@@ -561,7 +562,7 @@ async function loadOwnedProductImage(
       image,
     };
   } catch (error) {
-    if (error instanceof AppwriteException && error.code === 404) {
+    if (error instanceof DbException && error.code === 404) {
       return { ok: false, error: "Image not found." };
     }
     return { ok: false, error: "Could not load image." };
@@ -578,7 +579,7 @@ export async function deleteOwnProductImageCore(
   const auth = await requireSellerUser();
   if (!auth.ok) return auth;
 
-  const rate = assertRateLimit({
+  const rate = await assertRateLimit({
     bucket: "listings.images",
     key: `user:${auth.userId}`,
     ...RATE_LIMITS.listings,
@@ -602,7 +603,7 @@ export async function deleteOwnProductImageCore(
       rowId: loaded.image.$id,
     });
   } catch (error) {
-    if (error instanceof AppwriteException && error.code === 404) {
+    if (error instanceof DbException && error.code === 404) {
       return { ok: false, error: "Image not found." };
     }
     return { ok: false, error: "Could not delete image." };
@@ -624,7 +625,7 @@ export async function createDraftProductCore(
   input: CreateDraftProductInput,
   imageFiles: File[] = [],
 ): Promise<CreateDraftProductResult> {
-  if (!hasAppwritePublicConfig()) {
+  if (!hasDatabaseConfig()) {
     return { ok: false, error: "Marketplace is not configured." };
   }
 
@@ -633,10 +634,13 @@ export async function createDraftProductCore(
     return { ok: false, error: "You must be signed in to create a listing." };
   }
   if (!userHasLabel(user, ROLE_LABELS.seller)) {
-    return { ok: false, error: "Seller access is required to create listings." };
+    return {
+      ok: false,
+      error: "Seller access is required to create listings.",
+    };
   }
 
-  const rate = assertRateLimit({
+  const rate = await assertRateLimit({
     bucket: "listings.create",
     key: `user:${user.$id}`,
     ...RATE_LIMITS.listings,
@@ -655,7 +659,7 @@ export async function createDraftProductCore(
   }
 
   const nonEmptyImages = imageFiles.filter((f) => f.size > 0);
-  const imageCheck = validateImageFiles(nonEmptyImages);
+  const imageCheck = await validateImageFiles(nonEmptyImages);
   if (!imageCheck.ok) {
     return { ok: false, error: imageCheck.error };
   }
@@ -729,12 +733,9 @@ export async function createDraftProductCore(
       message: "Draft listing saved.",
       productId: product.$id,
     };
-  } catch (error) {
+  } catch {
     await cleanupUploadedFiles(uploadedFileIds);
 
-    if (error instanceof Error && !(error instanceof AppwriteException)) {
-      return { ok: false, error: error.message };
-    }
     return { ok: false, error: "Could not save listing. Please try again." };
   }
 }
@@ -743,7 +744,7 @@ export async function createDraftProductCore(
 export async function listOwnProducts(opts?: {
   limit?: number;
 }): Promise<Product[]> {
-  if (!hasAppwritePublicConfig()) return [];
+  if (!hasDatabaseConfig()) return [];
 
   const user = await getLoggedInUser();
   if (!user || !userHasLabel(user, ROLE_LABELS.seller)) return [];
@@ -830,7 +831,7 @@ async function loadOwnProduct(
 export async function submitListingForReviewCore(
   productId: string,
 ): Promise<SubmitListingForReviewResult> {
-  if (!hasAppwritePublicConfig()) {
+  if (!hasDatabaseConfig()) {
     return { ok: false, error: "Marketplace is not configured." };
   }
 
@@ -839,10 +840,13 @@ export async function submitListingForReviewCore(
     return { ok: false, error: "You must be signed in to submit a listing." };
   }
   if (!userHasLabel(user, ROLE_LABELS.seller)) {
-    return { ok: false, error: "Seller access is required to submit listings." };
+    return {
+      ok: false,
+      error: "Seller access is required to submit listings.",
+    };
   }
 
-  const rate = assertRateLimit({
+  const rate = await assertRateLimit({
     bucket: "listings.publish",
     key: `user:${user.$id}`,
     ...RATE_LIMITS.listings,
@@ -894,10 +898,7 @@ export async function submitListingForReviewCore(
       title: "Listing awaiting review",
       body: `A seller submitted "${product.title}" for moderation.`,
       link: "/admin/listings",
-      detailLines: [
-        `Product: ${product.$id}`,
-        `Seller: ${user.$id}`,
-      ],
+      detailLines: [`Product: ${product.$id}`, `Seller: ${user.$id}`],
     }),
   ]);
 

@@ -10,11 +10,10 @@ import {
   like,
   lt,
   lte,
-  sql,
   type SQL,
 } from "drizzle-orm";
 import type { MySqlColumn, MySqlTable } from "drizzle-orm/mysql-core";
-import { AppwriteException, isDuplicateKeyError } from "./errors";
+import { DbException, isDuplicateKeyError } from "./errors";
 import type mysql from "mysql2/promise";
 import { getDb, getPool, newId } from "./client";
 import { parseQueries, type QueryDescriptor } from "./query";
@@ -41,7 +40,7 @@ function colRef(table: MySqlTable, attribute: string) {
   return col as Parameters<typeof eq>[0];
 }
 
-function toAppwriteRow(row: AnyRow): AnyRow {
+function toServiceRow(row: AnyRow): AnyRow {
   const out: AnyRow = { ...row };
   if (typeof row.id === "string") {
     out.$id = row.id;
@@ -64,7 +63,7 @@ function toAppwriteRow(row: AnyRow): AnyRow {
   return out;
 }
 
-function fromAppwriteData(data: Record<string, unknown>): Record<string, unknown> {
+function fromServiceData(data: Record<string, unknown>): Record<string, unknown> {
   const out: Record<string, unknown> = {};
   for (const [k, v] of Object.entries(data)) {
     if (k.startsWith("$")) continue;
@@ -73,7 +72,7 @@ function fromAppwriteData(data: Record<string, unknown>): Record<string, unknown
   return out;
 }
 
-/** Drizzle datetime columns need Date; Appwrite-style queries often pass ISO strings. */
+/** Drizzle datetime columns need Date; service queries often pass ISO strings. */
 function coerceCompareValue(attribute: string, value: unknown): unknown {
   if (typeof value !== "string" || value.trim() === "") return value;
   const attr = attribute.replace(/^\$/, "");
@@ -128,15 +127,16 @@ function buildWhere(
         ),
       );
     } else if (d.type === "search") {
+      const escaped = d.value.replace(/[\\%_]/g, "\\$&");
       parts.push(
-        like(colRef(table, d.attribute) as never, `%${d.value}%`),
+        like(colRef(table, d.attribute) as never, `%${escaped}%`),
       );
     } else if (d.type === "orderDesc") {
       orderBy = [desc(colRef(table, d.attribute))];
     } else if (d.type === "orderAsc") {
       orderBy = [asc(colRef(table, d.attribute))];
     } else if (d.type === "limit") {
-      limit = d.value;
+      limit = Math.min(Math.max(Math.floor(d.value), 1), 100);
     } else if (d.type === "cursorAfter") {
       cursorAfter = d.value;
     }
@@ -181,7 +181,7 @@ export class DrizzleTablesDB {
 
     const rows = await q;
     return {
-      rows: rows.map((r) => toAppwriteRow(r as AnyRow)),
+      rows: rows.map((r) => toServiceRow(r as AnyRow)),
       total: rows.length,
     };
   }
@@ -202,9 +202,9 @@ export class DrizzleTablesDB {
       .limit(1);
     const row = rows[0];
     if (!row) {
-      throw new AppwriteException("Row not found", 404, "row_not_found");
+      throw new DbException("Row not found", 404, "row_not_found");
     }
-    return toAppwriteRow(row as AnyRow);
+    return toServiceRow(row as AnyRow);
   }
 
   async createRow(params: {
@@ -220,7 +220,7 @@ export class DrizzleTablesDB {
     const id =
       params.tableId === "profiles" ? params.rowId : params.rowId || newId();
     const payload = {
-      ...fromAppwriteData(params.data),
+      ...fromServiceData(params.data),
       id,
     } as Record<string, unknown>;
 
@@ -255,7 +255,7 @@ export class DrizzleTablesDB {
     try {
       await db
         .update(table)
-        .set(fromAppwriteData(params.data) as never)
+        .set(fromServiceData(params.data) as never)
         .where(eq(idCol, params.rowId));
     } catch (error) {
       throw mapWriteError(error);
@@ -284,7 +284,7 @@ export class DrizzleTablesDB {
     try {
       const result = await db
         .update(table)
-        .set(fromAppwriteData(params.data) as never)
+        .set(fromServiceData(params.data) as never)
         .where(
           and(
             eq(colRef(table, "id"), params.rowId),
@@ -363,7 +363,7 @@ export class DrizzleTablesDB {
         : [params.value, params.rowId],
     );
     if (affectedRows(result) === 0) {
-      throw new AppwriteException(
+      throw new DbException(
         "Increment rejected (row missing or limit reached)",
         400,
         "column_limit",
@@ -387,7 +387,7 @@ export class DrizzleTablesDB {
       [params.value, params.rowId, params.value, min],
     );
     if (affectedRows(result) === 0) {
-      throw new AppwriteException(
+      throw new DbException(
         "Decrement rejected (row missing or below minimum)",
         400,
         "column_limit",
@@ -425,7 +425,7 @@ function affectedRows(result: unknown): number {
 
 function mapWriteError(error: unknown): unknown {
   if (isDuplicateKeyError(error)) {
-    return new AppwriteException(
+    return new DbException(
       "Row already exists",
       409,
       "row_already_exists",

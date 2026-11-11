@@ -1,13 +1,17 @@
+import type { Metadata } from "next";
 import type { ReactNode } from "react";
 import { SkipToContent } from "@/components/layout/skip-to-content";
 import { StoreFooter } from "@/components/layout/store-footer";
 import { StoreNavbar } from "@/components/layout/store-navbar";
-import { getOwnProfile } from "@/lib/appwrite/profiles";
-import { redirectIfRegistrationIncomplete } from "@/lib/appwrite/registration-complete";
-import { getLoggedInUser } from "@/lib/appwrite/session";
-import { portalHomeForSessionUser, toSessionUserView } from "@/lib/appwrite/session-user";
-import { resolveAvatarUrl } from "@/lib/appwrite/storage-urls";
+import { getOwnProfile } from "@/lib/backend/profiles";
+import { redirectIfRegistrationIncomplete } from "@/lib/backend/registration-complete";
+import { getLoggedInUser } from "@/lib/backend/session";
+import { portalHomeForSessionUser, toSessionUserView } from "@/lib/backend/session-user";
+import { resolveAvatarUrl } from "@/lib/backend/storage-urls";
+import { NOINDEX_METADATA } from "@/lib/seo/metadata";
 import { getOwnBuyerCommerceCounts } from "@/lib/services/buyer-commerce-counts";
+
+export const metadata: Metadata = NOINDEX_METADATA;
 
 export default async function AuthLayout({ children }: { children: ReactNode }) {
   await redirectIfRegistrationIncomplete();

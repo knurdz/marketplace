@@ -1,15 +1,21 @@
-import { ID, Permission, Query, Role } from "@/lib/db/appwrite-shim";
-import { getOwnProfile } from "@/lib/appwrite/profiles";
+import {
+  DbException,
+  ID,
+  Permission,
+  Query,
+  Role,
+} from "@/lib/db/compat";
+import { getOwnProfile } from "@/lib/backend/profiles";
 import {
   DATABASE_ID,
   TABLE_PRODUCTS,
   TABLE_PROFILES,
   TABLE_PURCHASE_REQUESTS,
-  hasAppwritePublicConfig,
-} from "@/lib/appwrite/config";
-import { mayBrowsePublicCatalog } from "@/lib/appwrite/roles";
-import { createAdminClient, createSessionClient } from "@/lib/appwrite/server";
-import { getActiveUserById, getLoggedInUser } from "@/lib/appwrite/session";
+  hasDatabaseConfig,
+} from "@/lib/backend/config";
+import { mayBrowsePublicCatalog } from "@/lib/backend/roles";
+import { createAdminClient, createSessionClient } from "@/lib/backend/server";
+import { getActiveUserById, getLoggedInUser } from "@/lib/backend/session";
 import { getDb } from "@/lib/db/client";
 import { purchaseRequests } from "@/lib/db/schema";
 import {
@@ -18,8 +24,9 @@ import {
   notifyUserEvent,
 } from "@/lib/email/events";
 import { logError } from "@/lib/observability/log-error";
+import { assertAdminUser } from "@/lib/security/admin-auth";
 import {
-  assertRateLimit,
+  assertRateLimits,
   getClientIp,
   RATE_LIMIT_MESSAGE,
   RATE_LIMITS,
@@ -145,7 +152,7 @@ async function loadProfileContact(
 export async function getSellerPhoneForBuy(
   sellerId: string,
 ): Promise<string | null> {
-  if (!hasAppwritePublicConfig() || !sellerId.trim()) return null;
+  if (!hasDatabaseConfig() || !sellerId.trim()) return null;
   const contact = await loadProfileContact(sellerId.trim());
   return contact.phone;
 }
@@ -162,11 +169,18 @@ function requestRowPermissions(buyerId: string, sellerId: string): string[] {
 
 async function assertRequestRateLimit(userId: string): Promise<void> {
   const ip = await getClientIp();
-  const result = assertRateLimit({
-    bucket: "purchaseRequests",
-    key: `${userId}:${ip}`,
-    ...RATE_LIMITS.purchaseRequests,
-  });
+  const result = await assertRateLimits([
+    {
+      bucket: "purchaseRequests",
+      key: `${userId}:${ip}`,
+      ...RATE_LIMITS.purchaseRequests,
+    },
+    {
+      bucket: "purchaseRequests.daily",
+      key: `user:${userId}`,
+      ...RATE_LIMITS.purchaseRequestsDaily,
+    },
+  ]);
   if (!result.ok) {
     const err = new Error(RATE_LIMIT_MESSAGE);
     (err as Error & { code: PurchaseRequestErrorCode }).code =
@@ -179,7 +193,7 @@ export async function createPurchaseRequest(input: {
   productId: string;
   quantity: number;
 }): Promise<CreatePurchaseRequestResult> {
-  if (!hasAppwritePublicConfig()) {
+  if (!hasDatabaseConfig()) {
     return {
       ok: false,
       error: "Buy requests are not available right now.",
@@ -281,6 +295,7 @@ export async function createPurchaseRequest(input: {
         buyerId: user.$id,
         sellerId: product.sellerId,
         productId: product.$id,
+        openKey: `${user.$id}:${product.$id}`,
         title: product.title.slice(0, 200),
         quantity,
         unitPrice: product.price,
@@ -290,7 +305,9 @@ export async function createPurchaseRequest(input: {
       permissions: requestRowPermissions(user.$id, product.sellerId),
     });
 
-    const request = asPurchaseRequest(row as unknown as Record<string, unknown>);
+    const request = asPurchaseRequest(
+      row as unknown as Record<string, unknown>,
+    );
     if (!request) {
       return {
         ok: false,
@@ -339,6 +356,16 @@ export async function createPurchaseRequest(input: {
 
     return { ok: true, requestId: request.$id };
   } catch (error) {
+    if (
+      error instanceof DbException &&
+      (error.code === 409 || error.message.toLowerCase().includes("unique"))
+    ) {
+      return {
+        ok: false,
+        error: "You already have an open request for this product.",
+        errorCode: PURCHASE_REQUEST_ERROR_CODES.ALREADY_REQUESTED,
+      };
+    }
     logError("purchaseRequest.create", error, { productId });
     return {
       ok: false,
@@ -351,9 +378,13 @@ export async function createPurchaseRequest(input: {
 async function listRequestsFor(
   field: "buyerId" | "sellerId",
   userId: string,
-  opts?: { status?: PurchaseRequestStatus | PurchaseRequestStatus[]; cursor?: string; limit?: number },
+  opts?: {
+    status?: PurchaseRequestStatus | PurchaseRequestStatus[];
+    cursor?: string;
+    limit?: number;
+  },
 ): Promise<PurchaseRequest[]> {
-  if (!hasAppwritePublicConfig()) return [];
+  if (!hasDatabaseConfig()) return [];
 
   const limit = Math.min(Math.max(opts?.limit ?? 50, 1), 100);
   const queries = [
@@ -379,7 +410,9 @@ async function listRequestsFor(
     });
     const out: PurchaseRequest[] = [];
     for (const row of result.rows) {
-      const request = asPurchaseRequest(row as unknown as Record<string, unknown>);
+      const request = asPurchaseRequest(
+        row as unknown as Record<string, unknown>,
+      );
       if (request && request[field] === userId) out.push(request);
     }
     return out;
@@ -414,13 +447,11 @@ export async function listAllPurchaseRequests(opts?: {
   cursor?: string;
   limit?: number;
 }): Promise<PurchaseRequest[]> {
-  if (!hasAppwritePublicConfig()) return [];
+  await assertAdminUser();
+  if (!hasDatabaseConfig()) return [];
 
   const limit = Math.min(Math.max(opts?.limit ?? 50, 1), 100);
-  const queries = [
-    Query.orderDesc("$createdAt"),
-    Query.limit(limit),
-  ];
+  const queries = [Query.orderDesc("$createdAt"), Query.limit(limit)];
   if (opts?.status) {
     const statuses = Array.isArray(opts.status) ? opts.status : [opts.status];
     queries.push(Query.equal("status", statuses));
@@ -438,7 +469,9 @@ export async function listAllPurchaseRequests(opts?: {
     });
     const out: PurchaseRequest[] = [];
     for (const row of result.rows) {
-      const request = asPurchaseRequest(row as unknown as Record<string, unknown>);
+      const request = asPurchaseRequest(
+        row as unknown as Record<string, unknown>,
+      );
       if (request) out.push(request);
     }
     return out;
@@ -451,7 +484,7 @@ export async function listAllPurchaseRequests(opts?: {
 async function getRequestRow(
   requestId: string,
 ): Promise<PurchaseRequest | null> {
-  if (!hasAppwritePublicConfig() || !requestId.trim()) return null;
+  if (!hasDatabaseConfig() || !requestId.trim()) return null;
   try {
     const { tables } = await createSessionClient();
     const row = await tables.getRow({
@@ -520,6 +553,7 @@ export async function getOwnPurchaseRequestDetail(
 export async function getAdminPurchaseRequestDetail(
   requestId: string,
 ): Promise<PurchaseRequestDetail | null> {
+  await assertAdminUser();
   const request = await getRequestRow(requestId);
   if (!request) return null;
   const contact = await loadProfileContact(request.buyerId);
@@ -542,7 +576,7 @@ async function resolvePurchaseRequest(
   requestId: string,
   nextStatus: "sold" | "cancelled",
 ): Promise<ResolvePurchaseRequestResult> {
-  if (!hasAppwritePublicConfig()) {
+  if (!hasDatabaseConfig()) {
     return {
       ok: false,
       error: "Requests are not available right now.",
@@ -630,7 +664,7 @@ async function resolvePurchaseRequest(
       rowId: request.$id,
       column: "status",
       values: [OPEN_PURCHASE_REQUEST_STATUS],
-      data: { status: nextStatus },
+      data: { status: nextStatus, openKey: null },
       transactionId,
     });
 
@@ -730,7 +764,7 @@ export async function countPurchaseRequestsByStatus(opts?: {
     sold: 0,
     cancelled: 0,
   };
-  if (!hasAppwritePublicConfig()) return empty;
+  if (!hasDatabaseConfig()) return empty;
 
   try {
     const db = getDb();

@@ -1,4 +1,4 @@
-/** Appwrite-compatible query descriptors for the Drizzle tables adapter. */
+/** Query descriptors for the Drizzle tables adapter. */
 
 export type QueryDescriptor =
   | { type: "equal"; attribute: string; value: string | string[] | boolean | number }

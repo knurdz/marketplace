@@ -1,4 +1,4 @@
-import type { SessionUserView } from "@/lib/appwrite/session-user";
+import type { SessionUserView } from "@/lib/backend/session-user";
 
 /** First name for portal welcome line (real profile or email local-part). */
 export function portalWelcomeName(

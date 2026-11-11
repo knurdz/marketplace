@@ -4,19 +4,19 @@ import { redirect } from "next/navigation";
 import { SkipToContent } from "@/components/layout/skip-to-content";
 import { StoreFooter } from "@/components/layout/store-footer";
 import { StoreNavbar } from "@/components/layout/store-navbar";
-import { loadSellerStatus } from "@/lib/appwrite/home-path";
-import { getOwnProfile } from "@/lib/appwrite/profiles";
+import { loadSellerStatus } from "@/lib/backend/home-path";
+import { getOwnProfile } from "@/lib/backend/profiles";
 import {
   homePathForUser,
   mayBrowsePublicCatalog,
   pathIsPublicCatalog,
   pathIsPublicStoreException,
   shouldLeaveBuyerStorefront,
-} from "@/lib/appwrite/roles";
-import { redirectIfRegistrationIncomplete } from "@/lib/appwrite/registration-complete";
-import { getLoggedInUser } from "@/lib/appwrite/session";
-import { portalHomeForSessionUser, toSessionUserView } from "@/lib/appwrite/session-user";
-import { resolveAvatarUrl } from "@/lib/appwrite/storage-urls";
+} from "@/lib/backend/roles";
+import { redirectIfRegistrationIncomplete } from "@/lib/backend/registration-complete";
+import { getLoggedInUser } from "@/lib/backend/session";
+import { portalHomeForSessionUser, toSessionUserView } from "@/lib/backend/session-user";
+import { resolveAvatarUrl } from "@/lib/backend/storage-urls";
 import { getOwnBuyerCommerceCounts } from "@/lib/services/buyer-commerce-counts";
 
 export default async function StoreLayout({

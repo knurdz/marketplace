@@ -1,11 +1,11 @@
-import { Query } from "@/lib/db/appwrite-shim";
+import { Query } from "@/lib/db/compat";
 import {
   DATABASE_ID,
   TABLE_PLATFORM_SETTINGS,
-  hasAppwritePublicConfig,
-} from "@/lib/appwrite/config";
+  hasDatabaseConfig,
+} from "@/lib/backend/config";
 import { PLATFORM_SETTING_KEYS } from "@/lib/platform-settings/keys";
-import { createSessionClient } from "@/lib/appwrite/server";
+import { createSessionClient } from "@/lib/backend/server";
 import type { PlatformSetting } from "@/lib/types";
 
 const KEY_MAX = 128;
@@ -60,7 +60,7 @@ export function parsePlatformSettingJson<T>(
 async function withSessionTables(): Promise<{
   tables: Awaited<ReturnType<typeof createSessionClient>>["tables"];
 } | null> {
-  if (!hasAppwritePublicConfig()) return null;
+  if (!hasDatabaseConfig()) return null;
   try {
     const { tables } = await createSessionClient();
     return { tables };

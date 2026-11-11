@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
@@ -20,9 +21,12 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
-import { getOwnProfile } from "@/lib/appwrite/profiles";
-import { mayBrowsePublicCatalog } from "@/lib/appwrite/roles";
-import { getLoggedInUser } from "@/lib/appwrite/session";
+import { BUCKET_PRODUCT_IMAGES } from "@/lib/backend/config";
+import { getOwnProfile } from "@/lib/backend/profiles";
+import { mayBrowsePublicCatalog } from "@/lib/backend/roles";
+import { getLoggedInUser } from "@/lib/backend/session";
+import { getFilePreviewUrl } from "@/lib/backend/storage-urls";
+import { buildNoIndexMetadata, buildPublicMetadata } from "@/lib/seo/metadata";
 import {
   getProduct,
   getPublicSellerByUserId,
@@ -40,6 +44,46 @@ import {
 type ProductPageProps = {
   params: Promise<{ id: string }>;
 };
+
+export async function generateMetadata({
+  params,
+}: ProductPageProps): Promise<Metadata> {
+  const { id } = await params;
+  const product = await getProduct(id);
+  if (!product) {
+    return buildNoIndexMetadata("Listing not found");
+  }
+
+  const [images, seller] = await Promise.all([
+    listProductImages(product.$id),
+    getPublicSellerByUserId(product.sellerId),
+  ]);
+
+  const priceLabel = formatProductPrice(product);
+  const coverImage = images[0];
+  const coverUrl = coverImage
+    ? getFilePreviewUrl(BUCKET_PRODUCT_IMAGES, coverImage.fileId, {
+        width: 1200,
+        height: 630,
+      })
+    : null;
+  const sellerSuffix = seller ? ` Listed by ${seller.shopName}.` : "";
+  const description = product.description?.trim()
+    ? `${product.description.trim()}${sellerSuffix}`
+    : `${product.title} (${priceLabel}) on Knurdz Marketplace.${sellerSuffix}`;
+
+  return buildPublicMetadata({
+    title: `${product.title} — ${priceLabel}`,
+    description,
+    canonicalPath: `/products/${product.$id}`,
+    image: coverUrl
+      ? {
+          url: coverUrl,
+          alt: coverImage.alt || product.title,
+        }
+      : null,
+  });
+}
 
 export default async function ProductPage({ params }: ProductPageProps) {
   const { id } = await params;

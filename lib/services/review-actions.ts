@@ -9,16 +9,31 @@ import {
 } from "./reviews";
 import type { ReviewActionState } from "./review-errors";
 import type { ReviewModerationResult } from "./reviews";
+import { verifyFormGuard } from "@/lib/security/bot-guard";
 
 export async function createSellerReview(
-  input: CreateSellerReviewInput,
+  formData: FormData,
 ): Promise<ReviewActionState> {
+  const guard = await verifyFormGuard(formData, "review.seller.create");
+  if (!guard.ok) {
+    return { error: "Could not submit this form. Please refresh and try again." };
+  }
+  const input: CreateSellerReviewInput = {
+    requestId: readString(formData, "requestId"),
+    rating: Number(readString(formData, "rating")),
+    comment: readString(formData, "comment") || null,
+  };
   const result = await createSellerReviewImpl(input);
   if (result.success) {
     revalidatePath(`/requests/${input.requestId}`);
     revalidatePath("/admin/reviews");
   }
   return result;
+}
+
+function readString(formData: FormData, key: string): string {
+  const value = formData.get(key);
+  return typeof value === "string" ? value.trim() : "";
 }
 
 export async function approveReviewAction(

@@ -9,6 +9,7 @@ const isDev = process.env.NODE_ENV !== "production";
 const scriptSrc = [
   "'self'",
   "'unsafe-inline'",
+  "https://challenges.cloudflare.com",
   ...(isDev ? ["'unsafe-eval'"] : []),
 ].join(" ");
 
@@ -36,8 +37,6 @@ const imgSrc = [
   "'self'",
   "data:",
   "blob:",
-  "https://sgp.cloud.appwrite.io",
-  "https://*.cloud.appwrite.io",
   "https://images.unsplash.com",
   "https://*.googleusercontent.com",
   "https://avatars.githubusercontent.com",
@@ -66,6 +65,10 @@ const securityHeaders = [
     value: "camera=(), microphone=(), geolocation=()",
   },
   {
+    key: "Cross-Origin-Opener-Policy",
+    value: "same-origin",
+  },
+  {
     key: "Content-Security-Policy",
     value: [
       "default-src 'self'",
@@ -73,7 +76,8 @@ const securityHeaders = [
       "style-src 'self' 'unsafe-inline'",
       `img-src ${imgSrc}`,
       "font-src 'self'",
-      "connect-src 'self' https://sgp.cloud.appwrite.io https://*.cloud.appwrite.io",
+      "connect-src 'self' https://challenges.cloudflare.com",
+      "frame-src https://challenges.cloudflare.com",
       "frame-ancestors 'none'",
       "base-uri 'self'",
       "form-action 'self'",
@@ -85,6 +89,11 @@ const nextConfig: NextConfig = {
   turbopack: {
     root: appRoot,
   },
+  experimental: {
+    serverActions: {
+      bodySizeLimit: "6mb",
+    },
+  },
   async headers() {
     return [
       {
@@ -95,14 +104,6 @@ const nextConfig: NextConfig = {
   },
   images: {
     remotePatterns: [
-      {
-        protocol: "https",
-        hostname: "sgp.cloud.appwrite.io",
-      },
-      {
-        protocol: "https",
-        hostname: "*.cloud.appwrite.io",
-      },
       {
         protocol: "https",
         hostname: DEFAULT_STORAGE_HOST,
