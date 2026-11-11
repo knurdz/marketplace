@@ -10,6 +10,7 @@ import {
   createSessionClient,
 } from "@/lib/backend/server";
 import { hasDatabaseConfig } from "@/lib/config/app";
+import { logError } from "@/lib/observability/log-error";
 import { DbException, ID, Query } from "@/lib/db/compat";
 import { getDb } from "@/lib/db/client";
 import { products as productsTable } from "@/lib/db/schema";
@@ -131,8 +132,8 @@ async function loadLiveProductCounts(): Promise<Map<string, number>> {
       if (!id) continue;
       counts.set(id, Number(row.liveCount) || 0);
     }
-  } catch {
-    // Fall through with empty counts (name-only sort).
+  } catch (error) {
+    logError("categories.loadLiveProductCounts", error);
   }
   return counts;
 }
