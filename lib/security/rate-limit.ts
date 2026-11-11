@@ -382,17 +382,20 @@ export async function recordRateLimitHits(
   });
 }
 
+function isIpToken(value: string): boolean {
+  return value.length > 0 && value.length <= 64 && /^[0-9A-Fa-f:.]+$/.test(value);
+}
+
 /**
- * Client IP from Vercel's overwritten forwarding header.
- * Falls back to `"unknown"` (still rate-limited as one shared bucket).
+ * Client IP set by proxy.ts from edge headers (Vercel, X-Real-IP, X-Forwarded-For).
+ * Falls back to `"unknown"` when none of those headers are present.
  */
 export async function getClientIp(): Promise<string> {
   const h = await headers();
-  const forwarded = h.get("x-vercel-forwarded-for");
-  if (forwarded) {
-    const first = forwarded.split(",")[0]?.trim();
-    if (first) return first.slice(0, 64);
-  }
+  const trusted = h.get("x-knurdz-client-ip")?.trim() ?? "";
+  if (isIpToken(trusted)) return trusted;
+  const vercel = h.get("x-vercel-forwarded-for")?.split(",")[0]?.trim() ?? "";
+  if (isIpToken(vercel)) return vercel;
   return "unknown";
 }
 

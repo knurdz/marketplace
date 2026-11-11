@@ -264,26 +264,32 @@ export async function signUpWithEmail(
     return fail(sellerInput.error, sellerApplicationFieldErrors(sellerInput.error));
   }
 
+  if (await isPasswordBreached(password)) {
+    const msg =
+      "This password appears in a known breach. Choose a different password.";
+    return fail(msg, { password: msg });
+  }
+
   const ip = await getClientIp();
-  const registerLimit = await assertRateLimits([
-    {
-      bucket: "auth.register",
-      key: `ip:${ip}`,
-      ...RATE_LIMITS.register,
-    },
+  const registerChecks = [
     {
       bucket: "auth.register",
       key: `email:${normalizeEmailKey(email)}`,
       ...RATE_LIMITS.register,
     },
-  ]);
+  ];
+  // Local dev has no edge IP header, so every signup shared `ip:unknown`
+  // and five attempts anywhere locked registration for the hour.
+  if (ip !== "unknown" || process.env.NODE_ENV === "production") {
+    registerChecks.unshift({
+      bucket: "auth.register",
+      key: `ip:${ip}`,
+      ...RATE_LIMITS.register,
+    });
+  }
+  const registerLimit = await assertRateLimits(registerChecks);
   if (!registerLimit.ok) {
     return fail(RATE_LIMIT_MESSAGE);
-  }
-  if (await isPasswordBreached(password)) {
-    const msg =
-      "This password appears in a known breach. Choose a different password.";
-    return fail(msg, { password: msg });
   }
 
   let createdUserId: string | null = null;
