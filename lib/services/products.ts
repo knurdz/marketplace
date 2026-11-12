@@ -116,6 +116,15 @@ export type ProductCatalogSort = "newest" | "price_asc" | "price_desc";
 /** Default storefront catalog page size (infinite scroll). */
 export const CATALOG_PAGE_SIZE = 12;
 
+/** Homepage “Just listed” row: only products created within this many days. */
+export const JUST_LISTED_WINDOW_DAYS = 9;
+
+const MS_PER_DAY = 24 * 60 * 60 * 1000;
+
+export function justListedCreatedAfter(now = new Date()): Date {
+  return new Date(now.getTime() - JUST_LISTED_WINDOW_DAYS * MS_PER_DAY);
+}
+
 type CatalogCursorPayload = {
   v: 1;
   sort: ProductCatalogSort;
@@ -178,6 +187,7 @@ function buildPublicCatalogSqlFilters(opts: {
   sellerId?: string | null;
   minPrice?: number;
   maxPrice?: number;
+  createdAfter?: Date;
 }): SQL[] {
   const categoryId = opts.categoryId?.trim() || null;
   const sellerId = opts.sellerId?.trim() || null;
@@ -192,6 +202,9 @@ function buildPublicCatalogSqlFilters(opts: {
   }
   if (opts.maxPrice != null) {
     filters.push(lte(productsTable.price, String(opts.maxPrice)));
+  }
+  if (opts.createdAfter != null) {
+    filters.push(gte(productsTable.createdAt, opts.createdAfter));
   }
   return filters;
 }
@@ -414,6 +427,7 @@ type ProductCatalogFilterOpts = {
   minPrice?: number;
   maxPrice?: number;
   sort?: ProductCatalogSort;
+  createdAfter?: Date;
 };
 
 function parseOptionalPrice(raw: unknown): number | undefined {
@@ -481,6 +495,14 @@ function buildProductCatalogQueries(
     ...(filters.maxPrice != null
       ? [Query.lessThanEqual("price", filters.maxPrice)]
       : []),
+    ...(filters.createdAfter != null
+      ? [
+          Query.greaterThanEqual(
+            "$createdAt",
+            filters.createdAfter.toISOString(),
+          ),
+        ]
+      : []),
     productCatalogSortQuery(filters.sort ?? "newest"),
   ];
 }
@@ -510,6 +532,7 @@ export async function listActiveProducts(opts?: {
   maxPrice?: number;
   sort?: ProductCatalogSort;
   invalidPriceRange?: boolean;
+  createdAfter?: Date;
 }): Promise<Product[]> {
   if (!hasDatabaseConfig() || opts?.invalidPriceRange) return [];
 
@@ -526,6 +549,7 @@ export async function listActiveProducts(opts?: {
         minPrice: opts?.minPrice,
         maxPrice: opts?.maxPrice,
         sort: opts?.sort,
+        createdAfter: opts?.createdAfter,
       }),
       Query.limit(limit),
     ];
@@ -540,6 +564,17 @@ export async function listActiveProducts(opts?: {
     logError("products.listActiveProducts", error);
     return [];
   }
+}
+
+/** Newest active storefront listings created within {@link JUST_LISTED_WINDOW_DAYS} days. */
+export async function listJustListedProducts(opts?: {
+  limit?: number;
+}): Promise<Product[]> {
+  return listActiveProducts({
+    limit: opts?.limit,
+    sort: "newest",
+    createdAfter: justListedCreatedAfter(),
+  });
 }
 
 /** Admin-curated featured listings (active + available). */

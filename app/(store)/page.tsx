@@ -13,14 +13,14 @@ import {
 } from "@/lib/seo/metadata";
 import {
   getCategoryBySlug,
-  listActiveProducts,
   listActiveProductsPage,
+  listJustListedProducts,
   listCategoriesWithActiveProducts,
   listCoverImagesByProductIds,
   parseProductCatalogParams,
 } from "@/lib/services";
 
-/** One horizontal row of recent listings. */
+/** One horizontal row of listings created in the last 9 days. */
 const JUST_LISTED_LIMIT = 8;
 /** Browse grid first page (infinite scroll loads the rest). */
 const BROWSE_LIMIT = 12;
@@ -90,10 +90,7 @@ export default async function Home({ searchParams }: HomePageProps) {
   const [justListed, browsePage] = await Promise.all([
     hasBrowseParams
       ? Promise.resolve([])
-      : listActiveProducts({
-          limit: JUST_LISTED_LIMIT,
-          sort: "newest",
-        }),
+      : listJustListedProducts({ limit: JUST_LISTED_LIMIT }),
     listActiveProductsPage({
       limit: BROWSE_LIMIT,
       categoryId: matchedCategory?.$id,
