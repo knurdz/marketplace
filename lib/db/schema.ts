@@ -205,6 +205,22 @@ export const productImages = mysqlTable(
   (t) => [index("product_images_product_id_idx").on(t.productId)],
 );
 
+/** Staged seller edits for active listings (one row per product). */
+export const productRevisions = mysqlTable(
+  "product_revisions",
+  {
+    id: id36(),
+    productId: varchar("product_id", { length: 36 }).notNull(),
+    patch: text("patch").notNull(),
+    createdAt: ts(),
+    updatedAt: tsUpdated(),
+  },
+  (t) => [
+    uniqueIndex("product_revisions_product_id_unique").on(t.productId),
+    index("product_revisions_updated_at_idx").on(t.updatedAt),
+  ],
+);
+
 export const wishlistItems = mysqlTable(
   "wishlist_items",
   {
@@ -408,6 +424,7 @@ export const TABLE_REGISTRY = {
   categories,
   products,
   product_images: productImages,
+  product_revisions: productRevisions,
   wishlist_items: wishlistItems,
   purchase_requests: purchaseRequests,
   reviews,

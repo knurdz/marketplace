@@ -153,9 +153,18 @@ export type {
   SellerListingMutationResult,
 } from "./seller-listings";
 export {
+  listModerationQueueItems,
   listPendingModerationQueue,
   listProductsByStatus,
 } from "./listing-moderation";
+export type { ModerationQueueItem } from "./listing-moderation";
+export {
+  buildAdminChangeLines,
+  getRevisionForProduct,
+  listProductIdsWithRevisions,
+  overlayProductWithPatch,
+  revisionImagesToDisplay,
+} from "./listing-revisions";
 export { listBuyers, listUsers } from "./user-management";
 export type {
   AdminUserView,
@@ -288,6 +297,10 @@ export type {
   SellerPerformanceInput,
   SellerPerformanceRow,
 } from "./admin-seller-performance";
+export {
+  getAdminPortalSidebarDots,
+  type AdminPortalSidebarDots,
+} from "./portal-sidebar-dots";
 export { getAdminShopDetail } from "./admin-shop-detail";
 export type {
   AdminShopAccount,

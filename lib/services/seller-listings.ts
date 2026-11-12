@@ -32,11 +32,20 @@ import {
 } from "@/lib/security/rate-limit";
 import type { Product, ProductImage, ProductStatus } from "@/lib/types";
 import {
+  ACTIVE_PRODUCT_STATUS,
   ARCHIVED_PRODUCT_STATUS,
   DRAFT_PRODUCT_STATUS,
   PENDING_REVIEW_PRODUCT_STATUS,
   REJECTED_PRODUCT_STATUS,
 } from "@/lib/types/status";
+import {
+  discardRevisionCore,
+  getRevisionForProduct,
+  proposedImagesFromProduct,
+  revisionImagesToDisplay,
+  stageActiveListingFieldUpdate,
+  stageActiveListingImagesPatch,
+} from "./listing-revisions";
 import { asProduct, asProductImage, listProductImages } from "./products";
 import { areFreeListingsEnabled } from "./platform-settings";
 
@@ -45,6 +54,8 @@ const MAX_TITLE_LENGTH = 200;
 const MAX_DESCRIPTION_LENGTH = 10000;
 const MAX_IMAGES = 8;
 const FREE_LISTINGS_DISABLED = "Free listings are currently disabled." as const;
+export const LISTING_REQUIRES_PHOTO =
+  "Add at least one product photo." as const;
 
 export type CreateDraftProductInput = {
   title: string;
@@ -380,6 +391,18 @@ export async function updateOwnProductCore(
     return { ok: false, error: "Selected category was not found." };
   }
 
+  const available = parseAvailableFlag(input.available);
+
+  if (loaded.product.status === ACTIVE_PRODUCT_STATUS) {
+    const liveImages = await listProductImages(loaded.product.$id);
+    return stageActiveListingFieldUpdate(
+      loaded.product,
+      liveImages,
+      parsed,
+      available,
+    );
+  }
+
   try {
     const { tables } = await createSessionClient();
     await tables.updateRow({
@@ -393,7 +416,7 @@ export async function updateOwnProductCore(
         price: parsed.price,
         isFree: parsed.isFree,
         stock: parsed.stock,
-        available: parseAvailableFlag(input.available),
+        available,
       },
     });
 
@@ -431,6 +454,9 @@ export async function archiveOwnProductCore(
   if (loaded.product.status === ARCHIVED_PRODUCT_STATUS) {
     return { ok: true, message: "Listing is already archived." };
   }
+
+  const liveImages = await listProductImages(loaded.product.$id);
+  await discardRevisionCore(loaded.product.$id, liveImages);
 
   try {
     const { tables } = await createSessionClient();
@@ -481,11 +507,20 @@ export async function addOwnProductImagesCore(
     return { ok: false, error: "Select at least one image to upload." };
   }
 
-  const existing = await listProductImages(loaded.product.$id);
-  if (existing.length + nonEmptyImages.length > MAX_IMAGES) {
+  const liveImages = await listProductImages(loaded.product.$id);
+  const revision =
+    loaded.product.status === ACTIVE_PRODUCT_STATUS
+      ? await getRevisionForProduct(loaded.product.$id)
+      : null;
+  const proposedImages =
+    loaded.product.status === ACTIVE_PRODUCT_STATUS && revision
+      ? revisionImagesToDisplay(liveImages, revision.patch)
+      : liveImages;
+
+  if (proposedImages.length + nonEmptyImages.length > MAX_IMAGES) {
     return {
       ok: false,
-      error: `At most ${MAX_IMAGES} images allowed (${existing.length} already uploaded).`,
+      error: `At most ${MAX_IMAGES} images allowed (${proposedImages.length} already uploaded).`,
     };
   }
 
@@ -495,17 +530,34 @@ export async function addOwnProductImagesCore(
   }
 
   const uploadedFileIds: string[] = [];
-  const imagePerms = productImagePermissions(auth.userId);
   const nextSortOrder =
-    existing.reduce((max, image) => Math.max(max, image.sortOrder), -1) + 1;
+    proposedImages.reduce((max, image) => Math.max(max, image.sortOrder), -1) + 1;
 
   try {
-    const { tables } = await createAdminClient();
     for (let i = 0; i < imageCheck.files.length; i++) {
       const file = imageCheck.files[i]!;
       const { fileId } = await uploadProductImage(file);
       uploadedFileIds.push(fileId);
+    }
 
+    if (loaded.product.status === ACTIVE_PRODUCT_STATUS) {
+      const existingPatch = revision?.patch ?? {};
+      const base = proposedImagesFromProduct(liveImages, existingPatch);
+      const merged = [
+        ...base,
+        ...uploadedFileIds.map((fileId, i) => ({
+          fileId,
+          sortOrder: nextSortOrder + i,
+          alt: loaded.product.title.slice(0, 200),
+        })),
+      ];
+      return stageActiveListingImagesPatch(loaded.product, liveImages, merged);
+    }
+
+    const imagePerms = productImagePermissions(auth.userId);
+    const { tables } = await createAdminClient();
+    for (let i = 0; i < uploadedFileIds.length; i++) {
+      const fileId = uploadedFileIds[i]!;
       await tables.createRow({
         databaseId: DATABASE_ID,
         tableId: TABLE_PRODUCT_IMAGES,
@@ -588,11 +640,69 @@ export async function deleteOwnProductImageCore(
     return { ok: false, error: RATE_LIMIT_MESSAGE };
   }
 
+  if (imageRowId.startsWith("pending:")) {
+    const fileId = imageRowId.slice("pending:".length).trim();
+    if (!fileId) {
+      return { ok: false, error: "Image not found." };
+    }
+
+    const owned = await loadOwnedProductForMutation(productId);
+    if (!owned.ok) return owned;
+
+    if (owned.product.status === ARCHIVED_PRODUCT_STATUS) {
+      return archivedMutationError();
+    }
+    if (owned.product.status !== ACTIVE_PRODUCT_STATUS) {
+      return { ok: false, error: "Image not found." };
+    }
+
+    const liveImages = await listProductImages(owned.product.$id);
+    const revision = await getRevisionForProduct(owned.product.$id);
+    const existingPatch = revision?.patch ?? {};
+    const proposed = proposedImagesFromProduct(liveImages, existingPatch);
+    const next = proposed.filter((img) => img.fileId !== fileId);
+    if (next.length === proposed.length) {
+      return { ok: false, error: "Image not found." };
+    }
+
+    try {
+      await deleteFile(BUCKET_PRODUCT_IMAGES, fileId);
+    } catch {
+      // best-effort
+    }
+
+    return stageActiveListingImagesPatch(owned.product, liveImages, next);
+  }
+
   const loaded = await loadOwnedProductImage(productId, imageRowId);
   if (!loaded.ok) return loaded;
 
   if (loaded.product.status === ARCHIVED_PRODUCT_STATUS) {
     return archivedMutationError();
+  }
+
+  const liveImages = await listProductImages(loaded.product.$id);
+
+  if (loaded.product.status === ACTIVE_PRODUCT_STATUS) {
+    const revision = await getRevisionForProduct(loaded.product.$id);
+    const existingPatch = revision?.patch ?? {};
+    const proposed = proposedImagesFromProduct(liveImages, existingPatch);
+    const liveFileIds = new Set(liveImages.map((i) => i.fileId));
+    const next = proposed.filter((img) => img.fileId !== loaded.image.fileId);
+
+    if (next.length === proposed.length) {
+      return { ok: false, error: "Image not found." };
+    }
+
+    if (!liveFileIds.has(loaded.image.fileId)) {
+      try {
+        await deleteFile(BUCKET_PRODUCT_IMAGES, loaded.image.fileId);
+      } catch {
+        // best-effort
+      }
+    }
+
+    return stageActiveListingImagesPatch(loaded.product, liveImages, next);
   }
 
   try {
@@ -659,6 +769,9 @@ export async function createDraftProductCore(
   }
 
   const nonEmptyImages = imageFiles.filter((f) => f.size > 0);
+  if (nonEmptyImages.length === 0) {
+    return { ok: false, error: LISTING_REQUIRES_PHOTO };
+  }
   const imageCheck = await validateImageFiles(nonEmptyImages);
   if (!imageCheck.ok) {
     return { ok: false, error: imageCheck.error };
@@ -871,6 +984,14 @@ export async function submitListingForReviewCore(
     return {
       ok: false,
       error: `Listing is ${product.status}. Only drafts and rejected listings can be submitted.`,
+    };
+  }
+
+  const images = await listProductImages(product.$id);
+  if (images.length === 0) {
+    return {
+      ok: false,
+      error: `${LISTING_REQUIRES_PHOTO} before submitting for review.`,
     };
   }
 

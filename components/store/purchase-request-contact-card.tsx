@@ -23,14 +23,14 @@ function ContactCell({
   href?: string;
 }) {
   return (
-    <div className="rounded-lg border border-border bg-muted/15 px-3.5 py-3">
+    <div className="min-w-0 rounded-lg border border-border bg-muted/15 px-3.5 py-3">
       <dt className="text-xs font-medium text-muted-foreground">{label}</dt>
       <dd
-        className="mt-1 text-sm font-medium text-foreground"
+        className="mt-1 text-sm font-medium wrap-anywhere text-foreground"
         data-testid={testId}
       >
         {href ? (
-          <a href={href} className="hover:text-accent">
+          <a href={href} className="wrap-anywhere hover:text-accent">
             {value}
           </a>
         ) : (
@@ -58,6 +58,7 @@ export function PurchaseRequestContactCard({
   return (
     <section
       className={cn(
+        "min-w-0",
         isPortal ? "space-y-4" : "rounded-xl border border-border bg-card p-4",
         className,
       )}
@@ -75,7 +76,9 @@ export function PurchaseRequestContactCard({
       <dl
         className={cn(
           "gap-3",
-          isPortal ? "grid sm:grid-cols-3" : "mt-3 space-y-2 text-sm",
+          isPortal
+            ? "grid grid-cols-1 sm:grid-cols-[repeat(3,minmax(0,1fr))]"
+            : "mt-3 space-y-2 text-sm",
         )}
       >
         {isPortal ? (
@@ -103,7 +106,7 @@ export function PurchaseRequestContactCard({
             {contact.displayName ? (
               <div>
                 <dt className="text-muted-foreground">Name</dt>
-                <dd className="font-medium text-foreground">
+                <dd className="font-medium wrap-anywhere text-foreground">
                   {contact.displayName}
                 </dd>
               </div>
@@ -111,7 +114,7 @@ export function PurchaseRequestContactCard({
             <div>
               <dt className="text-muted-foreground">Phone</dt>
               <dd
-                className="font-medium text-foreground"
+                className="font-medium wrap-anywhere text-foreground"
                 data-testid="request-contact-phone"
               >
                 {contact.phone ?? "Not provided"}
@@ -120,7 +123,7 @@ export function PurchaseRequestContactCard({
             <div>
               <dt className="text-muted-foreground">Email</dt>
               <dd
-                className="font-medium text-foreground"
+                className="font-medium wrap-anywhere text-foreground"
                 data-testid="request-contact-email"
               >
                 {contact.email ?? "Not provided"}

@@ -15,8 +15,17 @@ import {
   PENDING_REVIEW_PRODUCT_STATUS,
   REJECTED_PRODUCT_STATUS,
 } from "@/lib/types/status";
+import {
+  applyRevisionCore,
+  discardRevisionCore,
+  getRevisionForProduct,
+  listModerationQueueItems,
+} from "./listing-revisions";
 import { writeAuditLog } from "./audit-logs";
-import { asProduct } from "./products";
+import { asProduct, listProductImages } from "./products";
+
+export { listModerationQueueItems };
+export type { ModerationQueueItem } from "@/lib/types/listing-revision";
 
 const MAX_REASON_LENGTH = 500;
 const DEFAULT_PAGE_SIZE = 24;
@@ -110,7 +119,8 @@ export async function listPendingModerationQueue(opts?: {
   limit?: number;
   cursor?: string;
 }): Promise<Product[]> {
-  return listProductsByStatus(PENDING_REVIEW_PRODUCT_STATUS, opts);
+  const { items } = await listModerationQueueItems(opts);
+  return items.map((item) => item.product);
 }
 
 /**
@@ -127,8 +137,27 @@ export async function approveListingCore(
     return { ok: false, error: "Listing not found." };
   }
 
+  const pendingEdit =
+    product.status === ACTIVE_PRODUCT_STATUS
+      ? await getRevisionForProduct(product.$id)
+      : null;
+
   if (product.status === ACTIVE_PRODUCT_STATUS) {
-    return { ok: true, message: `"${product.title}" is already active.` };
+    if (!pendingEdit) {
+      return { ok: true, message: `"${product.title}" is already active.` };
+    }
+    const liveImages = await listProductImages(product.$id);
+    const applied = await applyRevisionCore(adminUserId, product, liveImages);
+    if (!applied.ok) return applied;
+
+    await notifyUserEvent(product.sellerId, {
+      type: "listing.edit.approved",
+      title: "Listing edits approved",
+      body: `Your changes to "${product.title}" are now live on the storefront.`,
+      link: `/seller/listings?edit=${encodeURIComponent(product.$id)}`,
+    });
+
+    return applied;
   }
 
   if (product.status !== PENDING_REVIEW_PRODUCT_STATUS) {
@@ -197,6 +226,52 @@ export async function rejectListingCore(
   const product = await loadProduct(productId);
   if (!product) {
     return { ok: false, error: "Listing not found." };
+  }
+
+  if (product.status === ACTIVE_PRODUCT_STATUS) {
+    const revision = await getRevisionForProduct(product.$id);
+    if (!revision) {
+      return {
+        ok: false,
+        error: "This listing has no pending edit to reject.",
+      };
+    }
+
+    const liveImages = await listProductImages(product.$id);
+    await discardRevisionCore(product.$id, liveImages);
+
+    try {
+      await writeAuditLog({
+        actorId: adminUserId,
+        event: "listing.edit_rejected",
+        resourceType: "product",
+        resourceId: product.$id,
+        meta: {
+          title: product.title,
+          sellerId: product.sellerId,
+          reason: parsedReason,
+        },
+      });
+    } catch {
+      return {
+        ok: false,
+        error:
+          "Edit rejected but audit log failed. Please notify an operator.",
+      };
+    }
+
+    await notifyUserEvent(product.sellerId, {
+      type: "listing.edit.rejected",
+      title: "Listing edits rejected",
+      body: `Your proposed changes to "${product.title}" were not approved. The live listing is unchanged.`,
+      link: `/seller/listings?edit=${encodeURIComponent(product.$id)}`,
+      detailLines: [`Reason: ${parsedReason}`],
+    });
+
+    return {
+      ok: true,
+      message: `Pending edits to "${product.title}" were discarded.`,
+    };
   }
 
   if (product.status === REJECTED_PRODUCT_STATUS) {
@@ -284,6 +359,9 @@ export async function removeListingCore(
       error: `Listing is ${product.status}. Only active listings can be removed.`,
     };
   }
+
+  const liveImages = await listProductImages(product.$id);
+  await discardRevisionCore(product.$id, liveImages);
 
   const { tables } = await createAdminClient();
   try {

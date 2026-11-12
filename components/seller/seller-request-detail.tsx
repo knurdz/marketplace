@@ -145,7 +145,7 @@ export function SellerRequestDetail({
           </aside>
 
           <div className="flex min-w-0 flex-col">
-            <div className="flex-1 p-5 lg:p-6">
+            <div className="min-w-0 flex-1 p-5 lg:p-6">
               <PurchaseRequestContactCard
                 title="Buyer contact"
                 contact={contact}

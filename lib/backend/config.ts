@@ -17,6 +17,7 @@ export const TABLE_SELLER_PROFILES = "seller_profiles";
 export const TABLE_CATEGORIES = "categories";
 export const TABLE_PRODUCTS = "products";
 export const TABLE_PRODUCT_IMAGES = "product_images";
+export const TABLE_PRODUCT_REVISIONS = "product_revisions";
 export const TABLE_WISHLIST_ITEMS = "wishlist_items";
 export const TABLE_PURCHASE_REQUESTS = "purchase_requests";
 export const TABLE_REVIEWS = "reviews";
@@ -34,6 +35,7 @@ export const ALL_TABLE_IDS = [
   TABLE_CATEGORIES,
   TABLE_PRODUCTS,
   TABLE_PRODUCT_IMAGES,
+  TABLE_PRODUCT_REVISIONS,
   TABLE_WISHLIST_ITEMS,
   TABLE_PURCHASE_REQUESTS,
   TABLE_REVIEWS,

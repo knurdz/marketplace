@@ -57,7 +57,7 @@ export function CreateListingForm({
           media={
             <ListingFormMediaSection
               title="Photos"
-              description="Optional. Add up to 8 images before or after saving."
+              description="At least one image is required. Up to 8, JPG, PNG, or WebP."
             >
               <ListingFormFileField
                 id="images"
@@ -66,6 +66,7 @@ export function CreateListingForm({
                 hint="First image is used as the cover on your listings table."
                 disabled={pending}
                 multiple
+                required
               />
             </ListingFormMediaSection>
           }

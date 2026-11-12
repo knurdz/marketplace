@@ -7,11 +7,14 @@ import {
 import { redirectIfRegistrationIncomplete } from "@/lib/backend/registration-complete";
 import { requireLabel } from "@/lib/backend/roles";
 import { buildNoIndexMetadata } from "@/lib/seo/metadata";
-import { hasPendingSellerApplications } from "@/lib/services/seller-approvals";
+import {
+  getAdminPortalSidebarDots,
+  type AdminPortalSidebarDots,
+} from "@/lib/services/portal-sidebar-dots";
 
 export const metadata: Metadata = buildNoIndexMetadata("Admin Portal");
 
-function buildAdminNav(pendingSellers: boolean): PortalNavGroup[] {
+function buildAdminNav(dots: AdminPortalSidebarDots): PortalNavGroup[] {
   return [
     {
       items: [{ href: "/admin", label: "Dashboard", icon: "dashboard" }],
@@ -19,7 +22,12 @@ function buildAdminNav(pendingSellers: boolean): PortalNavGroup[] {
     {
       title: "Commerce",
       items: [
-        { href: "/admin/listings", label: "Listings", icon: "listings" },
+        {
+          href: "/admin/listings",
+          label: "Listings",
+          icon: "listings",
+          showDot: dots.listings,
+        },
         { href: "/admin/categories", label: "Categories", icon: "categories" },
         { href: "/admin/requests", label: "Requests", icon: "orders" },
       ],
@@ -31,7 +39,7 @@ function buildAdminNav(pendingSellers: boolean): PortalNavGroup[] {
           href: "/admin/sellers",
           label: "Sellers",
           icon: "sellers",
-          showDot: pendingSellers,
+          showDot: dots.sellers,
         },
         { href: "/admin/buyers", label: "Buyers", icon: "users" },
         {
@@ -40,8 +48,18 @@ function buildAdminNav(pendingSellers: boolean): PortalNavGroup[] {
           icon: "performance",
         },
         { href: "/admin/trust", label: "Trust", icon: "trust" },
-        { href: "/admin/reports", label: "Reports", icon: "reports" },
-        { href: "/admin/reviews", label: "Reviews", icon: "reports" },
+        {
+          href: "/admin/reports",
+          label: "Reports",
+          icon: "reports",
+          showDot: dots.reports,
+        },
+        {
+          href: "/admin/reviews",
+          label: "Reviews",
+          icon: "reports",
+          showDot: dots.reviews,
+        },
       ],
     },
     {
@@ -61,13 +79,13 @@ export default async function AdminLayout({
 }) {
   await requireLabel("admin");
   await redirectIfRegistrationIncomplete();
-  const pendingSellers = await hasPendingSellerApplications();
+  const dots = await getAdminPortalSidebarDots();
 
   return (
     <PortalShell
       title="Admin"
       homeHref="/admin"
-      nav={buildAdminNav(pendingSellers)}
+      nav={buildAdminNav(dots)}
     >
       {children}
     </PortalShell>

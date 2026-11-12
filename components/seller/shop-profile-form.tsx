@@ -218,13 +218,22 @@ function BannerDropzone({
       >
         {previewSrc ? (
           <>
-            <StorageImage
-              src={previewSrc}
-              alt=""
-              className="absolute inset-0 h-full w-full"
-              imgClassName="object-cover"
-              priority
-            />
+            {selected?.previewUrl ? (
+              // eslint-disable-next-line @next/next/no-img-element -- local file preview
+              <img
+                src={selected.previewUrl}
+                alt=""
+                className="absolute inset-0 h-full w-full object-cover"
+              />
+            ) : (
+              <StorageImage
+                src={previewSrc}
+                alt=""
+                className="absolute inset-0 h-full w-full"
+                imgClassName="object-cover"
+                priority
+              />
+            )}
             <div className="absolute inset-0 bg-gradient-to-t from-black/55 via-black/20 to-black/10" />
             <div className="relative z-10 mt-auto flex w-full flex-col gap-3 p-5 text-white sm:flex-row sm:items-end sm:justify-between">
               <div className="min-w-0">

@@ -29,6 +29,7 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "@/components/ui/sidebar";
+import { BrandLogo } from "@/components/brand/brand-logo";
 import { cn } from "@/lib/utils";
 
 function isActivePath(pathname: string, href: string, allHrefs: string[]): boolean {
@@ -136,14 +137,13 @@ export function PortalAppSidebar({
         <div className="flex items-center justify-between gap-2">
           <Link
             href={homeHref}
-            className="flex min-w-0 items-center gap-2.5 overflow-hidden group-data-[collapsible=icon]:size-9 group-data-[collapsible=icon]:justify-center"
+            className="flex min-w-0 items-center overflow-hidden group-data-[collapsible=icon]:justify-center"
+            aria-label="Knurdz Marketplace home"
           >
-            <span className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-accent text-sm font-bold text-accent-foreground">
-              K
-            </span>
-            <span className="truncate text-base font-semibold tracking-tight text-foreground group-data-[collapsible=icon]:hidden">
-              Knurdz
-            </span>
+            <BrandLogo
+              priority
+              className="h-10 w-auto max-w-full group-data-[collapsible=icon]:h-8"
+            />
           </Link>
           <SidebarCollapseButton className="hidden group-data-[collapsible=icon]:hidden md:inline-flex" />
         </div>

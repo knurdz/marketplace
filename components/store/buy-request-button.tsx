@@ -53,12 +53,12 @@ export function BuyRequestButton({
 
   if (!buyerHasPhone) {
     return (
-      <div className="space-y-2" data-testid="buy-request-phone-required">
-        <p className="text-sm text-muted-foreground">
-          Add a phone number to your account so the seller can contact you.
+      <div className="contents" data-testid="buy-request-phone-required">
+        <p className="w-full text-sm text-muted-foreground">
+          Sellers contact buyers by phone after you send a buy request.
         </p>
-        <Button asChild variant="secondary">
-          <Link href="/account">Add phone number</Link>
+        <Button asChild variant="secondary" className="h-10 shrink-0">
+          <Link href="/account">Add phone to buy</Link>
         </Button>
       </div>
     );

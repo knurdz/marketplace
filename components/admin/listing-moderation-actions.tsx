@@ -50,6 +50,7 @@ type ListingRowActionsProps = {
   title: string;
   view: "pending" | "active";
   featured?: boolean;
+  moderationKind?: "new" | "edit";
 };
 
 export function ListingApproveButton({ productId }: { productId: string }) {
@@ -79,7 +80,8 @@ export function ListingApproveButton({ productId }: { productId: string }) {
 export function ListingRejectForm({
   productId,
   title,
-}: Pick<ListingRowActionsProps, "productId" | "title">) {
+  moderationKind = "new",
+}: Pick<ListingRowActionsProps, "productId" | "title" | "moderationKind">) {
   const [open, setOpen] = useState(false);
   const [state, formAction, pending] = useActionState(
     rejectListingFormAction,
@@ -102,8 +104,12 @@ export function ListingRejectForm({
       <ConfirmActionDialog
         open={open}
         onOpenChange={setOpen}
-        title="Reject listing?"
-        description={`Reject “${title}”? A reason is required for the audit log.`}
+        title={moderationKind === "edit" ? "Reject edits?" : "Reject listing?"}
+        description={
+          moderationKind === "edit"
+            ? `Reject proposed changes to “${title}”? The live listing stays up. A reason is required for the audit log.`
+            : `Reject “${title}”? A reason is required for the audit log.`
+        }
         confirmLabel="Confirm reject"
         pendingLabel="Rejecting…"
         confirmVariant="destructive"
@@ -204,12 +210,17 @@ export function ListingRowActions({
   title,
   view,
   featured = false,
+  moderationKind = "new",
 }: ListingRowActionsProps) {
   if (view === "pending") {
     return (
       <div className="flex flex-wrap items-start gap-3">
         <ListingApproveButton productId={productId} />
-        <ListingRejectForm productId={productId} title={title} />
+        <ListingRejectForm
+          productId={productId}
+          title={title}
+          moderationKind={moderationKind}
+        />
       </div>
     );
   }
@@ -223,6 +234,17 @@ export function ListingRowActions({
 }
 
 const DESCRIPTION_PREVIEW = 280;
+
+export function ListingChangeLines({ lines }: { lines: string[] }) {
+  if (lines.length === 0) return null;
+  return (
+    <ul className="mt-3 list-disc space-y-1 pl-5 text-xs text-muted-foreground">
+      {lines.map((line) => (
+        <li key={line}>{line}</li>
+      ))}
+    </ul>
+  );
+}
 
 export function ListingDescription({ description }: { description: string }) {
   const [expanded, setExpanded] = useState(false);

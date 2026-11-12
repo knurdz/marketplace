@@ -62,6 +62,7 @@ type EditListingFormProps = {
   categories: Category[];
   images: ProductImage[];
   freeListingsEnabled?: boolean;
+  editInReview?: boolean;
 };
 
 export function EditListingForm({
@@ -69,8 +70,10 @@ export function EditListingForm({
   categories,
   images,
   freeListingsEnabled = true,
+  editInReview = false,
 }: EditListingFormProps) {
   const isArchived = product.status === "archived";
+  const isActive = product.status === "active";
   const [showArchiveConfirm, setShowArchiveConfirm] = useState(false);
   const [isFree, setIsFree] = useState(
     freeListingsEnabled && (product.isFree || product.price === 0),
@@ -111,6 +114,15 @@ export function EditListingForm({
             label={product.status}
             tone={productStatusTone(product.status)}
           />
+          {editInReview ? (
+            <StatusPill label="Edit in review" tone="warning" />
+          ) : null}
+          {isActive ? (
+            <p className="text-sm text-muted-foreground">
+              Shoppers see the live version until an admin approves your
+              changes.
+            </p>
+          ) : null}
           {isArchived ? (
             <p className="text-sm text-muted-foreground">
               Archived listings stay hidden and cannot be edited.

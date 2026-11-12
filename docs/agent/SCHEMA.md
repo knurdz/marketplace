@@ -53,6 +53,15 @@ Shop name, slug, bio, banner, status, return/shipping policies. **No bank accoun
 
 Unchanged listing model (`price`, `stock`, `available`, `status`, `featured`, …).
 
+### `product_revisions`
+
+| Column | Notes |
+|--------|-------|
+| `productId` | Unique — one staged edit per product |
+| `patch` | JSON text: field overrides and optional full proposed `images` array when the gallery changed |
+
+Used when sellers edit an **active** listing: the live row stays on the storefront until admin approves the revision.
+
 ### `wishlist_items`
 
 Owner-only saved products.

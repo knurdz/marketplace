@@ -7,6 +7,8 @@ import {
   useId,
   useRef,
   useState,
+  type ChangeEvent,
+  type DragEvent,
   type ReactNode,
 } from "react";
 import { Pencil, Plus, Trash2, Upload } from "lucide-react";
@@ -14,7 +16,6 @@ import { CategoryImage } from "@/components/store/category-image";
 import { PortalPageHeader } from "@/components/layout/portal-page-header";
 import { PortalPanel } from "@/components/layout/portal-panel";
 import { Button } from "@/components/ui/button";
-import { StorageImage } from "@/components/ui/storage-image";
 import { ConfirmActionDialog } from "@/components/ui/confirm-action-dialog";
 import {
   Drawer,
@@ -107,29 +108,84 @@ function CategoryImageField({
   id: string;
   existing?: Pick<Category, "name" | "slug" | "imageFileId"> | null;
 }) {
+  const inputRef = useRef<HTMLInputElement>(null);
+  const objectUrlRef = useRef<string | null>(null);
+  const [dragging, setDragging] = useState(false);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
 
   useEffect(() => {
     return () => {
-      if (previewUrl) URL.revokeObjectURL(previewUrl);
+      if (objectUrlRef.current) {
+        URL.revokeObjectURL(objectUrlRef.current);
+        objectUrlRef.current = null;
+      }
     };
-  }, [previewUrl]);
+  }, []);
+
+  function assignFile(file: File | null) {
+    if (!inputRef.current) return;
+    if (objectUrlRef.current) {
+      URL.revokeObjectURL(objectUrlRef.current);
+      objectUrlRef.current = null;
+    }
+    const dt = new DataTransfer();
+    if (file) dt.items.add(file);
+    inputRef.current.files = dt.files;
+    if (file) {
+      const url = URL.createObjectURL(file);
+      objectUrlRef.current = url;
+      setPreviewUrl(url);
+    } else {
+      setPreviewUrl(null);
+    }
+  }
+
+  function onInputChange(event: ChangeEvent<HTMLInputElement>) {
+    const file = event.target.files?.[0] ?? null;
+    assignFile(file);
+  }
+
+  function onDrop(event: DragEvent<HTMLLabelElement>) {
+    event.preventDefault();
+    event.stopPropagation();
+    setDragging(false);
+    const file = event.dataTransfer.files?.[0] ?? null;
+    assignFile(file);
+  }
+
+  function onDragOver(event: DragEvent<HTMLLabelElement>) {
+    event.preventDefault();
+    event.stopPropagation();
+    setDragging(true);
+  }
+
+  function onDragLeave(event: DragEvent<HTMLLabelElement>) {
+    event.preventDefault();
+    event.stopPropagation();
+    if (event.currentTarget.contains(event.relatedTarget as Node)) return;
+    setDragging(false);
+  }
 
   return (
     <div className="space-y-2">
       <Label htmlFor={id}>Image</Label>
       <label
         htmlFor={id}
+        onDrop={onDrop}
+        onDragOver={onDragOver}
+        onDragEnter={onDragOver}
+        onDragLeave={onDragLeave}
         className={cn(
           "relative flex min-h-[200px] cursor-pointer flex-col items-center justify-center overflow-hidden rounded-xl border border-dashed border-border bg-muted/15 px-4 py-6 text-center transition-colors hover:border-muted-foreground/40 hover:bg-muted/25",
+          dragging && "border-accent/60 bg-accent/5",
         )}
       >
         {previewUrl ? (
-          <StorageImage
+          // eslint-disable-next-line @next/next/no-img-element -- local file preview
+          <img
             src={previewUrl}
             alt=""
-            className="absolute inset-0 size-full"
-            imgClassName="object-cover"
+            className="absolute inset-0 size-full object-cover"
           />
         ) : existing ? (
           <span className="absolute inset-0">
@@ -159,18 +215,13 @@ function CategoryImageField({
           </span>
         )}
         <input
+          ref={inputRef}
           id={id}
           name="image"
           type="file"
           accept="image/jpeg,image/png,image/webp,.jpg,.jpeg,.png,.webp"
           className="sr-only"
-          onChange={(event) => {
-            const file = event.target.files?.[0] ?? null;
-            setPreviewUrl((prev) => {
-              if (prev) URL.revokeObjectURL(prev);
-              return file ? URL.createObjectURL(file) : null;
-            });
-          }}
+          onChange={onInputChange}
         />
       </label>
       <p className="text-xs text-muted-foreground">

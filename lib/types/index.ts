@@ -36,6 +36,13 @@ export {
   isSellerStatus,
 } from "./status";
 export type {
+  ModerationQueueItem,
+  ModerationQueueKind,
+  ProductRevision,
+  ProductRevisionPatch,
+  RevisionImagePatch,
+} from "./listing-revision";
+export type {
   ProductStatus,
   PurchaseRequestStatus,
   ReportStatus,

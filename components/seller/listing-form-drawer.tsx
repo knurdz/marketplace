@@ -1,7 +1,15 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import type { InputHTMLAttributes, ReactNode } from "react";
+import {
+  useEffect,
+  useRef,
+  useState,
+  type ChangeEvent,
+  type DragEvent,
+  type InputHTMLAttributes,
+  type ReactNode,
+} from "react";
 import { Upload } from "lucide-react";
 import {
   Drawer,
@@ -225,6 +233,8 @@ export function ListingFormCheckbox({
   );
 }
 
+type ListingPreviewItem = { name: string; url: string };
+
 export function ListingFormFileField({
   id,
   name,
@@ -232,6 +242,7 @@ export function ListingFormFileField({
   label = "Images",
   disabled,
   multiple,
+  required,
 }: {
   id: string;
   name: string;
@@ -239,33 +250,156 @@ export function ListingFormFileField({
   label?: string;
   disabled?: boolean;
   multiple?: boolean;
+  required?: boolean;
 }) {
+  const inputRef = useRef<HTMLInputElement>(null);
+  const objectUrlsRef = useRef<string[]>([]);
+  const [dragging, setDragging] = useState(false);
+  const [previews, setPreviews] = useState<ListingPreviewItem[]>([]);
+
+  useEffect(() => {
+    const urls = objectUrlsRef.current;
+    return () => {
+      for (const url of urls) URL.revokeObjectURL(url);
+      objectUrlsRef.current = [];
+    };
+  }, []);
+
+  function revokeTrackedUrls() {
+    for (const url of objectUrlsRef.current) URL.revokeObjectURL(url);
+    objectUrlsRef.current = [];
+  }
+
+  function buildPreviewsFromFiles(files: FileList | File[]) {
+    revokeTrackedUrls();
+    const items: ListingPreviewItem[] = [];
+    for (const file of files) {
+      if (!file.type.startsWith("image/")) continue;
+      const url = URL.createObjectURL(file);
+      objectUrlsRef.current.push(url);
+      items.push({ name: file.name, url });
+    }
+    setPreviews(items);
+  }
+
+  function assignFiles(files: FileList | null) {
+    if (!inputRef.current) return;
+    if (!files || files.length === 0) {
+      inputRef.current.files = new DataTransfer().files;
+      revokeTrackedUrls();
+      setPreviews([]);
+      return;
+    }
+    const dt = new DataTransfer();
+    for (const file of files) {
+      if (file.type.startsWith("image/")) dt.items.add(file);
+    }
+    inputRef.current.files = dt.files;
+    buildPreviewsFromFiles(dt.files);
+  }
+
+  function onInputChange(event: ChangeEvent<HTMLInputElement>) {
+    assignFiles(event.target.files);
+  }
+
+  function onDrop(event: DragEvent<HTMLLabelElement>) {
+    event.preventDefault();
+    event.stopPropagation();
+    setDragging(false);
+    if (disabled) return;
+    const dropped = event.dataTransfer.files;
+    if (!dropped?.length) return;
+    if (multiple) assignFiles(dropped);
+    else {
+      const first = dropped[0];
+      const dt = new DataTransfer();
+      dt.items.add(first);
+      assignFiles(dt.files);
+    }
+  }
+
+  function onDragOver(event: DragEvent<HTMLLabelElement>) {
+    event.preventDefault();
+    event.stopPropagation();
+    if (!disabled) setDragging(true);
+  }
+
+  function onDragLeave(event: DragEvent<HTMLLabelElement>) {
+    event.preventDefault();
+    event.stopPropagation();
+    if (event.currentTarget.contains(event.relatedTarget as Node)) return;
+    setDragging(false);
+  }
+
+  const hasPreviews = previews.length > 0;
+
   return (
     <ListingFormField label={label} htmlFor={id} hint={hint}>
       <label
         htmlFor={id}
+        onDrop={onDrop}
+        onDragOver={onDragOver}
+        onDragEnter={onDragOver}
+        onDragLeave={onDragLeave}
         className={cn(
           "flex min-h-[200px] cursor-pointer flex-col items-center justify-center gap-2 rounded-xl border border-dashed border-border bg-muted/15 px-4 py-8 text-center transition-colors hover:border-muted-foreground/40 hover:bg-muted/25 lg:min-h-[min(52vh,360px)]",
+          dragging && "border-accent/60 bg-accent/5",
           disabled && "pointer-events-none opacity-50",
+          hasPreviews && "items-stretch justify-start gap-3 py-4",
         )}
       >
-        <span className="flex size-10 items-center justify-center rounded-full border border-border bg-card">
-          <Upload className="size-4 text-muted-foreground" aria-hidden />
-        </span>
-        <span className="text-sm font-medium text-foreground">
-          Choose files or drag here
-        </span>
-        <span className="text-xs text-muted-foreground">
-          JPG, PNG, or WebP · up to 8 · 5MB each
-        </span>
+        {hasPreviews ? (
+          <>
+            <ul className="grid w-full grid-cols-2 gap-2 sm:grid-cols-3">
+              {previews.map((item) => (
+                <li
+                  key={item.url}
+                  className="overflow-hidden rounded-lg border border-border bg-card text-left"
+                >
+                  <div className="relative aspect-square bg-muted/20">
+                    {/* eslint-disable-next-line @next/next/no-img-element -- local file preview */}
+                    <img
+                      src={item.url}
+                      alt=""
+                      className="size-full object-cover"
+                    />
+                  </div>
+                  <p className="truncate px-2 py-1.5 text-xs text-muted-foreground">
+                    {item.name}
+                  </p>
+                </li>
+              ))}
+            </ul>
+            <span className="text-xs text-muted-foreground">
+              {multiple
+                ? "Add or replace images — first file is the cover."
+                : "Click or drop to change the image."}
+            </span>
+          </>
+        ) : (
+          <>
+            <span className="flex size-10 items-center justify-center rounded-full border border-border bg-card">
+              <Upload className="size-4 text-muted-foreground" aria-hidden />
+            </span>
+            <span className="text-sm font-medium text-foreground">
+              Choose files or drag here
+            </span>
+            <span className="text-xs text-muted-foreground">
+              JPG, PNG, or WebP · up to 8 · 5MB each
+            </span>
+          </>
+        )}
         <input
+          ref={inputRef}
           id={id}
           name={name}
           type="file"
           accept="image/jpeg,image/png,image/webp,.jpg,.jpeg,.png,.webp"
           multiple={multiple}
           disabled={disabled}
+          required={required}
           className="sr-only"
+          onChange={onInputChange}
         />
       </label>
     </ListingFormField>

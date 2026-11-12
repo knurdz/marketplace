@@ -21,7 +21,14 @@ import { BUCKET_PRODUCT_IMAGES } from "@/lib/backend/config";
 import { getFilePreviewUrl } from "@/lib/backend/storage-urls";
 import { listCategories } from "@/lib/services/categories";
 import { StorageImage } from "@/components/ui/storage-image";
-import { listCoverImagesByProductIds, listProductImages } from "@/lib/services/products";
+import {
+  getRevisionForProduct,
+  listProductIdsWithRevisions,
+  listCoverImagesByProductIds,
+  listProductImages,
+  overlayProductWithPatch,
+  revisionImagesToDisplay,
+} from "@/lib/services";
 import { areFreeListingsEnabled } from "@/lib/services/platform-settings";
 import {
   canSubmitListingForReview,
@@ -56,23 +63,40 @@ export default async function SellerListingsPage({
     listCategories(),
   ]);
 
-  const [imageCounts, covers, editingProduct, freeListingsEnabled] =
+  const activeProductIds = products
+    .filter((p) => p.status === "active")
+    .map((p) => p.$id);
+
+  const [imageCounts, covers, editingProduct, freeListingsEnabled, pendingEditIds] =
     await Promise.all([
       countProductImagesForOwnProducts(products),
       listCoverImagesByProductIds(products.map((product) => product.$id)),
       editId ? getOwnProduct(editId) : Promise.resolve(null),
       creating || editId ? areFreeListingsEnabled() : Promise.resolve(false),
+      listProductIdsWithRevisions(activeProductIds),
     ]);
 
-  const editingImages = editingProduct
+  const editingLiveImages = editingProduct
     ? await listProductImages(editingProduct.$id)
     : [];
+  const editingRevision =
+    editingProduct?.status === "active"
+      ? await getRevisionForProduct(editingProduct.$id)
+      : null;
+  const editingDisplayProduct =
+    editingProduct && editingRevision
+      ? overlayProductWithPatch(editingProduct, editingRevision.patch)
+      : editingProduct;
+  const editingImages =
+    editingProduct && editingRevision
+      ? revisionImagesToDisplay(editingLiveImages, editingRevision.patch)
+      : editingLiveImages;
 
   return (
     <div className="w-full">
       <PortalPageHeader
         title="Listings"
-        description="Drafts stay private until you submit for review. Approved listings appear on the storefront."
+        description="Drafts stay private until you submit for review. Edits to live listings need admin approval before shoppers see them."
         actions={
           <Button variant="info" asChild disabled={categories.length === 0}>
             <Link href="/seller/listings?compose=new">New listing</Link>
@@ -151,10 +175,15 @@ export default async function SellerListingsPage({
                       </div>
                     </TableCell>
                     <TableCell>
-                      <StatusPill
-                        label={product.status}
-                        tone={productStatusTone(product.status)}
-                      />
+                      <div className="flex flex-wrap items-center gap-1.5">
+                        <StatusPill
+                          label={product.status}
+                          tone={productStatusTone(product.status)}
+                        />
+                        {pendingEditIds.has(product.$id) ? (
+                          <StatusPill label="Edit in review" tone="warning" />
+                        ) : null}
+                      </div>
                     </TableCell>
                     <TableCell className="tabular-nums">
                       {formatPrice(
@@ -203,17 +232,22 @@ export default async function SellerListingsPage({
         </ListingFormDrawer>
       ) : null}
 
-      {editingProduct ? (
+      {editingDisplayProduct ? (
         <ListingFormDrawer
           title="Edit listing"
-          description={editingProduct.title}
+          description={
+            editingDisplayProduct.status === "active"
+              ? "Saving sends changes for admin review. Shoppers still see the current listing until it is approved."
+              : editingDisplayProduct.title
+          }
         >
           <EditListingForm
-            key={editingProduct.$id}
-            product={editingProduct}
+            key={editingDisplayProduct.$id}
+            product={editingDisplayProduct}
             categories={categories}
             images={editingImages}
             freeListingsEnabled={freeListingsEnabled}
+            editInReview={Boolean(editingRevision)}
           />
         </ListingFormDrawer>
       ) : null}

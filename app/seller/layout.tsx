@@ -10,6 +10,7 @@ import {
 import { redirectIfRegistrationIncomplete } from "@/lib/backend/registration-complete";
 import { ROLE_LABELS, requireUser, userHasLabel } from "@/lib/backend/roles";
 import { buildNoIndexMetadata } from "@/lib/seo/metadata";
+import { getSellerMetrics } from "@/lib/services/seller-metrics";
 import {
   blockedSellerPortalDestination,
   getOwnSellerProfile,
@@ -17,29 +18,36 @@ import {
 
 export const metadata: Metadata = buildNoIndexMetadata("Seller Portal");
 
-const SELLER_NAV: PortalNavGroup[] = [
-  {
-    items: [{ href: "/seller", label: "Dashboard", icon: "dashboard" }],
-  },
-  {
-    title: "Shop",
-    items: [
-      { href: "/seller/shop", label: "Shop", icon: "shop" },
-      { href: "/seller/listings", label: "Listings", icon: "listings" },
-    ],
-  },
-  {
-    title: "Sales",
-    items: [
-      { href: "/seller/requests", label: "Requests", icon: "orders" },
-      { href: "/seller/reviews", label: "Reviews", icon: "reviews" },
-    ],
-  },
-  {
-    title: "Account",
-    items: [{ href: "/seller/settings", label: "Settings", icon: "settings" }],
-  },
-];
+function buildSellerNav(openRequests: boolean): PortalNavGroup[] {
+  return [
+    {
+      items: [{ href: "/seller", label: "Dashboard", icon: "dashboard" }],
+    },
+    {
+      title: "Shop",
+      items: [
+        { href: "/seller/shop", label: "Shop", icon: "shop" },
+        { href: "/seller/listings", label: "Listings", icon: "listings" },
+      ],
+    },
+    {
+      title: "Sales",
+      items: [
+        {
+          href: "/seller/requests",
+          label: "Requests",
+          icon: "orders",
+          showDot: openRequests,
+        },
+        { href: "/seller/reviews", label: "Reviews", icon: "reviews" },
+      ],
+    },
+    {
+      title: "Account",
+      items: [{ href: "/seller/settings", label: "Settings", icon: "settings" }],
+    },
+  ];
+}
 
 export default async function SellerLayout({
   children,
@@ -59,8 +67,13 @@ export default async function SellerLayout({
     if (isPendingPage) {
       redirect("/seller");
     }
+    const { openCount } = await getSellerMetrics();
     return (
-      <PortalShell title="Seller" homeHref="/seller" nav={SELLER_NAV}>
+      <PortalShell
+        title="Seller"
+        homeHref="/seller"
+        nav={buildSellerNav(openCount > 0)}
+      >
         {children}
       </PortalShell>
     );

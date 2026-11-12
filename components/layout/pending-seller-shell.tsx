@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 import { signOut } from "@/lib/backend/auth";
+import { BrandLogoLink } from "@/components/brand/brand-logo";
 import { SkipToContent } from "@/components/layout/skip-to-content";
 import { ThemeToggle } from "@/components/theme/theme-toggle";
 import { Button } from "@/components/ui/button";
@@ -9,12 +10,7 @@ export function PendingSellerShell({ children }: { children: ReactNode }) {
     <div className="portal flex min-h-dvh flex-col bg-background text-foreground">
       <SkipToContent />
       <header className="flex h-16 items-center justify-between px-4 md:px-6">
-        <p className="flex items-center gap-2.5 text-[15px] font-semibold tracking-tight">
-          <span className="grid size-9 place-items-center rounded-[10px] bg-accent text-sm font-bold text-accent-foreground">
-            K
-          </span>
-          Knurdz
-        </p>
+        <BrandLogoLink priority />
         <div className="flex items-center gap-1">
           <ThemeToggle />
           <form action={signOut}>
