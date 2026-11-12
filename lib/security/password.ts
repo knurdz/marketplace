@@ -5,9 +5,14 @@ export const MAX_PASSWORD_LENGTH = 128;
 const HIBP_TIMEOUT_MS = 3_000;
 const HIBP_RANGE_URL = "https://api.pwnedpasswords.com/range";
 
+/** Reject only widely exposed passwords; rare HIBP hits are allowed. */
+export const HIBP_MIN_BREACH_COUNT = 100;
+
 /**
  * HIBP range check. Only the first five SHA-1 characters leave the server.
- * Availability failures intentionally fail open so auth remains usable.
+ * A match counts as breached when its exposure count is at least
+ * {@link HIBP_MIN_BREACH_COUNT}. Availability failures intentionally fail open
+ * so auth remains usable.
  */
 export async function isPasswordBreached(password: string): Promise<boolean> {
   const hash = createHash("sha1")
@@ -35,7 +40,9 @@ export async function isPasswordBreached(password: string): Promise<boolean> {
         return false;
       }
       const count = Number(line.slice(separator + 1));
-      return Number.isSafeInteger(count) && count > 0;
+      return (
+        Number.isSafeInteger(count) && count >= HIBP_MIN_BREACH_COUNT
+      );
     });
   } catch {
     return false;

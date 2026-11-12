@@ -100,7 +100,7 @@ export function StoreNavbar({
         : null;
 
   return (
-    <header className="sticky top-0 z-40 border-b border-border bg-background/95 backdrop-blur-md">
+    <header className="sticky top-0 isolate z-50 border-b border-border bg-background/95 backdrop-blur-md">
       <div className="mx-auto grid h-16 w-full max-w-7xl grid-cols-[1fr_auto] items-center gap-3 px-4 sm:px-6 md:grid-cols-[1fr_minmax(0,40rem)_1fr] md:gap-6 lg:px-8">
         <div className="flex min-w-0 items-center justify-start">
           <BrandLogoLink priority />

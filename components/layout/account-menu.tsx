@@ -45,7 +45,7 @@ export function AccountMenu({ user, displayName, avatarUrl }: AccountMenuProps) 
         : null;
 
   return (
-    <DropdownMenu>
+    <DropdownMenu modal={false}>
       <DropdownMenuTrigger asChild>
         <Button
           variant="secondary"

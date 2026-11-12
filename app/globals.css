@@ -481,15 +481,14 @@ html[data-theme="light"] {
     background-color: var(--background);
     color: var(--foreground);
   }
-  /* Hide browser number steppers (avoid dark spinners on light inputs). */
-  input[type="number"] {
-    appearance: textfield;
-    -moz-appearance: textfield;
-  }
-  input[type="number"]::-webkit-inner-spin-button,
-  input[type="number"]::-webkit-outer-spin-button {
-    -webkit-appearance: none;
-    margin: 0;
+  /* Native number steppers (color-scheme per surface above keeps light gray arrows on light fields). */
+  html:has(.storefront) input[type="number"]::-webkit-inner-spin-button,
+  html:has(.storefront) input[type="number"]::-webkit-outer-spin-button,
+  html.light:has(.portal) input[type="number"]::-webkit-inner-spin-button,
+  html.light:has(.portal) input[type="number"]::-webkit-outer-spin-button,
+  html[data-theme="light"]:has(.portal) input[type="number"]::-webkit-inner-spin-button,
+  html[data-theme="light"]:has(.portal) input[type="number"]::-webkit-outer-spin-button {
+    opacity: 1;
   }
   html {
     @apply font-sans;

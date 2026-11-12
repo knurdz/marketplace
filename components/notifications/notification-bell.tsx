@@ -86,7 +86,7 @@ export function NotificationBell({ className }: { className?: string }) {
   const badgeLabel = unread > 99 ? "99+" : String(unread);
 
   return (
-    <Popover open={open} onOpenChange={setOpen}>
+    <Popover open={open} onOpenChange={setOpen} modal={false}>
       <PopoverTrigger asChild>
         <Button
           type="button"
