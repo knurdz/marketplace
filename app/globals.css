@@ -681,24 +681,20 @@ html[data-theme="light"] {
   }
 }
 
-@keyframes knurdz-orbit {
-  from {
-    transform: rotate(0deg);
-  }
+@keyframes knurdz-orbit-spin {
   to {
     transform: rotate(360deg);
   }
 }
 
-.knurdz-orbit {
-  transform-origin: center;
-  animation: knurdz-orbit 1.6s linear infinite;
-  will-change: transform;
-  /* Brand primary blue on storefront; readable blue on dark portals. */
+.knurdz-orbit-loader {
   color: var(--info-deep);
+  transform-origin: center;
+  animation: knurdz-orbit-spin 1.75s linear infinite;
+  will-change: transform;
 }
 
-html:has(.storefront) .knurdz-orbit {
+html:has(.storefront) .knurdz-orbit-loader {
   color: var(--primary);
 }
 

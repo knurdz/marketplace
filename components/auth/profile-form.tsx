@@ -10,7 +10,7 @@ import {
   type ChangeEvent,
   type DragEvent,
 } from "react";
-import { ImagePlus, Upload } from "lucide-react";
+import { Upload } from "lucide-react";
 import {
   updateOwnAvatar,
   updateOwnProfile,
@@ -223,19 +223,16 @@ function AvatarPicker({
           <p className="text-xs text-muted-foreground">
             {hasNewFile && selected
               ? `${selected.name} · ${formatBytes(selected.size)}`
-              : "Click here, drag an image, or use Choose image below."}
+              : hasSavedPhoto
+                ? "Drag a new image here, or choose one below."
+                : "Drag an image here, or choose one below."}
           </p>
           {hasNewFile ? (
-            <p className="text-xs font-medium text-accent">
-              Tap Save photo when you are happy with the preview.
+            <p className="text-xs text-muted-foreground">
+              When the preview looks right, press Save photo.
             </p>
           ) : null}
         </div>
-
-        <span className="inline-flex shrink-0 items-center gap-1.5 rounded-lg border border-border bg-card px-3 py-1.5 text-xs font-medium text-foreground shadow-xs sm:self-center">
-          <ImagePlus className="size-3.5 text-muted-foreground" aria-hidden />
-          {hasNewFile || hasSavedPhoto ? "Replace" : "Upload"}
-        </span>
       </label>
 
       <div className="flex flex-wrap items-center gap-2">

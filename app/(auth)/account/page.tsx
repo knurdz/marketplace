@@ -157,7 +157,7 @@ export default async function AccountPage() {
           </CardHeader>
           <CardContent>
             <form action={signOut}>
-              <Button type="submit" variant="outline">
+              <Button type="submit" variant="destructive">
                 Sign out
               </Button>
             </form>

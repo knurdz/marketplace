@@ -1,5 +1,5 @@
-import { PageLoader } from "@/components/ui/page-loader";
+import { AuthCardSkeleton } from "@/components/loading/auth-card-skeleton";
 
 export default function AuthLoading() {
-  return <PageLoader />;
+  return <AuthCardSkeleton />;
 }
