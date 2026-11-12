@@ -372,6 +372,7 @@ export const rateLimits = mysqlTable(
   },
   (t) => [
     uniqueIndex("rate_limits_bucket_key_unique").on(t.bucket, t.limitKey),
+    index("rate_limits_updated_at_idx").on(t.updatedAt),
   ],
 );
 

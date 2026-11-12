@@ -1,6 +1,7 @@
 import { headers } from "next/headers";
-import { and, eq, lt, sql } from "drizzle-orm";
+import { and, eq, lt } from "drizzle-orm";
 import { getDb, hasDatabaseConfig, newId } from "@/lib/db/client";
+import { isDuplicateKeyError } from "@/lib/db/errors";
 import { rateLimits } from "@/lib/db/schema";
 
 /** MariaDB-backed rate limiter with a development-only memory fallback. */
@@ -130,6 +131,101 @@ function assertMemoryRateLimits(
 let lastDurablePruneAt = 0;
 const DURABLE_PRUNE_INTERVAL_MS = 5 * MS_MINUTE;
 const DURABLE_RETENTION_MS = 48 * MS_HOUR;
+const RATE_LIMIT_TX_ISOLATION = {
+  isolationLevel: "read committed" as const,
+};
+const LOCK_RETRY_MAX = 3;
+const PRUNE_BATCH_LIMIT = 200;
+
+type RateLimitTx = Parameters<Parameters<ReturnType<typeof getDb>["transaction"]>[0]>[0];
+
+type LockedRateLimitRow = {
+  id: string;
+  count: number;
+  windowStart: number;
+};
+
+function isRetryableLockError(error: unknown): boolean {
+  let current: unknown = error;
+  for (let depth = 0; depth < 4 && current; depth++) {
+    if (typeof current === "object") {
+      const record = current as { code?: unknown; errno?: unknown };
+      if (record.code === "ER_LOCK_DEADLOCK" || record.errno === 1213) {
+        return true;
+      }
+      if (record.code === "ER_LOCK_WAIT_TIMEOUT" || record.errno === 1205) {
+        return true;
+      }
+    }
+    current = (current as { cause?: unknown }).cause;
+  }
+  return false;
+}
+
+function lockRetryJitterMs(): number {
+  return 5 + Math.floor(Math.random() * 20);
+}
+
+async function withLockRetry<T>(run: () => Promise<T>): Promise<T> {
+  let lastError: unknown;
+  for (let attempt = 0; attempt < LOCK_RETRY_MAX; attempt++) {
+    try {
+      return await run();
+    } catch (error) {
+      lastError = error;
+      if (!isRetryableLockError(error) || attempt === LOCK_RETRY_MAX - 1) {
+        throw error;
+      }
+      await new Promise((resolve) => setTimeout(resolve, lockRetryJitterMs()));
+    }
+  }
+  throw lastError;
+}
+
+async function selectRateLimitRowForUpdate(
+  tx: RateLimitTx,
+  bucket: string,
+  limitKey: string,
+): Promise<LockedRateLimitRow | null> {
+  const [row] = await tx
+    .select({
+      id: rateLimits.id,
+      count: rateLimits.count,
+      windowStart: rateLimits.windowStart,
+    })
+    .from(rateLimits)
+    .where(and(eq(rateLimits.bucket, bucket), eq(rateLimits.limitKey, limitKey)))
+    .limit(1)
+    .for("update");
+  return row ?? null;
+}
+
+async function lockRateLimitRowForUpdate(
+  tx: RateLimitTx,
+  bucket: string,
+  key: string,
+  now: number,
+): Promise<LockedRateLimitRow> {
+  const limitKey = key.slice(0, 256);
+  let row = await selectRateLimitRowForUpdate(tx, bucket, limitKey);
+  if (row) return row;
+
+  try {
+    await tx.insert(rateLimits).values({
+      id: newId(),
+      bucket,
+      limitKey,
+      windowStart: now,
+      count: 0,
+    });
+  } catch (error) {
+    if (!isDuplicateKeyError(error)) throw error;
+  }
+
+  row = await selectRateLimitRowForUpdate(tx, bucket, limitKey);
+  if (!row) throw new Error("Could not lock rate-limit row.");
+  return row;
+}
 
 /**
  * Apply one rate-limit hit using MariaDB row locks. The unique bucket/key row
@@ -163,78 +259,57 @@ export async function assertRateLimits(
     `${a.bucket}:${a.key}`.localeCompare(`${b.bucket}:${b.key}`),
   );
   const now = Date.now();
-  const result = await getDb().transaction(async (tx) => {
-    const states: Array<{
-      check: (typeof ordered)[number];
-      id: string;
-      count: number;
-      windowStart: number;
-    }> = [];
+  const result = await withLockRetry(() =>
+    getDb().transaction(async (tx) => {
+      const states: Array<{
+        check: (typeof ordered)[number];
+        id: string;
+        count: number;
+        windowStart: number;
+      }> = [];
 
-    for (const check of ordered) {
-      await tx
-        .insert(rateLimits)
-        .values({
-          id: newId(),
-          bucket: check.bucket,
-          limitKey: check.key.slice(0, 256),
-          windowStart: now,
-          count: 0,
-        })
-        .onDuplicateKeyUpdate({
-          set: { bucket: sql`${rateLimits.bucket}` },
-        });
-
-      const [row] = await tx
-        .select({
-          id: rateLimits.id,
-          count: rateLimits.count,
-          windowStart: rateLimits.windowStart,
-        })
-        .from(rateLimits)
-        .where(
-          and(
-            eq(rateLimits.bucket, check.bucket),
-            eq(rateLimits.limitKey, check.key.slice(0, 256)),
-          ),
-        )
-        .limit(1)
-        .for("update");
-
-      if (!row) throw new Error("Could not lock rate-limit row.");
-      const activeWindow = now - row.windowStart < check.windowMs;
-      const count = activeWindow ? row.count : 0;
-      const windowStart = activeWindow ? row.windowStart : now;
-      if (count >= check.limit) {
-        return {
-          ok: false as const,
-          retryAfterSec: Math.max(
-            1,
-            Math.ceil((windowStart + check.windowMs - now) / 1000),
-          ),
-        };
+      for (const check of ordered) {
+        const row = await lockRateLimitRowForUpdate(
+          tx,
+          check.bucket,
+          check.key,
+          now,
+        );
+        const activeWindow = now - row.windowStart < check.windowMs;
+        const count = activeWindow ? row.count : 0;
+        const windowStart = activeWindow ? row.windowStart : now;
+        if (count >= check.limit) {
+          return {
+            ok: false as const,
+            retryAfterSec: Math.max(
+              1,
+              Math.ceil((windowStart + check.windowMs - now) / 1000),
+            ),
+          };
+        }
+        states.push({ check, id: row.id, count, windowStart });
       }
-      states.push({ check, id: row.id, count, windowStart });
-    }
 
-    for (const state of states) {
-      await tx
-        .update(rateLimits)
-        .set({
-          count: state.count + 1,
-          windowStart: state.windowStart,
-        })
-        .where(eq(rateLimits.id, state.id));
-    }
-    return { ok: true as const };
-  });
+      for (const state of states) {
+        await tx
+          .update(rateLimits)
+          .set({
+            count: state.count + 1,
+            windowStart: state.windowStart,
+          })
+          .where(eq(rateLimits.id, state.id));
+      }
+      return { ok: true as const };
+    }, RATE_LIMIT_TX_ISOLATION),
+  );
 
   if (now - lastDurablePruneAt >= DURABLE_PRUNE_INTERVAL_MS) {
     lastDurablePruneAt = now;
     try {
       await getDb()
         .delete(rateLimits)
-        .where(lt(rateLimits.updatedAt, new Date(now - DURABLE_RETENTION_MS)));
+        .where(lt(rateLimits.updatedAt, new Date(now - DURABLE_RETENTION_MS)))
+        .limit(PRUNE_BATCH_LIMIT);
     } catch {
       // Pruning is best effort; enforcement has already completed atomically.
     }
@@ -340,48 +415,27 @@ export async function recordRateLimitHits(
     return;
   }
 
-  await getDb().transaction(async (tx) => {
-    for (const hit of ordered) {
-      await tx
-        .insert(rateLimits)
-        .values({
-          id: newId(),
-          bucket: hit.bucket,
-          limitKey: hit.key,
-          windowStart: now,
-          count: 0,
-        })
-        .onDuplicateKeyUpdate({
-          set: { bucket: sql`${rateLimits.bucket}` },
-        });
+  await withLockRetry(() =>
+    getDb().transaction(async (tx) => {
+      for (const hit of ordered) {
+        const row = await lockRateLimitRowForUpdate(
+          tx,
+          hit.bucket,
+          hit.key,
+          now,
+        );
 
-      const [row] = await tx
-        .select({
-          id: rateLimits.id,
-          count: rateLimits.count,
-          windowStart: rateLimits.windowStart,
-        })
-        .from(rateLimits)
-        .where(
-          and(
-            eq(rateLimits.bucket, hit.bucket),
-            eq(rateLimits.limitKey, hit.key),
-          ),
-        )
-        .limit(1)
-        .for("update");
-      if (!row) throw new Error("Could not lock rate-limit row.");
-
-      const activeWindow = now - row.windowStart < hit.windowMs;
-      await tx
-        .update(rateLimits)
-        .set({
-          count: (activeWindow ? row.count : 0) + 1,
-          windowStart: activeWindow ? row.windowStart : now,
-        })
-        .where(eq(rateLimits.id, row.id));
-    }
-  });
+        const activeWindow = now - row.windowStart < hit.windowMs;
+        await tx
+          .update(rateLimits)
+          .set({
+            count: (activeWindow ? row.count : 0) + 1,
+            windowStart: activeWindow ? row.windowStart : now,
+          })
+          .where(eq(rateLimits.id, row.id));
+      }
+    }, RATE_LIMIT_TX_ISOLATION),
+  );
 }
 
 function isIpToken(value: string): boolean {

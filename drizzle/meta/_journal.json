@@ -85,6 +85,13 @@
       "when": 1795200000000,
       "tag": "0011_verification_value_text",
       "breakpoints": true
+    },
+    {
+      "idx": 12,
+      "version": "5",
+      "when": 1795300000000,
+      "tag": "0012_rate_limits_updated_at_idx",
+      "breakpoints": true
     }
   ]
 }
