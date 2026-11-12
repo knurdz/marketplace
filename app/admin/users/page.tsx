@@ -4,7 +4,7 @@ type PageProps = {
   searchParams: Promise<{ q?: string; cursor?: string }>;
 };
 
-/** Legacy Users route — buyers live under /admin/buyers. */
+/** Legacy Users route; buyers live under /admin/buyers. */
 export default async function AdminUsersRedirectPage({
   searchParams,
 }: PageProps) {

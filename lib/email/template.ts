@@ -64,7 +64,7 @@ function buildText(params: {
     lines.push(`${params.ctaLabel ?? "Open"}: ${params.ctaHref}`);
   }
   lines.push("");
-  lines.push("— Knurdz Marketplace");
+  lines.push("-- Knurdz Marketplace");
   lines.push(appOrigin());
   return lines.join("\n");
 }

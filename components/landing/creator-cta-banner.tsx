@@ -31,7 +31,7 @@ export function CreatorCtaBanner({ className }: { className?: string }) {
           </h2>
 
           <p className="mt-2 text-base text-muted-foreground">
-            List your digital tools, hardware, design assets, or goods. Buyers contact you directly — you keep the full sale.
+            List your digital tools, hardware, design assets, or goods. Buyers contact you directly. You keep the full sale.
           </p>
 
           <div className="mt-6 flex flex-wrap items-center gap-4">

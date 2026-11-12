@@ -41,7 +41,7 @@ function statusTone(status: SellerStatus): StatusTone {
 }
 
 function formatWhen(iso: string | null | undefined): string {
-  if (!iso) return "—";
+  if (!iso) return "-";
   try {
     return new Intl.DateTimeFormat(undefined, {
       dateStyle: "medium",
@@ -134,19 +134,19 @@ export default async function AdminShopDetailPage({ params }: PageProps) {
             <div>
               <dt className="text-muted-foreground">Bio</dt>
               <dd className="mt-0.5 whitespace-pre-wrap">
-                {profile.bio?.trim() || "—"}
+                {profile.bio?.trim() || "-"}
               </dd>
             </div>
             <div>
               <dt className="text-muted-foreground">Return policy</dt>
               <dd className="mt-0.5 whitespace-pre-wrap">
-                {profile.returnPolicy?.trim() || "—"}
+                {profile.returnPolicy?.trim() || "-"}
               </dd>
             </div>
             <div>
               <dt className="text-muted-foreground">Shipping policy</dt>
               <dd className="mt-0.5 whitespace-pre-wrap">
-                {profile.shippingPolicy?.trim() || "—"}
+                {profile.shippingPolicy?.trim() || "-"}
               </dd>
             </div>
             {profile.status === "rejected" && profile.rejectionReason ? (
@@ -174,15 +174,15 @@ export default async function AdminShopDetailPage({ params }: PageProps) {
           <dl className="mt-4 space-y-3 text-sm">
             <div>
               <dt className="text-muted-foreground">Name</dt>
-              <dd className="mt-0.5 font-medium">{account.name || "—"}</dd>
+              <dd className="mt-0.5 font-medium">{account.name || "-"}</dd>
             </div>
             <div>
               <dt className="text-muted-foreground">Email</dt>
-              <dd className="mt-0.5 font-medium">{account.email || "—"}</dd>
+              <dd className="mt-0.5 font-medium">{account.email || "-"}</dd>
             </div>
             <div>
               <dt className="text-muted-foreground">Phone</dt>
-              <dd className="mt-0.5 font-medium">{account.phone || "—"}</dd>
+              <dd className="mt-0.5 font-medium">{account.phone || "-"}</dd>
             </div>
             <div className="flex flex-wrap gap-4">
               <div>
@@ -290,7 +290,7 @@ export default async function AdminShopDetailPage({ params }: PageProps) {
               <span>Sold / request</span>
               <span>
                 {conversion.soldPerRequestRate == null
-                  ? "—"
+                  ? "-"
                   : `${conversion.soldPerRequestRate}%`}
               </span>
             </li>
@@ -435,7 +435,7 @@ export default async function AdminShopDetailPage({ params }: PageProps) {
                     </TableCell>
                     <TableCell className="font-medium">{entry.event}</TableCell>
                     <TableCell className="font-mono text-xs text-muted-foreground">
-                      {entry.actorId?.slice(0, 8) ?? "—"}
+                      {entry.actorId?.slice(0, 8) ?? "-"}
                     </TableCell>
                   </TableRow>
                 ))}

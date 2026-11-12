@@ -73,7 +73,7 @@ export async function generateMetadata({
     : `${product.title} (${priceLabel}) on Knurdz Marketplace.${sellerSuffix}`;
 
   return buildPublicMetadata({
-    title: `${product.title} — ${priceLabel}`,
+    title: `${product.title} | ${priceLabel}`,
     description,
     canonicalPath: `/products/${product.$id}`,
     image: coverUrl
@@ -233,7 +233,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
               <p className="text-sm text-muted-foreground">
                 Signed in as{" "}
                 {user && user.labels.includes("admin") ? "admin" : "seller"}.
-                Browse only — buy requests stay with buyer accounts.
+                Browse only. Buy requests stay with buyer accounts.
               </p>
             ) : canBuy ? (
               <BuyRequestButton

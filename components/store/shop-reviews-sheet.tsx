@@ -15,9 +15,9 @@ import type { SellerReviewMetrics } from "@/lib/services/reviews";
 import type { Review } from "@/lib/types";
 
 function formatReviewDate(iso?: string): string {
-  if (!iso) return "—";
+  if (!iso) return "-";
   const date = new Date(iso);
-  if (Number.isNaN(date.getTime())) return "—";
+  if (Number.isNaN(date.getTime())) return "-";
   return date.toLocaleDateString("en-US", {
     year: "numeric",
     month: "short",
@@ -86,7 +86,7 @@ export function ShopReviewsSheet({
   triggerLabel = "See reviews",
 }: ShopReviewsSheetProps) {
   const hasRating = metrics.count > 0 && metrics.average != null;
-  const averageLabel = hasRating ? metrics.average!.toFixed(1) : "—";
+  const averageLabel = hasRating ? metrics.average!.toFixed(1) : "-";
 
   const ratingPill = (
     <button

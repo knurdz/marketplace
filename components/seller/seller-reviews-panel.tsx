@@ -11,9 +11,9 @@ import type {
 } from "@/lib/services/reviews";
 
 function formatReviewDate(iso?: string): string {
-  if (!iso) return "—";
+  if (!iso) return "-";
   const date = new Date(iso);
-  if (Number.isNaN(date.getTime())) return "—";
+  if (Number.isNaN(date.getTime())) return "-";
   return date.toLocaleDateString(undefined, {
     year: "numeric",
     month: "short",
@@ -110,7 +110,7 @@ export function SellerReviewsPanel({
                 Average
               </p>
               <p className="mt-2 text-4xl font-semibold tabular-nums tracking-tight text-foreground">
-                {metrics.average?.toFixed(1) ?? "—"}
+                {metrics.average?.toFixed(1) ?? "-"}
               </p>
               <StarRating
                 rating={Math.round(metrics.average ?? 0)}
@@ -155,7 +155,7 @@ export function SellerReviewsPanel({
               Average rating
             </p>
             <p className="mt-2 text-5xl font-semibold tabular-nums tracking-tight text-foreground">
-              {metrics.count === 0 ? "—" : metrics.average?.toFixed(1)}
+              {metrics.count === 0 ? "-" : metrics.average?.toFixed(1)}
             </p>
             {metrics.count > 0 ? (
               <StarRating

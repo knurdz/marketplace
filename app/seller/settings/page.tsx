@@ -33,7 +33,7 @@ export default async function SellerSettingsPage() {
     <div className="w-full">
       <PortalPageHeader
         title="Settings"
-        description={`Policies for ${profile.shopName} — shown on your shop and listing pages when filled in.`}
+        description={`Policies for ${profile.shopName}, shown on your shop and listing pages when filled in.`}
         actions={
           <>
             <Button variant="info" size="sm" asChild>

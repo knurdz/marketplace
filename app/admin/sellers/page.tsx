@@ -51,7 +51,7 @@ function formatAppliedAt(iso: string | undefined): {
   date: string;
   time: string;
 } {
-  if (!iso) return { date: "—", time: "" };
+  if (!iso) return { date: "-", time: "" };
   try {
     const when = new Date(iso);
     return {

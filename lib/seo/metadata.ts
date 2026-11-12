@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { getAppUrl } from "@/lib/config/app";
 
 export const SITE_NAME = "Knurdz Marketplace";
-export const SITE_TITLE_DEFAULT = `${SITE_NAME} — Buy Directly from People`;
+export const SITE_TITLE_DEFAULT = `${SITE_NAME} | Buy Directly from People`;
 export const SITE_DESCRIPTION =
   "Community marketplace in Sri Lanka to buy and sell directly with people. Browse verified local shops, send direct purchase requests, and pay zero platform fees.";
 export const SITE_LOCALE = "en_LK";

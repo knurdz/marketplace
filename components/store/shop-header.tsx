@@ -153,7 +153,7 @@ export function ShopHeader({
                 Joined
               </span>
               <span className="mt-1 text-base font-semibold tracking-tight text-foreground">
-                {sellingSince ?? "—"}
+                {sellingSince ?? "-"}
               </span>
               <span className="mt-0.5 text-xs text-muted-foreground">
                 Seller since

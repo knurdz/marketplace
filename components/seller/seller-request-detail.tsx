@@ -75,7 +75,7 @@ export function SellerRequestDetail({
         description={
           requestedAt
             ? `Submitted ${requestedAt}`
-            : "Buyer purchase request — arrange payment and delivery off-platform."
+            : "Buyer purchase request: arrange payment and delivery off-platform."
         }
         actions={
           <Button variant="info" size="sm" asChild>

@@ -113,7 +113,7 @@ export default async function AdminReviewsPage({
                     {review.rating}/5
                   </TableCell>
                   <TableCell className="max-w-xs truncate text-sm">
-                    {review.comment ?? "—"}
+                    {review.comment ?? "-"}
                   </TableCell>
                   <TableCell className="text-xs text-muted-foreground">
                     {review.buyerId.slice(0, 8)}…
@@ -131,7 +131,7 @@ export default async function AdminReviewsPage({
                     {review.status === "pending" ? (
                       <ReviewModerationActions reviewId={review.$id} />
                     ) : (
-                      <span className="text-xs text-muted-foreground">—</span>
+                      <span className="text-xs text-muted-foreground">-</span>
                     )}
                   </TableCell>
                 </TableRow>

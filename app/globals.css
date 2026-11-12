@@ -398,7 +398,7 @@ html:has(.portal) [data-sidebar="menu-button"][data-active="true"] svg {
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring);
   --font-sans: var(--font-space-grotesk), ui-sans-serif, system-ui, sans-serif;
-  /* Use the site sans stack everywhere — no separate mono face. */
+  /* Use the site sans stack everywhere; no separate mono face. */
   --font-mono: var(--font-sans);
   --font-heading: var(--font-space-grotesk), ui-sans-serif, system-ui, sans-serif;
   --text-xs: 0.8125rem;

@@ -122,7 +122,7 @@ export default async function AdminBuyersPage({ searchParams }: PageProps) {
                       </div>
                     </TableCell>
                     <TableCell className="text-muted-foreground underline decoration-border underline-offset-2">
-                      {user.email ?? "—"}
+                      {user.email ?? "-"}
                     </TableCell>
                     <TableCell>
                       <StatusPill
