@@ -12,9 +12,20 @@ import {
   deleteRemoteFile,
   isRemoteStorageConfigured,
   putRemoteFile,
+  readPublicRemoteFile,
 } from "./remote";
 
 export { getStoredFileMeta, isRemoteStorageConfigured, readStoredFile };
+
+/** Local disk first, then public remote GET when STORAGE_API_URL is configured. */
+export async function readPublicStoredFile(
+  bucketId: string,
+  fileId: string,
+): Promise<{ stream: NodeJS.ReadableStream; mimeType: string } | null> {
+  const local = await readStoredFile(bucketId, fileId);
+  if (local) return local;
+  return readPublicRemoteFile(bucketId, fileId);
+}
 
 function assertDiskStorageAllowed(): void {
   if (process.env.NODE_ENV === "production") {

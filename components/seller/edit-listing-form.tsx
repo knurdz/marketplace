@@ -23,7 +23,6 @@ import {
   ListingFormFooter,
   ListingFormMediaSection,
   ListingFormSection,
-  listingNumberInputClassName,
   listingSelectClassName,
   listingTextareaClassName,
 } from "@/components/seller/listing-form-drawer";
@@ -286,7 +285,7 @@ export function EditListingForm({
                         required={!isFree}
                         defaultValue={product.price}
                         disabled={updatePending || isArchived || isFree}
-                        className={`bg-card shadow-xs ${listingNumberInputClassName}`}
+                        className="bg-card shadow-xs"
                       />
                     </ListingFormField>
                     <ListingFormField label="Stock" htmlFor="stock">
@@ -299,7 +298,7 @@ export function EditListingForm({
                         required
                         defaultValue={product.stock}
                         disabled={updatePending || isArchived}
-                        className={`bg-card shadow-xs ${listingNumberInputClassName}`}
+                        className="bg-card shadow-xs"
                       />
                     </ListingFormField>
                   </div>

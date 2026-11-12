@@ -3,7 +3,14 @@
 import { useEffect, useState } from "react";
 import { issueFormGuardToken } from "@/lib/security/bot-guard";
 
-export function FormGuardFields({ action }: { action: string }) {
+export function FormGuardFields({
+  action,
+  onGuardReady,
+}: {
+  action: string;
+  /** Fires when the signed `_fg` token is present (or cleared on unmount). */
+  onGuardReady?: (ready: boolean) => void;
+}) {
   const [token, setToken] = useState("");
 
   useEffect(() => {
@@ -15,6 +22,10 @@ export function FormGuardFields({ action }: { action: string }) {
       active = false;
     };
   }, [action]);
+
+  useEffect(() => {
+    onGuardReady?.(token.length > 0);
+  }, [token, onGuardReady]);
 
   return (
     <>

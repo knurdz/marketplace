@@ -33,9 +33,15 @@ export type FormGuardResult =
   | { ok: true }
   | { ok: false; reason: "honeypot" | "invalid" | "too_fast" | "expired" };
 
+export type VerifyFormGuardOptions = {
+  /** OAuth start: one-click sign-in; honeypot + signature + expiry still enforced. */
+  skipMinAge?: boolean;
+};
+
 export async function verifyFormGuard(
   formData: FormData,
   action: string,
+  options?: VerifyFormGuardOptions,
 ): Promise<FormGuardResult> {
   const honeypot = formData.get("company_website");
   if (typeof honeypot === "string" && honeypot.trim()) {
@@ -70,7 +76,9 @@ export async function verifyFormGuard(
   if (!Number.isFinite(age) || age < 0) {
     return { ok: false, reason: "invalid" };
   }
-  if (age < MIN_FORM_AGE_MS) return { ok: false, reason: "too_fast" };
+  if (!options?.skipMinAge && age < MIN_FORM_AGE_MS) {
+    return { ok: false, reason: "too_fast" };
+  }
   if (age > MAX_FORM_AGE_MS) return { ok: false, reason: "expired" };
   return { ok: true };
 }

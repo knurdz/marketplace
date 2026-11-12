@@ -15,7 +15,6 @@ import {
   ListingFormFooter,
   ListingFormMediaSection,
   ListingFormSection,
-  listingNumberInputClassName,
   listingSelectClassName,
   listingTextareaClassName,
 } from "@/components/seller/listing-form-drawer";
@@ -228,7 +227,6 @@ export function CreateListingForm({
 function cnInput(dimmed?: boolean) {
   return [
     "bg-card shadow-xs",
-    listingNumberInputClassName,
     dimmed ? "text-muted-foreground" : "",
   ]
     .filter(Boolean)

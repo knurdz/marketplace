@@ -19,6 +19,8 @@ type CategoryImageProps = {
   className?: string;
   imgClassName?: string;
   fallbackClassName?: string;
+  /** Eager load for category circles (horizontal rail). */
+  priority?: boolean;
   children?: ReactNode;
 };
 
@@ -30,6 +32,7 @@ export function CategoryImage({
   className,
   imgClassName,
   fallbackClassName,
+  priority = false,
 }: CategoryImageProps) {
   const uploadedId = imageFileId?.trim() || null;
   const src = uploadedId
@@ -41,6 +44,7 @@ export function CategoryImage({
       <StorageImage
         src={src}
         alt=""
+        priority={priority}
         className={cn("size-full", className)}
         imgClassName={cn("object-cover", imgClassName)}
         fallback={

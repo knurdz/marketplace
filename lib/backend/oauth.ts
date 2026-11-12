@@ -4,7 +4,12 @@ import { logError } from "@/lib/observability/log-error";
 import { getAppUrl } from "./config";
 import type { OAuthErrorCode } from "./oauth-errors";
 import { type OAuthProviderId } from "./oauth-providers";
-import { createProfileForUser, getOwnProfile } from "./profiles";
+import { DbException } from "@/lib/db/compat";
+import {
+  createProfileForUser,
+  getOwnProfile,
+  getProfileRowIdForUser,
+} from "./profiles";
 import { registrationCompletePath } from "./registration-complete";
 import { postLoginPath, safeNextPath } from "./roles";
 import { getLoggedInUser } from "./session";
@@ -127,16 +132,24 @@ export async function completeOAuthLogin(params: {
     };
   }
 
-  try {
-    await createProfileForUser({
-      userId: user.$id,
-      email: user.email,
-      name: user.name || undefined,
-      registrationComplete: false,
-    });
-  } catch (error) {
-    // Existing profile (returning user) is expected; other failures are logged.
-    logError("oauth.profile", error, { userId: user.$id });
+  const existingProfileId = await getProfileRowIdForUser(user.$id);
+  if (!existingProfileId) {
+    try {
+      await createProfileForUser({
+        userId: user.$id,
+        email: user.email,
+        name: user.name || undefined,
+        registrationComplete: false,
+      });
+    } catch (error) {
+      const duplicate =
+        error instanceof DbException &&
+        error.code === 409 &&
+        error.type === "row_already_exists";
+      if (!duplicate) {
+        logError("oauth.profile", error, { userId: user.$id });
+      }
+    }
   }
 
   const profile = await getOwnProfile();

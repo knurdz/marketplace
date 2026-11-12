@@ -38,11 +38,11 @@ export async function startOAuth(formData: FormData): Promise<void> {
   const origin = await getRequestOrigin();
   const from = oauthFrom(readString(formData, "from"));
   const failUrl = oauthFailureUrl(from, "oauth", origin);
-  const guard = await verifyFormGuard(formData, "auth.oauth.start");
+  const guard = await verifyFormGuard(formData, "auth.oauth.start", {
+    skipMinAge: true,
+  });
   if (!guard.ok) {
-    redirect(
-      oauthFailureUrl(from, guard.reason === "too_fast" ? "try_again" : "oauth", origin),
-    );
+    redirect(oauthFailureUrl(from, "oauth", origin));
   }
   const provider = parseOAuthProvider(readString(formData, "provider"));
   if (!provider) {

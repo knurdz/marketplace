@@ -216,6 +216,18 @@ html:has(.storefront) {
   --sidebar-ring: #2563eb;
 }
 
+/* Native steppers follow color-scheme; align with each surface (default html is dark). */
+html:has(.storefront) input[type="number"],
+html.light:has(.portal) input[type="number"],
+html[data-theme="light"]:has(.portal) input[type="number"] {
+  color-scheme: light;
+}
+
+html.dark:has(.portal) input[type="number"],
+html:not(.light):not([data-theme="light"]):has(.portal) input[type="number"] {
+  color-scheme: dark;
+}
+
 /*
   Admin and seller portals. Light canvas when html.light; Cursor-style neutral
   dark when html.dark (or default before hydration). Storefront stays light.
@@ -468,6 +480,16 @@ html[data-theme="light"] {
   select option {
     background-color: var(--background);
     color: var(--foreground);
+  }
+  /* Hide browser number steppers (avoid dark spinners on light inputs). */
+  input[type="number"] {
+    appearance: textfield;
+    -moz-appearance: textfield;
+  }
+  input[type="number"]::-webkit-inner-spin-button,
+  input[type="number"]::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
   }
   html {
     @apply font-sans;

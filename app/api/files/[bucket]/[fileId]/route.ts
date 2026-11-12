@@ -1,17 +1,22 @@
 import { NextResponse } from "next/server";
 import {
   BUCKET_AVATARS,
+  BUCKET_CATEGORIES,
   BUCKET_PRODUCT_IMAGES,
   IMAGE_MIME_TYPES,
 } from "@/lib/backend/config";
-import { readStoredFile } from "@/lib/storage/disk";
+import { readPublicStoredFile } from "@/lib/storage";
 import {
   assertRateLimit,
   getClientIp,
   RATE_LIMITS,
 } from "@/lib/security/rate-limit";
 
-const PUBLIC_BUCKETS = new Set([BUCKET_AVATARS, BUCKET_PRODUCT_IMAGES]);
+const PUBLIC_BUCKETS = new Set([
+  BUCKET_AVATARS,
+  BUCKET_PRODUCT_IMAGES,
+  BUCKET_CATEGORIES,
+]);
 
 export async function GET(
   _request: Request,
@@ -39,7 +44,7 @@ export async function GET(
     );
   }
 
-  const file = await readStoredFile(bucket, fileId);
+  const file = await readPublicStoredFile(bucket, fileId);
   if (!file) {
     return NextResponse.json({ error: "Not found" }, { status: 404 });
   }

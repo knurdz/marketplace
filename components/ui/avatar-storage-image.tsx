@@ -1,8 +1,8 @@
 "use client";
 
 import { useState } from "react";
+import { AvatarImage } from "@/components/ui/avatar";
 import { Skeleton } from "@/components/ui/skeleton";
-import { cn } from "@/lib/utils";
 
 type AvatarStorageImageProps = {
   src: string;
@@ -10,42 +10,39 @@ type AvatarStorageImageProps = {
   className?: string;
 };
 
+type ImageStatus = "loading" | "loaded" | "error";
+
 /** Avatar photo with pulse skeleton; on error renders nothing so AvatarFallback shows. */
 export function AvatarStorageImage({
   src,
   alt = "",
   className,
 }: AvatarStorageImageProps) {
-  const [loaded, setLoaded] = useState(false);
-  const [failed, setFailed] = useState(false);
+  const [status, setStatus] = useState<ImageStatus>("loading");
 
-  if (failed) return null;
+  const handleLoadingStatusChange = (
+    next: "idle" | "loading" | "loaded" | "error",
+  ) => {
+    if (next === "error") setStatus("error");
+    else if (next === "loaded") setStatus("loaded");
+    else setStatus("loading");
+  };
+
+  if (status === "error") return null;
 
   return (
     <>
-      {!loaded ? (
+      {status === "loading" ? (
         <Skeleton
-          className="absolute inset-0 size-full rounded-[inherit]"
+          className="absolute inset-0 z-0 size-full rounded-[inherit]"
           aria-hidden
         />
       ) : null}
-      {/* eslint-disable-next-line @next/next/no-img-element -- storage preview URL */}
-      <img
+      <AvatarImage
         src={src}
         alt={alt}
-        decoding="async"
-        loading="lazy"
-        referrerPolicy="no-referrer"
-        onLoad={() => setLoaded(true)}
-        onError={() => {
-          setLoaded(true);
-          setFailed(true);
-        }}
-        className={cn(
-          "aspect-square size-full object-cover transition-opacity duration-300",
-          loaded ? "opacity-100" : "opacity-0",
-          className,
-        )}
+        className={className}
+        onLoadingStatusChange={handleLoadingStatusChange}
       />
     </>
   );

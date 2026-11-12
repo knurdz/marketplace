@@ -1,8 +1,10 @@
+import { Readable } from "node:stream";
 import { eq } from "drizzle-orm";
 import { IMAGE_MIME_TYPES } from "@/lib/backend/config";
 import { getDb, newId } from "@/lib/db/client";
 import { storedFiles } from "@/lib/db/schema";
 import type { DetectedImageMime } from "@/lib/security/file-signature";
+import { isSafeFileId } from "@/lib/security/storage-id";
 
 const REMOTE_TIMEOUT_MS = 20_000;
 const SAFE_FILE_ID = /^[A-Za-z0-9_-]{8,64}$/;
@@ -159,6 +161,49 @@ export async function putRemoteFile(params: {
   }
 
   return { fileId: responseFileId };
+}
+
+/** Public GET `/files/{bucket}/{fileId}` (no bearer). Used by storefront `/api/files` proxy. */
+export async function readPublicRemoteFile(
+  bucketId: string,
+  fileId: string,
+): Promise<{ stream: NodeJS.ReadableStream; mimeType: string } | null> {
+  const cfg = getRemoteStorageConfig();
+  if (!cfg || !isSafeFileId(fileId)) return null;
+
+  const url = `${cfg.baseUrl}/files/${encodeURIComponent(bucketId)}/${encodeURIComponent(fileId)}`;
+  let response: Response;
+  try {
+    response = await fetchWithTimeout(url, {
+      method: "GET",
+      headers: { Accept: "image/*" },
+    });
+  } catch {
+    return null;
+  }
+  if (!response.ok) return null;
+
+  const rawMime =
+    response.headers.get("content-type")?.split(";")[0]?.trim().toLowerCase() ??
+    "";
+  if (
+    !IMAGE_MIME_TYPES.includes(
+      rawMime as (typeof IMAGE_MIME_TYPES)[number],
+    )
+  ) {
+    return null;
+  }
+
+  try {
+    const buffer = Buffer.from(await response.arrayBuffer());
+    if (buffer.length === 0) return null;
+    return {
+      stream: Readable.from(buffer),
+      mimeType: rawMime,
+    };
+  } catch {
+    return null;
+  }
 }
 
 export async function deleteRemoteFile(

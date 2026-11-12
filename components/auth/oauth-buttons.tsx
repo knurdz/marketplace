@@ -1,6 +1,6 @@
 "use client";
 
-import type { ComponentType } from "react";
+import { useCallback, useState, type ComponentType } from "react";
 import { useFormStatus } from "react-dom";
 import { startOAuth } from "@/lib/backend/oauth-actions";
 import { Button } from "@/components/ui/button";
@@ -76,24 +76,61 @@ const PROVIDER_ICONS: Record<
 function OAuthSubmitButton({
   provider,
   label,
+  guardReady,
 }: {
   provider: OAuthProviderId;
   label: string;
+  guardReady: boolean;
 }) {
   const { pending } = useFormStatus();
   const Icon = PROVIDER_ICONS[provider];
+  const disabled = pending || !guardReady;
 
   return (
     <Button
       type="submit"
       variant="outline"
       className="h-11 w-full justify-center rounded-lg border-border bg-background text-sm font-medium shadow-none hover:bg-muted"
-      disabled={pending}
+      disabled={disabled}
       data-testid={`oauth-${provider}`}
     >
       <Icon />
-      <span>{pending ? "Redirecting…" : label}</span>
+      <span>
+        {pending ? "Redirecting…" : !guardReady ? "Loading…" : label}
+      </span>
     </Button>
+  );
+}
+
+function OAuthProviderForm({
+  provider,
+  from,
+  nextPath,
+  intent,
+}: {
+  provider: (typeof PROVIDERS)[number];
+  from: "login" | "register";
+  nextPath?: string;
+  intent?: "seller";
+}) {
+  const [guardReady, setGuardReady] = useState(false);
+  const onGuardReady = useCallback((ready: boolean) => {
+    setGuardReady(ready);
+  }, []);
+
+  return (
+    <form action={startOAuth}>
+      <FormGuardFields action="auth.oauth.start" onGuardReady={onGuardReady} />
+      <input type="hidden" name="provider" value={provider.id} />
+      <input type="hidden" name="from" value={from} />
+      {nextPath ? <input type="hidden" name="next" value={nextPath} /> : null}
+      {intent ? <input type="hidden" name="intent" value={intent} /> : null}
+      <OAuthSubmitButton
+        provider={provider.id}
+        label={provider.label}
+        guardReady={guardReady}
+      />
+    </form>
   );
 }
 
@@ -129,14 +166,13 @@ export function OAuthButtons({
 
       <div className="space-y-3">
         {PROVIDERS.map((provider) => (
-          <form key={provider.id} action={startOAuth}>
-            <FormGuardFields action="auth.oauth.start" />
-            <input type="hidden" name="provider" value={provider.id} />
-            <input type="hidden" name="from" value={from} />
-            {nextPath ? <input type="hidden" name="next" value={nextPath} /> : null}
-            {intent ? <input type="hidden" name="intent" value={intent} /> : null}
-            <OAuthSubmitButton provider={provider.id} label={provider.label} />
-          </form>
+          <OAuthProviderForm
+            key={provider.id}
+            provider={provider}
+            from={from}
+            nextPath={nextPath}
+            intent={intent}
+          />
         ))}
       </div>
 

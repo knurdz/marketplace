@@ -1,7 +1,7 @@
 "use client";
 
 import type { ReactNode } from "react";
-import { useState } from "react";
+import { useLayoutEffect, useRef, useState } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
 
@@ -15,6 +15,16 @@ type StorageImageProps = {
   fallback?: ReactNode;
 };
 
+function syncFromImgElement(img: HTMLImageElement | null): {
+  loaded: boolean;
+  failed: boolean;
+} {
+  if (!img) return { loaded: false, failed: false };
+  if (img.naturalWidth > 0) return { loaded: true, failed: false };
+  if (img.complete) return { loaded: true, failed: true };
+  return { loaded: false, failed: false };
+}
+
 /**
  * Remote storage or CDN image with a pulse skeleton until load.
  * On error, renders optional fallback (caller supplies icon/initial UI).
@@ -27,8 +37,17 @@ export function StorageImage({
   priority = false,
   fallback = null,
 }: StorageImageProps) {
+  const imgRef = useRef<HTMLImageElement | null>(null);
   const [loaded, setLoaded] = useState(false);
   const [failed, setFailed] = useState(false);
+
+  useLayoutEffect(() => {
+    setLoaded(false);
+    setFailed(false);
+    const synced = syncFromImgElement(imgRef.current);
+    if (synced.loaded) setLoaded(true);
+    if (synced.failed) setFailed(true);
+  }, [src]);
 
   if (failed) {
     return (
@@ -43,8 +62,9 @@ export function StorageImage({
       {!loaded ? (
         <Skeleton className="absolute inset-0 size-full rounded-none" aria-hidden />
       ) : null}
-      {/* eslint-disable-next-line @next/next/no-img-element -- Appwrite/storage preview URLs */}
+      {/* eslint-disable-next-line @next/next/no-img-element -- storage preview via /api/files */}
       <img
+        ref={imgRef}
         src={src}
         alt={alt}
         decoding="async"
