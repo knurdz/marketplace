@@ -27,6 +27,8 @@ import {
   isPasswordBreached,
   MAX_PASSWORD_LENGTH,
 } from "@/lib/security/password";
+import { maskEmailAddress } from "@/lib/email/smtp";
+import { logInfo } from "@/lib/observability/log-error";
 
 export type RecoveryActionState = {
   error?: string;
@@ -73,18 +75,48 @@ function mapRecoveryError(error: unknown): string {
 const RECOVERY_SUCCESS =
   "If an account exists for that email, a reset link has been sent. Check your inbox.";
 
+function logRecoverySkipped(
+  reason: string,
+  extra?: Record<string, string | number | boolean | null>,
+): void {
+  logInfo("auth.recovery.skipped", { reason, ...extra });
+}
+
+function isBetterAuthRateLimitError(error: unknown): boolean {
+  if (!(error instanceof Error)) return false;
+  const message = error.message.toLowerCase();
+  if (message.includes("too many requests")) return true;
+  const status = (error as { status?: unknown }).status;
+  return status === 429 || status === "429";
+}
+
+function isBetterAuthClientError(error: unknown): boolean {
+  if (!(error instanceof Error)) return false;
+  const status = (error as { status?: unknown }).status;
+  if (typeof status === "number" && status >= 400 && status < 500) return true;
+  if (typeof status === "string" && /^4\d\d$/.test(status)) return true;
+  const message = error.message.toLowerCase();
+  return (
+    message.includes("invalid redirect") ||
+    message.includes("invalid callback") ||
+    message.includes("forbidden")
+  );
+}
+
 export async function requestPasswordRecovery(
   _prev: RecoveryActionState,
   formData: FormData,
 ): Promise<RecoveryActionState> {
+  const email = readString(formData, "email");
+  const maskedRecipient = email ? maskEmailAddress(email) : "[no-email]";
   const guard = await verifyFormGuard(
     formData,
     "auth.password-recovery.request",
   );
   if (!guard.ok) {
+    logRecoverySkipped("form_guard", { recipient: maskedRecipient });
     return { success: RECOVERY_SUCCESS };
   }
-  const email = readString(formData, "email");
   const turnstile = await verifyTurnstileIfRequired({
     formData,
     action: TURNSTILE_ACTIONS.recoveryRequest,
@@ -108,8 +140,12 @@ export async function requestPasswordRecovery(
     ...RATE_LIMITS.recovery,
   });
   if (!emailLimit.ok) {
+    logRecoverySkipped("rate_limit_email", {
+      recipient: maskedRecipient,
+      retryAfterSec: emailLimit.retryAfterSec,
+    });
     return {
-      success: RECOVERY_SUCCESS,
+      error: RATE_LIMIT_MESSAGE,
       requireCaptcha: turnstile.required,
     };
   }
@@ -119,8 +155,12 @@ export async function requestPasswordRecovery(
     ...RATE_LIMITS.recovery,
   });
   if (!ipLimit.ok) {
+    logRecoverySkipped("rate_limit_ip", {
+      recipient: maskedRecipient,
+      retryAfterSec: ipLimit.retryAfterSec,
+    });
     return {
-      success: RECOVERY_SUCCESS,
+      error: RATE_LIMIT_MESSAGE,
       requireCaptcha: turnstile.required,
     };
   }
@@ -143,6 +183,30 @@ export async function requestPasswordRecovery(
         error.message.includes("NEXT_PUBLIC_APP_URL")) ||
       isSmtpOrMailSendError(error)
     ) {
+      const requireCaptcha = await recordTurnstileFailure({
+        action: TURNSTILE_ACTIONS.recoveryRequest,
+        email,
+      });
+      return { error: mapRecoveryError(error), requireCaptcha };
+    }
+
+    if (isBetterAuthRateLimitError(error)) {
+      logRecoverySkipped("better_auth_rate_limit", {
+        recipient: maskedRecipient,
+      });
+      return {
+        error: RATE_LIMIT_MESSAGE,
+        requireCaptcha: turnstile.required,
+      };
+    }
+
+    if (isBetterAuthClientError(error)) {
+      const detail =
+        error instanceof Error ? error.message.slice(0, 200) : "unknown";
+      logRecoverySkipped("better_auth_request", {
+        recipient: maskedRecipient,
+        detail,
+      });
       const requireCaptcha = await recordTurnstileFailure({
         action: TURNSTILE_ACTIONS.recoveryRequest,
         email,

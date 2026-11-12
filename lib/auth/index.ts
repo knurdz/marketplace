@@ -10,7 +10,7 @@ import { getDb } from "@/lib/db/client";
 import * as schema from "@/lib/db/schema";
 import { maskEmailAddress, sendSmtpMail } from "@/lib/email/smtp";
 import { renderMarketplaceEmail } from "@/lib/email/template";
-import { logError } from "@/lib/observability/log-error";
+import { logError, logInfo } from "@/lib/observability/log-error";
 import { MAX_PASSWORD_LENGTH } from "@/lib/security/password";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -65,6 +65,9 @@ async function sendResetPassword({
       subject: rendered.subject,
       text: rendered.text,
       html: rendered.html,
+    });
+    logInfo("auth.email.reset_sent", {
+      recipient: maskEmailAddress(user.email),
     });
   } catch (error) {
     logError("auth.email.reset_send", error, {

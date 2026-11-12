@@ -44,3 +44,11 @@ export function logError(
 
   console.error("[knurdz]", payload);
 }
+
+/** Server-side info logger (tags, masked identifiers). */
+export function logInfo(
+  tag: string,
+  extra?: Record<string, string | number | boolean | null | undefined>,
+): void {
+  console.info("[knurdz]", { tag, ...sanitizeExtra(extra) });
+}
