@@ -1,5 +1,7 @@
 <p align="center">
-  <img src="./public/brand/logo.png" alt="Knurdz Marketplace" width="320" />
+  <span style="display: inline-block; background: #ffffff; padding: 16px 28px; border-radius: 12px;">
+    <img src="./public/brand/logo.png" alt="Knurdz Marketplace" width="320" />
+  </span>
 </p>
 
 **Knurdz Marketplace** is a production multi-role commerce web app: buyers discover listings and send **purchase requests**; sellers and buyers exchange contact details on those requests and complete payment off-platform. The platform does **not** process payments or hold funds. Inventory decreases only when a seller marks a request **sold**.
