@@ -2,6 +2,7 @@ import type { ReactNode } from "react";
 import Link from "next/link";
 import { LayoutGrid } from "lucide-react";
 import { CategoryImage } from "@/components/store/category-image";
+import { HorizontalFadeScroll } from "@/components/store/horizontal-fade-scroll";
 import { SectionHeading } from "@/components/store/section-heading";
 import type { Category } from "@/lib/types";
 import { cn } from "@/lib/utils";
@@ -104,12 +105,8 @@ export function MarketCategoryCircles({
   return (
     <section className="space-y-5">
       <SectionHeading title="Browse categories" />
-      <div className="relative">
-        <div
-          aria-hidden
-          className="pointer-events-none absolute inset-y-0 right-0 z-10 w-10 bg-gradient-to-l from-background to-transparent"
-        />
-        <ul className="scrollbar-none flex snap-x snap-mandatory gap-5 overflow-x-auto overscroll-x-contain py-1 pr-8 sm:gap-6">
+      <HorizontalFadeScroll trackClassName="overscroll-x-contain py-1 pr-8">
+        <ul className="flex w-max min-w-full snap-x snap-mandatory gap-5 sm:gap-6">
           <AllCategoryCircle active={allSelected} />
           {categories.map((category) => (
             <CategoryCircle
@@ -119,7 +116,7 @@ export function MarketCategoryCircles({
             />
           ))}
         </ul>
-      </div>
+      </HorizontalFadeScroll>
     </section>
   );
 }

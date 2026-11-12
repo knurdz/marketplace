@@ -681,6 +681,27 @@ html[data-theme="light"] {
   }
 }
 
+@keyframes knurdz-orbit {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.knurdz-orbit {
+  transform-origin: center;
+  animation: knurdz-orbit 1.6s linear infinite;
+  will-change: transform;
+  /* Brand primary blue on storefront; readable blue on dark portals. */
+  color: var(--info-deep);
+}
+
+html:has(.storefront) .knurdz-orbit {
+  color: var(--primary);
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
