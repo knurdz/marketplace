@@ -4,6 +4,7 @@ import { mayBrowsePublicCatalog } from "@/lib/backend/roles";
 import { getLoggedInUser } from "@/lib/backend/session";
 import { getDb, hasDatabaseConfig } from "@/lib/db/client";
 import { purchaseRequests, wishlistItems } from "@/lib/db/schema";
+import { countOwnUnread } from "@/lib/backend/notifications";
 import { logError } from "@/lib/observability/log-error";
 import { OPEN_PURCHASE_REQUEST_STATUS } from "@/lib/types";
 
@@ -16,6 +17,7 @@ export type BuyerCommerceCounts = {
   pendingRequests: number;
   soldRequests: number;
   cancelledRequests: number;
+  unreadNotifications: number;
 };
 
 const EMPTY_COUNTS: BuyerCommerceCounts = {
@@ -24,6 +26,7 @@ const EMPTY_COUNTS: BuyerCommerceCounts = {
   pendingRequests: 0,
   soldRequests: 0,
   cancelledRequests: 0,
+  unreadNotifications: 0,
 };
 
 function asCount(value: unknown): number {
@@ -44,7 +47,7 @@ export const getOwnBuyerCommerceCounts = cache(
 
     try {
       const db = getDb();
-      const [wishlistRows, requestRows] = await Promise.all([
+      const [wishlistRows, requestRows, unreadNotifications] = await Promise.all([
         db
           .select({ value: count() })
           .from(wishlistItems)
@@ -57,10 +60,12 @@ export const getOwnBuyerCommerceCounts = cache(
           .from(purchaseRequests)
           .where(eq(purchaseRequests.buyerId, user.$id))
           .groupBy(purchaseRequests.status),
+        countOwnUnread(),
       ]);
 
       const counts: BuyerCommerceCounts = { ...EMPTY_COUNTS };
       counts.wishlist = asCount(wishlistRows[0]?.value);
+      counts.unreadNotifications = asCount(unreadNotifications);
 
       for (const row of requestRows) {
         const n = asCount(row.value);

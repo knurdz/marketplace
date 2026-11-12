@@ -1,12 +1,13 @@
 import { cn } from "@/lib/utils";
 
 /** Wishlist reddish pink, all-requests sky, pending (requested) amber. */
-export type NavCountTone = "wishlist" | "requests" | "pending";
+export type NavCountTone = "wishlist" | "requests" | "pending" | "notifications";
 
 const TONE_CLASS: Record<NavCountTone, string> = {
   wishlist: "bg-[#e8456a] text-white",
   requests: "bg-sky-600 text-white",
   pending: "bg-amber-500 text-amber-950",
+  notifications: "bg-destructive text-white",
 };
 
 export function formatNavCount(count: number): string {

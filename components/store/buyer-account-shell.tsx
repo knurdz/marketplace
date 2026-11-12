@@ -1,8 +1,5 @@
 import type { ReactNode } from "react";
-import {
-  BuyerAccountMobileNav,
-  BuyerAccountNav,
-} from "@/components/store/buyer-account-nav";
+import { BuyerAccountNav } from "@/components/store/buyer-account-nav";
 import { getOwnBuyerCommerceCounts } from "@/lib/services/buyer-commerce-counts";
 import { cn } from "@/lib/utils";
 
@@ -26,7 +23,11 @@ export async function BuyerAccountShell({
 }: BuyerAccountShellProps) {
   const commerce = showBuyerNav ? await getOwnBuyerCommerceCounts() : null;
   const counts = commerce
-    ? { wishlist: commerce.wishlist, requests: commerce.requests }
+    ? {
+        wishlist: commerce.wishlist,
+        requests: commerce.requests,
+        notifications: commerce.unreadNotifications,
+      }
     : undefined;
 
   return (
@@ -36,12 +37,6 @@ export async function BuyerAccountShell({
         className,
       )}
     >
-      {showBuyerNav ? (
-        <div className="mb-6 lg:hidden">
-          <BuyerAccountMobileNav counts={counts} />
-        </div>
-      ) : null}
-
       <div
         className={cn(
           "grid gap-8",
@@ -49,8 +44,8 @@ export async function BuyerAccountShell({
         )}
       >
         {showBuyerNav ? (
-          <aside className="hidden lg:block">
-            <div className="sticky top-24 rounded-2xl border border-border/80 bg-card p-2 shadow-none">
+          <aside className="hidden lg:sticky lg:top-24 lg:block lg:self-start">
+            <div className="p-2">
               <p className="px-3 pt-2 pb-1 text-xs font-medium tracking-[0.14em] text-muted-foreground uppercase">
                 Account
               </p>

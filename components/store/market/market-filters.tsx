@@ -43,7 +43,7 @@ export function MarketFilters({
 
   return (
     <div className="space-y-4">
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+      <div className="flex w-full min-w-0 flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div
           role="group"
           aria-label="Sort listings"
@@ -77,7 +77,7 @@ export function MarketFilters({
         <form
           action="/"
           method="get"
-          className="flex flex-wrap items-center gap-2"
+          className="flex w-full min-w-0 flex-col gap-3 sm:w-auto sm:flex-row sm:flex-wrap sm:items-center sm:gap-2"
         >
           {category ? (
             <input type="hidden" name="category" value={category} />
@@ -86,15 +86,18 @@ export function MarketFilters({
             <input type="hidden" name="sort" value={sort} />
           ) : null}
 
-          <div className="flex items-center gap-2">
+          <div className="flex w-full min-w-0 items-center gap-2">
             <label
               htmlFor="market-minPrice"
-              className="flex h-10 items-center gap-2 rounded-lg border border-border bg-background px-3 focus-within:border-accent"
+              className="flex h-10 min-w-0 flex-1 items-center gap-1.5 rounded-lg border border-border bg-background px-2.5 focus-within:border-accent sm:max-w-none sm:flex-none sm:gap-2 sm:px-3"
             >
-              <span className="text-xs font-medium text-muted-foreground">
+              <span className="shrink-0 text-xs font-medium text-muted-foreground">
                 Min
               </span>
-              <span className="text-xs text-muted-foreground" aria-hidden>
+              <span
+                className="hidden shrink-0 text-xs text-muted-foreground sm:inline"
+                aria-hidden
+              >
                 LKR
               </span>
               <input
@@ -105,22 +108,28 @@ export function MarketFilters({
                 pattern="[0-9]*"
                 placeholder="0"
                 defaultValue={minPrice != null ? String(minPrice) : ""}
-                className="w-20 bg-transparent text-sm tabular-nums outline-none placeholder:text-muted-foreground/70"
+                className="min-w-0 flex-1 bg-transparent text-sm tabular-nums outline-none placeholder:text-muted-foreground/70 sm:w-20 sm:flex-none"
               />
             </label>
 
-            <span className="text-sm text-muted-foreground" aria-hidden>
+            <span
+              className="shrink-0 text-sm text-muted-foreground"
+              aria-hidden
+            >
               to
             </span>
 
             <label
               htmlFor="market-maxPrice"
-              className="flex h-10 items-center gap-2 rounded-lg border border-border bg-background px-3 focus-within:border-accent"
+              className="flex h-10 min-w-0 flex-1 items-center gap-1.5 rounded-lg border border-border bg-background px-2.5 focus-within:border-accent sm:max-w-none sm:flex-none sm:gap-2 sm:px-3"
             >
-              <span className="text-xs font-medium text-muted-foreground">
+              <span className="shrink-0 text-xs font-medium text-muted-foreground">
                 Max
               </span>
-              <span className="text-xs text-muted-foreground" aria-hidden>
+              <span
+                className="hidden shrink-0 text-xs text-muted-foreground sm:inline"
+                aria-hidden
+              >
                 LKR
               </span>
               <input
@@ -131,26 +140,28 @@ export function MarketFilters({
                 pattern="[0-9]*"
                 placeholder="Any"
                 defaultValue={maxPrice != null ? String(maxPrice) : ""}
-                className="w-20 bg-transparent text-sm tabular-nums outline-none placeholder:text-muted-foreground/70"
+                className="min-w-0 flex-1 bg-transparent text-sm tabular-nums outline-none placeholder:text-muted-foreground/70 sm:w-20 sm:flex-none"
               />
             </label>
           </div>
 
-          <button
-            type="submit"
-            className="h-10 rounded-lg bg-accent px-4 text-sm font-semibold text-accent-foreground transition hover:bg-accent-deep"
-          >
-            Filter
-          </button>
-
-          {hasPriceFilter ? (
-            <Link
-              href={clearHref}
-              className="h-10 px-2 text-sm font-medium leading-10 text-muted-foreground transition hover:text-foreground"
+          <div className="flex w-full items-center gap-2 sm:w-auto">
+            <button
+              type="submit"
+              className="h-10 flex-1 rounded-lg bg-accent px-4 text-sm font-semibold text-accent-foreground transition hover:bg-accent-deep sm:flex-none"
             >
-              Clear
-            </Link>
-          ) : null}
+              Filter
+            </button>
+
+            {hasPriceFilter ? (
+              <Link
+                href={clearHref}
+                className="h-10 shrink-0 px-2 text-sm font-medium leading-10 text-muted-foreground transition hover:text-foreground"
+              >
+                Clear
+              </Link>
+            ) : null}
+          </div>
         </form>
       </div>
 

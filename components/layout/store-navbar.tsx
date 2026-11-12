@@ -3,7 +3,6 @@ import { Suspense } from "react";
 import {
   Heart,
   LayoutDashboard,
-  Menu,
   Package,
   Search,
   UserRound,
@@ -12,20 +11,14 @@ import {
   portalHomeForSessionUser,
   type SessionUserView,
 } from "@/lib/backend/session-user";
-import { BrandLogo, BrandLogoLink } from "@/components/brand/brand-logo";
+import { BrandLogoLink } from "@/components/brand/brand-logo";
 import { AccountMenu } from "@/components/layout/account-menu";
+import { StoreMobileMenu } from "@/components/layout/store-mobile-sheet";
 import { NavCountBadge } from "@/components/layout/nav-count-badge";
 import { ProductSearchForm } from "@/components/layout/product-search-form";
 import { NotificationBell } from "@/components/notifications/notification-bell";
 import type { BuyerCommerceCounts } from "@/lib/services/buyer-commerce-counts";
 import { Button } from "@/components/ui/button";
-import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from "@/components/ui/sheet";
 
 type StoreNavbarProps = {
   user: SessionUserView | null;
@@ -40,10 +33,6 @@ function wishlistAriaLabel(count: number): string {
 
 function pendingRequestsAriaLabel(count: number): string {
   return count > 0 ? `Requests, ${count} pending` : "Requests";
-}
-
-function allRequestsAriaLabel(count: number): string {
-  return count > 0 ? `Requests, ${count}` : "Requests";
 }
 
 function SearchFormFallback({ className }: { className?: string }) {
@@ -89,7 +78,6 @@ export function StoreNavbar({
   counts,
 }: StoreNavbarProps) {
   const wishlistCount = counts?.wishlist ?? 0;
-  const requestCount = counts?.requests ?? 0;
   const pendingCount = counts?.pendingRequests ?? 0;
   const portalHome = user ? portalHomeForSessionUser(user) : null;
   const portalLabel =
@@ -168,91 +156,12 @@ export function StoreNavbar({
         </div>
 
         <div className="flex items-center justify-end gap-1 md:hidden">
-          {user && !portalHome ? (
-            <>
-              <Button variant="ghost" size="icon" className="relative" asChild>
-                <Link href="/wishlist" aria-label={wishlistAriaLabel(wishlistCount)}>
-                  <Heart className="size-5" aria-hidden />
-                  <NavCountBadge
-                    count={wishlistCount}
-                    tone="wishlist"
-                    className="absolute -top-1 -right-1 ring-2 ring-background"
-                  />
-                </Link>
-              </Button>
-              <Button variant="ghost" size="icon" className="relative" asChild>
-                <Link
-                  href="/requests?filter=open"
-                  aria-label={pendingRequestsAriaLabel(pendingCount)}
-                >
-                  <Package className="size-5" aria-hidden />
-                  <NavCountBadge
-                    count={pendingCount}
-                    tone="pending"
-                    className="absolute -top-1 -right-1 ring-2 ring-background"
-                  />
-                </Link>
-              </Button>
-              <NotificationBell className="size-10" />
-            </>
-          ) : user ? (
-            <NotificationBell className="size-10" />
-          ) : null}
-          <Sheet>
-            <SheetTrigger asChild>
-              <Button variant="ghost" size="icon" aria-label="Open menu">
-                <Menu />
-              </Button>
-            </SheetTrigger>
-            <SheetContent side="right" className="w-[300px]">
-              <SheetHeader>
-                <SheetTitle className="text-left">
-                  <BrandLogo className="h-11" />
-                </SheetTitle>
-              </SheetHeader>
-              <div className="mt-6 flex flex-col gap-4 px-4">
-                {user ? (
-                  <div className="flex flex-col gap-2">
-                    {portalHome ? (
-                      <Button variant="secondary" asChild>
-                        <Link href={portalHome}>{portalLabel} portal</Link>
-                      </Button>
-                    ) : (
-                      <>
-                        <Button variant="secondary" className="justify-between" asChild>
-                          <Link href="/requests" aria-label={allRequestsAriaLabel(requestCount)}>
-                            Requests
-                            <NavCountBadge count={requestCount} tone="requests" />
-                          </Link>
-                        </Button>
-                        <Button variant="secondary" className="justify-between" asChild>
-                          <Link href="/wishlist" aria-label={wishlistAriaLabel(wishlistCount)}>
-                            Wishlist
-                            <NavCountBadge count={wishlistCount} tone="wishlist" />
-                          </Link>
-                        </Button>
-                        <Button variant="secondary" asChild>
-                          <Link href="/dashboard">Dashboard</Link>
-                        </Button>
-                      </>
-                    )}
-                    <Button variant="secondary" asChild>
-                      <Link href="/account">Account</Link>
-                    </Button>
-                  </div>
-                ) : (
-                  <div className="flex flex-col gap-2">
-                    <Button asChild>
-                      <Link href="/register">Create account</Link>
-                    </Button>
-                    <Button variant="secondary" asChild>
-                      <Link href="/login">Sign in</Link>
-                    </Button>
-                  </div>
-                )}
-              </div>
-            </SheetContent>
-          </Sheet>
+          <StoreMobileMenu
+            user={user}
+            displayName={displayName}
+            avatarUrl={avatarUrl}
+            counts={counts ?? undefined}
+          />
         </div>
       </div>
 
