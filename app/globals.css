@@ -688,14 +688,10 @@ html[data-theme="light"] {
 }
 
 .knurdz-orbit-loader {
-  color: var(--info-deep);
+  color: color-mix(in srgb, var(--muted-foreground) 88%, var(--border));
   transform-origin: center;
   animation: knurdz-orbit-spin 1.75s linear infinite;
   will-change: transform;
-}
-
-html:has(.storefront) .knurdz-orbit-loader {
-  color: var(--primary);
 }
 
 @media (prefers-reduced-motion: reduce) {
