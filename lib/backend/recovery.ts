@@ -15,6 +15,7 @@ import {
   RATE_LIMITS,
 } from "@/lib/security/rate-limit";
 import { assertDurableRateLimit } from "@/lib/security/durable-rate-limit";
+import { resolveEmailVerificationCallbackUrl } from "@/lib/backend/email-verification-callback";
 import { getRequestOrigin } from "./server-origin";
 import { getLoggedInUser } from "./session";
 import { verifyFormGuard } from "@/lib/security/bot-guard";
@@ -337,11 +338,11 @@ export async function requestEmailVerification(
   }
 
   try {
-    const origin = await getRequestOrigin();
+    const verifyCallback = await resolveEmailVerificationCallbackUrl();
     await authApi().sendVerificationEmail({
       body: {
         email: user.email,
-        callbackURL: `${origin}/verify-email?verified=1`,
+        callbackURL: verifyCallback,
       },
       headers: await headers(),
     });

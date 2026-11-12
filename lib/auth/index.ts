@@ -8,6 +8,7 @@ import {
 } from "@/lib/config/app";
 import { getDb } from "@/lib/db/client";
 import * as schema from "@/lib/db/schema";
+import { ensureVerificationEmailLinkCallback } from "@/lib/backend/email-verification-callback";
 import { maskEmailAddress, sendSmtpMail } from "@/lib/email/smtp";
 import { renderMarketplaceEmail } from "@/lib/email/template";
 import { logError, logInfo } from "@/lib/observability/log-error";
@@ -24,12 +25,13 @@ async function sendVerificationEmail({
   url: string;
 }) {
   try {
+    const verifyHref = ensureVerificationEmailLinkCallback(url);
     const rendered = renderMarketplaceEmail({
       greetingName: user.name,
       title: "Verify your Knurdz Marketplace email",
       body: "Confirm your email for Knurdz Marketplace by opening the button below. If you did not create an account, you can ignore this message.",
       ctaLabel: "Verify email",
-      ctaHref: url,
+      ctaHref: verifyHref,
     });
     await sendSmtpMail({
       to: user.email,

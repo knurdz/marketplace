@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { verifyLinkErrorMessage } from "@/lib/backend/email-verification-callback";
 import { completeEmailVerification } from "@/lib/backend/recovery";
 import { AuthBackLink } from "@/components/auth/auth-back-link";
 import { AuthLegalLinks } from "@/components/auth/auth-legal-links";
@@ -37,17 +38,23 @@ export default async function VerifyEmailPage({
   const success = redirectedOk || Boolean(result?.ok);
   const failed = Boolean(linkError) || Boolean(result && !result.ok);
   const missingParams = !success && !failed;
+  const failureMessage =
+    result && !result.ok
+      ? result.error
+      : linkError
+        ? verifyLinkErrorMessage(linkError)
+        : "This verification link is invalid or has expired.";
 
   return (
     <main className="mx-auto w-full max-w-[30rem] px-4 py-14 sm:px-6 sm:py-20">
       <VerifyEmailToast
-        status={token && result ? (result.ok ? "success" : "error") : null}
+        status={success ? "success" : failed ? "error" : null}
         message={
-          token && result
-            ? result.ok
-              ? "Email verified. Sign in to continue."
-              : result.error
-            : ""
+          success
+            ? "Email verified. Sign in to continue."
+            : failed
+              ? failureMessage
+              : ""
         }
       />
       <h1 className="text-center text-2xl font-semibold tracking-tight text-foreground">
@@ -88,9 +95,7 @@ export default async function VerifyEmailPage({
             role="alert"
             className="rounded-lg border border-destructive/30 bg-destructive/5 px-3 py-2 text-sm text-destructive"
           >
-            {result && !result.ok
-              ? result.error
-              : "This verification link is invalid or has expired."}
+            {failureMessage}
           </p>
         ) : missingParams ? (
           <p

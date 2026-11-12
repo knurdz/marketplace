@@ -16,7 +16,7 @@ import {
 } from "@/lib/security/rate-limit";
 import { assertDurableRateLimit } from "@/lib/security/durable-rate-limit";
 import { DATABASE_ID, TABLE_PROFILES, TABLE_SELLER_PROFILES } from "./config";
-import { getRequestOrigin } from "./server-origin";
+import { resolveEmailVerificationCallbackUrl } from "@/lib/backend/email-verification-callback";
 import { createProfileForUser } from "./profiles";
 import { resolvePostLoginPath } from "./home-path";
 import { ROLE_LABELS } from "./roles";
@@ -296,13 +296,13 @@ export async function signUpWithEmail(
 
   try {
     const hdrs = await headers();
-    const origin = await getRequestOrigin();
+    const verifyCallback = await resolveEmailVerificationCallbackUrl();
     const result = await auth.api.signUpEmail({
       body: {
         email,
         password,
         name: name || email.split("@")[0] || "User",
-        callbackURL: `${origin}/verify-email?verified=1`,
+        callbackURL: verifyCallback,
       },
       headers: hdrs,
     });
@@ -420,8 +420,13 @@ export async function signInWithEmail(
 
   try {
     const hdrs = await headers();
+    const verifyCallback = await resolveEmailVerificationCallbackUrl();
     const result = await auth.api.signInEmail({
-      body: { email, password },
+      body: {
+        email,
+        password,
+        callbackURL: verifyCallback,
+      },
       headers: hdrs,
     });
     // The new session cookie is not on this request yet, so use the returned user id.
