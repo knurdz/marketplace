@@ -1,0 +1,8 @@
+Pre-rewrite main tip (rollback reference only).
+Saved before git filter-repo mailmap rewrite (Cursor Agent author removal).
+
+SHA: 9b1cc27269c52deecdc133168c9000bdaf107579
+Date saved: 2026-11-12
+
+Rollback (repo admins only, if rewrite was mistaken):
+  git push --force-with-lease origin 9b1cc27269c52deecdc133168c9000bdaf107579:main
