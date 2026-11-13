@@ -39,8 +39,18 @@ disk (never inside the deploy tree that gets replaced on each release).
 
 ## Dependency audit
 
-Next.js is on the patched 16.4.x line. After non-breaking fixes, `npm audit`
-reports no high or critical findings. Remaining moderate/low findings are in
-development tooling (`drizzle-kit`) and the shadcn CLI; npm only offers
-breaking-version downgrades for them. Do not run `npm audit fix --force`;
-recheck those advisories during routine dependency updates.
+Next.js is on the patched 16.4.x line. Transitive advisories for `esbuild` and
+`minimatch` are addressed in root [`package.json`](../package.json) `overrides`:
+
+- `esbuild@0.28.2` — unifies copies pulled in by `drizzle-kit` / `@esbuild-kit/*`
+  and satisfies advisory scanners; the withdrawn GHSA-gv7w advisory applies to
+  Deno install paths, not this Node app.
+- Scoped `minimatch@11.0.8` under `@typescript-eslint/typescript-estree` and
+  `@ts-morph/common` — upstream packages still declare `^10.x`; the override
+  bumps only those trees (CVE-2026-118764). Legacy `minimatch@3` used by ESLint
+  core file matching is left unchanged.
+
+After overrides and routine bumps, `npm audit` should show no high or critical
+findings for those packages. Remaining low findings, if any, may still come from
+other tooling. Do not run `npm audit fix --force`; recheck advisories when
+upstream parents adopt patched ranges and trim overrides where possible.
