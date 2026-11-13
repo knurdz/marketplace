@@ -142,7 +142,9 @@ export function PortalAppSidebar({
           >
             <BrandLogo
               priority
+              themeAware
               className="h-10 w-auto max-w-full group-data-[collapsible=icon]:h-8"
+              lightClassName="h-12"
             />
           </Link>
           <SidebarCollapseButton className="hidden group-data-[collapsible=icon]:hidden md:inline-flex" />
