@@ -38,7 +38,7 @@ function pendingRequestsAriaLabel(count: number): string {
 function SearchFormFallback({ className }: { className?: string }) {
   return (
     <form action="/search" method="get" className={className} role="search">
-      <div className="relative flex w-full items-center rounded-full border border-border bg-muted/70">
+      <div className="relative flex w-full min-w-0 items-center rounded-full border border-border bg-muted/70">
         <Search
           className="pointer-events-none absolute left-4 size-4 text-muted-foreground"
           aria-hidden
@@ -88,15 +88,15 @@ export function StoreNavbar({
         : null;
 
   return (
-    <header className="sticky top-0 isolate z-50 border-b border-border bg-background/95 backdrop-blur-md">
-      <div className="mx-auto grid h-16 w-full max-w-7xl grid-cols-[1fr_auto] items-center gap-3 px-4 sm:px-6 md:grid-cols-[1fr_minmax(0,40rem)_1fr] md:gap-6 lg:px-8">
-        <div className="flex min-w-0 items-center justify-start">
+    <header className="sticky top-0 isolate z-50 w-full min-w-0 border-b border-border bg-background/95 backdrop-blur-md">
+      <div className="mx-auto grid h-16 w-full min-w-0 max-w-7xl grid-cols-[auto_minmax(0,1fr)] items-center gap-3 px-4 sm:px-6 md:grid-cols-[auto_minmax(0,1fr)_auto] md:gap-4 lg:gap-6 lg:px-8">
+        <div className="flex shrink-0 items-center justify-start">
           <BrandLogoLink priority />
         </div>
 
-        <SearchForm className="hidden w-full justify-self-center md:flex" />
+        <SearchForm className="hidden w-full min-w-0 md:block" />
 
-        <div className="hidden items-center justify-end gap-1 md:flex">
+        <div className="hidden shrink-0 items-center justify-end gap-1 md:flex">
           {user ? (
             <>
               {portalHome ? (
@@ -166,7 +166,7 @@ export function StoreNavbar({
       </div>
 
       <div className="border-t border-border px-4 py-2 md:hidden">
-        <SearchForm className="flex w-full" />
+        <SearchForm className="w-full min-w-0" />
       </div>
     </header>
   );

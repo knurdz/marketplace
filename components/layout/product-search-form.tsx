@@ -191,7 +191,7 @@ export function ProductSearchForm({ className }: ProductSearchFormProps) {
       role="search"
       onSubmit={() => setOpen(false)}
     >
-      <div className="relative flex w-full items-center rounded-full border border-border bg-muted/70 transition focus-within:border-accent focus-within:bg-background">
+      <div className="relative flex w-full min-w-0 items-center rounded-full border border-border bg-muted/70 transition focus-within:border-accent focus-within:bg-background">
         <Search
           className="pointer-events-none absolute left-4 size-4 text-muted-foreground"
           aria-hidden
