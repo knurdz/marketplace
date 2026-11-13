@@ -18,6 +18,7 @@ import { isSellerStatus } from "@/lib/types";
 import { writeAuditLog } from "./audit-logs";
 import { escapeLikeWildcards } from "./products";
 import { recordSellerApplicationRejectionAttempt } from "./seller-application-attempts";
+import { rejectedSellerPlaceholderSlug } from "./seller-slug";
 
 const PENDING_STATUS = "pending" as const;
 const APPROVED_STATUS = "approved" as const;
@@ -481,6 +482,7 @@ export async function rejectSellerApplicationCore(
       data: {
         status: REJECTED_STATUS,
         rejectionReason: trimmedReason,
+        slug: rejectedSellerPlaceholderSlug(profile.$id),
       },
     });
   } catch {

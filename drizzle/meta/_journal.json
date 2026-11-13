@@ -120,6 +120,13 @@
       "when": 1795700000000,
       "tag": "0016_reapply_and_unban",
       "breakpoints": true
+    },
+    {
+      "idx": 17,
+      "version": "5",
+      "when": 1795800000000,
+      "tag": "0017_release_rejected_slugs",
+      "breakpoints": true
     }
   ]
 }

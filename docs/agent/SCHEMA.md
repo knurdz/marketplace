@@ -49,7 +49,7 @@
 
 ### `seller_profiles`
 
-Shop name, slug, bio, banner, status, return/shipping policies. **No bank account fields.**
+Shop name, slug, bio, banner, status, return/shipping policies. **No bank account fields.** Only `pending`, `approved`, and `banned` reserve a public shop slug; `rejected` rows use an internal `rejected-{id}` placeholder so others can claim the URL.
 
 ### `seller_application_attempts`
 

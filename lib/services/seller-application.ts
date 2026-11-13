@@ -17,11 +17,11 @@ import { deleteFile, uploadAvatar } from "@/lib/backend/storage";
 import { getLoggedInUser } from "@/lib/backend/session";
 import { notifyAdminsEvent, notifyUserEvent } from "@/lib/email/events";
 import type { SellerProfile } from "@/lib/types";
-import { and, eq, ne } from "drizzle-orm";
-import { getDb } from "@/lib/db/client";
-import { sellerProfiles } from "@/lib/db/schema";
 import { generateSlug } from "./categories";
 import { asSellerProfile } from "./seller-approvals";
+import { resolveUniqueShopSlug } from "./seller-slug";
+
+export { resolveUniqueShopSlug } from "./seller-slug";
 
 const PENDING_STATUS = "pending" as const;
 const REJECTED_STATUS = "rejected" as const;
@@ -170,45 +170,6 @@ function sellerProfilePermissions(userId: string): string[] {
     Permission.update(Role.label("admin")),
     Permission.delete(Role.label("admin")),
   ];
-}
-
-async function slugTaken(
-  slug: string,
-  exceptProfileId?: string,
-): Promise<boolean> {
-  if (!process.env.DATABASE_URL?.trim()) return false;
-
-  try {
-    const conditions = [eq(sellerProfiles.slug, slug)];
-    if (exceptProfileId?.trim()) {
-      conditions.push(ne(sellerProfiles.id, exceptProfileId.trim()));
-    }
-    const rows = await getDb()
-      .select({ id: sellerProfiles.id })
-      .from(sellerProfiles)
-      .where(and(...conditions))
-      .limit(1);
-    return rows.length > 0;
-  } catch {
-    return false;
-  }
-}
-
-/** Pick first slug in base, base-2, base-3, … not already used. */
-export async function resolveUniqueShopSlug(
-  baseSlug: string,
-  exceptProfileId?: string,
-): Promise<string> {
-  const root = baseSlug.slice(0, MAX_SLUG_LENGTH);
-  if (!(await slugTaken(root, exceptProfileId))) return root;
-
-  for (let n = 2; n <= 99; n += 1) {
-    const suffix = `-${n}`;
-    const candidate = `${root.slice(0, MAX_SLUG_LENGTH - suffix.length)}${suffix}`;
-    if (!(await slugTaken(candidate, exceptProfileId))) return candidate;
-  }
-
-  return `${root.slice(0, MAX_SLUG_LENGTH - 9)}-${ID.unique().slice(0, 8)}`;
 }
 
 /** Load the signed-in user's seller profile, if any. */
