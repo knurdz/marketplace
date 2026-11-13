@@ -1,7 +1,17 @@
+"use client";
+
+import { useState } from "react";
 import type { ProductCatalogParams } from "@/lib/services";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { ChevronDown, Check } from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 type ProductCatalogFiltersProps = {
   action: string;
@@ -20,6 +30,10 @@ export function ProductCatalogFilters({
   defaults,
   preserve,
 }: ProductCatalogFiltersProps) {
+  const currentSort =
+    SORT_OPTIONS.find((o) => o.value === defaults.sort) ?? SORT_OPTIONS[0];
+  const [selectedSort, setSelectedSort] = useState(currentSort);
+
   return (
     <form
       action={action}
@@ -66,20 +80,35 @@ export function ProductCatalogFilters({
       </div>
 
       <div className="flex min-w-[10rem] flex-1 flex-col gap-1.5">
-        <Label htmlFor="sort">Sort</Label>
-        <select
-          id="sort"
-          name="sort"
-          defaultValue={defaults.sort}
-          aria-label="Sort products"
-          className="border-input bg-background text-foreground focus-visible:ring-ring flex h-10 w-full rounded-lg border px-3 text-sm outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
-        >
-          {SORT_OPTIONS.map((option) => (
-            <option key={option.value} value={option.value} className="text-foreground bg-background">
-              {option.label}
-            </option>
-          ))}
-        </select>
+        <Label>Sort</Label>
+        {/* Hidden input carries the value on form submit */}
+        <input type="hidden" name="sort" value={selectedSort.value} />
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <button
+              type="button"
+              aria-label="Sort products"
+              className="border-input bg-background text-foreground focus-visible:ring-ring flex h-10 w-full items-center justify-between rounded-lg border px-3 text-sm outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
+            >
+              <span>{selectedSort.label}</span>
+              <ChevronDown className="size-4 shrink-0 text-muted-foreground" />
+            </button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="start" className="min-w-[10rem]">
+            {SORT_OPTIONS.map((option) => (
+              <DropdownMenuItem
+                key={option.value}
+                onSelect={() => setSelectedSort(option)}
+                className="flex items-center justify-between"
+              >
+                {option.label}
+                {selectedSort.value === option.value && (
+                  <Check className="size-4 shrink-0" />
+                )}
+              </DropdownMenuItem>
+            ))}
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
 
       <Button type="submit">Apply</Button>
