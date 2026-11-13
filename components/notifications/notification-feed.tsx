@@ -119,7 +119,7 @@ export function NotificationFeedList({
             type="button"
             className={cn(
               "flex w-full min-w-0 flex-col gap-1 text-left transition hover:bg-muted/40",
-              page ? "gap-1.5 px-4 py-4 sm:px-5" : "gap-0.5 py-2.5",
+              page ? "gap-1.5 px-4 py-4 sm:px-5" : "gap-0.5 px-3 py-2.5",
               !n.read && (page ? "bg-accent/[0.04]" : "bg-accent/5"),
             )}
             onClick={() => onItemActivate(n)}
