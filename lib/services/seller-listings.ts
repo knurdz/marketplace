@@ -11,6 +11,7 @@ import {
   IMAGE_EXTENSIONS,
   IMAGE_MIME_TYPES,
   PRODUCT_IMAGE_MAX_BYTES,
+  PRODUCT_IMAGE_MAX_COUNT,
   TABLE_CATEGORIES,
   TABLE_PRODUCT_IMAGES,
   TABLE_PRODUCTS,
@@ -52,7 +53,6 @@ import { areFreeListingsEnabled } from "./platform-settings";
 const DEFAULT_CURRENCY = "LKR";
 const MAX_TITLE_LENGTH = 200;
 const MAX_DESCRIPTION_LENGTH = 10000;
-const MAX_IMAGES = 8;
 const FREE_LISTINGS_DISABLED = "Free listings are currently disabled." as const;
 export const LISTING_REQUIRES_PHOTO =
   "Add at least one product photo." as const;
@@ -229,10 +229,10 @@ async function categoryExists(categoryId: string): Promise<boolean> {
 async function validateImageFiles(
   files: File[],
 ): Promise<{ ok: true; files: File[] } | { ok: false; error: string }> {
-  if (files.length > MAX_IMAGES) {
+  if (files.length > PRODUCT_IMAGE_MAX_COUNT) {
     return {
       ok: false,
-      error: `At most ${MAX_IMAGES} images allowed.`,
+      error: `At most ${PRODUCT_IMAGE_MAX_COUNT} images allowed.`,
     };
   }
   for (const file of files) {
@@ -517,10 +517,10 @@ export async function addOwnProductImagesCore(
       ? revisionImagesToDisplay(liveImages, revision.patch)
       : liveImages;
 
-  if (proposedImages.length + nonEmptyImages.length > MAX_IMAGES) {
+  if (proposedImages.length + nonEmptyImages.length > PRODUCT_IMAGE_MAX_COUNT) {
     return {
       ok: false,
-      error: `At most ${MAX_IMAGES} images allowed (${proposedImages.length} already uploaded).`,
+      error: `At most ${PRODUCT_IMAGE_MAX_COUNT} images allowed (${proposedImages.length} already uploaded).`,
     };
   }
 

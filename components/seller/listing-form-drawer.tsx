@@ -10,7 +10,12 @@ import {
   type InputHTMLAttributes,
   type ReactNode,
 } from "react";
-import { Upload } from "lucide-react";
+import { Trash2, Upload } from "lucide-react";
+import {
+  PRODUCT_IMAGE_MAX_BYTES,
+  PRODUCT_IMAGE_MAX_COUNT,
+} from "@/lib/backend/config";
+import { Button } from "@/components/ui/button";
 import {
   Drawer,
   DrawerContent,
@@ -233,7 +238,23 @@ export function ListingFormCheckbox({
   );
 }
 
-type ListingPreviewItem = { name: string; url: string };
+type ListingPreviewItem = {
+  id: string;
+  name: string;
+  url: string;
+};
+
+function listingImageFileKey(file: File): string {
+  return `${file.name}:${file.size}:${file.lastModified}`;
+}
+
+function isListingImageFile(file: File): boolean {
+  return (
+    file.type === "image/jpeg" ||
+    file.type === "image/png" ||
+    file.type === "image/webp"
+  );
+}
 
 export function ListingFormFileField({
   id,
@@ -243,6 +264,8 @@ export function ListingFormFileField({
   disabled,
   multiple,
   required,
+  maxFiles = PRODUCT_IMAGE_MAX_COUNT,
+  showCoverHint = false,
 }: {
   id: string;
   name: string;
@@ -251,11 +274,15 @@ export function ListingFormFileField({
   disabled?: boolean;
   multiple?: boolean;
   required?: boolean;
+  maxFiles?: number;
+  showCoverHint?: boolean;
 }) {
   const inputRef = useRef<HTMLInputElement>(null);
+  const filesRef = useRef<File[]>([]);
   const objectUrlsRef = useRef<string[]>([]);
   const [dragging, setDragging] = useState(false);
   const [previews, setPreviews] = useState<ListingPreviewItem[]>([]);
+  const [fieldMessage, setFieldMessage] = useState<string | null>(null);
 
   useEffect(() => {
     const urls = objectUrlsRef.current;
@@ -270,138 +297,255 @@ export function ListingFormFileField({
     objectUrlsRef.current = [];
   }
 
-  function buildPreviewsFromFiles(files: FileList | File[]) {
+  function syncInputFromFiles(files: File[]) {
+    if (!inputRef.current) return;
+    const dt = new DataTransfer();
+    for (const file of files) {
+      dt.items.add(file);
+    }
+    inputRef.current.files = dt.files;
+  }
+
+  function rebuildPreviewsFromFiles(files: File[]) {
     revokeTrackedUrls();
     const items: ListingPreviewItem[] = [];
     for (const file of files) {
-      if (!file.type.startsWith("image/")) continue;
       const url = URL.createObjectURL(file);
       objectUrlsRef.current.push(url);
-      items.push({ name: file.name, url });
+      items.push({
+        id: listingImageFileKey(file),
+        name: file.name,
+        url,
+      });
     }
     setPreviews(items);
   }
 
-  function assignFiles(files: FileList | null) {
-    if (!inputRef.current) return;
-    if (!files || files.length === 0) {
-      inputRef.current.files = new DataTransfer().files;
-      revokeTrackedUrls();
-      setPreviews([]);
+  function commitFiles(next: File[]) {
+    filesRef.current = next;
+    syncInputFromFiles(next);
+    rebuildPreviewsFromFiles(next);
+  }
+
+  function ingestIncoming(incoming: FileList | File[]) {
+    const list = Array.from(incoming);
+    const messages: string[] = [];
+
+    if (!multiple) {
+      const first = list.find(isListingImageFile);
+      if (!first) return;
+      if (first.size > PRODUCT_IMAGE_MAX_BYTES) {
+        setFieldMessage(`${first.name} is over 5 MB.`);
+        if (inputRef.current) inputRef.current.value = "";
+        return;
+      }
+      setFieldMessage(null);
+      commitFiles([first]);
+      if (inputRef.current) inputRef.current.value = "";
       return;
     }
-    const dt = new DataTransfer();
-    for (const file of files) {
-      if (file.type.startsWith("image/")) dt.items.add(file);
+
+    if (filesRef.current.length >= maxFiles) {
+      setFieldMessage(
+        `${maxFiles} of ${maxFiles} photos selected. Remove a photo to add a different one.`,
+      );
+      if (inputRef.current) inputRef.current.value = "";
+      return;
     }
-    inputRef.current.files = dt.files;
-    buildPreviewsFromFiles(dt.files);
+
+    const next = [...filesRef.current];
+    const seen = new Set(next.map(listingImageFileKey));
+    let skippedCap = false;
+
+    for (const file of list) {
+      if (!isListingImageFile(file)) continue;
+      if (file.size > PRODUCT_IMAGE_MAX_BYTES) {
+        messages.push(`${file.name} is over 5 MB.`);
+        continue;
+      }
+      const key = listingImageFileKey(file);
+      if (seen.has(key)) continue;
+      if (next.length >= maxFiles) {
+        skippedCap = true;
+        break;
+      }
+      next.push(file);
+      seen.add(key);
+    }
+
+    if (skippedCap) {
+      messages.push("Some files were not added because the limit was reached.");
+    }
+
+    setFieldMessage(messages.length > 0 ? messages.join(" ") : null);
+    commitFiles(next);
+    if (inputRef.current) inputRef.current.value = "";
+  }
+
+  function removePreview(previewId: string) {
+    const next = filesRef.current.filter(
+      (file) => listingImageFileKey(file) !== previewId,
+    );
+    setFieldMessage(null);
+    commitFiles(next);
   }
 
   function onInputChange(event: ChangeEvent<HTMLInputElement>) {
-    assignFiles(event.target.files);
+    const files = event.target.files;
+    if (!files?.length) return;
+    ingestIncoming(files);
   }
 
-  function onDrop(event: DragEvent<HTMLLabelElement>) {
+  function onDrop(event: DragEvent<HTMLElement>) {
     event.preventDefault();
     event.stopPropagation();
     setDragging(false);
-    if (disabled) return;
+    if (disabled || atCap) return;
     const dropped = event.dataTransfer.files;
     if (!dropped?.length) return;
-    if (multiple) assignFiles(dropped);
-    else {
-      const first = dropped[0];
-      const dt = new DataTransfer();
-      dt.items.add(first);
-      assignFiles(dt.files);
-    }
+    ingestIncoming(dropped);
   }
 
-  function onDragOver(event: DragEvent<HTMLLabelElement>) {
+  function onDragOver(event: DragEvent<HTMLElement>) {
     event.preventDefault();
     event.stopPropagation();
-    if (!disabled) setDragging(true);
+    if (!disabled && !atCap) setDragging(true);
   }
 
-  function onDragLeave(event: DragEvent<HTMLLabelElement>) {
+  function onDragLeave(event: DragEvent<HTMLElement>) {
     event.preventDefault();
     event.stopPropagation();
     if (event.currentTarget.contains(event.relatedTarget as Node)) return;
     setDragging(false);
   }
 
-  const hasPreviews = previews.length > 0;
+  const selectedCount = previews.length;
+  const atCap = multiple ? selectedCount >= maxFiles : false;
+  const canPickMore = !disabled && !atCap;
+
+  const dropzoneHelp = (() => {
+    if (multiple) {
+      if (atCap) {
+        return `${maxFiles} of ${maxFiles} photos selected. Remove a photo to add a different one.`;
+      }
+      if (selectedCount > 0) {
+        return `${selectedCount} of ${maxFiles} photos selected. Choose or drop more to add them.`;
+      }
+      const base = `JPG, PNG, or WebP. Up to ${maxFiles} photos, 5 MB each.`;
+      return showCoverHint
+        ? `${base} The first photo is the cover shoppers see.`
+        : base;
+    }
+    return selectedCount > 0
+      ? "Click or drop to change the image."
+      : "JPG, PNG, or WebP, 5 MB max.";
+  })();
+
+  const dropzoneClassName = cn(
+    "flex min-h-[200px] flex-col items-center justify-center gap-2 rounded-xl border border-dashed border-border bg-muted/15 px-4 py-8 text-center transition-colors lg:min-h-[min(52vh,360px)]",
+    canPickMore &&
+      "cursor-pointer hover:border-muted-foreground/40 hover:bg-muted/25",
+    dragging && canPickMore && "border-accent/60 bg-accent/5",
+    (!canPickMore || disabled) && "opacity-100",
+    disabled && "pointer-events-none opacity-50",
+  );
+
+  const fileInput = (
+    <input
+      ref={inputRef}
+      id={id}
+      name={name}
+      type="file"
+      accept="image/jpeg,image/png,image/webp,.jpg,.jpeg,.png,.webp"
+      multiple={multiple}
+      disabled={disabled}
+      required={required && selectedCount === 0}
+      className="sr-only"
+      onChange={onInputChange}
+    />
+  );
+
+  const dropzoneBody = (
+    <>
+      <span className="flex size-10 items-center justify-center rounded-full border border-border bg-card">
+        <Upload className="size-4 text-muted-foreground" aria-hidden />
+      </span>
+      <span className="text-sm font-medium text-foreground">
+        Choose files or drag here
+      </span>
+      <span className="text-xs text-muted-foreground">{dropzoneHelp}</span>
+    </>
+  );
 
   return (
     <ListingFormField label={label} htmlFor={id} hint={hint}>
-      <label
-        htmlFor={id}
-        onDrop={onDrop}
-        onDragOver={onDragOver}
-        onDragEnter={onDragOver}
-        onDragLeave={onDragLeave}
-        className={cn(
-          "flex min-h-[200px] cursor-pointer flex-col items-center justify-center gap-2 rounded-xl border border-dashed border-border bg-muted/15 px-4 py-8 text-center transition-colors hover:border-muted-foreground/40 hover:bg-muted/25 lg:min-h-[min(52vh,360px)]",
-          dragging && "border-accent/60 bg-accent/5",
-          disabled && "pointer-events-none opacity-50",
-          hasPreviews && "items-stretch justify-start gap-3 py-4",
-        )}
-      >
-        {hasPreviews ? (
-          <>
-            <ul className="grid w-full grid-cols-2 gap-2 sm:grid-cols-3">
-              {previews.map((item) => (
-                <li
-                  key={item.url}
-                  className="overflow-hidden rounded-lg border border-border bg-card text-left"
+      <div className="flex flex-col gap-3">
+        {selectedCount > 0 ? (
+          <ul className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-2">
+            {previews.map((item) => (
+              <li
+                key={item.id}
+                className="overflow-hidden rounded-lg border border-border"
+              >
+                <div className="relative aspect-square bg-muted/20">
+                  {/* eslint-disable-next-line @next/next/no-img-element -- local file preview */}
+                  <img
+                    src={item.url}
+                    alt=""
+                    className="size-full object-cover"
+                  />
+                </div>
+                <Button
+                  type="button"
+                  variant="destructive"
+                  size="xs"
+                  className="h-8 w-full rounded-none"
+                  disabled={disabled}
+                  aria-label={`Remove ${item.name}`}
+                  onClick={() => removePreview(item.id)}
                 >
-                  <div className="relative aspect-square bg-muted/20">
-                    {/* eslint-disable-next-line @next/next/no-img-element -- local file preview */}
-                    <img
-                      src={item.url}
-                      alt=""
-                      className="size-full object-cover"
-                    />
-                  </div>
-                  <p className="truncate px-2 py-1.5 text-xs text-muted-foreground">
-                    {item.name}
-                  </p>
-                </li>
-              ))}
-            </ul>
-            <span className="text-xs text-muted-foreground">
-              {multiple
-                ? "Add or replace images — first file is the cover."
-                : "Click or drop to change the image."}
-            </span>
-          </>
+                  <Trash2 data-icon="inline-start" />
+                  Remove
+                </Button>
+              </li>
+            ))}
+          </ul>
+        ) : null}
+
+        {fieldMessage ? (
+          <p
+            role="status"
+            className="rounded-lg border border-destructive/30 bg-destructive/5 px-3 py-2 text-xs text-destructive"
+          >
+            {fieldMessage}
+          </p>
+        ) : null}
+
+        {canPickMore ? (
+          <label
+            htmlFor={id}
+            onDrop={onDrop}
+            onDragOver={onDragOver}
+            onDragEnter={onDragOver}
+            onDragLeave={onDragLeave}
+            className={dropzoneClassName}
+          >
+            {dropzoneBody}
+            {fileInput}
+          </label>
         ) : (
-          <>
-            <span className="flex size-10 items-center justify-center rounded-full border border-border bg-card">
-              <Upload className="size-4 text-muted-foreground" aria-hidden />
-            </span>
-            <span className="text-sm font-medium text-foreground">
-              Choose files or drag here
-            </span>
-            <span className="text-xs text-muted-foreground">
-              JPG, PNG, or WebP · up to 8 · 5MB each
-            </span>
-          </>
+          <div
+            onDrop={onDrop}
+            onDragOver={onDragOver}
+            onDragEnter={onDragOver}
+            onDragLeave={onDragLeave}
+            className={cn(dropzoneClassName, "cursor-default")}
+          >
+            {dropzoneBody}
+            {fileInput}
+          </div>
         )}
-        <input
-          ref={inputRef}
-          id={id}
-          name={name}
-          type="file"
-          accept="image/jpeg,image/png,image/webp,.jpg,.jpeg,.png,.webp"
-          multiple={multiple}
-          disabled={disabled}
-          required={required}
-          className="sr-only"
-          onChange={onInputChange}
-        />
-      </label>
+      </div>
     </ListingFormField>
   );
 }

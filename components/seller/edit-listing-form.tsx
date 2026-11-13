@@ -9,7 +9,10 @@ import {
   updateOwnListing,
   type EditListingActionState,
 } from "@/lib/backend/seller-listing-actions";
-import { BUCKET_PRODUCT_IMAGES } from "@/lib/backend/config";
+import {
+  BUCKET_PRODUCT_IMAGES,
+  PRODUCT_IMAGE_MAX_COUNT,
+} from "@/lib/backend/config";
 import { getFilePreviewUrl } from "@/lib/backend/storage-urls";
 import { StorageImage } from "@/components/ui/storage-image";
 import type { Category, Product, ProductImage, ProductStatus } from "@/lib/types";
@@ -143,7 +146,7 @@ export function EditListingForm({
           media={
             <ListingFormMediaSection
               title="Photos"
-              description={`${images.length} of 8. JPG, PNG, or WebP, max 5MB each.`}
+              description={`${images.length} of ${PRODUCT_IMAGE_MAX_COUNT}. JPG, PNG, or WebP, max 5 MB each.`}
             >
               {images.length === 0 ? (
                 <p className="text-sm text-muted-foreground">No images yet.</p>
@@ -177,7 +180,7 @@ export function EditListingForm({
                 </ul>
               )}
 
-              {!isArchived && images.length < 8 ? (
+              {!isArchived && images.length < PRODUCT_IMAGE_MAX_COUNT ? (
                 <form action={addImagesAction} className="flex flex-col gap-3">
                   <FormGuardFields action="seller.listing.images.add" />
                   <input type="hidden" name="productId" value={product.$id} />
@@ -190,12 +193,14 @@ export function EditListingForm({
                     </p>
                   ) : null}
                   <ListingFormFileField
+                    key={images.map((image) => image.$id).join(",")}
                     id="images"
                     name="images"
                     label="Add more"
-                    hint=""
+                    hint="New photos are added after the ones already on your listing."
                     disabled={addImagesPending}
                     multiple
+                    maxFiles={PRODUCT_IMAGE_MAX_COUNT - images.length}
                   />
                   <Button
                     type="submit"

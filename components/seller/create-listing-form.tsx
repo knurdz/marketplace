@@ -22,6 +22,7 @@ import { Button } from "@/components/ui/button";
 import { DrawerClose } from "@/components/ui/drawer";
 import { Input } from "@/components/ui/input";
 import { FormGuardFields } from "@/components/security/form-guard-fields";
+import { PRODUCT_IMAGE_MAX_COUNT } from "@/lib/backend/config";
 
 const initialState: CreateListingActionState = {};
 
@@ -57,7 +58,7 @@ export function CreateListingForm({
           media={
             <ListingFormMediaSection
               title="Photos"
-              description="At least one image is required. Up to 8, JPG, PNG, or WebP."
+              description={`At least one image is required. Up to ${PRODUCT_IMAGE_MAX_COUNT}, JPG, PNG, or WebP, 5 MB each.`}
             >
               <ListingFormFileField
                 id="images"
@@ -67,6 +68,8 @@ export function CreateListingForm({
                 disabled={pending}
                 multiple
                 required
+                maxFiles={PRODUCT_IMAGE_MAX_COUNT}
+                showCoverHint
               />
             </ListingFormMediaSection>
           }

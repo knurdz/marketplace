@@ -64,6 +64,7 @@ export const ALL_BUCKET_IDS = [
 /** Max upload sizes (bytes): mirror bucket settings. */
 export const AVATAR_MAX_BYTES = 2 * 1024 * 1024; // 2MB
 export const PRODUCT_IMAGE_MAX_BYTES = 5 * 1024 * 1024; // 5MB
+export const PRODUCT_IMAGE_MAX_COUNT = 8;
 
 export const IMAGE_MIME_TYPES = [
   "image/jpeg",
