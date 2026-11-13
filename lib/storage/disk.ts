@@ -1,13 +1,16 @@
 import { createReadStream, createWriteStream } from "fs";
-import { access, constants, mkdir, unlink } from "fs/promises";
+import { access, constants, mkdir, open, unlink } from "fs/promises";
 import path from "path";
 import { pipeline } from "stream/promises";
-import { ALL_BUCKET_IDS } from "@/lib/backend/config";
+import { ALL_BUCKET_IDS, IMAGE_MIME_TYPES } from "@/lib/backend/config";
 import { newId } from "@/lib/db/client";
 import { eq } from "drizzle-orm";
 import { getDb } from "@/lib/db/client";
 import { storedFiles } from "@/lib/db/schema";
-import type { DetectedImageMime } from "@/lib/security/file-signature";
+import {
+  detectImageMimeType,
+  type DetectedImageMime,
+} from "@/lib/security/file-signature";
 import { isSafeFileId } from "@/lib/security/storage-id";
 import { getUploadRoot } from "./upload-root";
 
@@ -81,6 +84,31 @@ export async function putStoredFile(params: {
   return { fileId };
 }
 
+function isKnownImageMime(
+  mime: string | null | undefined,
+): mime is DetectedImageMime {
+  if (!mime) return false;
+  const normalized = mime.trim().toLowerCase();
+  return IMAGE_MIME_TYPES.includes(
+    normalized as (typeof IMAGE_MIME_TYPES)[number],
+  );
+}
+
+/** Magic-byte sniff when `stored_files` rows are missing (e.g. Laravel disk copy). */
+async function sniffImageMimeFromPath(
+  filePath: string,
+): Promise<DetectedImageMime | null> {
+  const handle = await open(filePath, "r");
+  try {
+    const buf = Buffer.alloc(12);
+    const { bytesRead } = await handle.read(buf, 0, 12, 0);
+    if (bytesRead < 3) return null;
+    return detectImageMimeType(new Uint8Array(buf.subarray(0, bytesRead)));
+  } finally {
+    await handle.close();
+  }
+}
+
 export async function getStoredFileMeta(fileId: string) {
   const db = getDb();
   const rows = await db
@@ -107,9 +135,17 @@ export async function readStoredFile(
     return null;
   }
   const meta = await getStoredFileMeta(fileId);
+  let mimeType: DetectedImageMime | null = isKnownImageMime(meta?.mimeType)
+    ? (meta.mimeType.trim().toLowerCase() as DetectedImageMime)
+    : null;
+  if (!mimeType) {
+    mimeType = await sniffImageMimeFromPath(filePath);
+  }
+  if (!mimeType) return null;
+
   return {
     stream: createReadStream(/* turbopackIgnore: true */ filePath),
-    mimeType: meta?.mimeType ?? "application/octet-stream",
+    mimeType,
   };
 }
 
