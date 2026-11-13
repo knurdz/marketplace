@@ -21,7 +21,11 @@ import { createProfileForUser } from "./profiles";
 import { resolvePostLoginPath } from "./home-path";
 import { ROLE_LABELS } from "./roles";
 import { createAdminClient } from "./server";
-import { getActiveUserById } from "./session";
+import {
+  ACCOUNT_SUSPENDED_PATH,
+  getUserAccountStateById,
+  revokeAllSessionsForUser,
+} from "./session";
 import {
   createPendingSellerProfileForUser,
   parseSellerApplicationInput,
@@ -430,16 +434,20 @@ export async function signInWithEmail(
       headers: hdrs,
     });
     // The new session cookie is not on this request yet, so use the returned user id.
-    const signedIn = await getActiveUserById(result.user.id);
-    if (!signedIn) {
-      await revokeSessionsFor(result.user.id);
+    const accountState = await getUserAccountStateById(result.user.id);
+    if (accountState.status === "disabled") {
+      await revokeAllSessionsForUser(accountState.userId);
+      redirect(ACCOUNT_SUSPENDED_PATH);
+    }
+    if (accountState.status !== "active") {
+      await revokeAllSessionsForUser(result.user.id);
       const requireCaptcha = await recordTurnstileFailure({
         action: TURNSTILE_ACTIONS.login,
         email,
       });
       return { error: "Invalid email or password.", requireCaptcha };
     }
-    destination = await resolvePostLoginPath(signedIn, nextRaw);
+    destination = await resolvePostLoginPath(accountState.user, nextRaw);
   } catch (error) {
     unstable_rethrow(error);
     const requireCaptcha = await recordTurnstileFailure({
@@ -450,16 +458,6 @@ export async function signInWithEmail(
   }
 
   redirect(destination);
-}
-
-/** Suspended accounts must not keep a session even though the password was correct. */
-async function revokeSessionsFor(userId: string) {
-  try {
-    const { users } = await createAdminClient();
-    await users.deleteSessions({ userId });
-  } catch (error) {
-    logError("auth.signin.revoke", error, { userId });
-  }
 }
 
 export async function signOut() {

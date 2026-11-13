@@ -12,7 +12,12 @@ import {
 } from "./profiles";
 import { registrationCompletePath } from "./registration-complete";
 import { postLoginPath, safeNextPath } from "./roles";
-import { getLoggedInUser } from "./session";
+import {
+  ACCOUNT_SUSPENDED_PATH,
+  getBetterAuthSessionUserId,
+  getUserAccountStateById,
+  revokeAllSessionsForUser,
+} from "./session";
 
 export type { OAuthProviderId } from "./oauth-providers";
 export { parseOAuthProvider } from "./oauth-providers";
@@ -26,8 +31,8 @@ export type OAuthCompleteOk = {
 
 export type OAuthCompleteFail = {
   ok: false;
-  error: OAuthErrorCode;
-  failPath: "/login" | "/register";
+  error?: OAuthErrorCode;
+  failPath: "/login" | "/register" | typeof ACCOUNT_SUSPENDED_PATH;
 };
 
 export type OAuthCompleteResult = OAuthCompleteOk | OAuthCompleteFail;
@@ -123,14 +128,29 @@ export async function completeOAuthLogin(params: {
   intent?: string | null;
   next?: string | null;
 }): Promise<OAuthCompleteResult> {
-  const user = await getLoggedInUser();
-  if (!user) {
+  const sessionUserId = await getBetterAuthSessionUserId();
+  if (!sessionUserId) {
     return {
       ok: false,
       error: "oauth",
       failPath: oauthFailPath(params.intent),
     };
   }
+
+  const accountState = await getUserAccountStateById(sessionUserId);
+  if (accountState.status === "disabled") {
+    await revokeAllSessionsForUser(accountState.userId);
+    return { ok: false, failPath: ACCOUNT_SUSPENDED_PATH };
+  }
+  if (accountState.status !== "active") {
+    return {
+      ok: false,
+      error: "oauth",
+      failPath: oauthFailPath(params.intent),
+    };
+  }
+
+  const user = accountState.user;
 
   const existingProfileId = await getProfileRowIdForUser(user.$id);
   if (!existingProfileId) {

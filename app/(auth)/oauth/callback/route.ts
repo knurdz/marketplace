@@ -33,7 +33,11 @@ export async function GET(request: Request) {
   const result = await completeOAuthLogin({ next, intent });
 
   if (!result.ok) {
-    return redirectTo(request, `${result.failPath}?error=${result.error}`);
+    if (result.failPath === "/account-suspended") {
+      return redirectTo(request, result.failPath);
+    }
+    const query = result.error ? `?error=${result.error}` : "";
+    return redirectTo(request, `${result.failPath}${query}`);
   }
 
   const destination =
