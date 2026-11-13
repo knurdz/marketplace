@@ -1,6 +1,12 @@
 "use client";
 
-import { useActionState, useState } from "react";
+import {
+  useActionState,
+  useEffect,
+  useRef,
+  useState,
+  type FormEvent,
+} from "react";
 import {
   createDraftListing,
   type CreateListingActionState,
@@ -26,6 +32,26 @@ import { PRODUCT_IMAGE_MAX_COUNT } from "@/lib/backend/config";
 
 const initialState: CreateListingActionState = {};
 
+type ListingDraft = {
+  title: string;
+  description: string;
+  categoryId: string;
+  price: string;
+  stock: string;
+  isFree: boolean;
+  available: boolean;
+};
+
+const emptyDraft: ListingDraft = {
+  title: "",
+  description: "",
+  categoryId: "",
+  price: "",
+  stock: "1",
+  isFree: false,
+  available: true,
+};
+
 type CreateListingFormProps = {
   categories: Category[];
   freeListingsEnabled?: boolean;
@@ -35,14 +61,47 @@ export function CreateListingForm({
   categories,
   freeListingsEnabled = true,
 }: CreateListingFormProps) {
-  const [isFree, setIsFree] = useState(false);
+  const [draft, setDraft] = useState<ListingDraft>(emptyDraft);
+  const draftRef = useRef(draft);
+  draftRef.current = draft;
   const [state, formAction, pending] = useActionState(
     createDraftListing,
     initialState,
   );
 
+  useEffect(() => {
+    if (!state.error) return;
+    const id = window.setTimeout(() => {
+      setDraft((current) => ({ ...current }));
+    }, 0);
+    return () => window.clearTimeout(id);
+  }, [state]);
+
+  function patchDraft(partial: Partial<ListingDraft>) {
+    setDraft((current) => ({ ...current, ...partial }));
+  }
+
+  function keepDraftOnReset(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    const form = event.currentTarget;
+    const saved = draftRef.current;
+    window.setTimeout(() => {
+      writeControl(form, "title", saved.title);
+      writeControl(form, "description", saved.description);
+      writeControl(form, "categoryId", saved.categoryId);
+      writeControl(form, "price", saved.isFree ? "0" : saved.price);
+      writeControl(form, "stock", saved.stock);
+      writeChecked(form, "isFree", saved.isFree);
+      writeChecked(form, "available", saved.available);
+    }, 0);
+  }
+
   return (
-    <form action={formAction} className="flex min-h-0 flex-1 flex-col">
+    <form
+      action={formAction}
+      className="flex min-h-0 flex-1 flex-col"
+      onReset={keepDraftOnReset}
+    >
       <FormGuardFields action="seller.listing.create" />
       <ListingFormBody>
         {state.error ? (
@@ -88,6 +147,8 @@ export function CreateListingForm({
                     maxLength={200}
                     placeholder="e.g. Vinyl sticker pack"
                     disabled={pending}
+                    value={draft.title}
+                    onChange={(event) => patchDraft({ title: event.target.value })}
                     className="bg-card shadow-xs"
                   />
                 </ListingFormField>
@@ -101,6 +162,10 @@ export function CreateListingForm({
                     maxLength={10000}
                     disabled={pending}
                     placeholder="Describe your item for buyers."
+                    value={draft.description}
+                    onChange={(event) =>
+                      patchDraft({ description: event.target.value })
+                    }
                     className={listingTextareaClassName}
                   />
                 </ListingFormField>
@@ -120,7 +185,10 @@ export function CreateListingForm({
                     required
                     disabled={pending || categories.length === 0}
                     className={listingSelectClassName}
-                    defaultValue=""
+                    value={draft.categoryId}
+                    onChange={(event) =>
+                      patchDraft({ categoryId: event.target.value })
+                    }
                   >
                     <option value="">Select a category</option>
                     {categories.map((c) => (
@@ -143,27 +211,31 @@ export function CreateListingForm({
                     name="isFree"
                     label="Free listing"
                     description="Buyers see zero price at checkout."
-                    checked={isFree}
-                    onChange={(e) => setIsFree(e.target.checked)}
+                    checked={draft.isFree}
+                    onChange={(e) => patchDraft({ isFree: e.target.checked })}
                     disabled={pending}
                   />
                 ) : null}
 
                 <div className="grid gap-4 sm:grid-cols-2">
                   <ListingFormField label="Price (LKR)" htmlFor="price">
-                    {isFree ? (
+                    {draft.isFree ? (
                       <input type="hidden" name="price" value="0" />
                     ) : null}
                     <Input
                       id="price"
-                      name={isFree ? undefined : "price"}
+                      name={draft.isFree ? undefined : "price"}
                       type="number"
                       min={0.01}
                       step="0.01"
-                      required={!isFree}
-                      disabled={pending || isFree}
-                      placeholder={isFree ? "Free" : "500"}
-                      className={cnInput(isFree)}
+                      required={!draft.isFree}
+                      disabled={pending || draft.isFree}
+                      placeholder={draft.isFree ? "Free" : "500"}
+                      value={draft.isFree ? "" : draft.price}
+                      onChange={(event) =>
+                        patchDraft({ price: event.target.value })
+                      }
+                      className={cnInput(draft.isFree)}
                     />
                   </ListingFormField>
                   <ListingFormField label="Stock" htmlFor="stock">
@@ -174,7 +246,10 @@ export function CreateListingForm({
                       min={0}
                       step={1}
                       required
-                      defaultValue={1}
+                      value={draft.stock}
+                      onChange={(event) =>
+                        patchDraft({ stock: event.target.value })
+                      }
                       disabled={pending}
                       className={cnInput()}
                     />
@@ -186,7 +261,10 @@ export function CreateListingForm({
                   name="available"
                   label="Available for purchase"
                   description="Turn off to hide from checkout while keeping the listing."
-                  defaultChecked
+                  checked={draft.available}
+                  onChange={(event) =>
+                    patchDraft({ available: event.target.checked })
+                  }
                   disabled={pending}
                 />
               </ListingFormSection>
@@ -226,6 +304,26 @@ export function CreateListingForm({
       </ListingFormFooter>
     </form>
   );
+}
+
+function writeControl(
+  form: HTMLFormElement,
+  name: string,
+  value: string,
+) {
+  const field = form.elements.namedItem(name);
+  if (
+    field instanceof HTMLInputElement ||
+    field instanceof HTMLTextAreaElement ||
+    field instanceof HTMLSelectElement
+  ) {
+    field.value = value;
+  }
+}
+
+function writeChecked(form: HTMLFormElement, name: string, checked: boolean) {
+  const field = form.elements.namedItem(name);
+  if (field instanceof HTMLInputElement) field.checked = checked;
 }
 
 function cnInput(dimmed?: boolean) {

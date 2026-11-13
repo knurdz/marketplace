@@ -292,18 +292,41 @@ export function ListingFormFileField({
     };
   }, []);
 
+  useEffect(() => {
+    const form = inputRef.current?.form;
+    if (!form) return;
+    const onReset = () => {
+      window.setTimeout(() => {
+        const input = inputRef.current;
+        if (!input) return;
+        const dt = new DataTransfer();
+        for (const file of filesRef.current) dt.items.add(file);
+        input.value = "";
+        if (dt.files.length > 0) input.files = dt.files;
+      }, 0);
+    };
+    form.addEventListener("reset", onReset);
+    return () => form.removeEventListener("reset", onReset);
+  }, []);
+
   function revokeTrackedUrls() {
     for (const url of objectUrlsRef.current) URL.revokeObjectURL(url);
     objectUrlsRef.current = [];
   }
 
   function syncInputFromFiles(files: File[]) {
-    if (!inputRef.current) return;
+    const input = inputRef.current;
+    if (!input) return;
     const dt = new DataTransfer();
     for (const file of files) {
       dt.items.add(file);
     }
-    inputRef.current.files = dt.files;
+    // Clearing the value lets the same file be chosen again, and also
+    // drops every file. Put the accumulated list back immediately.
+    input.value = "";
+    if (dt.files.length > 0) {
+      input.files = dt.files;
+    }
   }
 
   function rebuildPreviewsFromFiles(files: File[]) {
@@ -336,12 +359,11 @@ export function ListingFormFileField({
       if (!first) return;
       if (first.size > PRODUCT_IMAGE_MAX_BYTES) {
         setFieldMessage(`${first.name} is over 5 MB.`);
-        if (inputRef.current) inputRef.current.value = "";
+        syncInputFromFiles(filesRef.current);
         return;
       }
       setFieldMessage(null);
       commitFiles([first]);
-      if (inputRef.current) inputRef.current.value = "";
       return;
     }
 
@@ -349,7 +371,7 @@ export function ListingFormFileField({
       setFieldMessage(
         `${maxFiles} of ${maxFiles} photos selected. Remove a photo to add a different one.`,
       );
-      if (inputRef.current) inputRef.current.value = "";
+      syncInputFromFiles(filesRef.current);
       return;
     }
 
@@ -379,7 +401,6 @@ export function ListingFormFileField({
 
     setFieldMessage(messages.length > 0 ? messages.join(" ") : null);
     commitFiles(next);
-    if (inputRef.current) inputRef.current.value = "";
   }
 
   function removePreview(previewId: string) {
@@ -459,7 +480,7 @@ export function ListingFormFileField({
       accept="image/jpeg,image/png,image/webp,.jpg,.jpeg,.png,.webp"
       multiple={multiple}
       disabled={disabled}
-      required={required && selectedCount === 0}
+      required={Boolean(required)}
       className="sr-only"
       onChange={onInputChange}
     />
@@ -531,7 +552,6 @@ export function ListingFormFileField({
             className={dropzoneClassName}
           >
             {dropzoneBody}
-            {fileInput}
           </label>
         ) : (
           <div
@@ -542,9 +562,9 @@ export function ListingFormFileField({
             className={cn(dropzoneClassName, "cursor-default")}
           >
             {dropzoneBody}
-            {fileInput}
           </div>
         )}
+        {fileInput}
       </div>
     </ListingFormField>
   );
