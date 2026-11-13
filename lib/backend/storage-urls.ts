@@ -1,7 +1,7 @@
 import { BUCKET_AVATARS } from "./config";
 import { getAppUrl } from "@/lib/config/app";
 
-/** Same-origin public file URL; `/api/files` proxies local disk or remote storage. */
+/** Same-origin public file URL; `/api/files` serves files from UPLOAD_DIR. */
 export function getFileViewUrl(bucketId: string, fileId: string): string {
   const base = getAppUrl().replace(/\/$/, "");
   return `${base}/api/files/${encodeURIComponent(bucketId)}/${encodeURIComponent(fileId)}`;

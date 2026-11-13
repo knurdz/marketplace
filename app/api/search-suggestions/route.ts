@@ -6,7 +6,7 @@ import {
   RATE_LIMITS,
 } from "@/lib/security/rate-limit";
 
-/** Cache the public suggestion index ~5 minutes (Vercel CDN / ISR). */
+/** Cache the public suggestion index ~5 minutes (CDN / ISR when configured). */
 export const revalidate = 300;
 
 export async function GET() {

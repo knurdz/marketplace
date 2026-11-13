@@ -13,26 +13,6 @@ const scriptSrc = [
   ...(isDev ? ["'unsafe-eval'"] : []),
 ].join(" ");
 
-const DEFAULT_STORAGE_HOST = "marketplace-storage.knurdz.org";
-
-function storageImageOrigins(): string[] {
-  const hosts = new Set<string>([`https://${DEFAULT_STORAGE_HOST}`]);
-  const raw =
-    process.env.NEXT_PUBLIC_STORAGE_URL?.trim() ||
-    process.env.STORAGE_API_URL?.trim();
-  if (raw) {
-    try {
-      const origin = new URL(raw.includes("://") ? raw : `https://${raw}`)
-        .origin;
-      hosts.add(origin);
-    } catch {
-      // ignore invalid env
-    }
-  }
-  return [...hosts];
-}
-
-const storageOrigins = storageImageOrigins();
 const imgSrc = [
   "'self'",
   "data:",
@@ -40,7 +20,6 @@ const imgSrc = [
   "https://images.unsplash.com",
   "https://*.googleusercontent.com",
   "https://avatars.githubusercontent.com",
-  ...storageOrigins,
 ].join(" ");
 
 const securityHeaders = [
@@ -93,6 +72,11 @@ const nextConfig: NextConfig = {
     // Hostinger build servers block Turbopack PostCSS child-process IPC; worker
     // threads avoid loopback sockets. Production builds use webpack (see package.json).
     turbopackPluginRuntimeStrategy: "workerThreads",
+    // The build host reports dozens of CPUs but a low thread limit. Next otherwise
+    // spawns one worker per CPU ("Collecting page data using 62 workers") and
+    // aborts with EAGAIN (os error 11).
+    cpus: 1,
+    staticGenerationMaxConcurrency: 1,
     serverActions: {
       bodySizeLimit: "6mb",
     },
@@ -109,25 +93,16 @@ const nextConfig: NextConfig = {
     remotePatterns: [
       {
         protocol: "https",
-        hostname: DEFAULT_STORAGE_HOST,
+        hostname: "images.unsplash.com",
       },
-      ...storageOrigins
-        .map((origin) => {
-          try {
-            const url = new URL(origin);
-            if (url.hostname === DEFAULT_STORAGE_HOST) return null;
-            return {
-              protocol: url.protocol.replace(":", "") as "http" | "https",
-              hostname: url.hostname,
-            };
-          } catch {
-            return null;
-          }
-        })
-        .filter(
-          (p): p is { protocol: "http" | "https"; hostname: string } =>
-            p != null,
-        ),
+      {
+        protocol: "https",
+        hostname: "avatars.githubusercontent.com",
+      },
+      {
+        protocol: "https",
+        hostname: "*.googleusercontent.com",
+      },
     ],
   },
 };

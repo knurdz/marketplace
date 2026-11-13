@@ -5,7 +5,7 @@ import { getAppUrl, getAuthAllowedHosts } from "@/lib/config/app";
 function isAllowedHost(host: string): boolean {
   const normalized = host.trim().toLowerCase();
   if (!normalized || /[/\\@,\s]/.test(normalized)) return false;
-  // Exact allowlist only; never trust an arbitrary *.vercel.app host.
+  // Exact allowlist only; never trust arbitrary Host values.
   return getAuthAllowedHosts().some(
     (allowed) => allowed.toLowerCase() === normalized,
   );

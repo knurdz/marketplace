@@ -1,10 +1,7 @@
 import { headers } from "next/headers";
 import { getAuthAllowedHosts, getAppUrl } from "@/lib/config/app";
 
-/**
- * Checks if a host is in the allowed domain list.
- * Accepts local + production auth origins and Vercel preview domains.
- */
+/** Checks if a host is in the allowed domain list (local + production auth origins). */
 function isAllowedHost(host: string): boolean {
   const raw = host.toLowerCase();
   const hostname = raw.split(":")[0] ?? "";
@@ -19,8 +16,6 @@ function isAllowedHost(host: string): boolean {
   ) {
     return true;
   }
-  // Vercel preview deployments
-  if (hostname.endsWith(".vercel.app")) return true;
   // Local development
   if (hostname === "localhost" || hostname === "127.0.0.1") return true;
   return false;

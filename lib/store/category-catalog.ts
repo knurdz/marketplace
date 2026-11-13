@@ -74,8 +74,10 @@ export function categoryImagePath(slug: string): string | null {
   const trimmed = slug?.trim();
   if (!trimmed || !CATALOG_SLUGS.has(trimmed)) return null;
 
-  const remoteBase = process.env.NEXT_PUBLIC_STORAGE_URL?.trim();
-  if (remoteBase) {
+  const useDiskStorage =
+    process.env.NODE_ENV === "production" ||
+    Boolean(process.env.UPLOAD_DIR?.trim());
+  if (useDiskStorage) {
     return getFileViewUrl(categoryImageBucket(), categoryImageFileId(trimmed));
   }
   return `/categories/${trimmed}.jpg`;

@@ -1,128 +1,39 @@
 /**
- * Upload public/categories/{slug}.jpg to the Hostinger storage API.
+ * Copy public/categories/{slug}.jpg into UPLOAD_DIR (categories bucket).
  * Usage: npx tsx --env-file=.env.local scripts/upload-category-images.ts
  *
- * Uses the `categories` bucket (falls back to `product-images` if missing).
- * File IDs are deterministic: category-{slug}. Existing files (409) are skipped.
+ * File IDs are deterministic: category-{slug}. Existing files are skipped.
  */
-import { readFile } from "node:fs/promises";
+import { access, constants, readFile } from "node:fs/promises";
 import path from "node:path";
-import {
-  BUCKET_CATEGORIES,
-  BUCKET_PRODUCT_IMAGES,
-} from "../lib/backend/config";
+import { BUCKET_CATEGORIES } from "../lib/backend/config";
+import { detectImageFileMime } from "../lib/security/file-signature";
+import { isSafeFileId } from "../lib/security/storage-id";
+import { putStoredFile } from "../lib/storage/disk";
+import { getUploadRoot } from "../lib/storage/upload-root";
 import {
   CATEGORY_CATALOG,
   categoryImageFileId,
 } from "../lib/store/category-catalog";
 
-function storageConfig(): { baseUrl: string; token: string } {
-  const baseUrl = process.env.STORAGE_API_URL?.trim().replace(/\/$/, "") ?? "";
-  const token = process.env.STORAGE_API_TOKEN?.trim() ?? "";
-  if (!baseUrl || !token) {
-    throw new Error("Set STORAGE_API_URL and STORAGE_API_TOKEN in .env.local");
-  }
-  return { baseUrl, token };
-}
+const SEED_OWNER_ID = "seed-category-images";
 
-async function uploadOne(
-  cfg: { baseUrl: string; token: string },
-  bucket: string,
+async function fileExistsOnDisk(
+  bucketId: string,
   fileId: string,
-  bytes: Buffer,
-  filename: string,
-): Promise<"created" | "exists" | "invalid_bucket" | "error"> {
-  const form = new FormData();
-  form.set("bucket", bucket);
-  form.set("fileId", fileId);
-  form.set(
-    "file",
-    new Blob([new Uint8Array(bytes)], { type: "image/jpeg" }),
-    filename,
-  );
-
-  const res = await fetch(`${cfg.baseUrl}/api/v1/files`, {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${cfg.token}`,
-      Accept: "application/json",
-    },
-    body: form,
-  });
-
-  if (res.status === 201) return "created";
-  if (res.status === 409) return "exists";
-
-  let detail = "";
+): Promise<boolean> {
+  if (!isSafeFileId(fileId)) return false;
+  const filePath = path.join(getUploadRoot(), bucketId, fileId);
   try {
-    const json = (await res.json()) as { error?: string };
-    detail = json.error ?? "";
+    await access(filePath, constants.R_OK);
+    return true;
   } catch {
-    // ignore
+    return false;
   }
-  if (res.status === 422 && /invalid bucket/i.test(detail)) {
-    return "invalid_bucket";
-  }
-  console.error(`  error ${fileId}: HTTP ${res.status} ${detail}`);
-  return "error";
-}
-
-async function resolveBucket(
-  cfg: { baseUrl: string; token: string },
-): Promise<string> {
-  const forced = process.env.CATEGORY_IMAGE_BUCKET?.trim();
-  if (forced === BUCKET_CATEGORIES || forced === BUCKET_PRODUCT_IMAGES) {
-    return forced;
-  }
-
-  // Probe with a tiny jpeg header check via first catalog file.
-  const probePath = path.join(
-    process.cwd(),
-    "public",
-    "categories",
-    `${CATEGORY_CATALOG[0]!.slug}.jpg`,
-  );
-  const bytes = await readFile(probePath);
-  const probeId = "category-bucketprobe";
-  const result = await uploadOne(
-    cfg,
-    BUCKET_CATEGORIES,
-    probeId,
-    bytes,
-    "probe.jpg",
-  );
-  if (result === "invalid_bucket") {
-    console.log(
-      `Bucket "${BUCKET_CATEGORIES}" not on remote yet; using "${BUCKET_PRODUCT_IMAGES}".`,
-    );
-    return BUCKET_PRODUCT_IMAGES;
-  }
-  if (result === "created" || result === "exists") {
-    // Clean probe if we created it (best-effort).
-    if (result === "created") {
-      await fetch(
-        `${cfg.baseUrl}/api/v1/files/${encodeURIComponent(BUCKET_CATEGORIES)}/${encodeURIComponent(probeId)}`,
-        {
-          method: "DELETE",
-          headers: {
-            Authorization: `Bearer ${cfg.token}`,
-            Accept: "application/json",
-          },
-        },
-      ).catch(() => undefined);
-    }
-    console.log(`Using bucket "${BUCKET_CATEGORIES}".`);
-    return BUCKET_CATEGORIES;
-  }
-  console.log(
-    `Probe failed; falling back to "${BUCKET_PRODUCT_IMAGES}".`,
-  );
-  return BUCKET_PRODUCT_IMAGES;
 }
 
 async function main() {
-  const cfg = storageConfig();
-  const bucket = await resolveBucket(cfg);
+  const bucket = BUCKET_CATEGORIES;
   const dir = path.join(process.cwd(), "public", "categories");
 
   let created = 0;
@@ -131,43 +42,40 @@ async function main() {
 
   for (const entry of CATEGORY_CATALOG) {
     const fileId = categoryImageFileId(entry.slug);
-    const filePath = path.join(dir, `${entry.slug}.jpg`);
-    const bytes = await readFile(filePath);
-    const result = await uploadOne(
-      cfg,
-      bucket,
-      fileId,
-      bytes,
-      `${entry.slug}.jpg`,
-    );
-    if (result === "created") {
-      created += 1;
-      console.log("OK created", entry.slug, fileId);
-    } else if (result === "exists") {
+    if (await fileExistsOnDisk(bucket, fileId)) {
       exists += 1;
       console.log("OK exists ", entry.slug, fileId);
-    } else {
+      continue;
+    }
+
+    const filePath = path.join(dir, `${entry.slug}.jpg`);
+    const bytes = await readFile(filePath);
+    const file = new File([bytes], `${entry.slug}.jpg`, { type: "image/jpeg" });
+    const detectedMime = await detectImageFileMime(file);
+    if (!detectedMime) {
       failed += 1;
+      console.error("  invalid image", entry.slug);
+      continue;
+    }
+
+    try {
+      await putStoredFile({
+        bucketId: bucket,
+        ownerId: SEED_OWNER_ID,
+        file,
+        fileId,
+        detectedMime,
+      });
+      created += 1;
+      console.log("OK created", entry.slug, fileId);
+    } catch (err) {
+      failed += 1;
+      console.error("  error", entry.slug, err);
     }
   }
 
-  // Remove earlier probe leftover if present.
-  await fetch(
-    `${cfg.baseUrl}/api/v1/files/${encodeURIComponent(BUCKET_PRODUCT_IMAGES)}/${encodeURIComponent("cat-probe-digital")}`,
-    {
-      method: "DELETE",
-      headers: {
-        Authorization: `Bearer ${cfg.token}`,
-        Accept: "application/json",
-      },
-    },
-  ).catch(() => undefined);
-
   console.log(
     `Done. bucket=${bucket} created=${created} exists=${exists} failed=${failed}`,
-  );
-  console.log(
-    `Uploaded to bucket="${bucket}". App defaults to categories; override with NEXT_PUBLIC_CATEGORY_IMAGE_BUCKET if needed.`,
   );
   if (failed > 0) process.exitCode = 1;
 }

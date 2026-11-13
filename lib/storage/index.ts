@@ -8,31 +8,15 @@ import {
   putStoredFile as putDiskFile,
   readStoredFile,
 } from "./disk";
-import {
-  deleteRemoteFile,
-  isRemoteStorageConfigured,
-  putRemoteFile,
-  readPublicRemoteFile,
-} from "./remote";
 
-export { getStoredFileMeta, isRemoteStorageConfigured, readStoredFile };
+export { getStoredFileMeta, readStoredFile };
 
-/** Local disk first, then public remote GET when STORAGE_API_URL is configured. */
+/** Public reads from local disk via `/api/files`. */
 export async function readPublicStoredFile(
   bucketId: string,
   fileId: string,
 ): Promise<{ stream: NodeJS.ReadableStream; mimeType: string } | null> {
-  const local = await readStoredFile(bucketId, fileId);
-  if (local) return local;
-  return readPublicRemoteFile(bucketId, fileId);
-}
-
-function assertDiskStorageAllowed(): void {
-  if (process.env.NODE_ENV === "production") {
-    throw new Error(
-      "Remote storage is required in production. Configure STORAGE_API_URL and STORAGE_API_TOKEN.",
-    );
-  }
+  return readStoredFile(bucketId, fileId);
 }
 
 export async function putStoredFile(params: {
@@ -50,11 +34,6 @@ export async function putStoredFile(params: {
     throw new Error("Unsupported file content.");
   }
   const verifiedParams = { ...params, detectedMime };
-
-  if (isRemoteStorageConfigured()) {
-    return putRemoteFile(verifiedParams);
-  }
-  assertDiskStorageAllowed();
   return putDiskFile(verifiedParams);
 }
 
@@ -62,9 +41,5 @@ export async function deleteStoredFile(
   bucketId: string,
   fileId: string,
 ): Promise<boolean> {
-  if (isRemoteStorageConfigured()) {
-    return deleteRemoteFile(bucketId, fileId);
-  }
-  assertDiskStorageAllowed();
   return deleteDiskFile(bucketId, fileId);
 }

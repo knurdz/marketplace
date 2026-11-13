@@ -10,12 +10,11 @@ function firstIp(value: string | null): string | null {
 }
 
 /**
- * IP for rate limits. Prefer headers the edge overwrites (Vercel, then nginx
+ * IP for rate limits. Prefer headers the reverse proxy overwrites (Hostinger
  * X-Real-IP) so a browser cannot spoof the bucket key.
  */
 function resolveClientIp(request: NextRequest): string | null {
   return (
-    firstIp(request.headers.get("x-vercel-forwarded-for")) ??
     firstIp(request.headers.get("x-real-ip")) ??
     firstIp(request.headers.get("x-forwarded-for"))
   );

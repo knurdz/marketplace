@@ -38,7 +38,7 @@ A **3-portal marketplace**:
 | Auth               | **Better Auth** + Drizzle adapter              | Sessions; email verify; password recovery; optional OAuth        |
 | Roles              | User **labels** on auth records                | `buyer` default, `seller` after approval, `admin` elevated       |
 | Database           | **MariaDB + Drizzle**                            | Tables in `lib/db/schema.ts`; services use `lib/db/compat` Query |
-| Files              | **Local disk** or **Hostinger storage API**    | Public product images via `/api/files` or CDN                      |
+| Files              | **Local disk** (`UPLOAD_DIR` on Hostinger)     | Public product images via `/api/files`                             |
 | Email              | SMTP (nodemailer)                              | Verify/reset templates; server-only creds                        |
 | Local quality      | Graphify before/after · Playwright MCP for E2E | See MCP list below                                               |
 
@@ -57,7 +57,7 @@ A **3-portal marketplace**:
 NEXT_PUBLIC_APP_URL=
 DATABASE_URL=
 BETTER_AUTH_SECRET=
-# Optional: SMTP_*, STORAGE_API_*, OAuth, Turnstile
+# Optional: SMTP_*, UPLOAD_DIR (prod), OAuth, Turnstile
 ```
 
 ### Suggested folder layout (Member 1 establishes; others follow)

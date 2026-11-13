@@ -229,7 +229,7 @@ async function lockRateLimitRowForUpdate(
 
 /**
  * Apply one rate-limit hit using MariaDB row locks. The unique bucket/key row
- * and deterministic lock order make checks atomic across Vercel instances.
+ * and deterministic lock order make checks atomic across Node instances.
  */
 export async function assertRateLimit(params: {
   bucket: string;
@@ -443,15 +443,17 @@ function isIpToken(value: string): boolean {
 }
 
 /**
- * Client IP set by proxy.ts from edge headers (Vercel, X-Real-IP, X-Forwarded-For).
+ * Client IP set by proxy.ts from Hostinger headers (X-Real-IP, X-Forwarded-For).
  * Falls back to `"unknown"` when none of those headers are present.
  */
 export async function getClientIp(): Promise<string> {
   const h = await headers();
   const trusted = h.get("x-knurdz-client-ip")?.trim() ?? "";
   if (isIpToken(trusted)) return trusted;
-  const vercel = h.get("x-vercel-forwarded-for")?.split(",")[0]?.trim() ?? "";
-  if (isIpToken(vercel)) return vercel;
+  const realIp = h.get("x-real-ip")?.split(",")[0]?.trim() ?? "";
+  if (isIpToken(realIp)) return realIp;
+  const forwarded = h.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "";
+  if (isIpToken(forwarded)) return forwarded;
   return "unknown";
 }
 

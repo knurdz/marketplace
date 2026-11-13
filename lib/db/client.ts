@@ -7,9 +7,8 @@ let pool: mysql.Pool | null = null;
 let dbInstance: MySql2Database<typeof schema> | null = null;
 
 /**
- * Hostinger shared MariaDB sets wait_timeout to 20s and then drops the socket.
- * A warm Vercel isolate still holds that socket, so the next query fails and
- * callers that swallow errors render an empty catalog.
+ * Hostinger shared MariaDB sets wait_timeout to 20s and then drops idle sockets.
+ * The pool retries once on transient connection errors.
  */
 const TRANSIENT_DB_CODES = new Set([
   "PROTOCOL_CONNECTION_LOST",
@@ -98,17 +97,12 @@ function attachRetry(poolInstance: mysql.Pool): mysql.Pool {
 
 export function getPool(): mysql.Pool {
   if (!pool) {
-    const onVercel = Boolean(process.env.VERCEL);
     pool = attachRetry(
       mysql.createPool({
         uri: getDatabaseUrl(),
-        // Hostinger counts every new login toward max_connections_per_hour (500).
-        // One socket per warm server; parallel queries wait on it instead of
-        // opening more. A dead socket after the 20s server timeout is replaced once.
-        connectionLimit: onVercel ? 1 : 10,
-        maxIdle: 1,
-        // Keep a live socket. Closing it early would spend another hourly login
-        // on the next request, while the server connection is still valid.
+        // Long-running Node on Hostinger: small pool against shared max_connections.
+        connectionLimit: 5,
+        maxIdle: 2,
         idleTimeout: 60_000,
         connectTimeout: 10_000,
         enableKeepAlive: true,

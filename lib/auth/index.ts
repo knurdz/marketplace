@@ -167,9 +167,9 @@ export function getAuth() {
       advanced: {
         cookiePrefix: "knurdz",
         ipAddress: {
-          ipAddressHeaders: ["x-vercel-forwarded-for"],
+          ipAddressHeaders: ["x-real-ip", "x-forwarded-for"],
         },
-        // Resolve Host / X-Forwarded-* behind reverse proxies (Hostinger, Vercel, etc.).
+        // Resolve Host / X-Forwarded-* behind Hostinger reverse proxy.
         trustedProxyHeaders: true,
       },
       // Per-request base URL from Host, allowlisted for local + production.

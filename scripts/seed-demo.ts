@@ -2,9 +2,19 @@
  * MariaDB demo seed + showcase catalog.
  * Usage: npx tsx --env-file=.env.local scripts/seed-demo.ts
  */
+import { access, constants } from "node:fs/promises";
+import path from "node:path";
 import { hashPassword } from "better-auth/crypto";
 import { eq, inArray } from "drizzle-orm";
+import {
+  BUCKET_AVATARS,
+  BUCKET_PRODUCT_IMAGES,
+} from "../lib/backend/config";
 import { getDb, getPool, newId } from "../lib/db/client";
+import { detectImageFileMime } from "../lib/security/file-signature";
+import { isSafeFileId } from "../lib/security/storage-id";
+import { putStoredFile } from "../lib/storage/disk";
+import { getUploadRoot } from "../lib/storage/upload-root";
 import {
   authAccount,
   authUser,
@@ -185,16 +195,33 @@ function seedShopBannerFileId(slug: string): string {
   return `seed-banner-${slug.trim()}`.slice(0, 64);
 }
 
+const SEED_FILE_OWNER_ID = "seed-demo";
+
+async function seedFileOnDisk(
+  bucketId: string,
+  fileId: string,
+): Promise<boolean> {
+  if (!isSafeFileId(fileId)) return false;
+  const filePath = path.join(getUploadRoot(), bucketId, fileId);
+  try {
+    await access(filePath, constants.R_OK);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 async function uploadSeedPhoto(opts: {
   fileId: string;
   photoId: string;
   bucket: "product-images" | "avatars";
   width?: number;
 }): Promise<"created" | "exists" | "error"> {
-  const baseUrl = process.env.STORAGE_API_URL?.trim().replace(/\/$/, "") ?? "";
-  const token = process.env.STORAGE_API_TOKEN?.trim() ?? "";
-  if (!baseUrl || !token) {
-    throw new Error("STORAGE_API_URL and STORAGE_API_TOKEN are required to seed images.");
+  const bucketId =
+    opts.bucket === "avatars" ? BUCKET_AVATARS : BUCKET_PRODUCT_IMAGES;
+
+  if (await seedFileOnDisk(bucketId, opts.fileId)) {
+    return "exists";
   }
 
   const imageRes = await fetch(unsplashDownloadUrl(opts.photoId, opts.width ?? 800));
@@ -203,46 +230,26 @@ async function uploadSeedPhoto(opts: {
     return "error";
   }
   const bytes = new Uint8Array(await imageRes.arrayBuffer());
-
-  for (let attempt = 0; attempt < 6; attempt += 1) {
-    const form = new FormData();
-    form.set("bucket", opts.bucket);
-    form.set("fileId", opts.fileId);
-    form.set(
-      "file",
-      new Blob([bytes], { type: "image/jpeg" }),
-      `${opts.fileId}.jpg`,
-    );
-
-    const res = await fetch(`${baseUrl}/api/v1/files`, {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${token}`,
-        Accept: "application/json",
-      },
-      body: form,
-    });
-
-    if (res.status === 201) return "created";
-    if (res.status === 409) return "exists";
-    if (res.status === 429) {
-      const waitMs = 1500 * (attempt + 1);
-      console.warn(`Rate limited ${opts.fileId}; retry in ${waitMs}ms`);
-      await sleep(waitMs);
-      continue;
-    }
-    let detail = "";
-    try {
-      const json = (await res.json()) as { error?: string };
-      detail = json.error ?? "";
-    } catch {
-      // ignore
-    }
-    console.error("Upload failed", opts.fileId, res.status, detail);
+  const file = new File([bytes], `${opts.fileId}.jpg`, { type: "image/jpeg" });
+  const detectedMime = await detectImageFileMime(file);
+  if (!detectedMime) {
+    console.error("Invalid image bytes", opts.fileId);
     return "error";
   }
-  console.error("Upload failed after retries", opts.fileId);
-  return "error";
+
+  try {
+    await putStoredFile({
+      bucketId,
+      ownerId: SEED_FILE_OWNER_ID,
+      file,
+      fileId: opts.fileId,
+      detectedMime,
+    });
+    return "created";
+  } catch (err) {
+    console.error("Upload failed", opts.fileId, err);
+    return "error";
+  }
 }
 
 async function uploadProductPhoto(

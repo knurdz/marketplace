@@ -1,9 +1,10 @@
 # Security operations
 
-## Vercel edge controls
+## Hostinger reverse proxy
 
-Application rate limits are authoritative and stored in MariaDB. Add Vercel
-Firewall rules as an additional edge layer:
+Application rate limits are authoritative and stored in MariaDB. On shared hosting,
+rely on Hostinger’s web application firewall / rate limits where available as an
+additional edge layer:
 
 - Challenge unusually high request volume to `/login`, `/register`,
   `/forgot-password`, and `/api/auth/*`.
@@ -11,9 +12,9 @@ Firewall rules as an additional edge layer:
 - Block known automated and malicious traffic, but do not rely on firewall
   rules for authorization.
 
-Keep Vercel's forwarding headers intact. The app trusts
-`x-vercel-forwarded-for` and does not trust client-supplied
-`x-forwarded-for`.
+The app resolves client IP from `x-real-ip`, then the first hop of
+`x-forwarded-for`. It does not trust client-supplied `x-forwarded-for` when
+`x-real-ip` is absent (see `proxy.ts`).
 
 ## Content Security Policy
 
@@ -30,12 +31,11 @@ static rendering.
 - `FORM_GUARD_SECRET`
 - `TURNSTILE_SECRET_KEY`
 - `NEXT_PUBLIC_TURNSTILE_SITE_KEY` (public site key, not a secret)
-- `STORAGE_API_TOKEN`
 - SMTP credentials
 
 Rotate a secret immediately if it appears in logs, browser bundles, or source
-control. Production file storage must use `STORAGE_API_URL`; Vercel's local
-filesystem is not persistent.
+control. Production files must live under `UPLOAD_DIR` on persistent Hostinger
+disk (never inside the deploy tree that gets replaced on each release).
 
 ## Dependency audit
 

@@ -7,7 +7,7 @@
 | Surface | URL |
 | -------- | --- |
 | Storefront | [https://marketplace.knurdz.org](https://marketplace.knurdz.org) |
-| File host | [https://marketplace-storage.knurdz.org](https://marketplace-storage.knurdz.org) |
+| Uploads | Same origin (`/api/files/...` on the storefront) |
 | Transactional email | `marketplace@knurdz.org` (Hostinger SMTP) |
 | Support | [support@knurdz.org](mailto:support@knurdz.org) |
 
@@ -50,15 +50,13 @@ flowchart LR
   subgraph client [Browser]
     NextApp[Next.js App Router]
   end
-  subgraph vercel [Vercel]
-  NextApp --> API[Route handlers and server actions]
+  subgraph hostinger [Hostinger Node]
+    NextApp --> API[Route handlers and server actions]
+    API --> UploadDir[UPLOAD_DIR on disk]
   end
-  API --> MariaDB[(MariaDB)]
+  API --> MariaDB[(MariaDB 127.0.0.1)]
   API --> Auth[Better Auth]
   API --> SMTP[Nodemailer SMTP]
-  API --> StorageAPI[Storage API Laravel]
-  StorageAPI --> Disk[Hostinger disk]
-  API --> LocalUploads[Local ./uploads dev only]
 ```
 
 | Layer | Technology | Location |
@@ -68,7 +66,7 @@ flowchart LR
 | Auth | Better Auth | `lib/auth/`, `app/api/auth/` |
 | Email | Nodemailer (SMTP) | `lib/email/` |
 | Business logic | Typed services | `lib/services/` |
-| Files | Remote API or local disk (dev) | `lib/storage/`, `storage-api/` |
+| Files | Local disk | `lib/storage/` (`UPLOAD_DIR` in production) |
 
 **Portals**
 
@@ -79,14 +77,14 @@ flowchart LR
 
 **Storage behavior** ([`lib/storage/index.ts`](./lib/storage/index.ts))
 
-- **Development:** If `STORAGE_API_URL` is unset, files are written under `./uploads` and served at `/api/files/{bucket}/{fileId}`.
-- **Production:** Remote storage is **required**. Disk fallback throws if `STORAGE_API_URL` / `STORAGE_API_TOKEN` are missing (Vercel has no persistent local filesystem).
+- **Development:** Omit `UPLOAD_DIR` to write under `./uploads`; serve at `/api/files/{bucket}/{fileId}`.
+- **Production:** Set `UPLOAD_DIR` to an absolute path outside the deploy folder on Hostinger.
 
 **References**
 
 - Data contract: [`docs/agent/SCHEMA.md`](./docs/agent/SCHEMA.md)
 - Production security and ops: [`docs/SECURITY_OPERATIONS.md`](./docs/SECURITY_OPERATIONS.md)
-- Storage API deploy: [`storage-api/README.md`](./storage-api/README.md)
+- Hostinger cutover: [`docs/HOSTINGER_CUTOVER.md`](./docs/HOSTINGER_CUTOVER.md)
 
 ---
 
@@ -134,10 +132,10 @@ Open [http://localhost:3000](http://localhost:3000).
 
 | Mode | Configuration | Behavior |
 | ---- | ------------- | -------- |
-| Local dev | Leave `STORAGE_API_URL` unset | Writes to `./uploads`, serves `/api/files/...` |
-| Remote (prod-like) | `STORAGE_API_URL`, `STORAGE_API_TOKEN`, `NEXT_PUBLIC_STORAGE_URL` | Next.js uploads via bearer token to the Laravel API |
+| Local dev | Omit `UPLOAD_DIR` | Writes to `./uploads`, serves `/api/files/...` |
+| Prod-like | `UPLOAD_DIR=/absolute/path` | Same as Hostinger; path must exist and be writable |
 
-To exercise production storage locally, point the three variables at your deployed API host (see [`storage-api/README.md`](./storage-api/README.md)).
+Category JPEGs for disk storage: `npx tsx --env-file=.env.local scripts/upload-category-images.ts`.
 
 ### Environment variables (summary)
 
@@ -149,7 +147,7 @@ To exercise production storage locally, point the three variables at your deploy
 | Turnstile | `NEXT_PUBLIC_TURNSTILE_SITE_KEY`, `TURNSTILE_SECRET_KEY` | Required for production forms |
 | SMTP | `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASSWORD`, `SMTP_FROM` | Verification and password reset; production uses `smtp.hostinger.com`, port `465`, `SMTP_FROM="Knurdz Marketplace <marketplace@knurdz.org>"`. If the password contains `$`, escape each literal dollar as `\$` in `.env.local` (Next.js expands `$VAR`). |
 | OAuth (optional) | `GOOGLE_*`, `GITHUB_*` | Leave empty to disable |
-| Storage (production) | `STORAGE_API_URL`, `STORAGE_API_TOKEN`, `NEXT_PUBLIC_STORAGE_URL` | Production: `https://marketplace-storage.knurdz.org` |
+| Storage (production) | `UPLOAD_DIR` | Absolute path on Hostinger, outside the deploy tree |
 
 Full comments: [`.env.example`](./.env.example).
 
@@ -174,22 +172,22 @@ Full comments: [`.env.example`](./.env.example).
 
 | Component | Deployment |
 | --------- | ------------ |
-| Next.js app | Vercel (`marketplace.knurdz.org`) |
-| Database | External MariaDB (`DATABASE_URL` on Vercel) |
-| Files | Laravel storage API on Hostinger — **mandatory** (no disk on Vercel) |
+| Next.js app | Hostinger Node.js (`marketplace.knurdz.org`) — `npm run build`, `npm start` |
+| Database | MariaDB on same account (`DATABASE_URL` with `127.0.0.1`) |
+| Files | `UPLOAD_DIR` on persistent disk |
 | Email | Hostinger SMTP as `marketplace@knurdz.org` |
 
-Deploy and update the file service using [`storage-api/README.md`](./storage-api/README.md).
+Step-by-step migration from Vercel: [`docs/HOSTINGER_CUTOVER.md`](./docs/HOSTINGER_CUTOVER.md).
 
-**Required production secrets** (names only; set in the host’s env UI):
+**Required production env** (names only; set in Hostinger):
 
 - `BETTER_AUTH_SECRET`, `FORM_GUARD_SECRET`
 - `TURNSTILE_SECRET_KEY`, `NEXT_PUBLIC_TURNSTILE_SITE_KEY`
-- `STORAGE_API_URL`, `STORAGE_API_TOKEN`, `NEXT_PUBLIC_STORAGE_URL`
+- `NEXT_PUBLIC_APP_URL`, `AUTH_PRODUCTION_APP_URL`
+- `UPLOAD_DIR`, `DATABASE_URL` (localhost)
 - SMTP: `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASSWORD`, `SMTP_FROM`
-- `DATABASE_URL`
 
-Edge rate limiting, CSP, and rotation policy: [`docs/SECURITY_OPERATIONS.md`](./docs/SECURITY_OPERATIONS.md).
+Rate limits, CSP, and rotation policy: [`docs/SECURITY_OPERATIONS.md`](./docs/SECURITY_OPERATIONS.md).
 
 ---
 
