@@ -38,11 +38,11 @@ export function ProductCatalogFilters({
           name="minPrice"
           type="number"
           min={0}
-          step="0.01"
-          inputMode="decimal"
+          step="1"
+          inputMode="numeric"
           placeholder="Any"
           defaultValue={
-            defaults.minPrice != null ? String(defaults.minPrice) : ""
+            defaults.minPrice != null ? String(Math.round(defaults.minPrice)) : ""
           }
           aria-label="Minimum price"
         />
@@ -55,11 +55,11 @@ export function ProductCatalogFilters({
           name="maxPrice"
           type="number"
           min={0}
-          step="0.01"
-          inputMode="decimal"
+          step="1"
+          inputMode="numeric"
           placeholder="Any"
           defaultValue={
-            defaults.maxPrice != null ? String(defaults.maxPrice) : ""
+            defaults.maxPrice != null ? String(Math.round(defaults.maxPrice)) : ""
           }
           aria-label="Maximum price"
         />
@@ -72,10 +72,10 @@ export function ProductCatalogFilters({
           name="sort"
           defaultValue={defaults.sort}
           aria-label="Sort products"
-          className="border-input bg-background focus-visible:ring-ring flex h-10 w-full rounded-lg border px-3 text-sm outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
+          className="border-input bg-background text-foreground focus-visible:ring-ring flex h-10 w-full rounded-lg border px-3 text-sm outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
         >
           {SORT_OPTIONS.map((option) => (
-            <option key={option.value} value={option.value}>
+            <option key={option.value} value={option.value} className="text-foreground bg-background">
               {option.label}
             </option>
           ))}
