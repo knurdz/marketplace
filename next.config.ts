@@ -90,6 +90,9 @@ const nextConfig: NextConfig = {
     root: appRoot,
   },
   experimental: {
+    // Hostinger build servers block Turbopack PostCSS child-process IPC; worker
+    // threads avoid loopback sockets. Production builds use webpack (see package.json).
+    turbopackPluginRuntimeStrategy: "workerThreads",
     serverActions: {
       bodySizeLimit: "6mb",
     },
