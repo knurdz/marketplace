@@ -10,6 +10,7 @@ import { ROLE_LABELS, userHasLabel } from "@/lib/backend/roles";
 import {
   approveSellerApplicationCore,
   rejectSellerApplicationCore,
+  unbanShopCore,
 } from "@/lib/services/seller-approvals";
 import { getLoggedInUser } from "@/lib/backend/session";
 import {
@@ -96,5 +97,31 @@ export async function rejectSellerApplication(
   if (!result.ok) return { error: result.error };
 
   revalidateSellerPaths();
+  return { success: result.message };
+}
+
+function revalidateShopDetail(sellerProfileId: string): void {
+  revalidatePath("/admin/sellers");
+  revalidatePath(`/admin/sellers/${sellerProfileId}`);
+  revalidatePath("/admin", "layout");
+}
+
+export async function unbanShop(
+  _prev: SellerApprovalActionState,
+  formData: FormData,
+): Promise<SellerApprovalActionState> {
+  const auth = await assertAdmin();
+  if (!auth.ok) return { error: auth.error };
+
+  const sellerProfileId = formData.get("sellerProfileId");
+  if (typeof sellerProfileId !== "string" || !sellerProfileId.trim()) {
+    return { error: "Missing shop." };
+  }
+
+  const trimmedId = sellerProfileId.trim();
+  const result = await unbanShopCore(auth.userId, trimmedId);
+  if (!result.ok) return { error: result.error };
+
+  revalidateShopDetail(trimmedId);
   return { success: result.message };
 }

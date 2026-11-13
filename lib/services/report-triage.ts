@@ -592,7 +592,7 @@ export async function takeDownListingFromReportCore(
 
 /**
  * Ban the reported listing's seller: suspend account, archive active listings,
- * reject approved seller profile, then resolve the report.
+ * mark approved seller profile as banned, then resolve the report.
  */
 export async function banShopFromReportCore(
   adminUserId: string,
@@ -638,7 +638,11 @@ export async function banShopFromReportCore(
         databaseId: DATABASE_ID,
         tableId: TABLE_PRODUCTS,
         rowId: productId,
-        data: { status: ARCHIVED_PRODUCT_STATUS, featured: false },
+        data: {
+          status: ARCHIVED_PRODUCT_STATUS,
+          featured: false,
+          hiddenByShopBan: true,
+        },
       });
       archivedCount += 1;
     }
@@ -659,7 +663,7 @@ export async function banShopFromReportCore(
         tableId: TABLE_SELLER_PROFILES,
         rowId: profile.$id,
         data: {
-          status: "rejected",
+          status: "banned",
           rejectionReason: parsedNote.slice(0, 500),
         },
       });
@@ -667,7 +671,7 @@ export async function banShopFromReportCore(
       return {
         ok: false,
         error:
-          "Seller suspended and listings archived, but shop profile could not be rejected. Contact an operator.",
+          "Seller suspended and listings archived, but shop profile could not be marked banned. Contact an operator.",
       };
     }
   }

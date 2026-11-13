@@ -14,6 +14,7 @@ export const DATABASE_ID = "marketplace";
 /** Table IDs: must match docs/agent/SCHEMA.md. */
 export const TABLE_PROFILES = "profiles";
 export const TABLE_SELLER_PROFILES = "seller_profiles";
+export const TABLE_SELLER_APPLICATION_ATTEMPTS = "seller_application_attempts";
 export const TABLE_CATEGORIES = "categories";
 export const TABLE_PRODUCTS = "products";
 export const TABLE_PRODUCT_IMAGES = "product_images";
@@ -32,6 +33,7 @@ export const TABLE_RATE_LIMITS = "rate_limits";
 export const ALL_TABLE_IDS = [
   TABLE_PROFILES,
   TABLE_SELLER_PROFILES,
+  TABLE_SELLER_APPLICATION_ATTEMPTS,
   TABLE_CATEGORIES,
   TABLE_PRODUCTS,
   TABLE_PRODUCT_IMAGES,

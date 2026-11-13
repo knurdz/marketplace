@@ -1,6 +1,7 @@
 "use client";
 
-import { useActionState } from "react";
+import { useRouter } from "next/navigation";
+import { useActionState, useEffect, useRef } from "react";
 import {
   submitSellerApplication,
   type SellerApplicationActionState,
@@ -17,6 +18,15 @@ export function SellerApplyForm() {
     submitSellerApplication,
     initialState,
   );
+  const router = useRouter();
+  const refreshed = useRef(false);
+
+  useEffect(() => {
+    if (state.success && !refreshed.current) {
+      refreshed.current = true;
+      router.refresh();
+    }
+  }, [state.success, router]);
 
   return (
     <form action={formAction} className="mt-8 max-w-lg space-y-5">

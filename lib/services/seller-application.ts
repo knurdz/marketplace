@@ -17,10 +17,15 @@ import { deleteFile, uploadAvatar } from "@/lib/backend/storage";
 import { getLoggedInUser } from "@/lib/backend/session";
 import { notifyAdminsEvent, notifyUserEvent } from "@/lib/email/events";
 import type { SellerProfile } from "@/lib/types";
+import { and, eq, ne } from "drizzle-orm";
+import { getDb } from "@/lib/db/client";
+import { sellerProfiles } from "@/lib/db/schema";
 import { generateSlug } from "./categories";
 import { asSellerProfile } from "./seller-approvals";
 
 const PENDING_STATUS = "pending" as const;
+const REJECTED_STATUS = "rejected" as const;
+const BANNED_STATUS = "banned" as const;
 const MAX_SHOP_NAME_LENGTH = 128;
 const MAX_SLUG_LENGTH = 128;
 const MAX_BIO_LENGTH = 2000;
@@ -63,12 +68,15 @@ export type ParsedShopPoliciesInput =
 
 /**
  * Where to send a signed-in user who hits /seller without approved portal access.
- * null = allow portal; pending/rejected → status UX; else home.
+ * null = allow portal; pending/rejected → status UX; banned → home; else home.
  */
 export function blockedSellerPortalDestination(
   hasSellerLabel: boolean,
   profile: SellerProfile | null,
 ): BlockedSellerPortalDestination {
+  if (profile?.status === "banned") {
+    return "/";
+  }
   if (profile?.status === "pending" || profile?.status === "rejected") {
     return "/seller/pending";
   }
@@ -164,31 +172,40 @@ function sellerProfilePermissions(userId: string): string[] {
   ];
 }
 
-async function slugTaken(slug: string): Promise<boolean> {
+async function slugTaken(
+  slug: string,
+  exceptProfileId?: string,
+): Promise<boolean> {
   if (!process.env.DATABASE_URL?.trim()) return false;
 
   try {
-    const { tables } = await createAdminClient();
-    const result = await tables.listRows({
-      databaseId: DATABASE_ID,
-      tableId: TABLE_SELLER_PROFILES,
-      queries: [Query.equal("slug", slug), Query.limit(1)],
-    });
-    return result.rows.length > 0;
+    const conditions = [eq(sellerProfiles.slug, slug)];
+    if (exceptProfileId?.trim()) {
+      conditions.push(ne(sellerProfiles.id, exceptProfileId.trim()));
+    }
+    const rows = await getDb()
+      .select({ id: sellerProfiles.id })
+      .from(sellerProfiles)
+      .where(and(...conditions))
+      .limit(1);
+    return rows.length > 0;
   } catch {
     return false;
   }
 }
 
 /** Pick first slug in base, base-2, base-3, … not already used. */
-export async function resolveUniqueShopSlug(baseSlug: string): Promise<string> {
+export async function resolveUniqueShopSlug(
+  baseSlug: string,
+  exceptProfileId?: string,
+): Promise<string> {
   const root = baseSlug.slice(0, MAX_SLUG_LENGTH);
-  if (!(await slugTaken(root))) return root;
+  if (!(await slugTaken(root, exceptProfileId))) return root;
 
   for (let n = 2; n <= 99; n += 1) {
     const suffix = `-${n}`;
     const candidate = `${root.slice(0, MAX_SLUG_LENGTH - suffix.length)}${suffix}`;
-    if (!(await slugTaken(candidate))) return candidate;
+    if (!(await slugTaken(candidate, exceptProfileId))) return candidate;
   }
 
   return `${root.slice(0, MAX_SLUG_LENGTH - 9)}-${ID.unique().slice(0, 8)}`;
@@ -228,8 +245,91 @@ function existingApplicationMessage(profile: SellerProfile): string {
       return profile.rejectionReason
         ? `Your previous application was rejected: ${profile.rejectionReason}`
         : "Your previous seller application was rejected.";
+    case "banned":
+      return "Your shop was banned. You cannot apply again until an admin unbans the shop.";
     default:
       return "You already have a seller profile.";
+  }
+}
+
+async function notifySellerApplicationSubmitted(
+  userId: string,
+  profile: SellerProfile,
+): Promise<void> {
+  await Promise.all([
+    notifyUserEvent(userId, {
+      type: "seller.application.submitted",
+      title: "Seller application submitted",
+      body: `Your application for "${profile.shopName}" was submitted. An admin will review your shop details.`,
+      link: "/seller/pending",
+    }),
+    notifyAdminsEvent({
+      type: "seller.application.submitted.admin",
+      title: "New seller application",
+      body: `"${profile.shopName}" applied to become a seller.`,
+      link: "/admin/sellers",
+      detailLines: [
+        `Profile: ${profile.$id}`,
+        `Applicant: ${userId}`,
+        `Slug: ${profile.slug}`,
+      ],
+    }),
+  ]);
+}
+
+async function resubmitRejectedSellerApplication(
+  userId: string,
+  existing: SellerProfile,
+  parsed: Extract<ParsedSellerApplicationInput, { ok: true }>,
+): Promise<SellerApplicationResult> {
+  const slug = await resolveUniqueShopSlug(parsed.slug, existing.$id);
+
+  try {
+    const { tables } = await createSessionClient();
+    const row = await tables.updateRow({
+      databaseId: DATABASE_ID,
+      tableId: TABLE_SELLER_PROFILES,
+      rowId: existing.$id,
+      data: {
+        shopName: parsed.shopName,
+        slug,
+        bio: parsed.bio,
+        status: PENDING_STATUS,
+        rejectionReason: null,
+      },
+    });
+
+    const profile = asSellerProfile(row as unknown as Record<string, unknown>);
+    if (!profile || profile.userId !== userId || profile.status !== PENDING_STATUS) {
+      return {
+        ok: false,
+        error: "Application could not be updated. Please try again.",
+      };
+    }
+
+    await notifySellerApplicationSubmitted(userId, profile);
+
+    return {
+      ok: true,
+      message: "Application resubmitted. An admin will review your shop details.",
+      profileId: profile.$id,
+    };
+  } catch (error) {
+    if (error instanceof DbException) {
+      if (error.code === 409) {
+        return {
+          ok: false,
+          error: "This shop URL is already in use. Try a different slug.",
+        };
+      }
+      if (error.code === 401) {
+        return { ok: false, error: "You must be signed in to apply." };
+      }
+    }
+    return {
+      ok: false,
+      error: "Could not resubmit application. Please try again.",
+    };
   }
 }
 
@@ -263,6 +363,9 @@ export async function submitSellerApplicationCore(
 
   const existing = await getOwnSellerProfile();
   if (existing) {
+    if (existing.status === REJECTED_STATUS) {
+      return resubmitRejectedSellerApplication(user.$id, existing, parsed);
+    }
     return { ok: false, error: existingApplicationMessage(existing) };
   }
 
@@ -294,25 +397,7 @@ export async function submitSellerApplicationCore(
       };
     }
 
-    await Promise.all([
-      notifyUserEvent(user.$id, {
-        type: "seller.application.submitted",
-        title: "Seller application submitted",
-        body: `Your application for "${profile.shopName}" was submitted. An admin will review your shop details.`,
-        link: "/seller/pending",
-      }),
-      notifyAdminsEvent({
-        type: "seller.application.submitted.admin",
-        title: "New seller application",
-        body: `"${profile.shopName}" applied to become a seller.`,
-        link: "/admin/sellers",
-        detailLines: [
-          `Profile: ${profile.$id}`,
-          `Applicant: ${user.$id}`,
-          `Slug: ${profile.slug}`,
-        ],
-      }),
-    ]);
+    await notifySellerApplicationSubmitted(user.$id, profile);
 
     return {
       ok: true,

@@ -5,6 +5,7 @@ import {
   SellerApproveButton,
   SellerRejectForm,
 } from "@/components/admin/seller-approval-actions";
+import { SellerUnbanShopButton } from "@/components/admin/seller-unban-button";
 import {
   UserSuspendForm,
   UserUnsuspendButton,
@@ -37,6 +38,7 @@ type PageProps = {
 function statusTone(status: SellerStatus): StatusTone {
   if (status === "approved") return "positive";
   if (status === "pending") return "warning";
+  if (status === "banned") return "danger";
   return "danger";
 }
 
@@ -72,13 +74,17 @@ export default async function AdminShopDetailPage({ params }: PageProps) {
     reviewModeration,
     reportCounts,
     audit,
+    previousApplications,
     $createdAt,
     $updatedAt,
   } = detail;
 
   const bannerUrl = getShopBannerPreviewUrl(profile.bannerFileId);
-  const canSuspend = !account.isAdmin && !account.suspended;
-  const canUnsuspend = !account.isAdmin && account.suspended;
+  const showUnbanShop = profile.status === "banned";
+  const canSuspend =
+    !account.isAdmin && !account.suspended && !showUnbanShop;
+  const canUnsuspend =
+    !account.isAdmin && account.suspended && !showUnbanShop;
 
   return (
     <div className="w-full">
@@ -106,7 +112,16 @@ export default async function AdminShopDetailPage({ params }: PageProps) {
       />
 
       <div className="mt-4 flex flex-wrap items-center gap-2">
-        <StatusPill label={profile.status} tone={statusTone(profile.status)} />
+        <StatusPill
+          label={
+            profile.status === "rejected"
+              ? "Rejected"
+              : profile.status === "banned"
+                ? "Banned"
+                : profile.status
+          }
+          tone={statusTone(profile.status)}
+        />
         <span className="text-xs text-muted-foreground">
           Applied {formatWhen($createdAt)}
           {$updatedAt ? ` · Updated ${formatWhen($updatedAt)}` : ""}
@@ -157,14 +172,24 @@ export default async function AdminShopDetailPage({ params }: PageProps) {
                 </dd>
               </div>
             ) : null}
+            {profile.status === "banned" && profile.rejectionReason ? (
+              <div>
+                <dt className="text-muted-foreground">Ban note</dt>
+                <dd className="mt-0.5 text-rose-700">
+                  {profile.rejectionReason}
+                </dd>
+              </div>
+            ) : null}
           </dl>
-          {profile.status === "pending" ? (
+          {profile.status === "pending" || profile.status === "rejected" ? (
             <div className="mt-6 flex flex-wrap items-start gap-2">
               <SellerApproveButton sellerProfileId={profile.$id} />
-              <SellerRejectForm
-                sellerProfileId={profile.$id}
-                shopName={profile.shopName}
-              />
+              {profile.status === "pending" ? (
+                <SellerRejectForm
+                  sellerProfileId={profile.$id}
+                  shopName={profile.shopName}
+                />
+              ) : null}
             </div>
           ) : null}
         </PortalPanel>
@@ -205,7 +230,7 @@ export default async function AdminShopDetailPage({ params }: PageProps) {
                 <dd className="mt-0.5">
                   <StatusPill
                     label={account.suspended ? "suspended" : "active"}
-                    tone={account.suspended ? "danger" : "positive"}
+                    tone={account.suspended ? "suspended" : "positive"}
                   />
                 </dd>
               </div>
@@ -213,6 +238,12 @@ export default async function AdminShopDetailPage({ params }: PageProps) {
           </dl>
           {!account.isAdmin ? (
             <div className="mt-6 flex flex-wrap items-center gap-2">
+              {showUnbanShop ? (
+                <SellerUnbanShopButton
+                  sellerProfileId={profile.$id}
+                  shopName={profile.shopName}
+                />
+              ) : null}
               {canSuspend ? (
                 <UserSuspendForm
                   userId={account.userId}
@@ -230,6 +261,50 @@ export default async function AdminShopDetailPage({ params }: PageProps) {
           )}
         </PortalPanel>
       </div>
+
+      {previousApplications.length > 0 ? (
+        <PortalPanel className="mt-6">
+          <h3 className="text-base font-semibold tracking-tight">
+            Previous applications
+          </h3>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Earlier shop details from rejected applications on this account.
+          </p>
+          <ul className="mt-4 space-y-4">
+            {previousApplications.map((attempt) => (
+              <li
+                key={attempt.id}
+                className="rounded-lg border border-border p-4 text-sm"
+              >
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <p className="font-semibold text-foreground">
+                    {attempt.shopName}
+                  </p>
+                  <span className="text-xs text-muted-foreground tabular-nums">
+                    Rejected {formatWhen(attempt.rejectedAt)}
+                  </span>
+                </div>
+                <p className="mt-1 font-mono text-xs text-muted-foreground">
+                  /shop/{attempt.slug}
+                </p>
+                {attempt.bio ? (
+                  <p className="mt-2 line-clamp-3 text-muted-foreground">
+                    {attempt.bio}
+                  </p>
+                ) : null}
+                {attempt.rejectionReason ? (
+                  <p className="mt-2 text-rose-700">
+                    {attempt.rejectionReason}
+                  </p>
+                ) : null}
+                <p className="mt-2 text-xs text-muted-foreground tabular-nums">
+                  Submitted {formatWhen(attempt.submittedAt)}
+                </p>
+              </li>
+            ))}
+          </ul>
+        </PortalPanel>
+      ) : null}
 
       <SellerDashboardCharts
         metrics={snapshot.metrics}

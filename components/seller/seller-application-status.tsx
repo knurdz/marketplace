@@ -55,8 +55,7 @@ export function SellerApplicationStatus({
           </p>
         )}
         <p className="mt-4 text-sm text-muted-foreground">
-          Only one application is allowed per account. Sign out to register a
-          buyer account instead.
+          You can submit a new application below with updated shop details.
         </p>
       </div>
     );

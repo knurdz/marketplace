@@ -1,19 +1,28 @@
+import { and, desc, eq, ne, or, sql } from "drizzle-orm";
 import { Query } from "@/lib/db/compat";
 import {
   DATABASE_ID,
   TABLE_SELLER_PROFILES,
   hasDatabaseConfig,
 } from "@/lib/backend/config";
+import { ACTIVE_PRODUCT_STATUS } from "@/lib/types/status";
 import { ROLE_LABELS } from "@/lib/backend/roles";
 import { createAdminClient } from "@/lib/backend/server";
+import { getDb } from "@/lib/db/client";
+import { authUser, products, sellerProfiles } from "@/lib/db/schema";
 import { notifyUserEvent } from "@/lib/email/events";
+import { getUserAccountStateById } from "@/lib/backend/session";
+import { assertAdminUser } from "@/lib/security/admin-auth";
 import type { SellerProfile } from "@/lib/types";
 import { isSellerStatus } from "@/lib/types";
 import { writeAuditLog } from "./audit-logs";
+import { escapeLikeWildcards } from "./products";
+import { recordSellerApplicationRejectionAttempt } from "./seller-application-attempts";
 
 const PENDING_STATUS = "pending" as const;
 const APPROVED_STATUS = "approved" as const;
 const REJECTED_STATUS = "rejected" as const;
+const BANNED_STATUS = "banned" as const;
 const MAX_REJECTION_REASON = 500;
 
 function asNullableString(value: unknown): string | null {
@@ -69,7 +78,17 @@ export type AdminSellerRow = {
   status: SellerProfile["status"];
   rejectionReason: string | null;
   $createdAt?: string;
+  accountSuspended?: boolean;
+  /** Shop ban flow: account disabled and profile rejected. */
+  shopBanned?: boolean;
+  ownerEmail?: string;
+  ownerName?: string;
 };
+
+export type AdminSellerListFilter = "pending" | "all" | "banned" | "suspended";
+
+const ADMIN_SELLER_LIST_CAP = 100;
+const ADMIN_SELLER_SEARCH_MAX = 256;
 
 function toAdminApplication(
   profile: SellerProfile,
@@ -139,6 +158,83 @@ export type SellerApprovalResult =
 /**
  * Seller profiles for admin (server-only). Pass status to filter, or omit for all.
  */
+/**
+ * Seller profiles for the admin table (search, filters, account state).
+ * `banned` = profile status banned (report shop ban).
+ * `suspended` = disabled auth account, excluding banned shops (those appear under Banned).
+ */
+export async function listSellerProfilesForAdminTable(opts?: {
+  filter?: AdminSellerListFilter;
+  search?: string;
+}): Promise<AdminSellerRow[]> {
+  await assertAdminUser();
+  if (!hasDatabaseConfig()) return [];
+
+  const filter = opts?.filter ?? "all";
+  const search = opts?.search?.trim().slice(0, ADMIN_SELLER_SEARCH_MAX) ?? "";
+  const conditions = [];
+
+  if (filter === "pending") {
+    conditions.push(eq(sellerProfiles.status, PENDING_STATUS));
+  } else if (filter === "banned") {
+    conditions.push(eq(sellerProfiles.status, BANNED_STATUS));
+  } else if (filter === "suspended") {
+    conditions.push(eq(authUser.disabled, true));
+    conditions.push(ne(sellerProfiles.status, BANNED_STATUS));
+  }
+
+  if (search.length > 0) {
+    const pattern = `%${escapeLikeWildcards(search.toLowerCase())}%`;
+    conditions.push(
+      or(
+        sql`LOWER(${sellerProfiles.shopName}) LIKE ${pattern} ESCAPE ${"\\"}`,
+        sql`LOWER(${sellerProfiles.slug}) LIKE ${pattern} ESCAPE ${"\\"}`,
+        sql`LOWER(${authUser.email}) LIKE ${pattern} ESCAPE ${"\\"}`,
+        sql`LOWER(${authUser.name}) LIKE ${pattern} ESCAPE ${"\\"}`,
+      )!,
+    );
+  }
+
+  try {
+    const rows = await getDb()
+      .select({
+        id: sellerProfiles.id,
+        userId: sellerProfiles.userId,
+        shopName: sellerProfiles.shopName,
+        slug: sellerProfiles.slug,
+        bio: sellerProfiles.bio,
+        status: sellerProfiles.status,
+        rejectionReason: sellerProfiles.rejectionReason,
+        createdAt: sellerProfiles.createdAt,
+        disabled: authUser.disabled,
+        ownerEmail: authUser.email,
+        ownerName: authUser.name,
+      })
+      .from(sellerProfiles)
+      .innerJoin(authUser, eq(sellerProfiles.userId, authUser.id))
+      .where(conditions.length > 0 ? and(...conditions) : undefined)
+      .orderBy(desc(sellerProfiles.createdAt))
+      .limit(ADMIN_SELLER_LIST_CAP);
+
+    return rows.map((row) => ({
+      $id: row.id,
+      userId: row.userId,
+      shopName: row.shopName,
+      slug: row.slug,
+      bio: row.bio,
+      status: row.status,
+      rejectionReason: row.rejectionReason,
+      $createdAt: row.createdAt?.toISOString(),
+      accountSuspended: row.disabled,
+      shopBanned: row.status === BANNED_STATUS,
+      ownerEmail: row.ownerEmail,
+      ownerName: row.ownerName,
+    }));
+  } catch {
+    return [];
+  }
+}
+
 export async function listSellerProfilesAdmin(opts?: {
   status?: SellerProfile["status"];
   limit?: number;
@@ -208,7 +304,8 @@ export async function hasPendingSellerApplications(): Promise<boolean> {
 }
 
 /**
- * Approve a pending seller application: status → approved, set seller-only label, audit.
+ * Approve a pending or previously rejected application: status → approved, seller label, audit.
+ * Banned and approved profiles cannot be approved via this action.
  * ponytail: status update + label update are not atomic; compensating revert on label failure.
  */
 export async function approveSellerApplicationCore(
@@ -221,11 +318,37 @@ export async function approveSellerApplicationCore(
   }
 
   const { profile } = loaded;
-  if (profile.status !== PENDING_STATUS) {
+  const priorStatus = profile.status;
+
+  if (profile.status === BANNED_STATUS) {
     return {
       ok: false,
-      error: `Application is already ${profile.status}. Only pending applications can be approved.`,
+      error: "Banned shops cannot be approved. Unban the account first if this was a mistake.",
     };
+  }
+  if (profile.status === APPROVED_STATUS) {
+    return {
+      ok: false,
+      error: "This shop is already approved.",
+    };
+  }
+  if (profile.status !== PENDING_STATUS && profile.status !== REJECTED_STATUS) {
+    return {
+      ok: false,
+      error: `Application is ${profile.status}. Only pending or rejected applications can be approved.`,
+    };
+  }
+
+  const accountState = await getUserAccountStateById(profile.userId);
+  if (accountState.status === "disabled") {
+    return {
+      ok: false,
+      error:
+        "This account is suspended. Unsuspend the user before approving the seller application.",
+    };
+  }
+  if (accountState.status === "missing") {
+    return { ok: false, error: "Seller account was not found." };
   }
 
   const { tables, users } = await createAdminClient();
@@ -256,7 +379,7 @@ export async function approveSellerApplicationCore(
         databaseId: DATABASE_ID,
         tableId: TABLE_SELLER_PROFILES,
         rowId: profile.$id,
-        data: { status: PENDING_STATUS },
+        data: { status: priorStatus },
       });
     } catch {
       return {
@@ -267,8 +390,7 @@ export async function approveSellerApplicationCore(
     }
     return {
       ok: false,
-      error:
-        "Could not grant seller label. Application reverted to pending. Please retry.",
+      error: `Could not grant seller label. Application reverted to ${priorStatus}. Please retry.`,
     };
   }
 
@@ -324,7 +446,7 @@ export async function rejectSellerApplicationCore(
     return { ok: false, error: "Seller application not found." };
   }
 
-  const { profile } = loaded;
+  const { profile, row } = loaded;
   if (profile.status !== PENDING_STATUS) {
     return {
       ok: false,
@@ -333,6 +455,23 @@ export async function rejectSellerApplicationCore(
   }
 
   const { tables } = await createAdminClient();
+
+  try {
+    await recordSellerApplicationRejectionAttempt({
+      sellerProfileId: profile.$id,
+      userId: profile.userId,
+      shopName: profile.shopName,
+      slug: profile.slug,
+      bio: profile.bio,
+      rejectionReason: trimmedReason,
+      profileRow: row,
+    });
+  } catch {
+    return {
+      ok: false,
+      error: "Failed to record application history.",
+    };
+  }
 
   try {
     await tables.updateRow({
@@ -373,11 +512,123 @@ export async function rejectSellerApplicationCore(
     type: "seller.rejected",
     title: "Seller application not approved",
     body: `Your application for "${profile.shopName}" was not approved.`,
-    link: "/become-seller",
+    link: "/seller/pending",
     ...(trimmedReason
       ? { detailLines: [`Message: ${trimmedReason}`] }
       : {}),
   });
 
   return { ok: true, message: `${profile.shopName} rejected.` };
+}
+
+/**
+ * Unban a shop from a report ban: re-enable account, profile → approved, restore ban-hidden listings.
+ */
+export async function unbanShopCore(
+  adminUserId: string,
+  sellerProfileId: string,
+): Promise<SellerApprovalResult> {
+  const loaded = await loadSellerProfileRow(sellerProfileId);
+  if (!loaded) {
+    return { ok: false, error: "Seller shop not found." };
+  }
+
+  const { profile } = loaded;
+  if (profile.status !== BANNED_STATUS) {
+    return {
+      ok: false,
+      error: `Shop is ${profile.status}. Only banned shops can be unbanned.`,
+    };
+  }
+
+  const accountState = await getUserAccountStateById(profile.userId);
+  if (accountState.status === "disabled") {
+    const { unsuspendUserCore } = await import("./user-management");
+    const unsuspended = await unsuspendUserCore(adminUserId, profile.userId);
+    if (!unsuspended.ok) return unsuspended;
+  }
+
+  const { tables, users } = await createAdminClient();
+
+  try {
+    await tables.updateRow({
+      databaseId: DATABASE_ID,
+      tableId: TABLE_SELLER_PROFILES,
+      rowId: profile.$id,
+      data: {
+        status: APPROVED_STATUS,
+        rejectionReason: null,
+      },
+    });
+  } catch {
+    return { ok: false, error: "Failed to update shop status." };
+  }
+
+  try {
+    await getDb()
+      .update(products)
+      .set({
+        status: ACTIVE_PRODUCT_STATUS,
+        hiddenByShopBan: false,
+      })
+      .where(
+        and(
+          eq(products.sellerId, profile.userId),
+          eq(products.hiddenByShopBan, true),
+        ),
+      );
+  } catch {
+    return {
+      ok: false,
+      error: "Shop unbanned but listings could not be restored. Contact an operator.",
+    };
+  }
+
+  try {
+    await users.get({ userId: profile.userId });
+    await users.updateLabels({
+      userId: profile.userId,
+      labels: exclusiveSellerLabels(),
+    });
+  } catch {
+    try {
+      await tables.updateRow({
+        databaseId: DATABASE_ID,
+        tableId: TABLE_SELLER_PROFILES,
+        rowId: profile.$id,
+        data: { status: BANNED_STATUS },
+      });
+    } catch {
+      return {
+        ok: false,
+        error:
+          "Unban failed and could not revert profile status. Contact an operator.",
+      };
+    }
+    return {
+      ok: false,
+      error: "Could not grant seller label after unban. Profile reverted to banned.",
+    };
+  }
+
+  try {
+    await writeAuditLog({
+      actorId: adminUserId,
+      event: "shop.unbanned",
+      resourceType: "seller_profile",
+      resourceId: profile.$id,
+      meta: {
+        userId: profile.userId,
+        shopName: profile.shopName,
+        slug: profile.slug,
+      },
+    });
+  } catch {
+    return {
+      ok: false,
+      error: "Shop unbanned but audit log failed. Please notify an operator.",
+    };
+  }
+
+  return { ok: true, message: `${profile.shopName} unbanned. Listings hidden by the ban are live again.` };
 }

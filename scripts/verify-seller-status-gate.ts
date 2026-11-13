@@ -22,7 +22,10 @@ function profile(status: SellerProfile["status"]): SellerProfile {
     bio: null,
     bannerFileId: null,
     status,
-    rejectionReason: status === "rejected" ? "Incomplete details" : null,
+    rejectionReason:
+      status === "rejected" || status === "banned"
+        ? "Incomplete details"
+        : null,
     returnPolicy: null,
     shippingPolicy: null,
   };
@@ -64,6 +67,14 @@ assert(
   blockedSellerPortalDestination(true, profile("approved")) === null,
   "approved label + profile allows portal",
 );
+assert(
+  blockedSellerPortalDestination(true, profile("banned")) === "/",
+  "banned profile blocks seller portal",
+);
+assert(
+  blockedSellerPortalDestination(false, profile("banned")) === "/",
+  "banned without label → home",
+);
 
 assert(
   homePathForUser({ labels: ["admin"] }) === "/admin",
@@ -96,6 +107,14 @@ assert(
 assert(
   homePathForUser({ labels: [] }, "rejected") === "/seller/pending",
   "rejected applicant home",
+);
+assert(
+  homePathForUser({ labels: ["seller"] }, "banned") === "/",
+  "banned shop home is storefront, not applicant page",
+);
+assert(
+  homePathForUser({ labels: [] }, "banned") === "/",
+  "banned without label → market",
 );
 assert(
   postLoginPath({ labels: ["seller"] }, "/") === "/",

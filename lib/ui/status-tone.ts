@@ -48,6 +48,7 @@ export function sellerStatusTone(status: SellerStatus): StatusTone {
     case "pending":
       return "warning";
     case "rejected":
+    case "banned":
       return "danger";
     default: {
       const exhaustive: never = status;

@@ -19,7 +19,12 @@ export const PURCHASE_REQUEST_STATUSES = [
 ] as const;
 export type PurchaseRequestStatus = (typeof PURCHASE_REQUEST_STATUSES)[number];
 
-export const SELLER_STATUSES = ["pending", "rejected", "approved"] as const;
+export const SELLER_STATUSES = [
+  "pending",
+  "rejected",
+  "approved",
+  "banned",
+] as const;
 export type SellerStatus = (typeof SELLER_STATUSES)[number];
 
 export const REPORT_STATUSES = [

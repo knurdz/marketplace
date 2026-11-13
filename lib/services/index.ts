@@ -105,9 +105,11 @@ export {
   hasPendingSellerApplications,
   listPendingSellerApplications,
   listSellerProfilesAdmin,
+  listSellerProfilesForAdminTable,
 } from "./seller-approvals";
 export type {
   AdminSellerApplication,
+  AdminSellerListFilter,
   AdminSellerRow,
   SellerApprovalResult,
 } from "./seller-approvals";

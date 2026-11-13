@@ -129,6 +129,9 @@ export function homePathForUser(
   if (sellerStatus === "pending" || sellerStatus === "rejected") {
     return "/seller/pending";
   }
+  if (sellerStatus === "banned") {
+    return "/";
+  }
   if (userHasLabel(user, "seller")) {
     return "/seller";
   }

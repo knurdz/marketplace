@@ -1,7 +1,13 @@
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 
-export type StatusTone = "neutral" | "positive" | "warning" | "danger" | "info";
+export type StatusTone =
+  | "neutral"
+  | "positive"
+  | "warning"
+  | "danger"
+  | "info"
+  | "suspended";
 
 const TONE_CLASS: Record<StatusTone, string> = {
   neutral:
@@ -14,6 +20,8 @@ const TONE_CLASS: Record<StatusTone, string> = {
     "border-rose-200/80 bg-rose-50/70 text-rose-700 dark:border-rose-800/60 dark:bg-rose-950/40 dark:text-rose-300",
   info:
     "border-sky-200/80 bg-sky-50/70 text-sky-800 dark:border-sky-800/60 dark:bg-sky-950/40 dark:text-sky-300",
+  suspended:
+    "border-orange-300/85 bg-orange-50/75 text-orange-900 dark:border-orange-700/70 dark:bg-orange-950/45 dark:text-orange-300",
 };
 
 const DOT_CLASS: Record<StatusTone, string> = {
@@ -22,6 +30,7 @@ const DOT_CLASS: Record<StatusTone, string> = {
   warning: "bg-amber-500",
   danger: "bg-rose-500",
   info: "bg-sky-500",
+  suspended: "bg-orange-600 dark:bg-orange-500",
 };
 
 function formatStatusLabel(label: string): string {

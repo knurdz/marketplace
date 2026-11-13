@@ -127,7 +127,7 @@ export default async function AdminBuyersPage({ searchParams }: PageProps) {
                     <TableCell>
                       <StatusPill
                         label={user.suspended ? "Suspended" : "Active"}
-                        tone={user.suspended ? "danger" : "positive"}
+                        tone={user.suspended ? "suspended" : "positive"}
                       />
                     </TableCell>
                     <TableCell className="text-xs text-muted-foreground">

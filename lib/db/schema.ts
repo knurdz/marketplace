@@ -147,6 +147,28 @@ export const sellerProfiles = mysqlTable(
   ],
 );
 
+/** Prior seller applications when an account reapplies after rejection. */
+export const sellerApplicationAttempts = mysqlTable(
+  "seller_application_attempts",
+  {
+    id: id36(),
+    sellerProfileId: varchar("seller_profile_id", { length: 36 }).notNull(),
+    userId: varchar("user_id", { length: 36 }).notNull(),
+    shopName: varchar("shop_name", { length: 128 }).notNull(),
+    slug: varchar("slug", { length: 128 }).notNull(),
+    bio: varchar("bio", { length: 2000 }),
+    rejectionReason: varchar("rejection_reason", { length: 500 }),
+    submittedAt: timestamp("submitted_at", { mode: "date" }).notNull(),
+    rejectedAt: timestamp("rejected_at", { mode: "date" }).notNull(),
+    createdAt: ts(),
+    updatedAt: tsUpdated(),
+  },
+  (t) => [
+    index("seller_app_attempts_profile_idx").on(t.sellerProfileId),
+    index("seller_app_attempts_user_idx").on(t.userId),
+  ],
+);
+
 export const categories = mysqlTable(
   "categories",
   {
@@ -179,6 +201,7 @@ export const products = mysqlTable(
     available: boolean("available").notNull(),
     currency: varchar("currency", { length: 8 }).notNull(),
     featured: boolean("featured").notNull().default(false),
+    hiddenByShopBan: boolean("hidden_by_shop_ban").notNull().default(false),
     createdAt: ts(),
     updatedAt: tsUpdated(),
   },
@@ -422,6 +445,7 @@ export const storageQuotas = mysqlTable("storage_quotas", {
 export const TABLE_REGISTRY = {
   profiles,
   seller_profiles: sellerProfiles,
+  seller_application_attempts: sellerApplicationAttempts,
   categories,
   products,
   product_images: productImages,

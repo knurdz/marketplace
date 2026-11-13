@@ -20,7 +20,7 @@
 |--------|--------|
 | Product `status` | `draft` \| `pending_review` \| `active` \| `rejected` \| `archived` |
 | Purchase request `status` | `requested` \| `sold` \| `cancelled` |
-| Seller profile `status` | `pending` \| `rejected` \| `approved` |
+| Seller profile `status` | `pending` \| `rejected` \| `approved` \| `banned` |
 | Report `status` | `open` \| `reviewing` \| `resolved` \| `dismissed` |
 | Review `status` | `pending` \| `approved` \| `rejected` |
 
@@ -51,9 +51,13 @@
 
 Shop name, slug, bio, banner, status, return/shipping policies. **No bank account fields.**
 
+### `seller_application_attempts`
+
+Archived snapshot when an admin **rejects** a pending application (shop name, slug, bio, rejection reason, `submitted_at`, `rejected_at`). Same account may apply again; admin history lives here.
+
 ### `products` / `product_images`
 
-Unchanged listing model (`price`, `stock`, `available`, `status`, `featured`, …).
+Listing model (`price`, `stock`, `available`, `status`, `featured`, …). **`hidden_by_shop_ban`** marks listings taken down by a report shop ban so unban can restore only those rows to `active`.
 
 ### `product_revisions`
 

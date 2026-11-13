@@ -34,6 +34,10 @@ import {
   type SellerDashboardSnapshot,
 } from "./seller-dashboard";
 import { getSellerViewInsightsForSellerId } from "./view-stats";
+import {
+  listSellerApplicationAttemptsForProfile,
+  type SellerApplicationAttempt,
+} from "./seller-application-attempts";
 
 const PRODUCT_PAGE = 100;
 const REQUEST_PAGE = 100;
@@ -87,6 +91,7 @@ export type AdminShopDetail = {
   reviewModeration: AdminShopReviewModeration;
   reportCounts: AdminShopReportCounts;
   audit: AuditLogEntry[];
+  previousApplications: SellerApplicationAttempt[];
 };
 
 function adminSdkAvailable(): boolean {
@@ -430,9 +435,10 @@ export async function getAdminShopDetail(
     reviewInsights,
   });
 
-  const [reportCounts, auditRaw] = await Promise.all([
+  const [reportCounts, auditRaw, previousApplications] = await Promise.all([
     countReportsForProductIds(products.map((p) => p.$id)),
     getAuditLogsForResource("seller_profile", profile.$id),
+    listSellerApplicationAttemptsForProfile(profile.$id),
   ]);
 
   const audit = auditRaw.slice(0, AUDIT_CAP).map((entry) => ({
@@ -455,5 +461,6 @@ export async function getAdminShopDetail(
     },
     reportCounts,
     audit,
+    previousApplications,
   };
 }

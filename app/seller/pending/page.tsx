@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 import { SellerApplicationStatus } from "@/components/seller/seller-application-status";
+import { SellerApplyForm } from "@/components/seller/seller-apply-form";
 import { PageHeader } from "@/components/layout/page-header";
 import { ROLE_LABELS, userHasLabel } from "@/lib/backend/roles";
 import { getLoggedInUser } from "@/lib/backend/session";
@@ -36,6 +37,7 @@ export default async function SellerPendingPage() {
         description="Admin review is required before you can open the seller dashboard."
       />
       <SellerApplicationStatus profile={existing} />
+      {existing.status === "rejected" ? <SellerApplyForm /> : null}
     </div>
   );
 }
