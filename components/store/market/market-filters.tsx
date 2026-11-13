@@ -43,7 +43,7 @@ export function MarketFilters({
 
   return (
     <div className="space-y-4">
-      <div className="flex w-full min-w-0 flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+      <div className="flex w-full min-w-0 flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div
           role="group"
           aria-label="Sort listings"
@@ -77,7 +77,7 @@ export function MarketFilters({
         <form
           action="/"
           method="get"
-          className="flex w-full min-w-0 flex-col gap-3 sm:w-auto sm:flex-row sm:flex-wrap sm:items-center sm:gap-2"
+          className="flex w-full min-w-0 max-md:flex-col max-md:gap-3 md:w-auto md:flex-row md:flex-nowrap md:items-center md:gap-2"
         >
           {category ? (
             <input type="hidden" name="category" value={category} />
@@ -86,16 +86,16 @@ export function MarketFilters({
             <input type="hidden" name="sort" value={sort} />
           ) : null}
 
-          <div className="flex w-full min-w-0 items-center gap-2">
+          <div className="flex w-full min-w-0 max-md:w-full items-center gap-2 md:w-auto md:shrink-0">
             <label
               htmlFor="market-minPrice"
-              className="flex h-10 min-w-0 flex-1 items-center gap-1.5 rounded-lg border border-border bg-background px-2.5 focus-within:border-accent sm:max-w-none sm:flex-none sm:gap-2 sm:px-3"
+              className="flex h-10 min-w-0 max-md:flex-1 items-center gap-1.5 rounded-lg border border-border bg-background px-2.5 focus-within:border-accent md:flex-none md:gap-2 md:px-3"
             >
               <span className="shrink-0 text-xs font-medium text-muted-foreground">
                 Min
               </span>
               <span
-                className="hidden shrink-0 text-xs text-muted-foreground sm:inline"
+                className="hidden shrink-0 text-xs text-muted-foreground md:inline"
                 aria-hidden
               >
                 LKR
@@ -108,7 +108,7 @@ export function MarketFilters({
                 pattern="[0-9]*"
                 placeholder="0"
                 defaultValue={minPrice != null ? String(minPrice) : ""}
-                className="min-w-0 flex-1 bg-transparent text-sm tabular-nums outline-none placeholder:text-muted-foreground/70 sm:w-20 sm:flex-none"
+                className="min-w-0 max-md:flex-1 bg-transparent text-sm tabular-nums outline-none placeholder:text-muted-foreground/70 md:w-20 md:flex-none"
               />
             </label>
 
@@ -121,13 +121,13 @@ export function MarketFilters({
 
             <label
               htmlFor="market-maxPrice"
-              className="flex h-10 min-w-0 flex-1 items-center gap-1.5 rounded-lg border border-border bg-background px-2.5 focus-within:border-accent sm:max-w-none sm:flex-none sm:gap-2 sm:px-3"
+              className="flex h-10 min-w-0 max-md:flex-1 items-center gap-1.5 rounded-lg border border-border bg-background px-2.5 focus-within:border-accent md:flex-none md:gap-2 md:px-3"
             >
               <span className="shrink-0 text-xs font-medium text-muted-foreground">
                 Max
               </span>
               <span
-                className="hidden shrink-0 text-xs text-muted-foreground sm:inline"
+                className="hidden shrink-0 text-xs text-muted-foreground md:inline"
                 aria-hidden
               >
                 LKR
@@ -140,15 +140,15 @@ export function MarketFilters({
                 pattern="[0-9]*"
                 placeholder="Any"
                 defaultValue={maxPrice != null ? String(maxPrice) : ""}
-                className="min-w-0 flex-1 bg-transparent text-sm tabular-nums outline-none placeholder:text-muted-foreground/70 sm:w-20 sm:flex-none"
+                className="min-w-0 max-md:flex-1 bg-transparent text-sm tabular-nums outline-none placeholder:text-muted-foreground/70 md:w-20 md:flex-none"
               />
             </label>
           </div>
 
-          <div className="flex w-full items-center gap-2 sm:w-auto">
+          <div className="flex w-full shrink-0 items-center gap-2 max-md:w-full md:w-auto">
             <button
               type="submit"
-              className="h-10 flex-1 rounded-lg bg-accent px-4 text-sm font-semibold text-accent-foreground transition hover:bg-accent-deep sm:flex-none"
+              className="h-10 max-md:flex-1 rounded-lg bg-accent px-4 text-sm font-semibold text-accent-foreground transition hover:bg-accent-deep md:flex-none"
             >
               Filter
             </button>

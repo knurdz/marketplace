@@ -5,7 +5,10 @@ import { QueryToast } from "@/components/auth/query-toast";
 import { ThemeProvider } from "@/components/theme/theme-provider";
 import { Toaster } from "@/components/ui/sonner";
 import {
+  DEFAULT_OG_IMAGE_ALT,
+  DEFAULT_OG_IMAGE_HEIGHT,
   DEFAULT_OG_IMAGE_PATH,
+  DEFAULT_OG_IMAGE_WIDTH,
   getMetadataBase,
   SITE_DESCRIPTION,
   SITE_LOCALE,
@@ -57,7 +60,9 @@ export const metadata: Metadata = {
     images: [
       {
         url: DEFAULT_OG_IMAGE_PATH,
-        alt: SITE_NAME,
+        alt: DEFAULT_OG_IMAGE_ALT,
+        width: DEFAULT_OG_IMAGE_WIDTH,
+        height: DEFAULT_OG_IMAGE_HEIGHT,
       },
     ],
   },
@@ -92,11 +97,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
     <html
       lang="en"
       suppressHydrationWarning
-      className={cn(
-        spaceGrotesk.variable,
-        nunitoSans.variable,
-        "font-sans",
-      )}
+      className={cn(spaceGrotesk.variable, nunitoSans.variable, "font-sans")}
     >
       <body className="min-h-screen antialiased">
         <ThemeProvider>

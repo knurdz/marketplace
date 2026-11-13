@@ -6,7 +6,12 @@ export const SITE_TITLE_DEFAULT = `${SITE_NAME} | Buy Directly from People`;
 export const SITE_DESCRIPTION =
   "Community marketplace in Sri Lanka to buy and sell directly with people. Browse verified local shops, send direct purchase requests, and pay zero platform fees.";
 export const SITE_LOCALE = "en_LK";
-export const DEFAULT_OG_IMAGE_PATH = "/brand/logo.png";
+/** Default social share card (light theme lockup + tagline). */
+export const DEFAULT_OG_IMAGE_PATH = "/brand/og.png";
+export const DEFAULT_OG_IMAGE_WIDTH = 1024;
+export const DEFAULT_OG_IMAGE_HEIGHT = 537;
+export const DEFAULT_OG_IMAGE_ALT =
+  "Knurdz Marketplace — Buy directly from people";
 
 const MAX_META_DESCRIPTION_LENGTH = 160;
 
@@ -31,7 +36,8 @@ export function truncateMetaDescription(
 
   const sliced = cleaned.slice(0, maxLength - 1);
   const lastSpace = sliced.lastIndexOf(" ");
-  const boundary = lastSpace >= Math.floor(maxLength * 0.6) ? lastSpace : sliced.length;
+  const boundary =
+    lastSpace >= Math.floor(maxLength * 0.6) ? lastSpace : sliced.length;
   return `${sliced.slice(0, boundary).replace(/[.,;:!?-]+$/, "")}…`;
 }
 
@@ -75,17 +81,28 @@ export function buildPublicMetadata(
   const canonical = opts.canonicalPath.startsWith("/")
     ? opts.canonicalPath
     : `/${opts.canonicalPath}`;
+  const usingDefaultImage = !opts.image?.url;
   const ogImageUrl = opts.image?.url
     ? toAbsoluteUrl(opts.image.url)
     : toAbsoluteUrl(DEFAULT_OG_IMAGE_PATH);
-  const ogImageAlt = opts.image?.alt?.trim() || `${opts.title} | ${SITE_NAME}`;
+  const ogImageAlt =
+    opts.image?.alt?.trim() ||
+    (usingDefaultImage ? DEFAULT_OG_IMAGE_ALT : `${opts.title} | ${SITE_NAME}`);
 
   const images = [
     {
       url: ogImageUrl,
       alt: ogImageAlt,
-      ...(opts.image?.width ? { width: opts.image.width } : {}),
-      ...(opts.image?.height ? { height: opts.image.height } : {}),
+      ...(opts.image?.width
+        ? { width: opts.image.width }
+        : usingDefaultImage
+          ? { width: DEFAULT_OG_IMAGE_WIDTH }
+          : {}),
+      ...(opts.image?.height
+        ? { height: opts.image.height }
+        : usingDefaultImage
+          ? { height: DEFAULT_OG_IMAGE_HEIGHT }
+          : {}),
     },
   ];
 
@@ -159,7 +176,9 @@ export function buildNoIndexMetadata(
 ): Metadata {
   return {
     title,
-    ...(description ? { description: truncateMetaDescription(description) } : {}),
+    ...(description
+      ? { description: truncateMetaDescription(description) }
+      : {}),
     ...NOINDEX_METADATA,
   };
 }
