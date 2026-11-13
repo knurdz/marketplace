@@ -12,6 +12,7 @@ export type MarketplaceUser = {
   labels: string[];
   status: boolean;
   emailVerification: boolean;
+  isSuperAdmin: boolean;
   $createdAt?: string;
   registration?: string;
 };
@@ -30,6 +31,7 @@ export function rowToMarketplaceUser(row: {
   role: string;
   disabled: boolean;
   emailVerified: boolean;
+  isSuperAdmin?: boolean;
   createdAt?: Date;
 }): MarketplaceUser {
   const image = row.image?.trim();
@@ -41,6 +43,7 @@ export function rowToMarketplaceUser(row: {
     labels: roleToLabels(row.role),
     status: !row.disabled,
     emailVerification: row.emailVerified,
+    isSuperAdmin: row.isSuperAdmin === true,
     $createdAt: row.createdAt?.toISOString(),
     registration: row.createdAt?.toISOString(),
   };

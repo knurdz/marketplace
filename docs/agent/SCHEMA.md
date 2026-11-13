@@ -12,6 +12,8 @@
 | `seller` | Approved seller |
 | `admin` | Platform admin |
 
+`user.is_super_admin` — at most one account may be `true`. That account manages other admins (`/admin/admins`). Other admins keep `admin` role with `is_super_admin = false`.
+
 ## Status enums (canonical)
 
 | Domain | Values |

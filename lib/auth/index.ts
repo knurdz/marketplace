@@ -162,6 +162,12 @@ export function getAuth() {
             defaultValue: false,
             input: false,
           },
+          isSuperAdmin: {
+            type: "boolean",
+            required: false,
+            defaultValue: false,
+            input: false,
+          },
         },
       },
       advanced: {

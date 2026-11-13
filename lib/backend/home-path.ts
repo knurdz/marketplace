@@ -32,7 +32,7 @@ async function isRegistrationCompleteForUser(
 export async function loadSellerStatus(
   user: LabeledUser,
 ): Promise<SellerStatus | null> {
-  if (userHasLabel(user, "admin") || userHasLabel(user, "seller")) {
+  if (userHasLabel(user, "admin")) {
     return null;
   }
   if (!user.$id) return null;

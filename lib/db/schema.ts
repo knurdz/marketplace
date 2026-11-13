@@ -41,6 +41,7 @@ export const authUser = mysqlTable("user", {
   image: varchar("image", { length: 2048 }),
   role: userRoleEnum.notNull().default("buyer"),
   disabled: boolean("disabled").notNull().default(false),
+  isSuperAdmin: boolean("is_super_admin").notNull().default(false),
   createdAt: ts(),
   updatedAt: tsUpdated(),
 });

@@ -1,5 +1,5 @@
-import { headers } from "next/headers";
 import { redirect } from "next/navigation";
+import { getRequestPathname } from "./request-pathname";
 import { getOwnProfile } from "./profiles";
 import { safeNextPath } from "./roles";
 import { getLoggedInUser } from "./session";
@@ -42,8 +42,7 @@ export async function redirectIfRegistrationIncomplete(
   const user = await getLoggedInUser();
   if (!user) return;
 
-  const path =
-    pathname ?? (await headers()).get("x-knurdz-pathname") ?? "";
+  const path = pathname ?? (await getRequestPathname());
   if (pathAllowsIncompleteRegistration(path)) return;
 
   const profile = await getOwnProfile();

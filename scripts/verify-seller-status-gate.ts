@@ -30,17 +30,17 @@ function profile(status: SellerProfile["status"]): SellerProfile {
 
 assert(
   blockedSellerPortalDestination(true, null) === null,
-  "seller label allows portal",
+  "seller label without profile row allows portal",
 );
 assert(
-  blockedSellerPortalDestination(true, profile("pending")) === null,
-  "seller label allows even with pending row",
+  blockedSellerPortalDestination(true, profile("pending")) ===
+    "/seller/pending",
+  "pending profile → status page even with seller label",
 );
-// Shop/settings pages must not redirect labeled sellers to /seller/pending
-// (pending page bounces them back to /seller: redirect loop).
 assert(
-  blockedSellerPortalDestination(true, profile("pending")) !== "/seller/pending",
-  "labeled seller shop/settings must not redirect to pending",
+  blockedSellerPortalDestination(true, profile("rejected")) ===
+    "/seller/pending",
+  "rejected profile → status page even with seller label",
 );
 assert(
   blockedSellerPortalDestination(false, profile("pending")) ===
@@ -60,6 +60,10 @@ assert(
   blockedSellerPortalDestination(false, profile("approved")) === "/",
   "approved without label → home (label is authoritative gate)",
 );
+assert(
+  blockedSellerPortalDestination(true, profile("approved")) === null,
+  "approved label + profile allows portal",
+);
 
 assert(
   homePathForUser({ labels: ["admin"] }) === "/admin",
@@ -67,7 +71,11 @@ assert(
 );
 assert(
   homePathForUser({ labels: ["seller"] }) === "/seller",
-  "seller home",
+  "approved seller home",
+);
+assert(
+  homePathForUser({ labels: ["seller"] }, "rejected") === "/seller/pending",
+  "stale seller label + rejected profile → pending",
 );
 assert(
   homePathForUser({ labels: ["buyer"] }) === "/",
@@ -86,8 +94,16 @@ assert(
   "pending applicant home",
 );
 assert(
+  homePathForUser({ labels: [] }, "rejected") === "/seller/pending",
+  "rejected applicant home",
+);
+assert(
   postLoginPath({ labels: ["seller"] }, "/") === "/",
   "seller may next into market catalog",
+);
+assert(
+  postLoginPath({ labels: ["seller"] }, "/", "rejected") === "/seller/pending",
+  "stale label does not next into market when profile rejected",
 );
 assert(
   postLoginPath({ labels: ["admin"] }, "/products/x") === "/products/x",

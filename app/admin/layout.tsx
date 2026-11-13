@@ -7,6 +7,8 @@ import {
 import { redirectIfRegistrationIncomplete } from "@/lib/backend/registration-complete";
 import { requireLabel } from "@/lib/backend/roles";
 import { buildNoIndexMetadata } from "@/lib/seo/metadata";
+import { getLoggedInUser } from "@/lib/backend/session";
+import { userIsSuperAdmin } from "@/lib/security/super-admin";
 import {
   getAdminPortalSidebarDots,
   type AdminPortalSidebarDots,
@@ -14,7 +16,10 @@ import {
 
 export const metadata: Metadata = buildNoIndexMetadata("Admin Portal");
 
-function buildAdminNav(dots: AdminPortalSidebarDots): PortalNavGroup[] {
+function buildAdminNav(
+  dots: AdminPortalSidebarDots,
+  showAdminAccounts: boolean,
+): PortalNavGroup[] {
   return [
     {
       items: [{ href: "/admin", label: "Dashboard", icon: "dashboard" }],
@@ -42,6 +47,9 @@ function buildAdminNav(dots: AdminPortalSidebarDots): PortalNavGroup[] {
           showDot: dots.sellers,
         },
         { href: "/admin/buyers", label: "Buyers", icon: "users" },
+        ...(showAdminAccounts
+          ? [{ href: "/admin/admins", label: "Admins", icon: "users" as const }]
+          : []),
         {
           href: "/admin/sellers/performance",
           label: "Performance",
@@ -80,12 +88,14 @@ export default async function AdminLayout({
   await requireLabel("admin");
   await redirectIfRegistrationIncomplete();
   const dots = await getAdminPortalSidebarDots();
+  const session = await getLoggedInUser();
+  const showAdminAccounts = userIsSuperAdmin(session);
 
   return (
     <PortalShell
       title="Admin"
       homeHref="/admin"
-      nav={buildAdminNav(dots)}
+      nav={buildAdminNav(dots, showAdminAccounts)}
     >
       {children}
     </PortalShell>

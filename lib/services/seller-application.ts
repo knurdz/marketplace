@@ -62,17 +62,17 @@ export type ParsedShopPoliciesInput =
   | { ok: false; error: string };
 
 /**
- * Where to send a signed-in user without the seller label who hits /seller.
+ * Where to send a signed-in user who hits /seller without approved portal access.
  * null = allow portal; pending/rejected → status UX; else home.
  */
 export function blockedSellerPortalDestination(
   hasSellerLabel: boolean,
   profile: SellerProfile | null,
 ): BlockedSellerPortalDestination {
-  if (hasSellerLabel) return null;
   if (profile?.status === "pending" || profile?.status === "rejected") {
     return "/seller/pending";
   }
+  if (hasSellerLabel) return null;
   return "/";
 }
 

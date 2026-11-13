@@ -126,11 +126,11 @@ export function homePathForUser(
   if (userHasLabel(user, "admin")) {
     return "/admin";
   }
-  if (userHasLabel(user, "seller")) {
-    return "/seller";
-  }
   if (sellerStatus === "pending" || sellerStatus === "rejected") {
     return "/seller/pending";
+  }
+  if (userHasLabel(user, "seller")) {
+    return "/seller";
   }
   return "/";
 }
@@ -149,6 +149,13 @@ export function postLoginPath(
   const safe = safeNextPath(next ?? undefined);
   if (!safe) return roleHome;
 
+  if (sellerStatus === "pending" || sellerStatus === "rejected") {
+    if (pathnameOf(safe) === "/seller/pending") {
+      return safe;
+    }
+    return roleHome;
+  }
+
   if (pathIsPortal(safe, "/admin") && !userHasLabel(user, "admin")) {
     return roleHome;
   }
@@ -157,9 +164,6 @@ export function postLoginPath(
     const pendingPage = pathnameOf(safe) === "/seller/pending";
     if (pendingPage) {
       if (userHasLabel(user, "seller")) return "/seller";
-      if (sellerStatus === "pending" || sellerStatus === "rejected") {
-        return safe;
-      }
       return roleHome;
     }
     if (!userHasLabel(user, "seller")) {

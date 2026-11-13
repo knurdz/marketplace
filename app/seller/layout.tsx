@@ -1,13 +1,15 @@
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
-import { headers } from "next/headers";
 import { redirect } from "next/navigation";
-import { PendingSellerShell } from "@/components/layout/pending-seller-shell";
 import {
   PortalShell,
   type PortalNavGroup,
 } from "@/components/layout/portal-shell";
 import { redirectIfRegistrationIncomplete } from "@/lib/backend/registration-complete";
+import {
+  getRequestPathname,
+  pathIsSellerPendingRoute,
+} from "@/lib/backend/request-pathname";
 import { ROLE_LABELS, requireUser, userHasLabel } from "@/lib/backend/roles";
 import { buildNoIndexMetadata } from "@/lib/seo/metadata";
 import { getSellerMetrics } from "@/lib/services/seller-metrics";
@@ -55,10 +57,10 @@ export default async function SellerLayout({
   children: ReactNode;
 }) {
   const user = await requireUser();
-  const pathname = (await headers()).get("x-knurdz-pathname") ?? "";
+  const pathname = await getRequestPathname();
   await redirectIfRegistrationIncomplete(pathname);
   const hasSellerLabel = userHasLabel(user, ROLE_LABELS.seller);
-  const isPendingPage = pathname === "/seller/pending";
+  const isPendingPage = pathIsSellerPendingRoute(pathname);
   const profile = await getOwnSellerProfile();
   const hasApprovedSellerAccess =
     hasSellerLabel && profile?.status === "approved";
@@ -80,14 +82,15 @@ export default async function SellerLayout({
   }
 
   if (isPendingPage) {
-    if (!profile) {
-      redirect("/");
-    }
-    return <PendingSellerShell>{children}</PendingSellerShell>;
+    return children;
   }
 
-  const dest = blockedSellerPortalDestination(false, profile);
+  const dest = blockedSellerPortalDestination(hasSellerLabel, profile);
   if (dest) {
+    // When the proxy pathname header is missing, avoid redirecting to the same URL.
+    if (dest === "/seller/pending" && !pathname) {
+      return children;
+    }
     redirect(dest);
   }
   redirect("/");

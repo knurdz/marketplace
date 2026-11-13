@@ -11,13 +11,16 @@ export default async function SellerPendingPage() {
     redirect("/login?next=/seller/pending");
   }
 
-  if (userHasLabel(user, ROLE_LABELS.seller)) {
-    redirect("/seller");
-  }
-
   const existing = await getOwnSellerProfile();
   if (!existing) {
     redirect("/register");
+  }
+
+  if (
+    userHasLabel(user, ROLE_LABELS.seller) &&
+    existing.status === "approved"
+  ) {
+    redirect("/seller");
   }
 
   if (existing.status === "approved") {

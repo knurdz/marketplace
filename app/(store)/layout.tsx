@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
-import { headers } from "next/headers";
 import { redirect } from "next/navigation";
+import { getRequestPathname } from "@/lib/backend/request-pathname";
 import { SkipToContent } from "@/components/layout/skip-to-content";
 import { StoreFooter } from "@/components/layout/store-footer";
 import { StoreNavbar } from "@/components/layout/store-navbar";
@@ -25,7 +25,7 @@ export default async function StoreLayout({
   children: ReactNode;
 }) {
   const authUser = await getLoggedInUser();
-  const pathname = (await headers()).get("x-knurdz-pathname") ?? "";
+  const pathname = await getRequestPathname();
 
   await redirectIfRegistrationIncomplete(pathname);
 
