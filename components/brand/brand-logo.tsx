@@ -18,7 +18,7 @@ export function BrandLogo({
   className,
   lightClassName,
   priority = false,
-  themeAware = false,
+  themeAware = true,
 }: BrandLogoProps) {
   if (!themeAware) {
     return (
@@ -56,14 +56,23 @@ export function BrandLogo({
   );
 }
 
-export function BrandLogoLink({ className, priority = false }: BrandLogoProps) {
+export function BrandLogoLink({
+  className,
+  priority = false,
+  themeAware = true,
+  lightClassName,
+}: BrandLogoProps) {
   return (
     <Link
       href="/"
       className={cn("inline-flex shrink-0 items-center", className)}
       aria-label="Knurdz Marketplace home"
     >
-      <BrandLogo priority={priority} />
+      <BrandLogo
+        priority={priority}
+        themeAware={themeAware}
+        lightClassName={lightClassName}
+      />
     </Link>
   );
 }
