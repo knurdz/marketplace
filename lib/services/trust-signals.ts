@@ -9,10 +9,15 @@ import {
 } from "@/lib/backend/config";
 import { requireLabel } from "@/lib/backend/roles";
 import { createAdminClient } from "@/lib/backend/server";
+import { and, count, eq, inArray } from "drizzle-orm";
+import { getDb } from "@/lib/db/client";
+import { products, purchaseRequests, reports } from "@/lib/db/schema";
 import {
   evaluateBadgeEligibility,
   evaluateFraudFlags,
   FRAUD_ROLLING_WINDOW_DAYS,
+  MIN_ACCOUNT_AGE_DAYS_FOR_BADGE,
+  MIN_COMPLETED_ORDERS_FOR_BADGE,
   OPEN_REPORT_STATUSES,
   type TrustBankSlip,
   type TrustOrder,
@@ -525,5 +530,51 @@ export async function listVerifiedSellers(): Promise<VerifiedSellerRow[]> {
     return verified;
   } catch {
     return [];
+  }
+}
+
+/**
+ * Public check for whether an approved seller qualifies for the Verified badge on the storefront.
+ */
+export async function isSellerVerified(
+  sellerId: string,
+  createdAt: string | Date | null,
+): Promise<boolean> {
+  if (!sellerId || !createdAt || !hasDatabaseConfig()) return false;
+  const createdDate = new Date(createdAt);
+  if (Number.isNaN(createdDate.getTime())) return false;
+  const ageDays = (Date.now() - createdDate.getTime()) / (1000 * 60 * 60 * 24);
+  if (ageDays < MIN_ACCOUNT_AGE_DAYS_FOR_BADGE) return false;
+
+  const db = await getDb();
+  if (!db) return false;
+
+  try {
+    const [sales] = await db
+      .select({ count: count() })
+      .from(purchaseRequests)
+      .where(
+        and(
+          eq(purchaseRequests.sellerId, sellerId),
+          eq(purchaseRequests.status, "sold"),
+        ),
+      );
+
+    if ((sales?.count ?? 0) < MIN_COMPLETED_ORDERS_FOR_BADGE) return false;
+
+    const [openReports] = await db
+      .select({ count: count() })
+      .from(reports)
+      .innerJoin(products, eq(reports.productId, products.id))
+      .where(
+        and(
+          eq(products.sellerId, sellerId),
+          inArray(reports.status, OPEN_REPORT_STATUSES),
+        ),
+      );
+
+    return (openReports?.count ?? 0) === 0;
+  } catch {
+    return false;
   }
 }
