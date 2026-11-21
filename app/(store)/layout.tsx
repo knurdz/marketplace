@@ -12,6 +12,7 @@ import {
   pathIsPublicCatalog,
   pathIsPublicStoreException,
   shouldLeaveBuyerStorefront,
+  userHasLabel,
 } from "@/lib/backend/roles";
 import { redirectIfRegistrationIncomplete } from "@/lib/backend/registration-complete";
 import { getLoggedInUser } from "@/lib/backend/session";
@@ -35,10 +36,14 @@ export default async function StoreLayout({
     !(pathIsPublicCatalog(pathname) && mayBrowsePublicCatalog(authUser))
   ) {
     const sellerStatus = await loadSellerStatus(authUser);
-    const leave = shouldLeaveBuyerStorefront(authUser, sellerStatus);
-    const home = homePathForUser(authUser, sellerStatus);
-    if (leave) {
-      redirect(home);
+    const isApprovedSeller =
+      userHasLabel(authUser, "seller") && sellerStatus === "approved";
+    if (!isApprovedSeller) {
+      const leave = shouldLeaveBuyerStorefront(authUser, sellerStatus);
+      const home = homePathForUser(authUser, sellerStatus);
+      if (leave) {
+        redirect(home);
+      }
     }
   }
 
@@ -48,7 +53,7 @@ export default async function StoreLayout({
     : null;
   const user = authUser ? toSessionUserView(authUser) : null;
   const counts =
-    user && !portalHomeForSessionUser(user)
+    user && !user.labels.includes("admin")
       ? await getOwnBuyerCommerceCounts()
       : null;
 

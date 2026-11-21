@@ -23,7 +23,7 @@ import {
 } from "@/components/ui/breadcrumb";
 import { BUCKET_PRODUCT_IMAGES } from "@/lib/backend/config";
 import { getOwnProfile } from "@/lib/backend/profiles";
-import { mayBrowsePublicCatalog } from "@/lib/backend/roles";
+import { ROLE_LABELS, userHasLabel } from "@/lib/backend/roles";
 import { getLoggedInUser } from "@/lib/backend/session";
 import { getFilePreviewUrl } from "@/lib/backend/storage-urls";
 import { buildNoIndexMetadata, buildPublicMetadata } from "@/lib/seo/metadata";
@@ -129,8 +129,9 @@ export default async function ProductPage({ params }: ProductPageProps) {
 
   const category = categories.find((entry) => entry.$id === product.categoryId);
   const priceLabel = formatProductPrice(product);
-  const isPortalBrowser = Boolean(user && mayBrowsePublicCatalog(user));
-  const canBuy = isProductPurchasable(product) && !isPortalBrowser;
+  const isAdmin = Boolean(user && userHasLabel(user, ROLE_LABELS.admin));
+  const isOwnListing = Boolean(user && user.$id === product.sellerId);
+  const canBuy = isProductPurchasable(product) && !isAdmin && !isOwnListing;
   const loginHref = `/login?next=${encodeURIComponent(`/products/${product.$id}`)}`;
   const buyerHasPhone = Boolean(profile?.phone);
   const sellerHasPhone = Boolean(sellerPhone);
@@ -239,11 +240,13 @@ export default async function ProductPage({ params }: ProductPageProps) {
           </div>
 
           <div className="mt-6 flex flex-wrap items-end gap-3">
-            {isPortalBrowser ? (
+            {isAdmin ? (
               <p className="text-sm text-muted-foreground">
-                Signed in as{" "}
-                {user && user.labels.includes("admin") ? "admin" : "seller"}.
-                Browse only. Buy requests stay with buyer accounts.
+                Signed in as admin. Browse only. Buy requests stay with shopper accounts.
+              </p>
+            ) : isOwnListing ? (
+              <p className="text-sm text-muted-foreground">
+                This is your own listing.
               </p>
             ) : canBuy ? (
               <BuyRequestButton
@@ -262,7 +265,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
               </p>
             )}
 
-            {!isPortalBrowser ? (
+            {!isAdmin && !isOwnListing ? (
               <WishlistToggleButton
                 productId={product.$id}
                 initialSaved={saved}

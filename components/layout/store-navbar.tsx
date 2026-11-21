@@ -99,15 +99,23 @@ export function StoreNavbar({
         <div className="hidden shrink-0 items-center justify-end gap-1 md:flex">
           {user ? (
             <>
-              {portalHome ? (
+              {portalHome === "/admin" ? (
                 <Button variant="ghost" size="sm" className="gap-2" asChild>
                   <Link href={portalHome}>
                     <LayoutDashboard className="size-5" aria-hidden />
-                    {portalLabel} portal
+                    Admin portal
                   </Link>
                 </Button>
               ) : (
                 <>
+                  {portalHome === "/seller" ? (
+                    <Button variant="ghost" size="sm" className="gap-2" asChild>
+                      <Link href={portalHome}>
+                        <LayoutDashboard className="size-5" aria-hidden />
+                        Seller portal
+                      </Link>
+                    </Button>
+                  ) : null}
                   <Button variant="ghost" size="icon" className="relative" asChild>
                     <Link href="/wishlist" aria-label={wishlistAriaLabel(wishlistCount)}>
                       <Heart className="size-5" aria-hidden />

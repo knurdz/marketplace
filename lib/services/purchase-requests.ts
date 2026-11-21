@@ -13,7 +13,7 @@ import {
   TABLE_PURCHASE_REQUESTS,
   hasDatabaseConfig,
 } from "@/lib/backend/config";
-import { mayBrowsePublicCatalog } from "@/lib/backend/roles";
+import { ROLE_LABELS, userHasLabel } from "@/lib/backend/roles";
 import { createAdminClient, createSessionClient } from "@/lib/backend/server";
 import { getActiveUserById, getLoggedInUser } from "@/lib/backend/session";
 import { getDb } from "@/lib/db/client";
@@ -210,10 +210,10 @@ export async function createPurchaseRequest(input: {
     };
   }
 
-  if (mayBrowsePublicCatalog(user)) {
+  if (userHasLabel(user, ROLE_LABELS.admin)) {
     return {
       ok: false,
-      error: "Admin and seller accounts cannot send buy requests.",
+      error: "Admin accounts cannot send buy requests.",
       errorCode: PURCHASE_REQUEST_ERROR_CODES.NOT_ALLOWED,
     };
   }
