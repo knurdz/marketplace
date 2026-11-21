@@ -1,5 +1,6 @@
 import Link from "next/link";
 import type { ProductCatalogSort } from "@/lib/services/products";
+import type { ProductCondition } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
 type MarketFiltersProps = {
@@ -7,6 +8,7 @@ type MarketFiltersProps = {
   minPrice?: number | null;
   maxPrice?: number | null;
   sort: ProductCatalogSort;
+  condition?: ProductCondition | null;
   invalidPriceRange?: boolean;
 };
 
@@ -16,17 +18,25 @@ const SORT_OPTIONS: { value: ProductCatalogSort; label: string }[] = [
   { value: "price_desc", label: "Price ↓" },
 ];
 
+const CONDITION_OPTIONS = [
+  { value: "", label: "All" },
+  { value: "brand_new", label: "Brand New" },
+  { value: "used", label: "Used" },
+] as const;
+
 function buildMarketHref(params: {
   category?: string | null;
   minPrice?: number | null;
   maxPrice?: number | null;
   sort?: ProductCatalogSort;
+  condition?: ProductCondition | null;
 }): string {
   const query = new URLSearchParams();
   if (params.category) query.set("category", params.category);
   if (params.minPrice != null) query.set("minPrice", String(params.minPrice));
   if (params.maxPrice != null) query.set("maxPrice", String(params.maxPrice));
   if (params.sort && params.sort !== "newest") query.set("sort", params.sort);
+  if (params.condition) query.set("condition", params.condition);
   const qs = query.toString();
   return qs ? `/?${qs}#browse` : "/#browse";
 }
@@ -36,42 +46,77 @@ export function MarketFilters({
   minPrice,
   maxPrice,
   sort,
+  condition,
   invalidPriceRange = false,
 }: MarketFiltersProps) {
   const hasPriceFilter = minPrice != null || maxPrice != null;
-  const clearHref = buildMarketHref({ category, sort });
+  const clearHref = buildMarketHref({ category, sort, condition });
 
   return (
     <div className="space-y-4">
       <div className="flex w-full min-w-0 flex-col gap-4 md:flex-row md:items-center md:justify-between">
-        <div
-          role="group"
-          aria-label="Sort listings"
-          className="inline-flex flex-wrap gap-1 rounded-full border border-border bg-muted/40 p-1"
-        >
-          {SORT_OPTIONS.map((option) => {
-            const active = sort === option.value;
-            return (
-              <Link
-                key={option.value}
-                href={buildMarketHref({
-                  category,
-                  minPrice,
-                  maxPrice,
-                  sort: option.value,
-                })}
-                aria-current={active ? "page" : undefined}
-                className={cn(
-                  "rounded-full px-3.5 py-1.5 text-sm font-medium transition",
-                  active
-                    ? "bg-background text-foreground shadow-sm"
-                    : "text-muted-foreground hover:text-foreground",
-                )}
-              >
-                {option.label}
-              </Link>
-            );
-          })}
+        <div className="flex flex-wrap items-center gap-3">
+          <div
+            role="group"
+            aria-label="Sort listings"
+            className="inline-flex flex-wrap gap-1 rounded-full border border-border bg-muted/40 p-1"
+          >
+            {SORT_OPTIONS.map((option) => {
+              const active = sort === option.value;
+              return (
+                <Link
+                  key={option.value}
+                  href={buildMarketHref({
+                    category,
+                    minPrice,
+                    maxPrice,
+                    sort: option.value,
+                    condition,
+                  })}
+                  aria-current={active ? "page" : undefined}
+                  className={cn(
+                    "rounded-full px-3.5 py-1.5 text-sm font-medium transition",
+                    active
+                      ? "bg-background text-foreground shadow-sm"
+                      : "text-muted-foreground hover:text-foreground",
+                  )}
+                >
+                  {option.label}
+                </Link>
+              );
+            })}
+          </div>
+
+          <div
+            role="group"
+            aria-label="Filter by condition"
+            className="inline-flex flex-wrap gap-1 rounded-full border border-border bg-muted/40 p-1"
+          >
+            {CONDITION_OPTIONS.map((option) => {
+              const active = (condition ?? "") === option.value;
+              return (
+                <Link
+                  key={option.value || "all"}
+                  href={buildMarketHref({
+                    category,
+                    minPrice,
+                    maxPrice,
+                    sort,
+                    condition: (option.value as ProductCondition) || null,
+                  })}
+                  aria-current={active ? "page" : undefined}
+                  className={cn(
+                    "rounded-full px-3.5 py-1.5 text-sm font-medium transition",
+                    active
+                      ? "bg-background text-foreground shadow-sm"
+                      : "text-muted-foreground hover:text-foreground",
+                  )}
+                >
+                  {option.label}
+                </Link>
+              );
+            })}
+          </div>
         </div>
 
         <form
@@ -84,6 +129,9 @@ export function MarketFilters({
           ) : null}
           {sort !== "newest" ? (
             <input type="hidden" name="sort" value={sort} />
+          ) : null}
+          {condition ? (
+            <input type="hidden" name="condition" value={condition} />
           ) : null}
 
           <div className="flex w-full min-w-0 max-md:w-full items-center gap-2 md:w-auto md:shrink-0">

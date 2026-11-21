@@ -18,6 +18,7 @@ type SearchPageProps = {
     minPrice?: string;
     maxPrice?: string;
     sort?: string;
+    condition?: string;
   }>;
 };
 
@@ -65,6 +66,7 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
   const searchResult = await searchActiveProducts(normalized, {
     limit: CATALOG_PAGE_SIZE,
     categoryId: selectedCategory?.$id,
+    condition: catalogParams.condition,
     minPrice: catalogParams.minPrice,
     maxPrice: catalogParams.maxPrice,
     sort: catalogParams.sort,
@@ -77,7 +79,8 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
   const hasActiveFilters =
     catalogParams.minPrice != null ||
     catalogParams.maxPrice != null ||
-    catalogParams.sort !== "newest";
+    catalogParams.sort !== "newest" ||
+    catalogParams.condition != null;
 
   let emptyTitle = "No matches";
   let emptyDescription = `Nothing active matched “${normalized}”.`;
