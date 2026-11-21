@@ -7,6 +7,8 @@ import { Button } from "@/components/ui/button";
 import { buildPublicMetadata } from "@/lib/seo/metadata";
 import { countActiveProducts, listCategories } from "@/lib/services";
 
+export const dynamic = "force-dynamic";
+
 export const metadata: Metadata = buildPublicMetadata({
   title: "Browse Categories",
   description:
