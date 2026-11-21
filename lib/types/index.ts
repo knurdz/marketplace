@@ -22,6 +22,7 @@ export {
   DRAFT_PRODUCT_STATUS,
   OPEN_PURCHASE_REQUEST_STATUS,
   PENDING_REVIEW_PRODUCT_STATUS,
+  PRODUCT_CONDITIONS,
   PRODUCT_STATUSES,
   PURCHASE_REQUEST_STATUSES,
   REJECTED_PRODUCT_STATUS,
@@ -29,6 +30,7 @@ export {
   REVIEW_STATUSES,
   SELLER_STATUSES,
   canSellerResolvePurchaseRequest,
+  isProductCondition,
   isProductStatus,
   isPurchaseRequestStatus,
   isReportStatus,
@@ -43,6 +45,7 @@ export type {
   RevisionImagePatch,
 } from "./listing-revision";
 export type {
+  ProductCondition,
   ProductStatus,
   PurchaseRequestStatus,
   ReportStatus,

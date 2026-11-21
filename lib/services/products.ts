@@ -28,9 +28,10 @@ import {
   products as productsTable,
   sellerProfiles as sellerProfilesTable,
 } from "@/lib/db/schema";
-import type { Product, ProductImage } from "@/lib/types";
+import type { Product, ProductCondition, ProductImage } from "@/lib/types";
 import {
   ACTIVE_PRODUCT_STATUS,
+  isProductCondition,
   isProductStatus,
 } from "@/lib/types";
 
@@ -68,6 +69,10 @@ export function asProduct(row: Record<string, unknown>): Product | null {
   }
 
   const price = asNumber(row.price);
+  const conditionRaw = row.condition;
+  const condition: ProductCondition = isProductCondition(conditionRaw)
+    ? conditionRaw
+    : "brand_new";
 
   return {
     $id,
@@ -78,6 +83,7 @@ export function asProduct(row: Record<string, unknown>): Product | null {
     price,
     isFree: price === 0,
     status: statusRaw,
+    condition,
     stock: Math.max(0, Math.floor(asNumber(row.stock))),
     available: asBoolean(row.available, true),
     currency: asNullableString(row.currency) || "LKR",
@@ -228,6 +234,7 @@ type DrizzleProductRow = {
   price: string;
   isFree: boolean;
   status: string;
+  condition: string;
   stock: number;
   available: boolean;
   currency: string;
@@ -245,6 +252,7 @@ function productFromDrizzleRow(row: DrizzleProductRow): Product | null {
     price: row.price,
     isFree: row.isFree,
     status: row.status,
+    condition: row.condition,
     stock: row.stock,
     available: row.available,
     currency: row.currency,
@@ -344,6 +352,7 @@ export async function listActiveProductsPage(opts?: {
         price: productsTable.price,
         isFree: productsTable.isFree,
         status: productsTable.status,
+        condition: productsTable.condition,
         stock: productsTable.stock,
         available: productsTable.available,
         currency: productsTable.currency,
@@ -760,6 +769,7 @@ export async function searchActiveProducts(
         price: productsTable.price,
         isFree: productsTable.isFree,
         status: productsTable.status,
+        condition: productsTable.condition,
         stock: productsTable.stock,
         available: productsTable.available,
         currency: productsTable.currency,

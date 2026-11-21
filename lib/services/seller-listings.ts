@@ -31,13 +31,14 @@ import {
   RATE_LIMIT_MESSAGE,
   RATE_LIMITS,
 } from "@/lib/security/rate-limit";
-import type { Product, ProductImage, ProductStatus } from "@/lib/types";
+import type { Product, ProductCondition, ProductImage, ProductStatus } from "@/lib/types";
 import {
   ACTIVE_PRODUCT_STATUS,
   ARCHIVED_PRODUCT_STATUS,
   DRAFT_PRODUCT_STATUS,
   PENDING_REVIEW_PRODUCT_STATUS,
   REJECTED_PRODUCT_STATUS,
+  isProductCondition,
 } from "@/lib/types/status";
 import {
   discardRevisionCore,
@@ -63,6 +64,7 @@ export type CreateDraftProductInput = {
   categoryId: string;
   price: unknown;
   stock: unknown;
+  condition?: unknown;
   available?: unknown;
 };
 
@@ -88,6 +90,7 @@ export type ParsedCreateDraftProductInput =
       categoryId: string;
       price: number;
       stock: number;
+      condition: ProductCondition;
       isFree: boolean;
     }
   | { ok: false; error: string };
@@ -201,6 +204,11 @@ export function parseCreateDraftProductInput(
   const stock = parseStock(input.stock);
   if (typeof stock !== "number") return stock;
 
+  const rawCondition = input.condition;
+  const condition: ProductCondition = isProductCondition(rawCondition)
+    ? rawCondition
+    : "brand_new";
+
   return {
     ok: true,
     title,
@@ -208,6 +216,7 @@ export function parseCreateDraftProductInput(
     categoryId,
     price,
     stock,
+    condition,
     isFree: price === 0,
   };
 }
@@ -415,6 +424,7 @@ export async function updateOwnProductCore(
         description: parsed.description,
         price: parsed.price,
         isFree: parsed.isFree,
+        condition: parsed.condition,
         stock: parsed.stock,
         available,
       },
@@ -799,6 +809,7 @@ export async function createDraftProductCore(
         price: parsed.price,
         isFree: parsed.isFree,
         status: DRAFT_PRODUCT_STATUS,
+        condition: parsed.condition,
         stock: parsed.stock,
         available:
           input.available === undefined

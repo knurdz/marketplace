@@ -11,7 +11,7 @@ import {
   createDraftListing,
   type CreateListingActionState,
 } from "@/lib/backend/seller-listing-actions";
-import type { Category } from "@/lib/types";
+import type { Category, ProductCondition } from "@/lib/types";
 import {
   ListingFormBody,
   ListingFormCheckbox,
@@ -38,6 +38,7 @@ type ListingDraft = {
   categoryId: string;
   price: string;
   stock: string;
+  condition: ProductCondition;
   isFree: boolean;
   available: boolean;
 };
@@ -48,6 +49,7 @@ const emptyDraft: ListingDraft = {
   categoryId: "",
   price: "",
   stock: "1",
+  condition: "brand_new",
   isFree: false,
   available: true,
 };
@@ -89,6 +91,7 @@ export function CreateListingForm({
       writeControl(form, "title", saved.title);
       writeControl(form, "description", saved.description);
       writeControl(form, "categoryId", saved.categoryId);
+      writeControl(form, "condition", saved.condition);
       writeControl(form, "price", saved.isFree ? "0" : saved.price);
       writeControl(form, "stock", saved.stock);
       writeChecked(form, "isFree", saved.isFree);
@@ -196,6 +199,23 @@ export function CreateListingForm({
                         {c.name}
                       </option>
                     ))}
+                  </select>
+                </ListingFormField>
+
+                <ListingFormField label="Condition" htmlFor="condition">
+                  <select
+                    id="condition"
+                    name="condition"
+                    required
+                    disabled={pending}
+                    className={listingSelectClassName}
+                    value={draft.condition}
+                    onChange={(event) =>
+                      patchDraft({ condition: event.target.value as ProductCondition })
+                    }
+                  >
+                    <option value="brand_new">Brand New</option>
+                    <option value="used">Used</option>
                   </select>
                 </ListingFormField>
               </ListingFormSection>

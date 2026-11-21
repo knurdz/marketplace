@@ -12,6 +12,7 @@ export type ProductRevisionPatch = {
   description?: string;
   price?: number;
   isFree?: boolean;
+  condition?: import("./status").ProductCondition;
   stock?: number;
   available?: boolean;
   images?: RevisionImagePatch[];

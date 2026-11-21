@@ -3,6 +3,7 @@
  */
 
 import type {
+  ProductCondition,
   ProductStatus,
   PurchaseRequestStatus,
   ReportStatus,
@@ -27,6 +28,7 @@ export type Product = {
   price: number;
   isFree: boolean;
   status: ProductStatus;
+  condition: ProductCondition;
   stock: number;
   available: boolean;
   currency: string;

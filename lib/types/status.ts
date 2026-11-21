@@ -12,6 +12,9 @@ export const PRODUCT_STATUSES = [
 ] as const;
 export type ProductStatus = (typeof PRODUCT_STATUSES)[number];
 
+export const PRODUCT_CONDITIONS = ["brand_new", "used"] as const;
+export type ProductCondition = (typeof PRODUCT_CONDITIONS)[number];
+
 export const PURCHASE_REQUEST_STATUSES = [
   "requested",
   "sold",
@@ -59,6 +62,10 @@ function isOneOf<T extends string>(
 
 export function isProductStatus(value: unknown): value is ProductStatus {
   return isOneOf(value, PRODUCT_STATUSES);
+}
+
+export function isProductCondition(value: unknown): value is ProductCondition {
+  return isOneOf(value, PRODUCT_CONDITIONS);
 }
 
 export function isPurchaseRequestStatus(
