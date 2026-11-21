@@ -5,7 +5,7 @@ import { PageHeader } from "@/components/layout/page-header";
 import { EmptyState } from "@/components/layout/empty-state";
 import { Button } from "@/components/ui/button";
 import { buildPublicMetadata } from "@/lib/seo/metadata";
-import { listCategories } from "@/lib/services";
+import { countActiveProducts, listCategories } from "@/lib/services";
 
 export const metadata: Metadata = buildPublicMetadata({
   title: "Browse Categories",
@@ -16,6 +16,10 @@ export const metadata: Metadata = buildPublicMetadata({
 
 export default async function CategoriesPage() {
   const categories = await listCategories();
+  const counts = await Promise.all(
+    categories.map((c) => countActiveProducts({ categoryId: c.$id })),
+  );
+  const countMap = new Map(categories.map((c, i) => [c.$id, counts[i]]));
 
   return (
     <main className="mx-auto w-full max-w-6xl px-4 py-10 sm:px-6 lg:px-8">
@@ -38,31 +42,34 @@ export default async function CategoriesPage() {
         />
       ) : (
         <ul className="mt-10 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-          {categories.map((category) => (
-            <li key={category.$id}>
-              <Link
-                href={`/categories/${category.slug}`}
-                className="flex min-h-24 items-center gap-4 rounded-xl border border-border bg-card px-5 py-4 transition-colors hover:border-foreground/20 hover:bg-card-hover"
-              >
-                <span className="size-14 shrink-0 overflow-hidden rounded-full border border-border bg-muted">
-                  <CategoryImage
-                    name={category.name}
-                    slug={category.slug}
-                    imageFileId={category.imageFileId}
-                    fallbackClassName="bg-muted text-foreground"
-                  />
-                </span>
-                <span className="min-w-0 flex-1">
-                  <span className="block text-lg font-semibold tracking-tight">
-                    {category.name}
+          {categories.map((category) => {
+            const count = countMap.get(category.$id) ?? 0;
+            return (
+              <li key={category.$id}>
+                <Link
+                  href={`/categories/${category.slug}`}
+                  className="flex min-h-24 items-center gap-4 rounded-xl border border-border bg-card px-5 py-4 transition-colors hover:border-foreground/20 hover:bg-card-hover"
+                >
+                  <span className="size-14 shrink-0 overflow-hidden rounded-full border border-border bg-muted">
+                    <CategoryImage
+                      name={category.name}
+                      slug={category.slug}
+                      imageFileId={category.imageFileId}
+                      fallbackClassName="bg-muted text-foreground"
+                    />
                   </span>
-                  <span className="mt-1 block font-mono text-xs text-muted-foreground">
-                    {category.slug}
+                  <span className="min-w-0 flex-1">
+                    <span className="block text-lg font-semibold tracking-tight">
+                      {category.name}
+                    </span>
+                    <span className="mt-1 block text-xs text-muted-foreground">
+                      {count === 1 ? "1 listing" : `${count} listings`}
+                    </span>
                   </span>
-                </span>
-              </Link>
-            </li>
-          ))}
+                </Link>
+              </li>
+            );
+          })}
         </ul>
       )}
     </main>
