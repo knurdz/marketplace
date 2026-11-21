@@ -127,6 +127,13 @@
       "when": 1795800000000,
       "tag": "0017_release_rejected_slugs",
       "breakpoints": true
+    },
+    {
+      "idx": 18,
+      "version": "5",
+      "when": 1795900000000,
+      "tag": "0018_product_condition",
+      "breakpoints": true
     }
   ]
 }
