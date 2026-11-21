@@ -9,6 +9,7 @@ import { buildNoIndexMetadata, buildPublicMetadata } from "@/lib/seo/metadata";
 import {
   computeSellerReviewMetrics,
   getPublicSellerBySlug,
+  isSellerVerified,
   listActiveProductsPage,
   listApprovedSellerReviews,
   listCoverImagesByProductIds,
@@ -60,12 +61,13 @@ export default async function ShopPage({ params }: ShopPageProps) {
     targetId: seller.userId,
   });
 
-  const [catalogPage, reviews] = await Promise.all([
+  const [catalogPage, reviews, isVerified] = await Promise.all([
     listActiveProductsPage({
       sellerId: seller.userId,
       limit: CATALOG_PAGE_SIZE,
     }),
     listApprovedSellerReviews(seller.userId),
+    isSellerVerified(seller.userId, seller.$createdAt),
   ]);
   const products = catalogPage.products;
   const covers = await listCoverImagesByProductIds(products.map((p) => p.$id));
@@ -83,6 +85,7 @@ export default async function ShopPage({ params }: ShopPageProps) {
         listingCount={catalogPage.total}
         metrics={metrics}
         reviews={reviews}
+        isVerified={isVerified}
       />
 
       <div

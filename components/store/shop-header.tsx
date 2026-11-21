@@ -70,6 +70,7 @@ type ShopHeaderProps = {
   listingCount: number;
   metrics: SellerReviewMetrics;
   reviews: Review[];
+  isVerified?: boolean;
 };
 
 export function ShopHeader({
@@ -78,6 +79,7 @@ export function ShopHeader({
   listingCount,
   metrics,
   reviews,
+  isVerified = false,
 }: ShopHeaderProps) {
   const initial = seller.shopName.trim().charAt(0).toUpperCase() || "?";
   const sellingSince = formatSellingSince(seller.$createdAt);
@@ -114,7 +116,7 @@ export function ShopHeader({
                 <h1 className="min-w-0 truncate text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
                   {seller.shopName}
                 </h1>
-                <VerifiedSellerMark />
+                {isVerified ? <VerifiedSellerMark /> : null}
               </div>
               <p className="mt-0.5 truncate text-sm text-muted-foreground">
                 @{seller.slug}

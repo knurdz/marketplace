@@ -304,6 +304,7 @@ export {
   type AdminPortalSidebarDots,
 } from "./portal-sidebar-dots";
 export { getAdminShopDetail } from "./admin-shop-detail";
+export { isSellerVerified } from "./trust-signals";
 export type {
   AdminShopAccount,
   AdminShopConversion,
