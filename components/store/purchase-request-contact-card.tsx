@@ -1,3 +1,4 @@
+import { ShieldCheck } from "lucide-react";
 import type { PurchaseRequestContact } from "@/lib/types";
 import { emailHref, phoneHref } from "@/lib/security/contact";
 import { cn } from "@/lib/utils";
@@ -133,15 +134,22 @@ export function PurchaseRequestContactCard({
         )}
       </dl>
 
-      <p
+      <div
         className={cn(
-          "text-xs leading-relaxed text-muted-foreground",
+          "rounded-lg border border-border/80 bg-muted/20 p-3 text-xs leading-relaxed text-muted-foreground",
           !isPortal && "mt-3",
         )}
       >
-        Arrange payment and delivery directly. The marketplace does not process
-        payments.
-      </p>
+        <div className="flex items-start gap-2">
+          <ShieldCheck className="mt-0.5 size-4 shrink-0 text-accent" />
+          <div className="space-y-1">
+            <p className="font-semibold text-foreground">Transaction Safety</p>
+            <p>
+              Arrange payment and handover directly. Meet in populated public locations, inspect item condition before paying, and never share banking passwords.
+            </p>
+          </div>
+        </div>
+      </div>
     </section>
   );
 }
