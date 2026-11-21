@@ -285,6 +285,33 @@ export default async function ProductPage({ params }: ProductPageProps) {
             </p>
           </section>
 
+          {/* Seller Policies */}
+          {seller && (seller.shippingPolicy || seller.returnPolicy) ? (
+            <section aria-labelledby="policies-heading" className="mt-6 border-t border-border pt-6 space-y-3">
+              <h2 id="policies-heading" className="text-sm font-semibold tracking-tight text-foreground">
+                Seller Policies
+              </h2>
+              <div className="grid gap-3 sm:grid-cols-2 text-xs">
+                {seller.shippingPolicy ? (
+                  <div className="rounded-lg border border-border/70 bg-muted/20 p-3.5 space-y-1">
+                    <p className="font-semibold text-foreground">Shipping Policy</p>
+                    <p className="whitespace-pre-wrap text-muted-foreground leading-relaxed">
+                      {seller.shippingPolicy}
+                    </p>
+                  </div>
+                ) : null}
+                {seller.returnPolicy ? (
+                  <div className="rounded-lg border border-border/70 bg-muted/20 p-3.5 space-y-1">
+                    <p className="font-semibold text-foreground">Return Policy</p>
+                    <p className="whitespace-pre-wrap text-muted-foreground leading-relaxed">
+                      {seller.returnPolicy}
+                    </p>
+                  </div>
+                ) : null}
+              </div>
+            </section>
+          ) : null}
+
           {/* Metadata Bar & Report Listing Action */}
           <div className="mt-8 flex items-center justify-between border-t border-border/60 pt-4 text-xs text-muted-foreground">
             <span>

@@ -23,7 +23,7 @@ export function ProductImageGallery({
   if (!current) {
     return (
       <div
-        className="flex aspect-square w-full flex-col items-center justify-center rounded-2xl border border-border bg-card p-8 text-center"
+        className="flex aspect-square max-h-[480px] w-full flex-col items-center justify-center rounded-2xl border border-border bg-card p-8 text-center"
         aria-label="No product images"
       >
         <div className="flex size-14 items-center justify-center rounded-2xl border border-border/80 bg-background-alt text-muted-foreground/60 shadow-xs">
@@ -38,7 +38,7 @@ export function ProductImageGallery({
 
   return (
     <div className="space-y-3">
-      <div className="relative aspect-square w-full overflow-hidden rounded-xl border border-border bg-muted/20">
+      <div className="relative aspect-square max-h-[480px] w-full overflow-hidden rounded-xl border border-border bg-muted/20">
         <StorageImage
           src={getFilePreviewUrl(BUCKET_PRODUCT_IMAGES, current.fileId, {
             width: 960,
@@ -46,7 +46,7 @@ export function ProductImageGallery({
           })}
           alt={current.alt ?? productTitle}
           className="h-full w-full"
-          imgClassName="object-cover"
+          imgClassName="object-contain"
           priority
         />
       </div>
