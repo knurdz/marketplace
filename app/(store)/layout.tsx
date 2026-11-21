@@ -16,7 +16,7 @@ import {
 } from "@/lib/backend/roles";
 import { redirectIfRegistrationIncomplete } from "@/lib/backend/registration-complete";
 import { getLoggedInUser } from "@/lib/backend/session";
-import { portalHomeForSessionUser, toSessionUserView } from "@/lib/backend/session-user";
+import { toSessionUserView } from "@/lib/backend/session-user";
 import { resolveAvatarUrl } from "@/lib/backend/storage-urls";
 import { getOwnBuyerCommerceCounts } from "@/lib/services/buyer-commerce-counts";
 
