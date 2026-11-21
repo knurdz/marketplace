@@ -572,6 +572,90 @@ export async function markPurchaseRequestCancelled(
   return resolvePurchaseRequest(requestId, "cancelled");
 }
 
+export async function cancelPurchaseRequestByBuyer(
+  requestId: string,
+): Promise<ResolvePurchaseRequestResult> {
+  if (!hasDatabaseConfig()) {
+    return {
+      ok: false,
+      error: "Requests are not available right now.",
+      errorCode: PURCHASE_REQUEST_ERROR_CODES.NOT_CONFIGURED,
+    };
+  }
+
+  const user = await getLoggedInUser();
+  if (!user) {
+    return {
+      ok: false,
+      error: "Sign in to cancel this request.",
+      errorCode: PURCHASE_REQUEST_ERROR_CODES.NOT_AUTHENTICATED,
+    };
+  }
+
+  try {
+    await assertRequestRateLimit(user.$id);
+  } catch {
+    return {
+      ok: false,
+      error: RATE_LIMIT_MESSAGE,
+      errorCode: PURCHASE_REQUEST_ERROR_CODES.RATE_LIMITED,
+    };
+  }
+
+  const trimmed = requestId?.trim() ?? "";
+  if (!trimmed) {
+    return {
+      ok: false,
+      error: "Request not found.",
+      errorCode: PURCHASE_REQUEST_ERROR_CODES.NOT_FOUND,
+    };
+  }
+
+  const request = await getRequestRow(trimmed);
+  if (!request || request.buyerId !== user.$id) {
+    return {
+      ok: false,
+      error: "Request not found.",
+      errorCode: PURCHASE_REQUEST_ERROR_CODES.NOT_FOUND,
+    };
+  }
+
+  if (request.status !== OPEN_PURCHASE_REQUEST_STATUS) {
+    return {
+      ok: false,
+      error: "Only pending requests can be cancelled.",
+      errorCode: PURCHASE_REQUEST_ERROR_CODES.ALREADY_RESOLVED,
+    };
+  }
+
+  const { tables } = await createAdminClient();
+  const updated = await tables.updateRowIfColumnIn({
+    databaseId: DATABASE_ID,
+    tableId: TABLE_PURCHASE_REQUESTS,
+    rowId: request.$id,
+    column: "status",
+    values: [OPEN_PURCHASE_REQUEST_STATUS],
+    data: { status: "cancelled", openKey: null },
+  });
+
+  if (!updated) {
+    return {
+      ok: false,
+      error: "This request was already resolved.",
+      errorCode: PURCHASE_REQUEST_ERROR_CODES.ALREADY_RESOLVED,
+    };
+  }
+
+  await notifyUserEvent(request.sellerId, {
+    type: "request.cancelled",
+    title: "Buyer cancelled purchase request",
+    body: `The buyer cancelled their request for ${request.quantity}× ${request.title}.`,
+    link: `/seller/requests/${request.$id}`,
+  });
+
+  return { ok: true, status: "cancelled" };
+}
+
 async function resolvePurchaseRequest(
   requestId: string,
   nextStatus: "sold" | "cancelled",
