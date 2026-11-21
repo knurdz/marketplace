@@ -689,6 +689,7 @@ export async function searchActiveProducts(
   opts?: {
     limit?: number;
     offset?: number;
+    categoryId?: string;
     minPrice?: number;
     maxPrice?: number;
     sort?: ProductCatalogSort;
@@ -723,6 +724,9 @@ export async function searchActiveProducts(
       eq(productsTable.available, true),
       ...tokenConditions,
     ];
+    if (opts?.categoryId?.trim()) {
+      filters.push(eq(productsTable.categoryId, opts.categoryId.trim()));
+    }
     if (opts?.minPrice != null) {
       filters.push(gte(productsTable.price, String(opts.minPrice)));
     }
