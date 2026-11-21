@@ -272,6 +272,7 @@ export type {
 } from "./uploads";
 export {
   asPurchaseRequest,
+  cancelPurchaseRequestByBuyer,
   countPurchaseRequestsByStatus,
   createPurchaseRequest,
   getAdminPurchaseRequestDetail,

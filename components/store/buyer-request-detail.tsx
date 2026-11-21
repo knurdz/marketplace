@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import Link from "next/link";
 import { ArrowLeft, ExternalLink, Package } from "lucide-react";
+import { BuyerRequestCancelButton } from "@/components/store/buyer-request-cancel-button";
 import { PurchaseRequestContactCard } from "@/components/store/purchase-request-contact-card";
 import { SellerReviewForm } from "@/components/store/seller-review-form";
 import { formatProductPrice } from "@/components/store/product-display";
@@ -176,11 +177,12 @@ export function BuyerRequestDetail({
             </div>
 
             {request.status === "requested" ? (
-              <div className="border-t border-border bg-muted/10 px-5 py-4 lg:px-6">
+              <div className="flex flex-col gap-3 border-t border-border bg-muted/10 px-5 py-4 sm:flex-row sm:items-center sm:justify-between lg:px-6">
                 <p className="text-sm text-muted-foreground">
                   Contact the seller to arrange payment and delivery. The
                   marketplace does not process payments.
                 </p>
+                <BuyerRequestCancelButton requestId={request.$id} />
               </div>
             ) : null}
           </div>

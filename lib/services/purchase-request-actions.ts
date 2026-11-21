@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import {
+  cancelPurchaseRequestByBuyer,
   createPurchaseRequest,
   markPurchaseRequestCancelled,
   markPurchaseRequestSold,
@@ -84,6 +85,25 @@ export async function markPurchaseRequestCancelledAction(
   }
   revalidateRequestPaths(requestId);
   return { success: "Request cancelled. Stock unchanged." };
+}
+
+export async function cancelPurchaseRequestByBuyerAction(
+  _prev: PurchaseRequestActionState,
+  formData: FormData,
+): Promise<PurchaseRequestActionState> {
+  const guard = await verifyFormGuard(
+    formData,
+    "purchase-request.buyer-cancel",
+  );
+  if (!guard.ok) return { error: FORM_GUARD_ERROR };
+
+  const requestId = readString(formData, "requestId");
+  const result = await cancelPurchaseRequestByBuyer(requestId);
+  if (!result.ok) {
+    return { error: result.error, errorCode: result.errorCode };
+  }
+  revalidateRequestPaths(requestId);
+  return { success: "Purchase request cancelled." };
 }
 
 export async function createPurchaseRequestFromProduct(
