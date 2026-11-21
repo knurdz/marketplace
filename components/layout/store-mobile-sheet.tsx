@@ -112,7 +112,7 @@ export function StoreMobileSheetContent({
           </div>
 
           <div className="min-h-0 flex-1 overflow-y-auto px-3 pt-8">
-            {portalHome ? (
+            {portalHome === "/admin" ? (
               <div className="flex flex-col gap-1">
                 <SheetClose asChild>
                   <Link
@@ -132,11 +132,23 @@ export function StoreMobileSheetContent({
                 </SheetClose>
               </div>
             ) : (
-              <BuyerAccountNav
-                counts={navCounts(counts)}
-                dismissOnNavigate
-                appearance="plain"
-              />
+              <div className="flex flex-col gap-2">
+                {portalHome === "/seller" ? (
+                  <SheetClose asChild>
+                    <Link
+                      href={portalHome}
+                      className="rounded-2xl px-4 py-3.5 text-lg font-medium tracking-tight text-foreground/80 transition-colors hover:bg-muted hover:text-foreground"
+                    >
+                      Seller portal
+                    </Link>
+                  </SheetClose>
+                ) : null}
+                <BuyerAccountNav
+                  counts={navCounts(counts)}
+                  dismissOnNavigate
+                  appearance="plain"
+                />
+              </div>
             )}
           </div>
 
