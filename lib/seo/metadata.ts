@@ -44,9 +44,14 @@ export function truncateMetaDescription(
 /** Resolve a relative or absolute path against the public app origin. */
 export function toAbsoluteUrl(pathOrUrl: string): string {
   const trimmed = pathOrUrl.trim();
-  if (!trimmed) return getAppUrl();
+  let base: string;
+  try {
+    base = getAppUrl().replace(/\/$/, "");
+  } catch {
+    base = "https://marketplace.knurdz.org";
+  }
+  if (!trimmed) return base;
   if (/^https?:\/\//i.test(trimmed)) return trimmed;
-  const base = getAppUrl().replace(/\/$/, "");
   const normalizedPath = trimmed.startsWith("/") ? trimmed : `/${trimmed}`;
   return `${base}${normalizedPath}`;
 }
