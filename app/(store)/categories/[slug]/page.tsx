@@ -20,6 +20,7 @@ type CategoryPageProps = {
     minPrice?: string;
     maxPrice?: string;
     sort?: string;
+    condition?: string;
   }>;
 };
 
@@ -38,6 +39,7 @@ export async function generateMetadata({
     catalogParams.minPrice != null ||
     catalogParams.maxPrice != null ||
     catalogParams.sort !== "newest" ||
+    catalogParams.condition != null ||
     catalogParams.invalidPriceRange;
 
   const uploadedId = category.imageFileId?.trim() || null;
@@ -77,6 +79,7 @@ export default async function CategoryPage({
       minPrice: catalogParams.minPrice,
       maxPrice: catalogParams.maxPrice,
       sort: catalogParams.sort,
+      condition: catalogParams.condition,
       invalidPriceRange: catalogParams.invalidPriceRange,
     }),
     listCategories(),
@@ -87,7 +90,8 @@ export default async function CategoryPage({
   const hasActiveFilters =
     catalogParams.minPrice != null ||
     catalogParams.maxPrice != null ||
-    catalogParams.sort !== "newest";
+    catalogParams.sort !== "newest" ||
+    catalogParams.condition != null;
 
   return (
     <CatalogView

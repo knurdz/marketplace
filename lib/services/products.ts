@@ -193,6 +193,7 @@ function buildPublicCatalogSqlFilters(opts: {
   sellerId?: string | null;
   minPrice?: number;
   maxPrice?: number;
+  condition?: ProductCondition;
   createdAfter?: Date;
 }): SQL[] {
   const categoryId = opts.categoryId?.trim() || null;
@@ -203,6 +204,9 @@ function buildPublicCatalogSqlFilters(opts: {
   ];
   if (sellerId) filters.push(eq(productsTable.sellerId, sellerId));
   if (categoryId) filters.push(eq(productsTable.categoryId, categoryId));
+  if (opts.condition) {
+    filters.push(eq(productsTable.condition, opts.condition));
+  }
   if (opts.minPrice != null) {
     filters.push(gte(productsTable.price, String(opts.minPrice)));
   }
@@ -290,6 +294,7 @@ export async function listActiveProductsPage(opts?: {
   minPrice?: number;
   maxPrice?: number;
   sort?: ProductCatalogSort;
+  condition?: ProductCondition;
   invalidPriceRange?: boolean;
   cursor?: string | null;
 }): Promise<ListActiveProductsPageResult> {
@@ -310,6 +315,7 @@ export async function listActiveProductsPage(opts?: {
       minPrice: opts?.minPrice,
       maxPrice: opts?.maxPrice,
       sort,
+      condition: opts?.condition,
       invalidPriceRange: opts?.invalidPriceRange,
     });
     return {
@@ -326,6 +332,7 @@ export async function listActiveProductsPage(opts?: {
       sellerId,
       minPrice: opts?.minPrice,
       maxPrice: opts?.maxPrice,
+      condition: opts?.condition,
     });
 
     const decoded = opts?.cursor?.trim()
@@ -390,6 +397,7 @@ export async function countActiveProducts(opts?: {
   sellerId?: string;
   minPrice?: number;
   maxPrice?: number;
+  condition?: ProductCondition;
   invalidPriceRange?: boolean;
 }): Promise<number> {
   if (opts?.invalidPriceRange) return 0;
@@ -401,6 +409,7 @@ export async function countActiveProducts(opts?: {
       sellerId: opts?.sellerId,
       minPrice: opts?.minPrice,
       maxPrice: opts?.maxPrice,
+      condition: opts?.condition,
       invalidPriceRange: opts?.invalidPriceRange,
     });
     return products.length;
@@ -413,6 +422,7 @@ export async function countActiveProducts(opts?: {
       sellerId: opts?.sellerId,
       minPrice: opts?.minPrice,
       maxPrice: opts?.maxPrice,
+      condition: opts?.condition,
     });
     const [row] = await db
       .select({ value: count() })
@@ -428,6 +438,7 @@ export type ProductCatalogParams = {
   minPrice?: number;
   maxPrice?: number;
   sort: ProductCatalogSort;
+  condition?: ProductCondition;
   /** When true, callers must return [] without querying TablesDB. */
   invalidPriceRange: boolean;
 };
@@ -436,6 +447,7 @@ type ProductCatalogFilterOpts = {
   minPrice?: number;
   maxPrice?: number;
   sort?: ProductCatalogSort;
+  condition?: ProductCondition;
   createdAfter?: Date;
 };
 
@@ -458,16 +470,19 @@ export function parseProductCatalogParams(raw: {
   minPrice?: string | number | null;
   maxPrice?: string | number | null;
   sort?: string | null;
+  condition?: string | null;
 }): ProductCatalogParams {
   const minPrice = parseOptionalPrice(raw.minPrice);
   const maxPrice = parseOptionalPrice(raw.maxPrice);
   const sort = normalizeProductCatalogSort(raw.sort);
+  const condition = isProductCondition(raw.condition) ? raw.condition : undefined;
   const invalidPriceRange =
     minPrice != null && maxPrice != null && minPrice > maxPrice;
 
   return {
     ...(minPrice != null ? { minPrice } : {}),
     ...(maxPrice != null ? { maxPrice } : {}),
+    ...(condition ? { condition } : {}),
     sort,
     invalidPriceRange,
   };
@@ -498,6 +513,7 @@ function buildProductCatalogQueries(
     Query.equal("available", true),
     ...(sellerId ? [Query.equal("sellerId", sellerId)] : []),
     ...(categoryId ? [Query.equal("categoryId", categoryId)] : []),
+    ...(filters.condition ? [Query.equal("condition", filters.condition)] : []),
     ...(filters.minPrice != null
       ? [Query.greaterThanEqual("price", filters.minPrice)]
       : []),
@@ -540,6 +556,7 @@ export async function listActiveProducts(opts?: {
   minPrice?: number;
   maxPrice?: number;
   sort?: ProductCatalogSort;
+  condition?: ProductCondition;
   invalidPriceRange?: boolean;
   createdAfter?: Date;
 }): Promise<Product[]> {
@@ -558,6 +575,7 @@ export async function listActiveProducts(opts?: {
         minPrice: opts?.minPrice,
         maxPrice: opts?.maxPrice,
         sort: opts?.sort,
+        condition: opts?.condition,
         createdAfter: opts?.createdAfter,
       }),
       Query.limit(limit),
@@ -690,6 +708,7 @@ export async function searchActiveProducts(
     limit?: number;
     offset?: number;
     categoryId?: string;
+    condition?: ProductCondition;
     minPrice?: number;
     maxPrice?: number;
     sort?: ProductCatalogSort;
@@ -726,6 +745,9 @@ export async function searchActiveProducts(
     ];
     if (opts?.categoryId?.trim()) {
       filters.push(eq(productsTable.categoryId, opts.categoryId.trim()));
+    }
+    if (opts?.condition) {
+      filters.push(eq(productsTable.condition, opts.condition));
     }
     if (opts?.minPrice != null) {
       filters.push(gte(productsTable.price, String(opts.minPrice)));

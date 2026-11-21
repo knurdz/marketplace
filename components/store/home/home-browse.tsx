@@ -6,7 +6,7 @@ import { EmptyState } from "@/components/layout/empty-state";
 import { SectionHeading } from "@/components/store/section-heading";
 import { Button } from "@/components/ui/button";
 import type { ProductCatalogSort, ProductCoverMap } from "@/lib/services/products";
-import type { Category, Product } from "@/lib/types";
+import type { Category, Product, ProductCondition } from "@/lib/types";
 
 type HomeBrowseSharedProps = {
   category: string | null;
@@ -14,6 +14,7 @@ type HomeBrowseSharedProps = {
   minPrice: number | null;
   maxPrice: number | null;
   sort: ProductCatalogSort;
+  condition?: ProductCondition | null;
   invalidPriceRange: boolean;
 };
 
@@ -24,6 +25,7 @@ export function HomeBrowseControls({
   minPrice,
   maxPrice,
   sort,
+  condition,
   invalidPriceRange,
 }: HomeBrowseSharedProps & {
   categoriesWithProducts: Category[];
@@ -39,6 +41,7 @@ export function HomeBrowseControls({
         minPrice={minPrice}
         maxPrice={maxPrice}
         sort={sort}
+        condition={condition}
         invalidPriceRange={invalidPriceRange}
       />
     </div>
@@ -52,6 +55,7 @@ export function HomeBrowseListings({
   minPrice,
   maxPrice,
   sort,
+  condition,
   invalidPriceRange,
   products,
   covers,
@@ -69,6 +73,7 @@ export function HomeBrowseListings({
     category != null ||
     minPrice != null ||
     maxPrice != null ||
+    condition != null ||
     sort !== "newest";
 
   return (
@@ -103,7 +108,7 @@ export function HomeBrowseListings({
         />
       ) : (
         <InfiniteProductGrid
-          key={`${category ?? "all"}-${sort}-${minPrice ?? ""}-${maxPrice ?? ""}`}
+          key={`${category ?? "all"}-${sort}-${condition ?? ""}-${minPrice ?? ""}-${maxPrice ?? ""}`}
           initialProducts={products}
           initialCovers={covers ?? {}}
           totalCount={totalCount}
@@ -112,6 +117,7 @@ export function HomeBrowseListings({
           minPrice={minPrice}
           maxPrice={maxPrice}
           sort={sort}
+          condition={condition}
           invalidPriceRange={invalidPriceRange}
           initialCursor={catalogNextCursor}
         />

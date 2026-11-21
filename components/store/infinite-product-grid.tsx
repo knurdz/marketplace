@@ -8,7 +8,7 @@ import {
   type LoadMoreCatalogInput,
 } from "@/lib/services/product-actions";
 import type { ProductCatalogSort, ProductCoverMap } from "@/lib/services/products";
-import type { Product } from "@/lib/types";
+import type { Product, ProductCondition } from "@/lib/types";
 
 type InfiniteProductGridProps = {
   initialProducts: Product[];
@@ -21,6 +21,7 @@ type InfiniteProductGridProps = {
   minPrice?: number | null;
   maxPrice?: number | null;
   sort: ProductCatalogSort;
+  condition?: ProductCondition | null;
   invalidPriceRange?: boolean;
   initialCursor?: string | null;
   initialNextOffset?: number | null;
@@ -39,6 +40,7 @@ export function InfiniteProductGrid({
   minPrice,
   maxPrice,
   sort,
+  condition,
   invalidPriceRange = false,
   initialCursor = null,
   initialNextOffset = null,
@@ -89,6 +91,7 @@ export function InfiniteProductGrid({
         minPrice,
         maxPrice,
         sort,
+        condition,
         cursor: source === "catalog" ? cursor : null,
         offset: source === "search" ? offset : null,
         invalidPriceRange,

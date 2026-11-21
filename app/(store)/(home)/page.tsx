@@ -31,6 +31,7 @@ type HomePageProps = {
     minPrice?: string;
     maxPrice?: string;
     sort?: string;
+    condition?: string;
   }>;
 };
 
@@ -45,6 +46,7 @@ export async function generateMetadata({
     catalog.minPrice != null ||
     catalog.maxPrice != null ||
     catalog.sort !== "newest" ||
+    catalog.condition != null ||
     catalog.invalidPriceRange;
 
   if (categorySlug) {
@@ -85,6 +87,7 @@ export default async function Home({ searchParams }: HomePageProps) {
     catalog.minPrice != null ||
     catalog.maxPrice != null ||
     catalog.sort !== "newest" ||
+    catalog.condition != null ||
     catalog.invalidPriceRange;
 
   const [justListed, browsePage] = await Promise.all([
@@ -97,6 +100,7 @@ export default async function Home({ searchParams }: HomePageProps) {
       minPrice: catalog.minPrice,
       maxPrice: catalog.maxPrice,
       sort: catalog.sort,
+      condition: catalog.condition,
       invalidPriceRange: catalog.invalidPriceRange,
     }),
   ]);
@@ -113,6 +117,7 @@ export default async function Home({ searchParams }: HomePageProps) {
     minPrice: catalog.minPrice ?? null,
     maxPrice: catalog.maxPrice ?? null,
     sort: catalog.sort,
+    condition: catalog.condition ?? null,
     invalidPriceRange: catalog.invalidPriceRange,
     products: browseProducts,
     covers,
@@ -131,6 +136,7 @@ export default async function Home({ searchParams }: HomePageProps) {
         minPrice={browseProps.minPrice}
         maxPrice={browseProps.maxPrice}
         sort={browseProps.sort}
+        condition={browseProps.condition}
         invalidPriceRange={browseProps.invalidPriceRange}
         categoriesWithProducts={categoriesWithProducts}
       />

@@ -9,7 +9,7 @@ import {
   type ProductCatalogSort,
   type ProductCoverMap,
 } from "./products";
-import type { Product } from "@/lib/types";
+import type { Product, ProductCondition } from "@/lib/types";
 import {
   assertRateLimit,
   getClientIp,
@@ -33,6 +33,7 @@ export type LoadMoreCatalogInput = {
   minPrice?: number | null;
   maxPrice?: number | null;
   sort: ProductCatalogSort;
+  condition?: ProductCondition | null;
   cursor?: string | null;
   offset?: number | null;
   invalidPriceRange?: boolean;
@@ -80,6 +81,7 @@ export async function loadMoreCatalogProducts(
       limit: CATALOG_PAGE_SIZE,
       offset,
       categoryId: input.categoryId ?? undefined,
+      condition: input.condition ?? undefined,
       minPrice,
       maxPrice,
       sort: input.sort,
@@ -107,6 +109,7 @@ export async function loadMoreCatalogProducts(
     minPrice,
     maxPrice,
     sort: input.sort,
+    condition: input.condition ?? undefined,
     invalidPriceRange: input.invalidPriceRange,
     cursor: input.cursor,
   });

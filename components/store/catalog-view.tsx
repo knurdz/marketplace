@@ -112,8 +112,8 @@ export function CatalogView({
           <InfiniteProductGrid
             key={
               catalogMode === "search"
-                ? `search-${searchQuery ?? ""}-${catalogParams.sort}-${catalogParams.minPrice ?? ""}-${catalogParams.maxPrice ?? ""}`
-                : `${categoryId ?? "all"}-${catalogParams.sort}-${catalogParams.minPrice ?? ""}-${catalogParams.maxPrice ?? ""}`
+                ? `search-${searchQuery ?? ""}-${catalogParams.sort}-${catalogParams.condition ?? ""}-${catalogParams.minPrice ?? ""}-${catalogParams.maxPrice ?? ""}`
+                : `${categoryId ?? "all"}-${catalogParams.sort}-${catalogParams.condition ?? ""}-${catalogParams.minPrice ?? ""}-${catalogParams.maxPrice ?? ""}`
             }
             initialProducts={products}
             initialCovers={covers}
@@ -124,6 +124,7 @@ export function CatalogView({
             minPrice={catalogParams.minPrice ?? null}
             maxPrice={catalogParams.maxPrice ?? null}
             sort={catalogParams.sort as ProductCatalogSort}
+            condition={catalogParams.condition}
             invalidPriceRange={invalidPriceRange}
             initialCursor={
               catalogMode === "catalog" ? catalogNextCursor : null
