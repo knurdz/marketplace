@@ -75,7 +75,11 @@ export function CatalogView({
       </section>
 
       <div className="space-y-5">
-        <CategoryRail categories={categories} activeSlug={activeSlug} />
+        <CategoryRail
+          categories={categories}
+          activeSlug={activeSlug}
+          searchQuery={searchQuery}
+        />
         <ProductCatalogFilters
           action={filterAction}
           defaults={catalogParams}

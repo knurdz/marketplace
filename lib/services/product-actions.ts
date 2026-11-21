@@ -79,6 +79,7 @@ export async function loadMoreCatalogProducts(
     const result = await searchActiveProducts(q, {
       limit: CATALOG_PAGE_SIZE,
       offset,
+      categoryId: input.categoryId ?? undefined,
       minPrice,
       maxPrice,
       sort: input.sort,

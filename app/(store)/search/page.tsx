@@ -14,6 +14,7 @@ import { CATALOG_PAGE_SIZE } from "@/lib/services/products";
 type SearchPageProps = {
   searchParams: Promise<{
     q?: string;
+    category?: string;
     minPrice?: string;
     maxPrice?: string;
     sort?: string;
@@ -26,7 +27,13 @@ export async function generateMetadata({
   const params = await searchParams;
   const rawQ = typeof params.q === "string" ? params.q : "";
   const normalized = normalizeProductSearchQuery(rawQ);
-  const title = normalized ? `Search “${normalized}”` : "Search Listings";
+  const rawCategory =
+    typeof params.category === "string" ? params.category.trim() : "";
+  const title = normalized
+    ? rawCategory
+      ? `Search “${normalized}” in ${rawCategory}`
+      : `Search “${normalized}”`
+    : "Search Listings";
 
   return buildPublicMetadata({
     title,
@@ -47,17 +54,22 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
     redirect("/");
   }
 
+  const rawCategory =
+    typeof params.category === "string" ? params.category.trim() : "";
+  const categories = await listCategories();
+  const selectedCategory = rawCategory
+    ? categories.find((c) => c.slug === rawCategory)
+    : undefined;
+
   const catalogParams = parseProductCatalogParams(params);
-  const [searchResult, categories] = await Promise.all([
-    searchActiveProducts(normalized, {
-      limit: CATALOG_PAGE_SIZE,
-      minPrice: catalogParams.minPrice,
-      maxPrice: catalogParams.maxPrice,
-      sort: catalogParams.sort,
-      invalidPriceRange: catalogParams.invalidPriceRange,
-    }),
-    listCategories(),
-  ]);
+  const searchResult = await searchActiveProducts(normalized, {
+    limit: CATALOG_PAGE_SIZE,
+    categoryId: selectedCategory?.$id,
+    minPrice: catalogParams.minPrice,
+    maxPrice: catalogParams.maxPrice,
+    sort: catalogParams.sort,
+    invalidPriceRange: catalogParams.invalidPriceRange,
+  });
 
   const products = searchResult.ok ? searchResult.products : [];
   const covers = await listCoverImagesByProductIds(products.map((p) => p.$id));
@@ -98,8 +110,14 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
   return (
     <CatalogView
       title={`“${normalized}”`}
-      description="Listings matching your search."
+      description={
+        selectedCategory
+          ? `Listings in ${selectedCategory.name} matching your search.`
+          : "Listings matching your search."
+      }
       categories={categories}
+      activeSlug={selectedCategory?.slug}
+      categoryId={selectedCategory?.$id}
       products={products}
       covers={covers}
       totalCount={searchTotal}
@@ -111,7 +129,10 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
       }
       filterAction="/search"
       catalogParams={catalogParams}
-      preserve={{ q: normalized }}
+      preserve={{
+        q: normalized,
+        ...(selectedCategory ? { category: selectedCategory.slug } : {}),
+      }}
       resultLabel={resultLabel}
       emptyTitle={emptyTitle}
       emptyDescription={emptyDescription}
