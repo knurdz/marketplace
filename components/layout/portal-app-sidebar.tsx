@@ -29,7 +29,7 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "@/components/ui/sidebar";
-import { BrandLogo } from "@/components/brand/brand-logo";
+import { BrandLogo, BrandMascot } from "@/components/brand/brand-logo";
 import { cn } from "@/lib/utils";
 
 function isActivePath(pathname: string, href: string, allHrefs: string[]): boolean {
@@ -143,9 +143,10 @@ export function PortalAppSidebar({
             <BrandLogo
               priority
               themeAware
-              className="h-10 w-auto max-w-full group-data-[collapsible=icon]:h-8"
+              className="h-10 w-auto max-w-full group-data-[collapsible=icon]:hidden"
               lightClassName="h-12"
             />
+            <BrandMascot className="hidden group-data-[collapsible=icon]:block size-8" />
           </Link>
           <SidebarCollapseButton className="hidden group-data-[collapsible=icon]:hidden md:inline-flex" />
         </div>
