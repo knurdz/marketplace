@@ -269,6 +269,20 @@ export function EditListingForm({
                       ))}
                     </select>
                   </ListingFormField>
+
+                  <ListingFormField label="Condition" htmlFor="condition">
+                    <select
+                      id="condition"
+                      name="condition"
+                      required
+                      defaultValue={product.condition ?? "brand_new"}
+                      disabled={updatePending || isArchived}
+                      className={listingSelectClassName}
+                    >
+                      <option value="brand_new">Brand New</option>
+                      <option value="used">Used</option>
+                    </select>
+                  </ListingFormField>
                 </ListingFormSection>
 
                 <ListingFormSection

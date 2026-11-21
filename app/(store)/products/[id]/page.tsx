@@ -212,6 +212,16 @@ export default async function ProductPage({ params }: ProductPageProps) {
             </p>
             <span
               className={cn(
+                "inline-flex items-center rounded-full px-2.5 py-0.5 font-mono text-xs font-semibold tracking-wider uppercase",
+                product.condition === "used"
+                  ? "border border-amber-500/30 bg-amber-500/10 text-amber-600 dark:text-amber-400"
+                  : "border border-accent/30 bg-accent/10 text-accent",
+              )}
+            >
+              {product.condition === "used" ? "Used" : "Brand New"}
+            </span>
+            <span
+              className={cn(
                 "inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 font-mono text-xs font-medium",
                 product.stock > 0
                   ? "border border-accent/30 bg-accent/10 text-accent"

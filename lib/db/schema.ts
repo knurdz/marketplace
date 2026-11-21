@@ -12,6 +12,7 @@ import {
   varchar,
 } from "drizzle-orm/mysql-core";
 import {
+  PRODUCT_CONDITIONS,
   PRODUCT_STATUSES,
   PURCHASE_REQUEST_STATUSES,
   REPORT_STATUSES,
@@ -197,6 +198,9 @@ export const products = mysqlTable(
     price: decimal("price", { precision: 12, scale: 2 }).notNull(),
     isFree: boolean("is_free").notNull(),
     status: mysqlEnum("status", PRODUCT_STATUSES).notNull(),
+    condition: mysqlEnum("condition", PRODUCT_CONDITIONS)
+      .notNull()
+      .default("brand_new"),
     stock: int("stock").notNull(),
     available: boolean("available").notNull(),
     currency: varchar("currency", { length: 8 }).notNull(),
@@ -211,6 +215,7 @@ export const products = mysqlTable(
     index("products_status_idx").on(t.status),
     index("products_status_category_idx").on(t.status, t.categoryId),
     index("products_price_idx").on(t.price),
+    index("products_condition_idx").on(t.condition),
     index("products_featured_idx").on(t.featured, t.status),
   ],
 );

@@ -63,6 +63,7 @@ function readListingFields(formData: FormData) {
     categoryId: readString(formData, "categoryId"),
     price: isFree ? "0" : readString(formData, "price"),
     stock: readString(formData, "stock"),
+    condition: readString(formData, "condition"),
     available: formData.get("available"),
   };
 }

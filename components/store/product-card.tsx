@@ -51,6 +51,18 @@ export function ProductCard({ product, cover, className }: ProductCardProps) {
               Out of stock
             </div>
           ) : null}
+          <div className="absolute top-2 left-2 z-10">
+            <span
+              className={cn(
+                "rounded-md px-2 py-0.5 text-[10px] font-semibold tracking-wide uppercase shadow-xs",
+                product.condition === "used"
+                  ? "border border-amber-500/30 bg-amber-500/15 text-amber-600 dark:text-amber-400 backdrop-blur-xs"
+                  : "border border-accent/30 bg-accent/15 text-accent backdrop-blur-xs",
+              )}
+            >
+              {product.condition === "used" ? "Used" : "Brand New"}
+            </span>
+          </div>
         </div>
 
         <div className="flex flex-1 flex-col gap-1">

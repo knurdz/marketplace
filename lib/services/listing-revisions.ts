@@ -140,6 +140,7 @@ export function overlayProductWithPatch(
     description: patch.description ?? product.description,
     price,
     isFree,
+    condition: patch.condition ?? product.condition,
     stock: patch.stock ?? product.stock,
     available: patch.available ?? product.available,
   };
@@ -189,6 +190,9 @@ export function pruneRevisionPatch(
   if (next.stock !== undefined && next.stock === product.stock) {
     delete next.stock;
   }
+  if (next.condition !== undefined && next.condition === product.condition) {
+    delete next.condition;
+  }
   if (next.available !== undefined && next.available === product.available) {
     delete next.available;
   }
@@ -213,6 +217,7 @@ type ParsedListingFields = {
   title: string;
   description: string;
   price: number;
+  condition?: import("@/lib/types/status").ProductCondition;
   stock: number;
   isFree: boolean;
 };
@@ -229,6 +234,7 @@ export function mergeFieldPatch(
     description: parsed.description,
     price: parsed.price,
     isFree: parsed.isFree,
+    condition: parsed.condition,
     stock: parsed.stock,
     available,
   };
@@ -591,6 +597,7 @@ export async function applyRevisionCore(
         description: proposed.description,
         price: proposed.price,
         isFree: proposed.isFree,
+        condition: proposed.condition,
         stock: proposed.stock,
         available: proposed.available,
       },
